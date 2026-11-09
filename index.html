@@ -225,6 +225,30 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .ftable td small{color:var(--muted);font-size:12px}
 .ftable .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .ftable tr.cut td{border-bottom:2px solid var(--silver-2)}
+/* club scorecards */
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:4px 0 6px}
+@media(min-width:700px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{padding:12px 14px}
+.kpi small{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.kpi b{font-family:var(--display);font-size:30px;font-weight:800;display:block;line-height:1.1}
+.kpi span{font-size:13px;color:var(--silver-2)}
+.ftable tr[data-sc]{cursor:pointer}
+.ftable tr[data-sc]:hover td,.ftable tr[data-sc]:focus-visible td{background:var(--panel-2)}
+.ftable tr.me td{background:var(--panel-2)}
+.sccard{width:100%;border-collapse:collapse;table-layout:fixed;font-variant-numeric:tabular-nums;margin-top:8px}
+.sccard th,.sccard td{text-align:center;padding:5px 0;font-size:13px;border-bottom:1px solid var(--line)}
+.sccard th{color:var(--muted);font-weight:600;font-size:11px}
+.sccard th:first-child,.sccard td:first-child{text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;width:40px}
+.sccard th:last-child,.sccard td:last-child{width:34px;font-weight:800;color:var(--text)}
+.sccard .s{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;font-weight:700}
+.sccard .s.bd{border:1.5px solid var(--silver);border-radius:50%}
+.sccard .s.eg{border:1.5px solid var(--silver);border-radius:50%;box-shadow:0 0 0 2px var(--bg-2),0 0 0 3.5px var(--silver)}
+.sccard .s.bo{border:1.5px solid var(--silver-2);border-radius:3px}
+.sccard .s.db{border:1.5px solid var(--silver-2);border-radius:3px;box-shadow:0 0 0 2px var(--bg-2),0 0 0 3.5px var(--silver-2)}
+.sckey{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.sckey span{display:inline-flex;align-items:center;gap:6px}
+.sckey i{display:inline-block;width:12px;height:12px}
+.sckey .k1{border:1.5px solid var(--silver);border-radius:50%}.sckey .k2{border:1.5px solid var(--silver-2);border-radius:2px}
 .mu{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;padding:12px 14px}
 .mu .side b{font-family:var(--display);font-size:17px;text-transform:uppercase;line-height:1.05;display:block}
 .mu .side small{color:var(--muted);font-size:12px}
@@ -669,6 +693,36 @@ const MEMBERS=[
 const jit=id=>{let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))%997;return[((h%17)-8)*.004,(((h>>2)%17)-8)*.004]};
 const memPos=m=>{const c=CITIES[m.city],j=jit(m.id);return[c.lat+j[0],c.lng+j[1]]};
 
+/* ---------- club scorecards (demo: 30 members, one round each, same course) ---------- */
+/* Hole pars and stroke index are a demo par-72 layout, not Chimera's real card. Scores come from a seeded
+   random round built from each member's handicap, so the same 30 cards show every time. */
+const SC_EVENT={name:'Fall Club Championship',date:'Nov 8, 2026',course:'Chimera Golf Club',city:'Henderson, NV',tee:'White tees',
+ par:[4,4,3,5,4,4,3,4,5,4,3,5,4,4,3,4,4,5],si:[7,3,15,11,1,9,17,5,13,8,16,12,2,6,18,10,4,14]};
+const SC_PAR=SC_EVENT.par.reduce((a,b)=>a+b,0);
+const SC_EXTRA=[
+ {id:'x1',name:'Andre W.',chapter:'SoCal'},{id:'x2',name:'Gabe R.',chapter:'SoCal'},{id:'x3',name:'Tina M.',chapter:'SoCal'},{id:'x4',name:'Luis C.',chapter:'SoCal'},
+ {id:'x5',name:'Derek F.',chapter:'NorCal'},{id:'x6',name:'Pat O.',chapter:'NorCal'},{id:'x7',name:'Nina J.',chapter:'NorCal'},{id:'x8',name:'Carlos E.',chapter:'NorCal'},
+ {id:'x9',name:'Bobby V.',chapter:'Nevada'},{id:'x10',name:'Steph K.',chapter:'Nevada'},{id:'x11',name:'Ray D.',chapter:'Nevada'},{id:'x12',name:'Manny Q.',chapter:'Nevada'},
+ {id:'x13',name:'Kyle B.',chapter:'National'},{id:'x14',name:'Jo H.',chapter:'National'}];
+const SC_HCP=[4,12,18,9,15,7,22,3,11,26,14,19,8,16,24,10,6,13,20,28,9,17,5,12,21,2,15,25,11,18];
+const scHash=s=>{let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0};
+function scRng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const scGauss=r=>{let u=0,v=0;while(!u)u=r();while(!v)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+const ROUNDS=[...MEMBERS.map(m=>({id:m.id,name:m.name,chapter:m.chapter})),...SC_EXTRA].map((p,i)=>{
+  const hcp=SC_HCP[i],r=scRng(scHash(p.id+'-fall26'));
+  const holes=SC_EVENT.par.map((par,h)=>{
+    const rec=Math.floor(hcp/18)+(SC_EVENT.si[h]<=hcp%18?1:0);
+    let k=Math.round(rec+.17+scGauss(r)*.8);
+    k=Math.max(par===5?-2:-1,Math.min(2+rec,k));if(k===-2&&r()>.35)k=-1;
+    return par+k});
+  const diff=h=>holes[h]-SC_EVENT.par[h],cnt=f=>holes.filter((s,h)=>f(diff(h))).length;
+  const gross=holes.reduce((a,b)=>a+b,0),out=holes.slice(0,9).reduce((a,b)=>a+b,0);
+  return {...p,hcp,holes,gross,out,inn:gross-out,net:gross-hcp,eagles:cnt(d=>d<=-2),birdies:cnt(d=>d===-1),pars:cnt(d=>d===0),bogeys:cnt(d=>d===1),doubles:cnt(d=>d>=2)};
+});
+/* ties broken by the usual countback: back nine net, then gross */
+const scOrder=(key)=>ROUNDS.slice().sort((a,b)=>key==='gross'?(a.gross-b.gross||a.inn-b.inn||a.net-b.net):(a.net-b.net||(a.inn-a.hcp/2)-(b.inn-b.hcp/2)||a.gross-b.gross));
+const toPar=n=>n===0?'E':(n>0?'+'+n:String(n));
+
 /* seeded forum (demo) */
 const SEED_THREADS=[
  {id:'t1',board:'Tournaments',title:'Nov 14 foursomes at Chimera',body:'Who still needs a group for the 12th Man scramble? I have two spots open.',author:'Chris P.',when:'2h',likes:6,replies:[{a:'Jason G.',t:'Put me down. I can drive from Vegas.',w:'1h'},{a:'Lena V.',t:'Coming in from San Diego. Need a team.',w:'40m'}]},
@@ -680,9 +734,9 @@ const BOARDS=['All','Tournaments','Game Day','Golf Tips','Travel','Gear'];
 
 /* ---------- state ---------- */
 const KEY='rngc-site-v2';
-let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[],demo:false,tour:-1,gview:'sched',selGame:null,ffJoin:false};
+let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[],demo:false,tour:-1,gview:'sched',selGame:null,ffJoin:false,eview:'list',sview:'net'};
 try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw),{tab:'home',openThread:null,selCourse:null,selGame:null,tour:-1})}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin}))}catch(e){}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview}))}catch(e){}};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -717,6 +771,7 @@ function renderHome(){
    </div></div>
    ${next?`<div class="card next"><div class="cd">${daysTo(next.date)}<small>days</small></div><div><span class="pill">Next event - ${esc(next.chapter)}</span><h3 style="margin-top:6px">${esc(next.name)}</h3><div class="meta">${f.dow}, ${f.m} ${f.d} - ${esc(next.where)}</div></div><a class="btn small" href="${next.url}" ${ext}>Register</a></div>`:''}
    ${ng?`<div class="card next"><div class="cd">${daysTo(ng.date)}<small>days</small></div><div><span class="pill">Raiders - Week ${ng.wk}</span><h3 style="margin-top:6px">${esc(gTitle(ng))}</h3><div class="meta">${gWhen(ng)}</div></div><button class="btn small ghost" data-go="games">Schedule</button></div>`:''}
+   ${(()=>{const w=scOrder('net')[0];return `<div class="card next"><div class="cd">${w.net}<small>net</small></div><div><span class="pill">Leaderboard - ${esc(SC_EVENT.name)}</span><h3 style="margin-top:6px">${esc(w.name)} leads ${ROUNDS.length} members</h3><div class="meta">${esc(SC_EVENT.course)} - ${toPar(w.net-SC_PAR)} net, demo scores</div></div><button class="btn small ghost" data-scores>Scorecards</button></div>`})()}
    </div>
    <div class="homegrid">
     <div>
@@ -753,15 +808,74 @@ function evCard(e){
    <a class="btn small" href="${e.url}" ${ext}>Register</a>`}</div></div></article>`;
 }
 function renderEvents(){
+  const chip=(k,ic,t)=>`<button class="chip" data-ev="${k}" aria-pressed="${S.eview===k}"><i class="ph-bold ph-${ic}"></i> ${t}</button>`;
+  const seg=`<div class="seg" role="tablist" aria-label="Events">${chip('list','calendar-check','Events')}${chip('scores','list-numbers','Scorecards')}</div>`;
+  if(S.eview==='scores'){$('#v-events').innerHTML=seg+scoresHTML();return}
   const list=EVENTS.filter(e=>inChapter(e.chapter)||e.chapter==='National');
   const up=list.filter(e=>!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1),past=list.filter(e=>isPast(e.date)).sort((a,b)=>a.date<b.date?1:-1);
-  $('#v-events').innerHTML=`<h2 class="sec">Upcoming</h2>
+  $('#v-events').innerHTML=seg+`<h2 class="sec">Upcoming</h2>
    <div class="evgrid rise">${up.length?up.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No dates for this chapter yet. More get posted here as they are set.</div>'}</div>
    <h2 class="sec">Raider Cup</h2><p class="sub">The club's signature trip. 2026 ran May 22-24 in St. George, UT.</p>
    <div class="flyers">${FLYERS.map(u=>`<img src="${u}" alt="Event flyer" loading="lazy">`).join('')}</div>
    <h2 class="sec">Past events</h2>
    <div class="evgrid rise">${past.map(evCard).join('')}</div>`;
 }
+/* ---------- club scorecards view ---------- */
+function scoresHTML(){
+  const key=S.sview==='gross'?'gross':'net',all=scOrder(key);
+  const pos=new Map(all.map((r,i)=>[r.id,i+1]));
+  const rows=all.filter(r=>S.chapter==='All'||r.chapter===S.chapter);
+  const lowNet=scOrder('net')[0],lowGross=scOrder('gross')[0];
+  const most=ROUNDS.slice().sort((a,b)=>(b.birdies+b.eagles*2)-(a.birdies+a.eagles*2)||a.gross-b.gross)[0];
+  const avg=(ROUNDS.reduce((a,r)=>a+r.gross,0)/ROUNDS.length).toFixed(1);
+  const chs=['SoCal','NorCal','Nevada','National'].map(c=>{const rs=ROUNDS.filter(r=>r.chapter===c),best=rs.map(r=>r.net).sort((a,b)=>a-b).slice(0,4);
+    return {c,n:rs.length,best4:best.reduce((a,b)=>a+b,0),avg:(rs.reduce((a,r)=>a+r.net,0)/rs.length).toFixed(1)}}).sort((a,b)=>a.best4-b.best4);
+  const mine=S.demo?ROUNDS.find(r=>r.name===S.name):null;
+  const kpi=(k,b,s)=>`<div class="card kpi"><small>${k}</small><b>${b}</b><span>${s}</span></div>`;
+  return `<div class="tixhead"><div><h2 class="sec" style="margin:18px 0 0">${esc(SC_EVENT.name)}</h2>
+     <p class="sub">${esc(SC_EVENT.course)}, ${esc(SC_EVENT.city)} - ${esc(SC_EVENT.date)} - ${ROUNDS.length} members, par ${SC_PAR}. Tap a name for the full card.</p></div>
+     <span class="pill demo">Demo scores</span></div>
+   <div class="kpis">
+    ${kpi('Low net',lowNet.net,esc(lowNet.name)+' - '+toPar(lowNet.net-SC_PAR))}
+    ${kpi('Low gross',lowGross.gross,esc(lowGross.name)+' - '+toPar(lowGross.gross-SC_PAR))}
+    ${(()=>{const n=most.birdies+most.eagles,tied=ROUNDS.filter(r=>r.birdies+r.eagles===n).length-1;return kpi('Most birdies',n,esc(most.name)+(tied?' + '+tied+' tied':'')+(most.eagles?' - incl. eagle':''))})()}
+    ${kpi('Field average',avg,'gross, '+ROUNDS.length+' players')}
+   </div>
+   <div class="fwrap2"><div>
+    <div class="seg" style="margin-top:6px">${['net','gross'].map(k=>`<button class="chip" data-sv="${k}" aria-pressed="${key===k}">${k==='net'?'Net':'Gross'}</button>`).join('')}</div>
+    <div class="card" style="padding:4px 10px;margin-top:10px"><table class="ftable"><thead><tr><th>#</th><th>Player</th><th class="num">Gross</th><th class="num">Net</th><th class="num">To par</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr data-sc="${r.id}" tabindex="0" role="button" class="${mine&&mine.id===r.id?'me':''}"><td class="n">${pos.get(r.id)}</td><td><b>${esc(r.name)}</b><small>${esc(r.chapter)} - hcp ${r.hcp}</small></td><td class="num">${r.gross}</td><td class="num">${r.net}</td><td class="num"><b style="font-size:16px">${toPar((key==='net'?r.net:r.gross)-SC_PAR)}</b></td></tr>`).join('')}
+    </tbody></table></div></div>
+    <div><h2 class="sec">Chapter cup</h2><p class="sub">Best 4 net scores from each chapter, added up. Low total wins.</p>
+     <div class="card" style="padding:4px 10px"><table class="ftable"><thead><tr><th>#</th><th>Chapter</th><th class="num">Best 4</th><th class="num">Avg net</th></tr></thead><tbody>
+     ${chs.map((c,i)=>`<tr><td class="n">${i+1}</td><td><b>${esc(c.c)}</b><small>${c.n} players</small></td><td class="num">${c.best4}</td><td class="num">${c.avg}</td></tr>`).join('')}
+     </tbody></table></div>
+     <div class="card privacy"><i class="ph-bold ph-info"></i><span>Demo: 30 made-up members, one round each on a sample par ${SC_PAR} card. In the live app members post their card from the course and handicaps come from GHIN.</span></div>
+    </div></div>`;
+}
+function openScorecard(id){
+  const r=ROUNDS.find(x=>x.id===id);if(!r)return;
+  const P=SC_EVENT.par,cls=d=>d<=-2?'eg':d===-1?'bd':d===1?'bo':d>=2?'db':'';
+  const half=(a,lab)=>{const idx=[...Array(9)].map((_,i)=>i+a),pt=idx.reduce((s,i)=>s+P[i],0),st=idx.reduce((s,i)=>s+r.holes[i],0);
+    return `<table class="sccard"><thead><tr><th>Hole</th>${idx.map(i=>`<th>${i+1}</th>`).join('')}<th>${lab}</th></tr></thead><tbody>
+     <tr><td>Par</td>${idx.map(i=>`<td>${P[i]}</td>`).join('')}<td>${pt}</td></tr>
+     <tr><td>Score</td>${idx.map(i=>`<td><span class="s ${cls(r.holes[i]-P[i])}">${r.holes[i]}</span></td>`).join('')}<td>${st}</td></tr></tbody></table>`};
+  const place=scOrder('net').findIndex(x=>x.id===id)+1;
+  openSheet(`<span class="pill">${esc(r.chapter)} - handicap ${r.hcp}</span><h3 style="margin-top:8px">${esc(r.name)}</h3>
+   <p class="help" style="margin:0 0 6px;font-size:15px">${esc(SC_EVENT.course)} - ${esc(SC_EVENT.tee)} - ${place}${place===1?'st':place===2?'nd':place===3?'rd':'th'} of ${ROUNDS.length} on net</p>
+   <div class="kpis">${[['Gross',r.gross],['Net',r.net],['Birdies',r.birdies+r.eagles],['Pars',r.pars]].map(([k,v])=>`<div class="card kpi"><small>${k}</small><b>${v}</b></div>`).join('')}</div>
+   ${half(0,'Out')}${half(9,'In')}
+   <div class="sckey"><span><i class="k1"></i> Birdie or better</span><span><i class="k2"></i> Bogey or worse</span><span>Total ${r.gross}, ${toPar(r.gross-SC_PAR)}</span></div>
+   <button class="btn ghost full" id="closeSc">Close</button>`);
+  $('#closeSc').addEventListener('click',closeSheet);
+}
+document.addEventListener('click',e=>{
+  const ev=e.target.closest('[data-ev]');if(ev){S.eview=ev.dataset.ev;save();renderEvents();return}
+  const sv=e.target.closest('[data-sv]');if(sv){S.sview=sv.dataset.sv;save();renderEvents();return}
+  const sc=e.target.closest('[data-sc]');if(sc){openScorecard(sc.dataset.sc);return}
+  if(e.target.closest('[data-scores]')){closeSheet();S.eview='scores';save();setTab('events');return}
+});
+document.addEventListener('keydown',e=>{const sc=e.target.closest&&e.target.closest('[data-sc]');if(sc&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openScorecard(sc.dataset.sc)}});
 document.addEventListener('click',e=>{
   const r=e.target.closest('[data-rsvp]');
   if(r){const id=r.dataset.rsvp;S.rsvp[id]=!S.rsvp[id];save();renderEvents();toast(S.rsvp[id]?'Marked as going. Tap Register to pay.':'Removed')}
@@ -1331,8 +1445,10 @@ renderChips();renderAll();setTab('home');loadSchedule();
     setTimeout(()=>{lg.src=STATIC;busy=false},LEN);
   }
   window.playLogo=play;
-  lg.addEventListener('click',play);
-  lg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();play()}});
+  /* off the home screen the logo takes you home; on the home screen it replays the animation */
+  function tap(){if(S.tab!=='home'){closeSheet();S.openThread=null;setTab('home');return}play()}
+  lg.addEventListener('click',tap);
+  lg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tap()}});
   document.addEventListener('click',e=>{
     if(e.target.closest('#hdrLogo')||!e.target.closest('button,a,select'))return;
     if(++clicks>=6&&Date.now()-last>60000)play();
