@@ -483,6 +483,80 @@ body.thread-open .fab{display:none!important}
 .intro img{width:min(78vw,420px);height:auto}
 .intro.out{opacity:0;pointer-events:none}
 .intro .skip{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));font:600 13px system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#aab2be;background:none;border:1px solid #2a2f37;border-radius:999px;padding:9px 16px;cursor:pointer}
+
+/* ---------- sub-pages: each side-menu link is its own page ---------- */
+.subchips{padding-top:14px}
+.subchips .chip[aria-pressed="true"]{background:var(--silver);color:var(--on-silver);border-color:var(--silver)}
+h2.pagehead{margin-top:18px}
+.cardh{font-family:var(--display);font-size:24px;text-transform:uppercase;font-weight:800;line-height:1.05;margin-top:8px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.tile{display:grid;gap:4px;text-align:left;padding:16px;transition:transform .18s var(--ease),border-color .2s}
+.tile:hover{border-color:var(--silver-2)}.tile:active{transform:scale(.98)}
+.tile i{font-size:26px;color:var(--silver)}
+.tile b{font-family:var(--display);font-size:21px;text-transform:uppercase;line-height:1.05}
+.tile small{color:var(--muted);font-size:13px}
+.joinform{display:grid;gap:4px}
+.joinform .jcol{display:grid;gap:0}
+.plan2 b{font-family:var(--display);font-size:20px;text-transform:uppercase;color:var(--text);display:flex;justify-content:space-between;gap:10px}
+.plan2 b em{font-style:normal;color:var(--silver)}
+.plan2 small{display:block;margin-top:6px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--silver-2)}
+textarea.field{min-height:110px;resize:vertical}
+.sent{text-align:center;padding:28px 18px;display:grid;gap:10px;justify-items:center}
+.sent > i{font-size:52px;color:var(--silver)}
+.sent h3{font-family:var(--display);font-size:30px;text-transform:uppercase;font-weight:800}
+.sent .acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.leadgrid{display:grid;gap:10px}
+.leadcard{display:grid;grid-template-columns:72px 1fr auto;gap:14px;align-items:center;text-align:left;padding:12px 14px;transition:transform .18s var(--ease),border-color .2s}
+.leadcard:hover{border-color:var(--silver-2)}.leadcard:active{transform:scale(.98)}
+.leadcard img{width:72px;height:72px;object-fit:contain}
+.leadcard b{font-family:var(--display);font-size:23px;text-transform:uppercase;display:block;line-height:1.05}
+.leadcard span{display:block;color:var(--silver-2);font-size:14px;font-weight:600}
+.leadcard small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.leadcard > i{color:var(--muted);font-size:18px}
+.leadbio{display:grid;grid-template-columns:110px 1fr;gap:16px;align-items:center;margin-bottom:6px}
+.leadbio img{width:110px;height:110px;object-fit:contain}
+.minihead{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--silver-2);margin:18px 0 6px}
+.biotext{color:var(--muted);font-size:15px;line-height:1.5}
+.sheet form .btn.full{width:100%;margin-top:14px}
+.sheet .btn.ghost.full{width:100%;margin-top:10px}
+.shophead{font-family:var(--display);font-size:17px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--silver-2);margin:22px 0 10px}
+.shopgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.shopitem{display:flex;flex-direction:column;padding:0;overflow:hidden;transition:transform .18s var(--ease),border-color .2s}
+.shopitem:hover{border-color:var(--silver-2)}.shopitem:active{transform:scale(.98)}
+.simg{aspect-ratio:1/1;background:#000;display:grid;place-items:center;overflow:hidden}
+.simg img{width:100%;height:100%;object-fit:cover}
+.simg.contain img{object-fit:contain;padding:10px}
+.simg.top img{object-position:top}
+.sbody{padding:12px 14px 14px;display:grid;gap:4px;flex:1}
+.sbody b{font-family:var(--display);font-size:20px;text-transform:uppercase;line-height:1.05}
+.sprice{font-family:var(--display);font-size:24px;font-weight:800;margin-top:4px}
+.sbody .btn{margin-top:8px;align-self:end}
+.spongrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.sponcard{display:grid;gap:6px;align-content:start;padding:12px;transition:transform .18s var(--ease),border-color .2s}
+a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(.98)}
+.slogo{height:120px;overflow:hidden;border-radius:12px;background:#f2f3f5;display:grid;place-items:center;padding:16px;margin-bottom:6px}
+.slogo img{max-width:100%;max-height:88px;object-fit:contain}
+.slogo .wm{font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:.04em;text-transform:uppercase;color:#14171b;text-align:center;line-height:1}
+.sponcard b{font-family:var(--display);font-size:20px;text-transform:uppercase;line-height:1.05}
+.sponcard small{color:var(--muted);font-size:13px}
+.sponcta{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:18px;padding:18px}
+.sponcta b{font-family:var(--display);font-size:22px;text-transform:uppercase}
+.sponcta p{color:var(--muted);font-size:14px;margin-top:4px;max-width:520px}
+.cupgrid{display:grid;gap:14px}
+.cupflyer{width:100%;max-width:420px;border-radius:14px;border:1px solid var(--line);background:var(--panel)}
+.cgrid{display:grid;gap:10px}
+.cmapwrap .mapbox{height:58dvh;min-height:320px}
+@media (min-width:700px){
+  .tiles{grid-template-columns:repeat(3,1fr)}
+  .leadgrid,.cgrid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+  .joinform{grid-template-columns:1fr 1.3fr;gap:24px;align-items:start}
+  .cupgrid{grid-template-columns:minmax(260px,420px) 1fr;align-items:start}
+}
+@media (min-width:1000px){
+  .subchips{display:none}
+  .tiles{grid-template-columns:repeat(5,1fr)}
+  .cmapwrap .mapbox{height:calc(100dvh - 210px)}
+}
 </style>
 </head>
 <body>
@@ -549,7 +623,7 @@ body.thread-open .fab{display:none!important}
       <button class="iconbtn" id="btnProfile" aria-label="Your profile"><i class="ph-bold ph-user"></i></button>
     </div>
     <div class="chips" id="chapterChips" role="group" aria-label="Chapter filter"></div>
-    <a class="btn topjoin" href="https://raidernationgolfclub.com/shop/" target="_blank" rel="noopener"><i class="ph-bold ph-identification-badge"></i> Join the club</a>
+    <button type="button" class="btn topjoin" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button>
   </header>
 
   <div class="banner" id="banner"><i class="ph-bold ph-info"></i><span>Design preview. Events, plans, prices and the Raiders schedule are real. Forum posts, the member map, the ticket exchange and the fantasy league use demo people.</span></div>
@@ -760,7 +834,7 @@ const BOARDS=['All','Tournaments','Game Day','Golf Tips','Travel','Gear'];
 const KEY='rngc-site-v2';
 let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[],demo:false,tour:-1,gview:'sched',selGame:null,ffJoin:false,eview:'list',sview:'net'};
 try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw),{tab:'home',openThread:null,selCourse:null,selGame:null,tour:-1})}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview,rc27:S.rc27}))}catch(e){}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview,rc27:S.rc27,cview:S.cview}))}catch(e){}};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -781,46 +855,144 @@ function renderChips(){
 $('#chapterChips').addEventListener('change',e=>{if(e.target.id!=='chSel')return;S.chapter=e.target.value;save();renderAll()});
 
 /* ---------- home ---------- */
+/* ---------- home: overview plus its own pages (join, leaders, shop, sponsors) ---------- */
+const PRES={SoCal:'ross',National:'ross',NorCal:'duran',Nevada:'garrison'};
+const LEAD_X={
+ ross:{id:'ross',name:'Ross Ricks',first:'Ross',role:'Club President',chapters:'National and Southern California',img:UP+'2026/06/ROSS-PREZ-NATIONAL-324x324.png',big:UP+'2026/06/ROSS-PREZ-NATIONAL-1024x915.png'},
+ duran:{id:'duran',name:'Jason Duran',first:'Jason',role:'Chapter President',chapters:'Northern California',img:UP+'2026/06/JASON-BT2-324x324.png',big:UP+'2026/06/JASON-BT2-942x1024.png'},
+ garrison:{id:'garrison',name:'Jason Garrison',first:'Jason',role:'Chapter President',chapters:'Las Vegas and Nevada',img:UP+'2026/06/JG-VEGAS-BT-324x324.png',big:UP+'2026/06/JG-VEGAS-BT-944x1024.png'}
+};
+/* sponsor facts: only what the club site and flyers show; logo + site filled in when verified */
+const SPONS_X=[
+ {n:'Woodson Bourbon Whiskey',what:'Presenting sponsor of the Raider Cup.',logo:'https://woodsonwhiskey.com/cdn/shop/files/W_LOGO_1_500x.png?v=1625374642',zoom:1.6,site:'https://woodsonwhiskey.com'},
+ {n:'Chimera Golf Club',what:'Henderson, NV. Home course for the Las Vegas chapter scrambles.',logo:'https://chimeragolfclub.com/wp-content/uploads/2020/04/logo_header.png',site:'https://chimeragolfclub.com'},
+ {n:'Alpha Team Golf',what:'Club sponsor.',logo:'',site:''},
+ {n:'Black Sunday Brand',what:'Club sponsor. Raiders fan apparel.',logo:'https://cdn11.bigcommerce.com/s-713e0/images/stencil/197x100/blacksundaylogosml_1393448076__65323.original.png',site:'https://blacksundayshop.com'},
+ {n:'Surf City Sound',what:'Club partner. Audio, lighting and video.',logo:'https://surfcitysound.com/wp-content/uploads/2025/10/scs-300x222.png',site:'https://surfcitysound.com'}
+];
+function subChips(t){
+  const items=t==='home'?[['Overview','overview'],...SUBNAV.home]:SUBNAV[t];const cur=subNow(t);
+  return `<div class="chips subchips" role="group" aria-label="${t} pages">${items.map(([l,k])=>`<button class="chip" data-sub="${t}|${esc(k)}" aria-pressed="${k===cur}">${l}</button>`).join('')}</div>`;
+}
+const pageHead=(title,sub)=>`<h2 class="sec pagehead">${title}</h2>${sub?`<p class="sub">${sub}</p>`:''}`;
 function renderHome(){
+  const pg=S.hpage||'overview',v=$('#v-home');
+  if(pg==='join')v.innerHTML=subChips('home')+joinHTML();
+  else if(pg==='leaders')v.innerHTML=subChips('home')+leadersHTML();
+  else if(pg==='shop')v.innerHTML=subChips('home')+shopHTML();
+  else if(pg==='sponsors')v.innerHTML=subChips('home')+sponsorsHTML();
+  else if(pg==='news')v.innerHTML=subChips('home')+newsHTML();
+  else v.innerHTML=subChips('home')+overviewHTML();
+}
+function overviewHTML(){
   const next=EVENTS.filter(e=>!isPast(e.date)&&inChapter(e.chapter)).sort((a,b)=>a.date<b.date?-1:1)[0];
-  const f=next&&fmtDate(next.date);
-  const plans=PLANS.filter(p=>S.chapter==='All'||p.chapter===S.chapter||p.chapter==='National');
-  const ng=GAMES.find(g=>!g.res);
-  $('#v-home').innerHTML=`<div class="rise">
+  const f=next&&fmtDate(next.date),ng=GAMES.find(g=>!g.res);
+  const tile=(k,ic,t,s)=>`<button class="card tile" data-sub="home|${k}"><i class="ph-bold ph-${ic}"></i><b>${t}</b><small>${s}</small></button>`;
+  return `<div class="rise">
    <div class="hero"><div class="bg" style="background-image:url('${UP}2026/06/IMG_5442-1024x768.jpg')"></div><div class="in">
      <span class="tag">Est. 2019 - Travel, Golf, Football</span>
      <h1>Tee it up with Raider Nation</h1>
      <p>A national golf club for Raiders fans, with chapters in Southern California, Northern California and Las Vegas.</p>
-     <div class="acts"><a class="btn" href="#join" data-scroll="join"><i class="ph-bold ph-identification-badge"></i> Join the club</a><button class="btn ghost" data-go="events">See events</button></div>
+     <div class="acts"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button><button class="btn ghost" data-sub="events|up">See events</button></div>
    </div></div>
    ${next?`<div class="card next"><div class="cd">${daysTo(next.date)}<small>days</small></div><div><span class="pill">Next event - ${esc(next.chapter)}</span><h3 style="margin-top:6px">${esc(next.name)}</h3><div class="meta">${f.dow}, ${f.m} ${f.d} - ${esc(next.where)}</div></div><a class="btn small" href="${next.url}" ${ext}>Register</a></div>`:''}
-   ${ng?`<div class="card next"><div class="cd">${daysTo(ng.date)}<small>days</small></div><div><span class="pill">Raiders - Week ${ng.wk}</span><h3 style="margin-top:6px">${esc(gTitle(ng))}</h3><div class="meta">${gWhen(ng)}</div></div><button class="btn small ghost" data-go="games">Schedule</button></div>`:''}
-   ${(()=>{const w=scOrder('net')[0];return `<div class="card next"><div class="cd">${w.net}<small>net</small></div><div><span class="pill">Leaderboard - ${esc(SC_EVENT.name)}</span><h3 style="margin-top:6px">${esc(w.name)} leads ${ROUNDS.length} members</h3><div class="meta">${esc(SC_EVENT.course)} - ${toPar(w.net-SC_PAR)} net, demo scores</div></div><button class="btn small ghost" data-scores>Scorecards</button></div>`})()}
+   ${ng?`<div class="card next"><div class="cd">${daysTo(ng.date)}<small>days</small></div><div><span class="pill">Raiders - Week ${ng.wk}</span><h3 style="margin-top:6px">${esc(gTitle(ng))}</h3><div class="meta">${gWhen(ng)}</div></div><button class="btn small ghost" data-sub="games|sched">Schedule</button></div>`:''}
+   ${(()=>{const w=scOrder('net')[0];return `<div class="card next"><div class="cd">${w.net}<small>net</small></div><div><span class="pill">Leaderboard - ${esc(SC_EVENT.name)}</span><h3 style="margin-top:6px">${esc(w.name)} leads ${ROUNDS.length} members</h3><div class="meta">${esc(SC_EVENT.course)} - ${toPar(w.net-SC_PAR)} net, demo scores</div></div><button class="btn small ghost" data-sub="events|scores">Scorecards</button></div>`})()}
    </div>
-   <div class="homegrid">
-    <div>
-     <h2 class="sec" id="join">Join a chapter</h2>
-     <div class="plans">${plans.map(p=>`<div class="card plan"><div><h3>${p.name}</h3><p>${p.blurb}</p></div><div style="text-align:right"><div class="price">$${p.price}<small>/yr</small></div><a class="btn small" style="margin-top:8px" href="${p.url}" ${ext}>Join</a></div></div>`).join('')}</div>
-     <h2 class="sec" id="s-leaders">Club leaders</h2>
-     <div class="leaders">${LEADERS.map(l=>`<div class="card lead"><img src="${l.img}" alt="" loading="lazy"><div><b>${l.name}</b><span>${l.role}</span></div></div>`).join('')}</div>
-    </div>
-    <div>
-     <h2 class="sec" id="s-news">Club news</h2>
-     <div class="stack">${NEWS.map(n=>`<button class="card news" data-news="${n.id}"><img class="thumb" src="${n.img}" alt="" loading="lazy"><div><span class="pill">${n.tag}</span><h3 style="margin-top:6px">${esc(n.title)}</h3><div class="meta">${n.meta}</div></div></button>`).join('')}</div>
-     <h2 class="sec" id="s-shop">Club shop</h2>
-     <a class="card shopcard" href="${SHOP}rngc-golf-polo-the-og-classic/" ${ext}><img src="${UP}2026/06/RNGC-POLO-26-1-324x324.png" alt="" loading="lazy"><div><b>RNGC Golf Polo, The OG Classic</b><div class="meta">$60 - $65, sizes S to 4XL</div><span class="pill" style="margin-top:8px">Shop now</span></div></a>
-    </div>
-    <div class="full">
-     <h2 class="sec" id="s-spons">Sponsors and partners</h2>
-     <div class="spons">${SPONSORS.map(s=>`<div class="spon">${s}</div>`).join('')}</div>
-     <div class="foot"><span>Follow the club</span>
-      <a href="https://www.instagram.com/raidernationgolfclub" ${ext}><i class="ph-bold ph-instagram-logo"></i> Instagram</a>
-      <a href="https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ" ${ext}><i class="ph-bold ph-youtube-logo"></i> YouTube</a>
-      <a href="https://www.facebook.com/search/top?q=raider%20nation%20golf%20club" ${ext}><i class="ph-bold ph-facebook-logo"></i> Facebook</a>
-      <span style="margin-left:auto">&copy; Raider Nation Golf Club 2026</span></div>
-    </div>
-   </div>`;
+   <div class="tiles">${tile('join','identification-badge','Join a chapter','Sign up, the chapter president gets it')}${tile('leaders','users','Club leaders','Bios and how to reach them')}${tile('shop','shopping-bag','Club shop','Polos, memberships, event entries')}${tile('news','newspaper','Club news','Events, membership, interviews')}${tile('sponsors','handshake','Sponsors','The brands behind the club')}</div>
+   <div class="foot"><span>Follow the club</span>
+    <a href="https://www.instagram.com/raidernationgolfclub" ${ext}><i class="ph-bold ph-instagram-logo"></i> Instagram</a>
+    <a href="https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ" ${ext}><i class="ph-bold ph-youtube-logo"></i> YouTube</a>
+    <a href="https://www.facebook.com/search/top?q=raider%20nation%20golf%20club" ${ext}><i class="ph-bold ph-facebook-logo"></i> Facebook</a>
+    <span style="margin-left:auto">&copy; Raider Nation Golf Club 2026</span></div>`;
 }
+/* join a chapter: the form goes to that chapter's president (preview: nothing is sent yet) */
+function joinHTML(){
+  if(S.joinSent){const j=S.joinSent,L=LEAD_X[PRES[j.chapter]],p=PLANS.find(x=>x.chapter===j.chapter);
+    return pageHead('Join a chapter')+`<div class="card sent rise"><i class="ph-fill ph-check-circle"></i><h3>Thanks, ${esc(j.first)}</h3>
+     <p>Your request went to <b>${esc(L.name)}</b>, ${esc(L.chapters)}${L.id!=='ross'?', with Ross Ricks copied as club president':''}. Expect a reply by email.</p>
+     <p class="help">Preview: nothing is actually sent yet. In the live app this lands in the president's inbox.</p>
+     <div class="acts">${p?`<a class="btn" href="${p.url}" ${ext}><i class="ph-bold ph-credit-card"></i> Pay ${esc(p.name)} dues, $${p.price}</a>`:''}<button class="btn ghost" id="joinAgain">Send another</button></div></div>`}
+  const ch=S.joinCh||(S.chapter!=='All'?S.chapter:'SoCal');
+  const opt=p=>`<label class="radio plan2"><input type="radio" name="jc" value="${p.chapter}" ${ch===p.chapter?'checked':''}><span><b>${p.name} <em>$${p.price}/yr</em></b>${p.blurb}<small>Goes to ${LEAD_X[PRES[p.chapter]].name}</small></span></label>`;
+  return pageHead('Join a chapter','Fill this out and it goes straight to the president of the chapter you pick.')+`
+   <form id="joinForm" class="joinform rise" novalidate>
+    <div class="jcol">${PLANS.map(opt).join('')}</div>
+    <div class="jcol">
+     <div class="two"><div><label for="jf">First name</label><input class="field" id="jf" required maxlength="30" autocomplete="given-name"></div>
+     <div><label for="jl">Last name</label><input class="field" id="jl" required maxlength="30" autocomplete="family-name"></div></div>
+     <label for="je">Email</label><input class="field" id="je" type="email" required maxlength="80" autocomplete="email">
+     <div class="two"><div><label for="jp">Phone (optional)</label><input class="field" id="jp" type="tel" maxlength="20" autocomplete="tel"></div>
+     <div><label for="jcity">City</label><input class="field" id="jcity" required maxlength="40" autocomplete="address-level2"></div></div>
+     <div class="two"><div><label for="jh">Handicap (optional)</label><input class="field" id="jh" maxlength="6" placeholder="12 or none"></div>
+     <div><label for="jhear">How did you hear about us?</label><select class="field" id="jhear"><option>A member</option><option>Instagram</option><option>YouTube</option><option>Facebook</option><option>At an event</option><option>Other</option></select></div></div>
+     <label for="jm">Anything the president should know?</label><textarea class="field" id="jm" maxlength="500" placeholder="Where you play, who you golf with, events you want in on"></textarea>
+     <p class="si-msg" id="joinMsg" role="status"></p>
+     <button class="btn full" type="submit" style="width:100%;margin-top:14px"><i class="ph-bold ph-paper-plane-tilt"></i> Send to the chapter president</button>
+     <p class="help">Your details go only to the club leaders. Paying dues happens after, on the club store.</p>
+    </div></form>`;
+}
+document.addEventListener('change',e=>{if(e.target.name==='jc'){S.joinCh=e.target.value}});
+document.addEventListener('submit',e=>{
+  if(e.target.id==='joinForm'){e.preventDefault();
+    const v=id=>($('#'+id).value||'').trim(),msg=$('#joinMsg');
+    const ch=(document.querySelector('input[name=jc]:checked')||{}).value;
+    if(!v('jf')||!v('jl')||!v('jcity')){msg.textContent='Add your name and city.';return}
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('je'))){msg.textContent='Check the email address.';return}
+    S.joinSent={first:v('jf'),chapter:ch,at:Date.now()};S.joinCh=ch;save();renderHome();$('#v-home').scrollTop=0;
+    toast('Sent to '+LEAD_X[PRES[ch]].name)}
+  if(e.target.id==='leadMsgForm'){e.preventDefault();const L=LEAD_X[e.target.dataset.lead];if(!$('#lmText').value.trim())return;closeSheet();toast('Message sent to '+L.first+'. Preview only, nothing sent yet.')}
+  if(e.target.id==='sponForm'){e.preventDefault();if(!$('#spName').value.trim()||!$('#spEmail').value.trim()){toast('Add a business name and email');return}closeSheet();toast('Sent to Ross. Preview only, nothing sent yet.')}
+});
+document.addEventListener('click',e=>{if(e.target.closest('#joinAgain')){S.joinSent=null;save();renderHome()}});
+/* club leaders: tap for bio and contact */
+function leadersHTML(){
+  return pageHead('Club leaders','Tap a leader for their bio and to send them a message.')+`<div class="leadgrid rise">${Object.values(LEAD_X).map(L=>`<button class="card leadcard" data-leader="${L.id}"><img src="${L.img}" alt="" loading="lazy"><div><b>${esc(L.name)}</b><span>${esc(L.role)}</span><small>${esc(L.chapters)}</small></div><i class="ph-bold ph-caret-right"></i></button>`).join('')}</div>`;
+}
+function openLeader(id){
+  const L=LEAD_X[id];if(!L)return;
+  const chs=Object.entries(PRES).filter(([c,p])=>p===id).map(([c])=>c);
+  openSheet(`<div class="leadbio"><img src="${L.big}" alt=""><div><span class="pill">${esc(L.role)}</span><h3 style="margin-top:8px">${esc(L.name)}</h3><p class="help" style="margin:0;font-size:15px">${esc(L.chapters)}</p></div></div>
+   <h4 class="minihead">Bio</h4><p class="biotext">Bio coming soon: how ${esc(L.first)} got into the club, home course and favorite Raiders memory.</p>
+   <h4 class="minihead">Contact</h4>
+   <p class="help" style="margin:0 0 6px">Messages go to ${esc(L.first)}'s club inbox. Phone and email stay private until they reply.</p>
+   <form id="leadMsgForm" data-lead="${L.id}"><label for="lmText">Message ${esc(L.first)}</label><textarea class="field" id="lmText" maxlength="500" required placeholder="Questions about the chapter, events or sponsorship"></textarea>
+   <button class="btn full" type="submit"><i class="ph-bold ph-paper-plane-tilt"></i> Send to ${esc(L.first)}</button></form>
+   ${chs.length?`<button class="btn ghost full" data-sub="home|join" data-joinch="${chs[chs.length-1]}"><i class="ph-bold ph-identification-badge"></i> Join ${esc(L.first)}'s chapter</button>`:''}`);
+}
+document.addEventListener('click',e=>{
+  const l=e.target.closest('[data-leader]');if(l){openLeader(l.dataset.leader);return}
+  const jc=e.target.closest('[data-joinch]');if(jc){S.joinCh=jc.dataset.joinch;S.joinSent=null;closeSheet()}
+});
+/* club shop: only the store */
+function shopHTML(){
+  const evs=EVENTS.filter(e=>!isPast(e.date));
+  const item=(img,t,price,meta,url,fit)=>`<a class="card shopitem" href="${url}" ${ext}><div class="simg ${fit||''}"><img src="${img}" alt="" loading="lazy"></div><div class="sbody"><b>${t}</b><div class="meta">${meta}</div><div class="sprice">${price}</div><span class="btn small">Buy on club store</span></div></a>`;
+  return pageHead('Club shop','Checkout happens on the club store at raidernationgolfclub.com.')+`
+   <h3 class="shophead">Club gear</h3><div class="shopgrid rise">${item(UP+'2026/06/RNGC-POLO-26-1-324x324.png','RNGC Golf Polo, The OG Classic','$60 - $65','Sizes S to 4XL',SHOP+'rngc-golf-polo-the-og-classic/')}</div>
+   <h3 class="shophead">Memberships</h3><div class="shopgrid">${PLANS.map(p=>item(p.chapter==='National'?UP+'2026/06/ROSS-PREZ-NATIONAL-324x324.png':LEAD_X[PRES[p.chapter]].img,p.name+' membership','$'+p.price+' per year',p.chapter==='National'?'For fans anywhere':'GHIN handicap, laser bag tag',p.url,'contain')).join('')}</div>
+   ${evs.length?`<h3 class="shophead">Event entries</h3><div class="shopgrid">${evs.map(e=>item(e.img,e.name,e.price,fmtDate(e.date).dow+', '+fmtDate(e.date).m+' '+fmtDate(e.date).d+' - '+e.where,e.url,'top')).join('')}</div>`:''}
+   <a class="btn ghost" style="margin-top:16px" href="${SITE}/shop/" ${ext}><i class="ph-bold ph-storefront"></i> Open the full club store</a>`;
+}
+/* club news: own page */
+function newsHTML(){
+  return pageHead('Club news','Tap a story to read it.')+`<div class="stack newsgrid rise">${NEWS.map(n=>`<button class="card news" data-news="${n.id}"><img class="thumb" src="${n.img}" alt="" loading="lazy"><div><span class="pill">${n.tag}</span><h3 style="margin-top:6px">${esc(n.title)}</h3><div class="meta">${n.meta}</div></div></button>`).join('')}</div>`;
+}
+/* sponsors: own page with logos */
+function sponsorsHTML(){
+  const logo=s=>s.logo?`<img src="${s.logo}" alt="${esc(s.n)} logo" loading="lazy" ${s.zoom?`style="transform:scale(${s.zoom})"`:''} onerror="this.parentNode.innerHTML='<span class=wm>${esc(s.n).replace(/'/g,'&#39;')}</span>'">`:`<span class="wm">${esc(s.n)}</span>`;
+  return pageHead('Sponsors and partners','The brands that make the events happen. Tap one to visit them.')+`
+   <div class="spongrid rise">${SPONS_X.map(s=>{const inner=`<div class="slogo ${s.dark?'light':''}">${logo(s)}</div><b>${esc(s.n)}</b><small>${esc(s.what)}</small>`;
+     return s.site?`<a class="card sponcard" href="${s.site}" ${ext}>${inner}</a>`:`<div class="card sponcard">${inner}</div>`}).join('')}</div>
+   <div class="card sponcta"><div><b>Sponsor the club</b><p>Put your brand in front of Raiders fans at every scramble, the Raider Cup and on the club channels.</p></div><button class="btn" id="sponBtn"><i class="ph-bold ph-handshake"></i> Talk to Ross</button></div>`;
+}
+document.addEventListener('click',e=>{if(e.target.closest('#sponBtn'))openSheet(`<h3>Sponsor the club</h3><p class="help" style="margin:0 0 4px">This goes to Ross Ricks, club president.</p>
+  <form id="sponForm"><label for="spName">Business name</label><input class="field" id="spName" maxlength="60" required>
+  <label for="spWho">Your name</label><input class="field" id="spWho" maxlength="40">
+  <label for="spEmail">Email</label><input class="field" id="spEmail" type="email" maxlength="80" required>
+  <label for="spMsg">What do you have in mind?</label><textarea class="field" id="spMsg" maxlength="500" placeholder="Event sponsor, hole sponsor, Raider Cup, gear"></textarea>
+  <button class="btn full" type="submit">Send to Ross</button></form>`)});
+
 
 /* ---------- events ---------- */
 function evCard(e){
@@ -833,19 +1005,25 @@ function evCard(e){
    ${past?'':`<div class="help" style="margin-top:8px;font-size:13px;color:var(--muted)">Interested just lets other members know. Register and pay holds your spot.</div>`}</div></article>`;
 }
 function renderEvents(){
-  const chip=(k,ic,t)=>`<button class="chip" data-ev="${k}" aria-pressed="${S.eview===k}"><i class="ph-bold ph-${ic}"></i> ${t}</button>`;
-  const seg=`<div class="seg" role="tablist" aria-label="Events">${chip('list','calendar-check','Events')}${chip('scores','list-numbers','Scorecards')}</div>`;
-  if(S.eview==='scores'){$('#v-events').innerHTML=seg+scoresHTML();return}
+  if(!S.eview||S.eview==='list')S.eview='up';
+  const pg=S.eview,v=$('#v-events');
+  if(pg==='scores'){v.innerHTML=subChips('events')+scoresHTML();return}
   const list=EVENTS.filter(e=>inChapter(e.chapter)||e.chapter==='National');
   const up=list.filter(e=>!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1),past=list.filter(e=>isPast(e.date)).sort((a,b)=>a.date<b.date?1:-1);
-  $('#v-events').innerHTML=seg+`<h2 class="sec" id="ev-up">Upcoming</h2>
-   <div class="evgrid rise">${up.length?up.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No dates for this chapter yet. More get posted here as they are set.</div>'}</div>
-   ${up.length&&up.every(e=>e.chapter==='Nevada')&&S.chapter!=='Nevada'?'<p class="sub" style="margin-top:10px">Only Nevada has a date posted right now. SoCal and NorCal chapter events show up here as soon as they are set.</p>':''}
-   <h2 class="sec" id="ev-cup">Raider Cup</h2><p class="sub">The club's signature trip. 2026 ran May 22-24 in St. George, UT. Dates for 2027 are not set yet.</p>
-   <button class="btn ${S.rc27?'ghost':''}" id="rc27" style="margin-bottom:12px">${S.rc27?'<i class="ph-bold ph-check"></i> On the 2027 list':'<i class="ph-bold ph-bell"></i> Get Raider Cup 2027 updates'}</button>
-   <div class="flyers">${FLYERS.map(u=>`<img src="${u}" alt="Event flyer" loading="lazy">`).join('')}</div>
-   <h2 class="sec" id="ev-past">Past events</h2>
-   <div class="evgrid rise">${past.map(evCard).join('')}</div>`;
+  if(pg==='cup'){const rc=EVENTS.find(e=>e.id==='rc26');
+    v.innerHTML=subChips('events')+pageHead('Raider Cup','The club\'s signature trip, powered by Woodson Bourbon Whiskey.')+`<div class="cupgrid rise">
+     <img class="cupflyer" src="${rc.img}" alt="Raider Cup 2026 flyer" loading="lazy">
+     <div class="stack">
+      <div class="card"><span class="pill">2027</span><h3 class="cardh">Dates not set yet</h3><p class="meta">Get on the list and you hear first when the dates and courses are picked.</p>
+       <button class="btn ${S.rc27?'ghost':''}" id="rc27" style="margin-top:12px">${S.rc27?'<i class="ph-bold ph-check"></i> On the 2027 list':'<i class="ph-bold ph-bell"></i> Get Raider Cup 2027 updates'}</button></div>
+      <div class="card"><span class="pill">2026 - Past event</span><h3 class="cardh">Raider Cup 2026</h3><p class="meta">May 22-24 - St. George, UT</p><p class="meta">Copper Rock, Coral Canyon, Sand Hollow and Sky Mountain.</p></div>
+      <a class="btn ghost" href="${rc.url}" ${ext}><i class="ph-bold ph-arrow-square-out"></i> Raider Cup page on the club site</a>
+     </div></div>`;return}
+  if(pg==='past'){const live=new Set([...up.map(e=>e.img),EVENTS.find(e=>e.id==='rc26').img]);
+    v.innerHTML=subChips('events')+pageHead('Past events','Results, recaps and flyers from earlier club events.')+`<div class="evgrid rise">${past.length?past.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No past events for this chapter yet.</div>'}</div>
+     <h3 class="shophead">Flyers from past events</h3><div class="flyers">${FLYERS.filter(u=>!live.has(u)).map(u=>`<img src="${u}" alt="Event flyer" loading="lazy">`).join('')}</div>`;return}
+  v.innerHTML=subChips('events')+pageHead('Upcoming events','Interested lets other members know. Register and pay holds your spot.')+`<div class="evgrid rise">${up.length?up.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No dates for this chapter yet. More get posted here as they are set.</div>'}</div>
+   ${up.length&&up.every(e=>e.chapter==='Nevada')&&S.chapter!=='Nevada'?'<p class="sub" style="margin-top:10px">Only Nevada has a date posted right now. SoCal and NorCal chapter events show up here as soon as they are set.</p>':''}`;
 }
 /* ---------- club scorecards view ---------- */
 function scoresHTML(){
@@ -952,10 +1130,11 @@ window.addEventListener('resize',()=>{if(window.google&&google.maps)Object.value
 /* ---------- courses ---------- */
 function renderCourses(){
   const list=COURSES.filter(c=>inChapter(c.chapter)||c.chapter==='National');
-  $('#v-courses').innerHTML=`<div class="cwrap"><div class="mapbox" id="cmap" aria-label="Map of club courses"></div>
+  if(S.cview==='list'){cMarkers={};
+    $('#v-courses').innerHTML=subChips('courses')+pageHead('Where we play','Tap a course to see it on the map. Pins are approximate.')+`<div class="cgrid rise">${list.map(c=>`<button class="card course" data-course="${c.id}"><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(c.name)}</b><small>${esc(c.city)}</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join('')}</div>`;return}
+  $('#v-courses').innerHTML=subChips('courses')+`<div class="cmapwrap"><div class="mapbox" id="cmap" aria-label="Map of club courses"></div>
    <div class="detail card" id="cdetail"></div>
-   <h2 class="sec" id="c-list">Where we play</h2><p class="sub">Tap a course to see it on the map. Pins are approximate.</p>
-   <div class="stack">${list.map(c=>`<button class="card course ${S.selCourse===c.id?'sel':''}" data-course="${c.id}"><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(c.name)}</b><small>${esc(c.city)}</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join('')}</div></div>`;
+   <p class="sub" style="margin-top:10px">Tap a flag for the course. ${list.length} courses, pins are approximate.</p></div>`;
   const el=$('#cmap');
   withMaps(ok=>{
     const m=makeMap(el,'courses',[34.5,-116],6,ok);cMarkers={};
@@ -978,7 +1157,9 @@ function showCourse(id,fly){
   box.classList.add('on');
   if(fly&&maps.courses){maps.courses.panTo({lat:c.lat,lng:c.lng});maps.courses.setZoom(11)}
 }
-document.addEventListener('click',e=>{const b=e.target.closest('[data-course]');if(b){showCourse(b.dataset.course,true);$('#v-courses').scrollTo({top:0,behavior:'smooth'})}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-course]');if(!b)return;
+  if(S.cview==='list'){S.selCourse=b.dataset.course;S.cview='map';renderCourses();renderSubnav();$('#v-courses').scrollTop=0;return}
+  showCourse(b.dataset.course,true);$('#v-courses').scrollTo({top:0,behavior:'smooth'})});
 
 /* ---------- games (Raiders schedule with live ESPN feed, player news, fantasy) ---------- */
 const TEAMS={LV:'Raiders',MIA:'Dolphins',LAC:'Chargers',NO:'Saints',KC:'Chiefs',NE:'Patriots',BUF:'Bills',LAR:'Rams',NYJ:'Jets',SF:'49ers',SEA:'Seahawks',DEN:'Broncos',CLE:'Browns',TEN:'Titans',ARI:'Cardinals'};
@@ -993,7 +1174,7 @@ const nextGame=()=>GAMES.find(g=>!g.res);
 const sides=g=>g.home?[g.o,'LV']:['LV',g.o];
 function gWhen(g){const f=fmtDate(g.date);return g.tbd?'Jan 9 or 10, time to be set':`${f.dow}, ${f.m} ${f.d} - ${g.kick} PT - ${g.tv}`}
 async function getJSON(u){const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json()}
-let rfT;function refreshGames(){clearTimeout(rfT);rfT=setTimeout(()=>{fillGames();fillNews();renderHome();
+let rfT;function refreshGames(){clearTimeout(rfT);rfT=setTimeout(()=>{fillGames();fillNews();if((S.hpage||'overview')==='overview')renderHome();
   if(S.sheetGame&&$('#sheet').classList.contains('on'))openGame(S.sheetGame,true)},80)}
 async function loadSchedule(){
   if(LIVE.sched)return;LIVE.sched=1;
@@ -1457,6 +1638,8 @@ function setTab(t){
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+t));
   $('#fab').classList.toggle('on',t==='forum'&&(!S.openThread||window.innerWidth>=1000));
   $('#banner').style.display=(t==='home'||window.innerWidth>=1000)?'flex':'none';
+  if(t==='home')renderHome();
+  if(t==='events')renderEvents();
   if(t==='courses')renderCourses();
   if(t==='games')renderGames();
   if(t==='members')renderMembers();else renderCoach();
@@ -1466,7 +1649,7 @@ function setTab(t){
 }
 /* side menu: the open page shows its sub-links underneath it */
 const SUBNAV={
- home:[['Join a chapter','join'],['Club leaders','s-leaders'],['Club news','s-news'],['Club shop','s-shop'],['Sponsors','s-spons']],
+ home:[['Join a chapter','join'],['Club leaders','leaders'],['Club news','news'],['Club shop','shop'],['Sponsors','sponsors']],
  events:[['Upcoming','up'],['Scorecards','scores'],['Raider Cup','cup'],['Past events','past']],
  games:[['Raiders schedule','sched'],['Player news','news'],['Fantasy league','ff']],
  courses:[['Course map','map'],['Where we play','list']],
@@ -1475,7 +1658,9 @@ const SUBNAV={
 };
 const SUB={};
 function subNow(t){
-  if(t==='events')return S.eview==='scores'?'scores':(SUB.events&&SUB.events!=='scores'?SUB.events:'up');
+  if(t==='home')return S.hpage||'overview';
+  if(t==='events')return !S.eview||S.eview==='list'?'up':S.eview;
+  if(t==='courses')return S.cview||'map';
   if(t==='games')return S.gview;
   if(t==='members')return S.mview;
   if(t==='forum')return S.board;
@@ -1490,18 +1675,17 @@ function renderSubnav(){
 }
 function goSub(t,k){
   SUB[t]=k;
-  const jump={events:{up:'ev-up',cup:'ev-cup',past:'ev-past'},home:{join:'join','s-leaders':'s-leaders','s-news':'s-news','s-shop':'s-shop','s-spons':'s-spons'},courses:{map:'cmap',list:'c-list'}}[t];
-  if(t==='events'){S.eview=k==='scores'?'scores':'list';save();renderEvents()}
+  if(t==='home'){S.hpage=k;if(k==='join')S.joinSent=null}
+  if(t==='events'){S.eview=k;save()}
+  if(t==='courses')S.cview=k;
   if(t==='games'){S.gview=k;save()}
   if(t==='members'){S.mview=k;save()}
   if(t==='forum'){S.board=k;S.openThread=null;save()}
-  setTab(t);
-  const id=jump&&jump[k];
-  if(id)setTimeout(()=>{const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})},80);
+  closeSheet();setTab(t);
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-sub]');if(!b)return;const i=b.dataset.sub.indexOf('|');goSub(b.dataset.sub.slice(0,i),b.dataset.sub.slice(i+1))});
 document.addEventListener('click',e=>{if(e.target.closest('[data-ev],[data-gv],[data-mv],[data-board]'))setTimeout(renderSubnav,0)});
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.tab==='home')S.hpage='overview';setTab(b.dataset.tab)}));
 function renderAll(){renderHome();renderEvents();renderForum();if(S.tab==='courses')renderCourses();if(S.tab==='games')renderGames();if(S.tab==='members')renderMembers()}
 renderChips();renderAll();setTab('home');loadSchedule();
 
@@ -1521,7 +1705,7 @@ renderChips();renderAll();setTab('home');loadSchedule();
   }
   window.playLogo=play;
   /* off the home screen the logo takes you home; on the home screen it replays the animation */
-  function tap(){if(S.tab!=='home'){closeSheet();S.openThread=null;setTab('home');return}play()}
+  function tap(){if(S.tab!=='home'||(S.hpage||'overview')!=='overview'){closeSheet();S.openThread=null;S.hpage='overview';setTab('home');return}play()}
   lg.addEventListener('click',tap);
   lg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tap()}});
   document.addEventListener('click',e=>{
