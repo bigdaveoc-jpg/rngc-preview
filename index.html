@@ -309,6 +309,24 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
   .mxrow.big .tm b{font-size:18px}
   .tl{width:36px;height:36px}
 }
+/* side menu sub-links (computer layout) */
+.subnav{display:none}
+@media (min-width:1000px){
+  /* the whole left column scrolls as one when the menu is taller than the screen; the page area stays put */
+  .app{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+  .views{position:sticky;top:0;height:100dvh;align-self:start}
+  .tabs{align-content:start}
+  .app .fab,.app .toast,.app .coach,.app .sheet{position:fixed}
+  .subnav{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s var(--ease)}
+  .subnav > div{overflow:hidden;display:grid;gap:2px}
+  .subnav.open{grid-template-rows:1fr}
+  .subnav.open > div{padding:2px 0 8px}
+  .subnav button{position:relative;display:flex;align-items:center;width:100%;min-height:38px;padding:0 14px 0 56px;border-radius:10px;color:var(--muted);font-size:15px;font-weight:600;text-align:left}
+  .subnav button::before{content:"";position:absolute;left:28px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--line)}
+  .subnav button:hover{background:var(--panel);color:var(--text)}
+  .subnav button[aria-current="true"]{color:var(--text)}
+  .subnav button[aria-current="true"]::before{background:var(--silver)}
+}
 .gwrap,.fwrap2{display:block}
 @media (min-width:1000px){
   .gwrap{display:grid;grid-template-columns:1fr 430px;gap:28px;align-items:start}
@@ -549,11 +567,17 @@ body.thread-open .fab{display:none!important}
 
   <nav class="tabs" role="tablist" aria-label="Main">
     <button class="tab" role="tab" data-tab="home" aria-selected="true"><i class="ph-fill ph-house"></i>Home<span class="bar"></span></button>
+    <div class="subnav" data-for="home"><div></div></div>
     <button class="tab" role="tab" data-tab="events" aria-selected="false"><i class="ph-fill ph-calendar-check"></i>Events<span class="bar"></span></button>
+    <div class="subnav" data-for="events"><div></div></div>
     <button class="tab" role="tab" data-tab="games" aria-selected="false"><i class="ph-fill ph-football"></i>Games<span class="bar"></span></button>
+    <div class="subnav" data-for="games"><div></div></div>
     <button class="tab" role="tab" data-tab="courses" aria-selected="false"><i class="ph-fill ph-flag-pennant"></i>Courses<span class="bar"></span></button>
+    <div class="subnav" data-for="courses"><div></div></div>
     <button class="tab" role="tab" data-tab="forum" aria-selected="false"><i class="ph-fill ph-chats-circle"></i>Forum<span class="bar"></span></button>
+    <div class="subnav" data-for="forum"><div></div></div>
     <button class="tab" role="tab" data-tab="members" aria-selected="false"><i class="ph-fill ph-users-three"></i>Members<span class="bar"></span></button>
+    <div class="subnav" data-for="members"><div></div></div>
   </nav>
 
   <div class="coach" id="coach" role="region" aria-label="Demo tour"></div>
@@ -777,17 +801,17 @@ function renderHome(){
     <div>
      <h2 class="sec" id="join">Join a chapter</h2>
      <div class="plans">${plans.map(p=>`<div class="card plan"><div><h3>${p.name}</h3><p>${p.blurb}</p></div><div style="text-align:right"><div class="price">$${p.price}<small>/yr</small></div><a class="btn small" style="margin-top:8px" href="${p.url}" ${ext}>Join</a></div></div>`).join('')}</div>
-     <h2 class="sec">Club leaders</h2>
+     <h2 class="sec" id="s-leaders">Club leaders</h2>
      <div class="leaders">${LEADERS.map(l=>`<div class="card lead"><img src="${l.img}" alt="" loading="lazy"><div><b>${l.name}</b><span>${l.role}</span></div></div>`).join('')}</div>
     </div>
     <div>
-     <h2 class="sec">Club news</h2>
+     <h2 class="sec" id="s-news">Club news</h2>
      <div class="stack">${NEWS.map(n=>`<button class="card news" data-news="${n.id}"><img class="thumb" src="${n.img}" alt="" loading="lazy"><div><span class="pill">${n.tag}</span><h3 style="margin-top:6px">${esc(n.title)}</h3><div class="meta">${n.meta}</div></div></button>`).join('')}</div>
-     <h2 class="sec">Club shop</h2>
+     <h2 class="sec" id="s-shop">Club shop</h2>
      <a class="card shopcard" href="${SHOP}rngc-golf-polo-the-og-classic/" ${ext}><img src="${UP}2026/06/RNGC-POLO-26-1-324x324.png" alt="" loading="lazy"><div><b>RNGC Golf Polo, The OG Classic</b><div class="meta">$60 - $65, sizes S to 4XL</div><span class="pill" style="margin-top:8px">Shop now</span></div></a>
     </div>
     <div class="full">
-     <h2 class="sec">Sponsors and partners</h2>
+     <h2 class="sec" id="s-spons">Sponsors and partners</h2>
      <div class="spons">${SPONSORS.map(s=>`<div class="spon">${s}</div>`).join('')}</div>
      <div class="foot"><span>Follow the club</span>
       <a href="https://www.instagram.com/raidernationgolfclub" ${ext}><i class="ph-bold ph-instagram-logo"></i> Instagram</a>
@@ -813,11 +837,11 @@ function renderEvents(){
   if(S.eview==='scores'){$('#v-events').innerHTML=seg+scoresHTML();return}
   const list=EVENTS.filter(e=>inChapter(e.chapter)||e.chapter==='National');
   const up=list.filter(e=>!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1),past=list.filter(e=>isPast(e.date)).sort((a,b)=>a.date<b.date?1:-1);
-  $('#v-events').innerHTML=seg+`<h2 class="sec">Upcoming</h2>
+  $('#v-events').innerHTML=seg+`<h2 class="sec" id="ev-up">Upcoming</h2>
    <div class="evgrid rise">${up.length?up.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No dates for this chapter yet. More get posted here as they are set.</div>'}</div>
-   <h2 class="sec">Raider Cup</h2><p class="sub">The club's signature trip. 2026 ran May 22-24 in St. George, UT.</p>
+   <h2 class="sec" id="ev-cup">Raider Cup</h2><p class="sub">The club's signature trip. 2026 ran May 22-24 in St. George, UT.</p>
    <div class="flyers">${FLYERS.map(u=>`<img src="${u}" alt="Event flyer" loading="lazy">`).join('')}</div>
-   <h2 class="sec">Past events</h2>
+   <h2 class="sec" id="ev-past">Past events</h2>
    <div class="evgrid rise">${past.map(evCard).join('')}</div>`;
 }
 /* ---------- club scorecards view ---------- */
@@ -926,7 +950,7 @@ function renderCourses(){
   const list=COURSES.filter(c=>inChapter(c.chapter)||c.chapter==='National');
   $('#v-courses').innerHTML=`<div class="cwrap"><div class="mapbox" id="cmap" aria-label="Map of club courses"></div>
    <div class="detail card" id="cdetail"></div>
-   <h2 class="sec">Where we play</h2><p class="sub">Tap a course to see it on the map. Pins are approximate.</p>
+   <h2 class="sec" id="c-list">Where we play</h2><p class="sub">Tap a course to see it on the map. Pins are approximate.</p>
    <div class="stack">${list.map(c=>`<button class="card course ${S.selCourse===c.id?'sel':''}" data-course="${c.id}"><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(c.name)}</b><small>${esc(c.city)}</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join('')}</div></div>`;
   const el=$('#cmap');
   withMaps(ok=>{
@@ -1425,7 +1449,45 @@ function setTab(t){
   if(t==='members')renderMembers();else renderCoach();
   if(t==='forum')renderForum();
   document.getElementById('v-'+t).scrollTop=0;
+  renderSubnav();
 }
+/* side menu: the open page shows its sub-links underneath it */
+const SUBNAV={
+ home:[['Join a chapter','join'],['Club leaders','s-leaders'],['Club news','s-news'],['Club shop','s-shop'],['Sponsors','s-spons']],
+ events:[['Upcoming','up'],['Scorecards','scores'],['Raider Cup','cup'],['Past events','past']],
+ games:[['Raiders schedule','sched'],['Player news','news'],['Fantasy league','ff']],
+ courses:[['Course map','map'],['Where we play','list']],
+ forum:[['All posts','All'],['Tournaments','Tournaments'],['Game Day','Game Day'],['Golf Tips','Golf Tips'],['Travel','Travel'],['Gear','Gear']],
+ members:[['Member map','map'],['Ticket exchange','tix']]
+};
+const SUB={};
+function subNow(t){
+  if(t==='events')return S.eview==='scores'?'scores':(SUB.events&&SUB.events!=='scores'?SUB.events:'up');
+  if(t==='games')return S.gview;
+  if(t==='members')return S.mview;
+  if(t==='forum')return S.board;
+  return SUB[t]||SUBNAV[t][0][1];
+}
+function renderSubnav(){
+  document.querySelectorAll('.subnav').forEach(n=>{
+    const t=n.dataset.for,open=t===S.tab,cur=subNow(t);
+    n.classList.toggle('open',open);
+    n.firstElementChild.innerHTML=(SUBNAV[t]||[]).map(([l,k])=>`<button type="button" data-sub="${t}|${esc(k)}" aria-current="${open&&k===cur}" ${open?'':'tabindex="-1"'}>${l}</button>`).join('');
+  });
+}
+function goSub(t,k){
+  SUB[t]=k;
+  const jump={events:{up:'ev-up',cup:'ev-cup',past:'ev-past'},home:{join:'join','s-leaders':'s-leaders','s-news':'s-news','s-shop':'s-shop','s-spons':'s-spons'},courses:{map:'cmap',list:'c-list'}}[t];
+  if(t==='events'){S.eview=k==='scores'?'scores':'list';save();renderEvents()}
+  if(t==='games'){S.gview=k;save()}
+  if(t==='members'){S.mview=k;save()}
+  if(t==='forum'){S.board=k;S.openThread=null;save()}
+  setTab(t);
+  const id=jump&&jump[k];
+  if(id)setTimeout(()=>{const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})},80);
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-sub]');if(!b)return;const i=b.dataset.sub.indexOf('|');goSub(b.dataset.sub.slice(0,i),b.dataset.sub.slice(i+1))});
+document.addEventListener('click',e=>{if(e.target.closest('[data-ev],[data-gv],[data-mv],[data-board]'))setTimeout(renderSubnav,0)});
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 function renderAll(){renderHome();renderEvents();renderForum();if(S.tab==='courses')renderCourses();if(S.tab==='games')renderGames();if(S.tab==='members')renderMembers()}
 renderChips();renderAll();setTab('home');loadSchedule();
