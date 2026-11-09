@@ -81,11 +81,14 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .meta{font-size:13px;color:var(--muted);margin-top:4px}
 
 /* home hero */
-.hero{margin-top:16px;border-radius:22px;position:relative;overflow:hidden;border:1px solid var(--line);min-height:380px;display:flex;align-items:flex-end;
+.hero{margin-top:16px;border-radius:22px;position:relative;overflow:hidden;border:1px solid var(--line);display:flex;flex-direction:column;
   background:#14171b}
-.hero .bg{position:absolute;inset:0;background-size:cover;background-position:center 30%;filter:grayscale(.55) contrast(1.05)}
-.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,11,13,.15) 0%,rgba(10,11,13,.78) 62%,#0a0b0d 100%)}
-.hero .in{position:relative;z-index:2;padding:22px 18px 20px;width:100%}
+/* group photo sits on top, framed on the people at the bottom of the shot; words sit below it */
+.hero .bg{position:relative;height:230px;background-size:auto 175%;background-repeat:no-repeat;background-position:center 96%;filter:grayscale(.55) contrast(1.05)}
+@media (min-width:600px){.hero .bg{height:320px;background-size:cover;background-position:center 92%}}
+.hero .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,11,13,0) 55%,#14171b 100%)}
+.hero::after{content:none}
+.hero .in{position:relative;z-index:2;padding:6px 18px 20px;width:100%}
 .hero .tag{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--silver)}
 .hero h1{font-family:var(--display);font-weight:800;font-size:44px;line-height:.96;letter-spacing:.01em;text-transform:uppercase;margin:8px 0 8px}
 .hero p{color:#c3c9d2;font-size:16px;max-width:46ch}
@@ -420,8 +423,9 @@ body.thread-open .fab{display:none!important}
   .view{padding:12px 56px 64px}
   .view > *{max-width:1240px}
   h2.sec{font-size:30px}
-  .hero{min-height:480px;margin-top:20px}
-  .hero .in{padding:40px 40px 34px}
+  .hero{margin-top:20px}
+  .hero .bg{height:400px;background-size:cover;background-position:center 92%}
+  .hero .in{padding:10px 40px 34px}
   .hero h1{font-size:76px}
   .hero p{font-size:18px}
   .homegrid{display:grid;grid-template-columns:1fr 1fr;gap:20px 36px;align-items:start}
