@@ -590,6 +590,14 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .mxfoot i{font-size:16px;color:var(--silver-2)}
 .mxfoot .me b,.mxfoot .me i{color:#fff}
 .memchip.you{border-color:var(--silver-2)}
+.tixgame{margin:4px 0 4px}
+.tixopts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.tixopt{display:grid;gap:2px;text-align:left;padding:12px;background:var(--panel-2);transition:transform .18s var(--ease),border-color .2s}
+.tixopt:hover,.tixopt[aria-pressed="true"]{border-color:var(--silver-2)}.tixopt:active{transform:scale(.98)}
+.tixopt i{font-size:22px;color:var(--silver)}
+.tixopt b{font-family:var(--display);font-size:20px;text-transform:uppercase;line-height:1.05}
+.tixopt small{color:var(--muted);font-size:12px}
+@media (min-width:700px){.tixopts{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
@@ -867,7 +875,7 @@ const BOARDS=['All','Tournaments','Game Day','Golf Tips','Travel','Gear'];
 const KEY='rngc-site-v2';
 let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[],demo:false,tour:-1,gview:'sched',selGame:null,ffJoin:false,eview:'list',sview:'net'};
 try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw),{tab:'home',openThread:null,selCourse:null,selGame:null,tour:-1})}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview,rc27:S.rc27,cview:S.cview,gameGo:S.gameGo}))}catch(e){}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview,rc27:S.rc27,cview:S.cview,gameGo:S.gameGo,tixGame:S.tixGame}))}catch(e){}};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1298,7 +1306,7 @@ function heroHTML(g){
   return `<div class="card hero2"><div class="mxtop"><span>Next game - Week ${g.wk}</span><span>${g.tbd?'Date TBD':daysTo(g.date)+' days - '+esc(g.tv||'')}</span></div>
    <div class="mxrow big">${tside(a)}${midHTML(g,1)}${tside(h,1)}</div>
    ${p!=null?winBar(p):''}${lineHTML(g)}
-   <div class="acts"><a class="btn small" href="${VENUES[g.v].tix}" ${ext}><i class="ph-bold ph-ticket"></i> Tickets</a><button class="btn small ghost" data-game="${g.id}">Game info</button></div></div>`;
+   <div class="acts"><button class="btn small" data-tixgame="${g.id}"><i class="ph-bold ph-ticket"></i> Tickets</button><button class="btn small ghost" data-game="${g.id}">Game info</button></div></div>`;
 }
 let gMarkers={};
 function renderGames(){
@@ -1353,7 +1361,7 @@ function selPanel(){
    <h4 class="minihead">Members nearby</h4>${who}
    ${g.res?'':goingHTML(g)}
    ${golf?`<p class="meta"><i class="ph-bold ph-flag-pennant"></i> ${esc(golf.c.name)}, about ${Math.round(golf.d)} miles away</p>`:''}
-   <div class="acts">${g.res?'':`<a class="btn small" href="${V.tix}" ${ext}><i class="ph-bold ph-ticket"></i> Tickets</a>`}<button class="btn small ghost" data-game="${g.id}">Game info</button><button class="btn small ghost" data-allstad>All stadiums</button></div></div>`;
+   <div class="acts">${g.res?'':`<button class="btn small" data-tixgame="${g.id}"><i class="ph-bold ph-ticket"></i> Tickets</button>`}<button class="btn small ghost" data-game="${g.id}">Game info</button><button class="btn small ghost" data-allstad>All stadiums</button></div></div>`;
 }
 function goingHTML(g){
   const list=gameGoing(g),me=S.gameGo&&S.gameGo[g.id],n=goingCount(g);
@@ -1415,7 +1423,7 @@ function openVenue(k){
   S.sheetGame=null;
   openSheet(`<span class="pill">Home stadium</span><h3 style="margin-top:8px">${esc(V.n)}</h3><p class="help" style="margin:0 0 10px;font-size:15px">${esc(V.city)} - ${gs.length} games in 2026</p>
    <div class="gstack">${gs.map(matchup).join('')}</div>
-   <a class="btn full" href="${V.tix}" ${ext}><i class="ph-bold ph-ticket"></i> Official tickets</a>`);
+   <button class="btn full" data-gotix><i class="ph-bold ph-ticket"></i> Tickets</button>`);
 }
 function openGame(id,quiet){
   const g=GAMES.find(x=>x.id===id);if(!g)return;const V=VENUES[g.v],[a,h]=sides(g),p=g.eid?LIVE.pred[g.eid]:null;
@@ -1435,8 +1443,7 @@ function openGame(id,quiet){
     ${golf?row('Play a round first',esc(golf.c.name),'About '+Math.round(golf.d)+' miles from the stadium'):''}
     ${!g.home?row('Members near '+esc(V.city),near.length?near.length+' within 100 miles':'None yet. Post your trip in the Travel board.'):''}
    </div>
-   ${g.res?'':`<a class="btn full" href="${V.tix}" ${ext}><i class="ph-bold ph-ticket"></i> Official tickets</a>
-   <button class="btn ghost full" data-gotix><i class="ph-bold ph-swap"></i> Member ticket exchange</button>`}
+   ${g.res?'':`<button class="btn full" data-tixgame="${g.id}"><i class="ph-bold ph-ticket"></i> Tickets</button>`}
    <a class="btn ghost full" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(V.n+' '+V.city)}" ${ext}><i class="ph-bold ph-navigation-arrow"></i> Directions</a>
    <button class="btn ghost full" data-gameday><i class="ph-bold ph-chats-circle"></i> Game Day board</button>`);
   S.sheetGame=id;
@@ -1462,7 +1469,8 @@ document.addEventListener('click',e=>{
   const gg=e.target.closest('[data-gogame]');if(gg){if(!S.member){openSignIn();return}const id=gg.dataset.gogame;S.gameGo=S.gameGo||{};S.gameGo[id]=!S.gameGo[id];save();fillGames();selPanel();document.querySelectorAll('#v-games .mx').forEach(b=>b.classList.toggle('sel',b.dataset.selgame===S.selGame));toast(S.gameGo[id]?'Marked going. Members at this game can see you.':'Taken off the list');return}
   if(e.target.closest('[data-signin]')){openSignIn();return}
   const gm=e.target.closest('[data-game]');if(gm){openGame(gm.dataset.game);return}
-  if(e.target.closest('[data-gotix]')){closeSheet();S.mview='tix';S.tixFilter='all';save();setTab('members');return}
+  if(e.target.closest('[data-gotix]')){closeSheet();S.mview='tix';S.tixFilter='all';S.tixGame=null;save();setTab('members');return}
+  const tg=e.target.closest('[data-tixgame]');if(tg){closeSheet();S.mview='tix';S.tixFilter='all';S.tixGame=tg.dataset.tixgame;save();setTab('members');return}
   if(e.target.closest('[data-gameday]')){closeSheet();S.board='Game Day';S.openThread=null;save();setTab('forum');return}
   if(e.target.closest('#ffJoin')){S.ffJoin=!S.ffJoin;save();renderGames();toast(S.ffJoin?'You are on the list for next season.':'Taken off the list');return}
 });
@@ -1477,8 +1485,10 @@ function myPos(){const c=CITIES[S.myCity];return c?[c.lat,c.lng]:null}
 function renderMembers(){
   const v=$('#v-members');
   if(!S.member){
+    const tg=S.mview==='tix'&&S.tixGame&&GAMES.find(y=>y.id===S.tixGame);
     v.innerHTML=`<div class="card gate rise"><i class="ph-fill ph-lock-key"></i><h3>Members only</h3>
-     <p>See where other members live and play, so you can find a round when you travel. Sign in with your club account to open the member map.</p>
+     <p>${S.mview==='tix'?'The ticket exchange is for club members: buy, sell and trade seats with other members. Sign in with your club account to open it.':'See where other members live and play, so you can find a round when you travel. Sign in with your club account to open the member map.'}</p>
+     ${tg?`<a class="btn ghost" style="margin:4px 0 10px" href="${VENUES[tg.v].tix}" ${ext}><i class="ph-bold ph-arrow-square-out"></i> Or buy from the ${esc(tg.home?'Raiders':TEAMS[tg.o])} box office</a>`:''}
      <div class="acts"><button class="btn" id="demoIn"><i class="ph-bold ph-play-circle"></i> Try demo mode</button><button class="btn ghost" id="realIn"><i class="ph-bold ph-sign-in"></i> Sign in</button><a class="btn ghost" href="${SITE}/shop/" ${ext}>Become a member</a></div>
      <p class="help" style="margin-top:14px">Demo mode walks you through the map and the ticket exchange with sample members. In the live version, sign-in uses the account members already have on the club site.</p></div>`;
     renderCoach();return;
@@ -1616,14 +1626,32 @@ function tixCard(x){
    <div class="row2"><span class="who"><span class="av s">${initials(x.by)}</span>${esc(x.by)} <span class="meta" style="margin:0">${esc(x.chapter)}</span></span>
    ${mine?`<span><button class="btn small ghost" data-tixdone="${x.id}">Mark done</button> <button class="btn small ghost" data-tixdel="${x.id}">Remove</button></span>`:`<button class="btn small" data-offer="${x.id}">${x.mode==='sell'?'Make offer':'Propose trade'}</button>`}</div></article>`;
 }
+/* tickets for one game: buy, sell or trade with members, or go to the team's own ticket page */
+function tixGameHTML(){
+  const g=S.tixGame&&GAMES.find(y=>y.id===S.tixGame);if(!g)return '';
+  const V=VENUES[g.v],[a,h]=sides(g),f=fmtDate(g.date),L=allTix().filter(x=>x.game===g.id),fl=S.tixFilter;
+  const nS=L.filter(x=>x.mode==='sell').length,nT=L.filter(x=>x.mode==='trade').length,team=g.home?'Raiders':TEAMS[g.o];
+  const opt=(attr,on,ic,t,sub)=>`<button class="card tixopt" ${attr} aria-pressed="${on}"><i class="ph-bold ph-${ic}"></i><b>${t}</b><small>${sub}</small></button>`;
+  return `<div class="card tixgame rise"><div class="tixm">${tlogo(a,'tl s')}<span class="at">@</span>${tlogo(h,'tl s')}<span>Week ${g.wk} - ${g.tbd?f.m+' TBD':f.dow+', '+f.m+' '+f.d}${g.kick&&!g.tbd?' - '+g.kick+' PT':''}</span></div>
+   <h3 class="cardh">${esc(g.home?'Raiders vs '+TEAMS[g.o]:'Raiders at '+TEAMS[g.o])}</h3><div class="meta">${esc(V.n)}, ${esc(V.city)}</div>
+   <div class="tixopts">
+    ${opt('data-tf="sell"',fl==='sell','ticket','Buy',nS+' listing'+(nS===1?'':'s')+' from members')}
+    ${opt('data-postas="sell"',false,'tag','Sell','List your seats')}
+    ${opt('data-tf="trade"',fl==='trade','swap','Trade',nT?nT+' trade offer'+(nT===1?'':'s'):'Swap seats or games')}
+    <a class="card tixopt" href="${V.tix}" ${ext}><i class="ph-bold ph-arrow-square-out"></i><b>Team box office</b><small>Buy from the ${esc(team)} official site</small></a>
+   </div>
+   <button class="linkbtn" data-tixall style="margin-top:12px">Show tickets for every game</button></div>`;
+}
 function tixHTML(){
-  const f=S.tixFilter,list=allTix().filter(x=>f==='all'||x.mode===f);
+  const f=S.tixFilter,list=allTix().filter(x=>(f==='all'||x.mode===f)&&(!S.tixGame||x.game===S.tixGame));
   return `<div class="tixhead"><div><h2 class="sec" style="margin:18px 0 0">Ticket exchange</h2><p class="sub">Members buy, sell and trade Raiders and club event tickets with each other.</p></div><button class="btn" id="postTix"><i class="ph-bold ph-plus"></i> Post tickets</button></div>
    <div class="card privacy" style="margin-top:0"><i class="ph-bold ph-shield-check"></i><span><b style="color:var(--text)">Keep it safe.</b> Move tickets only through the official ticket app. Pay after the transfer shows in your app. The club does not handle money or guarantee a deal, and resale rules follow your state.</span></div>
+   ${tixGameHTML()}
    <div class="chips" style="padding-top:14px"><button class="chip" data-tf="all" aria-pressed="${f==='all'}">All</button><button class="chip" data-tf="sell" aria-pressed="${f==='sell'}">For sale</button><button class="chip" data-tf="trade" aria-pressed="${f==='trade'}">Trades</button></div>
    <div class="tixgrid rise" style="margin-top:12px">${list.map(tixCard).join('')||'<div class="card empty"><i class="ph-bold ph-ticket"></i>No tickets listed here yet. Post yours.</div>'}</div>`;
 }
-function openPostTix(){
+function openPostTix(pre){
+  pre=pre||{game:S.tixGame};
   ensureName(()=>{
     openSheet(`<h3>Post tickets</h3><form id="tixForm">
      <label for="tg">Which game?</label><select class="field" id="tg"><option value="">Club event or something else</option>${GAMES.filter(g=>!g.res).map(g=>`<option value="${g.id}">Week ${g.wk}: Raiders ${g.home?'vs':'at'} ${TEAMS[g.o]}, ${g.tbd?'date TBD':fmtDate(g.date).m+' '+fmtDate(g.date).d}</option>`).join('')}</select>
@@ -1643,6 +1671,8 @@ function openPostTix(){
      <button class="btn full" type="submit">Post to exchange</button></form>`);
     $('#tg').addEventListener('change',()=>{const g=GAMES.find(y=>y.id===$('#tg').value);if(!g)return;const V=VENUES[g.v];
       $('#te').value=g.home?'Raiders home game vs '+TEAMS[g.o]:'Raiders at '+TEAMS[g.o]+' in '+V.city.split(',')[0];$('#tv').value=V.n+', '+V.city});
+    if(pre.game&&GAMES.some(y=>y.id===pre.game)){$('#tg').value=pre.game;$('#tg').dispatchEvent(new Event('change'))}
+    if(pre.mode){const r=document.querySelector('input[name=tm][value='+pre.mode+']');if(r)r.checked=true}
     $('#tixForm').addEventListener('submit',ev=>{ev.preventDefault();
       const mode=document.querySelector('input[name=tm]:checked').value,p=$('#tp').value.trim();
       const x={id:'u'+Date.now(),game:$('#tg').value||null,event:$('#te').value.trim(),venue:$('#tv').value.trim()||'Venue to be confirmed',qty:+$('#tq').value||1,mode,by:S.name,chapter:S.chapter==='All'?'National':S.chapter,face:+$('#tf').value||0,
@@ -1667,6 +1697,8 @@ document.addEventListener('click',e=>{
   const mv=e.target.closest('[data-mv]');if(mv){S.mview=mv.dataset.mv;save();renderMembers();return}
   const tf=e.target.closest('[data-tf]');if(tf){S.tixFilter=tf.dataset.tf;save();renderMembers();return}
   if(e.target.closest('#postTix')){openPostTix();return}
+  const pa=e.target.closest('[data-postas]');if(pa){openPostTix({game:S.tixGame,mode:pa.dataset.postas});return}
+  if(e.target.closest('[data-tixall]')){S.tixGame=null;S.tixFilter='all';save();renderMembers();return}
   const of=e.target.closest('[data-offer]');if(of){openOffer(of.dataset.offer);return}
   const dn=e.target.closest('[data-tixdone]');if(dn){S.tixClosed[dn.dataset.tixdone]=true;save();renderMembers();toast('Marked done');return}
   const dl=e.target.closest('[data-tixdel]');if(dl){S.tix=S.tix.filter(t=>t.id!==dl.dataset.tixdel);save();renderMembers();toast('Removed');return}
