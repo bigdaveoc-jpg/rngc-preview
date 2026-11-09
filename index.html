@@ -48,6 +48,11 @@ select option{background:#16191e;color:#eef0f3}
 .chip:active{transform:scale(.96)}
 .chip[aria-pressed="true"]{background:var(--silver);color:var(--on-silver);border-color:var(--silver)}
 .topjoin{display:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:0}
+.selwrap{position:relative;width:100%}
+.chsel{appearance:none;-webkit-appearance:none;width:100%;min-height:44px;padding:0 44px 0 16px;border-radius:var(--pill);background:var(--panel);border:1px solid var(--line);color:var(--text);font-weight:600;font-size:15px;cursor:pointer}
+.chsel:hover{border-color:var(--silver-2)}
+.selwrap i{position:absolute;right:16px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--silver-2)}
 
 .banner{margin:12px 16px 0;padding:10px 12px;border-radius:var(--r-sm);background:var(--panel);border:1px dashed var(--line);font-size:13px;color:var(--muted);display:flex;gap:10px;align-items:flex-start}
 .banner i{font-size:18px;color:var(--silver-2);margin-top:1px}
@@ -492,9 +497,9 @@ const ext='target="_blank" rel="noopener"';
 
 /* ---------- header ---------- */
 function renderChips(){
-  $('#chapterChips').innerHTML=CHAPTERS.map(c=>`<button class="chip" data-ch="${c}" aria-pressed="${S.chapter===c}">${c==='All'?'All chapters':c}</button>`).join('');
+  $('#chapterChips').innerHTML=`<label class="sr" for="chSel">Chapter</label><div class="selwrap"><select class="chsel" id="chSel">${CHAPTERS.map(c=>`<option value="${c}" ${S.chapter===c?'selected':''}>${c==='All'?'All chapters':c+' chapter'}</option>`).join('')}</select><i class="ph-bold ph-caret-down"></i></div>`;
 }
-$('#chapterChips').addEventListener('click',e=>{const b=e.target.closest('[data-ch]');if(!b)return;S.chapter=b.dataset.ch;save();renderChips();renderAll()});
+$('#chapterChips').addEventListener('change',e=>{if(e.target.id!=='chSel')return;S.chapter=e.target.value;save();renderAll()});
 
 /* ---------- home ---------- */
 function renderHome(){
