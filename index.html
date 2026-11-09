@@ -332,9 +332,10 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 }
 .gwrap,.fwrap2{display:block}
 @media (min-width:1000px){
-  .gwrap{display:grid;grid-template-columns:1fr 430px;gap:28px;align-items:start}
-  .gwrap .mapbox{grid-column:1;grid-row:1/4;position:sticky;top:16px;height:calc(100dvh - 190px);margin-top:14px}
-  .gwrap > *:not(.mapbox){grid-column:2}
+  .gwrap{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start}
+  .gwrap .gmain{grid-column:1;grid-row:1}
+  .gwrap .gside{grid-column:2;grid-row:1;position:sticky;top:16px}
+  .gwrap .mapbox{height:min(400px,48dvh);margin-top:14px}
   .fwrap2{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:start}
   .card.mx:hover,.card.nw:hover{border-color:var(--silver-2)}
 }
@@ -571,6 +572,18 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .check{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--text)}
 .check input{width:20px;height:20px;accent-color:#d5dae1}
+.gkey{display:flex;gap:12px;flex-wrap:wrap;margin:8px 2px 0;font-size:12px;color:var(--muted)}
+.gkey span{display:inline-flex;align-items:center;gap:6px}
+.gkey .k{flex:none;padding:0;width:12px;height:12px;border-radius:50%;display:inline-block;border:2px solid var(--line)}
+.gkey .k.k-star{background:#0a0b0d;border-color:#d5dae1}.gkey .k.k-ball{background:#d5dae1;border-color:#0a0b0d}.gkey .k.k-mem{background:#0a0b0d;border-color:#fff}.gkey .k.k-flag{background:#d5dae1;border-radius:2px}
+.gsel{margin-top:10px}
+.gsel .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.gsel.empty2{color:var(--muted);font-size:14px;display:flex;gap:8px;align-items:center}
+.memchips{display:flex;flex-wrap:wrap;gap:6px}
+.memchip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border:1px solid var(--line);border-radius:var(--pill);font-size:13px;font-weight:600}
+.memchip i{font-style:normal;width:24px;height:24px;border-radius:50%;background:#0a0b0d;border:2px solid #fff;display:grid;place-items:center;font-size:10px;font-weight:800}
+.memchip small{color:var(--muted);font-weight:500}
+.linkbtn{color:var(--silver);text-decoration:underline;font-weight:600}
 </style>
 </head>
 <body>
@@ -1252,7 +1265,7 @@ function midHTML(g,big){
 const winBar=p=>`<div class="wc"><div class="wcl"><span>Raiders win chance</span><b>${Math.round(p)}%</b></div><div class="wct"><i style="width:${Math.max(3,Math.min(97,p))}%"></i></div></div>`;
 function matchup(g){
   const [a,h]=sides(g),f=fmtDate(g.date),p=g.eid?LIVE.pred[g.eid]:null;
-  return `<button class="card mx ${S.selGame===g.id?'sel':''} ${g.res?'done':''}" data-game="${g.id}">
+  return `<button class="card mx ${S.selGame===g.id?'sel':''} ${g.res?'done':''}" data-selgame="${g.id}">
    <div class="mxtop"><span>Week ${g.wk} - ${g.tbd?f.m+' TBD':f.dow+', '+f.m+' '+f.d}</span><span>${g.res?`<em class="wl ${g.res[0]}">${g.res[0]}</em>`:esc(g.tv||'')}</span></div>
    <div class="mxrow">${tside(a)}${midHTML(g)}${tside(h,1)}</div>
    ${!g.res&&p!=null?winBar(p):''}
@@ -1277,7 +1290,10 @@ function renderGames(){
   loadSchedule();
   if(S.gview==='ff'){v.innerHTML=seg+ffHTML();return}
   if(S.gview==='news'){v.innerHTML=seg+'<div id="gnews"></div>';loadNews();fillNews();return}
-  v.innerHTML=seg+`<div class="gwrap"><div class="mapbox" id="gmap" aria-label="Map of 2026 Raiders stadiums"></div><div id="gtop"></div><div id="glist"></div></div>`;
+  v.innerHTML=seg+`<div class="gwrap"><div class="gside"><div class="mapbox" id="gmap" aria-label="Map of 2026 Raiders stadiums"></div>
+   <div class="gkey"><span><i class="k k-star"></i>Allegiant</span><span><i class="k k-ball"></i>Stadium</span><span><i class="k k-mem"></i>Member</span><span><i class="k k-flag"></i>Club course</span></div>
+   <div id="gsel"></div></div><div class="gmain"><div id="gtop"></div><div id="glist"></div></div></div>`;
+  selPanel();
   fillGames();
   const el=$('#gmap');
   withMaps(ok=>{
@@ -1291,15 +1307,60 @@ function renderGames(){
       mk.addListener('click',()=>openVenue(k));gMarkers[k]=mk;
     });
     fit(m,Object.values(VENUES).map(V=>[V.lat,V.lng]),30);
+    if(S.selGame)selectGame(S.selGame);
   });
 }
+/* tap a game: the map flies to that stadium and shows club members around it (members only) plus the nearest club course */
+let gExtra=[];
+function memBadge(name){
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#0a0b0d" stroke="#ffffff" stroke-width="2.5"/><text x="16" y="20.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="700" fill="#ffffff">${initials(name)}</text></svg>`;
+  return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(32,32),anchor:new google.maps.Point(16,16)};
+}
+function nearGame(g){
+  const V=VENUES[g.v],out=[];
+  MEMBERS.forEach(m=>{const p=memPos(m);if(miles(V.lat,V.lng,p[0],p[1])<=100)out.push({m,p,trip:false});
+    else if(m.trip&&CITIES[m.trip.city]){const c=CITIES[m.trip.city],j=jit(m.id),q=[c.lat+j[0],c.lng+j[1]];if(miles(V.lat,V.lng,q[0],q[1])<=100)out.push({m,p:q,trip:true})}});
+  return out;
+}
+const nearCourse=V=>COURSES.filter(c=>c.id!=='stgeorge').map(c=>({c,d:miles(V.lat,V.lng,c.lat,c.lng)})).sort((x,y)=>x.d-y.d).filter(x=>x.d<=60)[0];
+function selPanel(){
+  const box=$('#gsel');if(!box)return;const g=S.selGame&&GAMES.find(x=>x.id===S.selGame);
+  if(!g){box.innerHTML='<div class="card gsel empty2"><i class="ph-bold ph-hand-tap"></i> Tap a game to see its stadium and the members near it.</div>';return}
+  const V=VENUES[g.v],near=nearGame(g),golf=nearCourse(V);
+  const who=!S.member?`<p class="meta">${near.length} member${near.length===1?'':'s'} within 100 miles. <button class="linkbtn" data-signin>Sign in to see who</button></p>`
+    :near.length?`<div class="memchips">${near.map(x=>`<span class="memchip"><i>${initials(x.m.name)}</i>${esc(x.m.name)}<small>${x.trip?'Visiting '+esc(x.m.trip.dates):esc(x.m.chapter)}</small></span>`).join('')}</div>`
+    :'<p class="meta">No members within 100 miles yet. Post your trip on the Travel board.</p>';
+  box.innerHTML=`<div class="card gsel"><div class="mxtop"><span>Week ${g.wk} - ${g.home?'Home':'Away'}</span><span>${g.res?esc(g.res):''}</span></div>
+   <h3 class="cardh">${esc(g.home?'Raiders vs '+TEAMS[g.o]:'Raiders at '+TEAMS[g.o])}</h3><div class="meta">${g.res?'Final':gWhen(g)}</div><div class="meta">${esc(V.n)}, ${esc(V.city)}</div>
+   <h4 class="minihead">Members nearby</h4>${who}
+   ${golf?`<p class="meta"><i class="ph-bold ph-flag-pennant"></i> ${esc(golf.c.name)}, about ${Math.round(golf.d)} miles away</p>`:''}
+   <div class="acts">${g.res?'':`<a class="btn small" href="${V.tix}" ${ext}><i class="ph-bold ph-ticket"></i> Tickets</a>`}<button class="btn small ghost" data-game="${g.id}">Game info</button><button class="btn small ghost" data-allstad>All stadiums</button></div></div>`;
+}
+function selectGame(id,scroll){
+  const g=GAMES.find(x=>x.id===id);if(!g)return;const V=VENUES[g.v];
+  S.selGame=id;if(!g.res)loadSummary(g);
+  document.querySelectorAll('#v-games .mx').forEach(b=>b.classList.toggle('sel',b.dataset.selgame===id));
+  selPanel();
+  const m=maps.games;
+  if(m&&window.google&&google.maps){
+    gExtra.forEach(x=>x.setMap(null));gExtra=[];
+    Object.entries(gMarkers).forEach(([k,mk])=>mk.setZIndex(k===g.v?30:(k==='lv'?20:1)));
+    const pts=[[V.lat,V.lng]];
+    if(S.member)nearGame(g).forEach(x=>{gExtra.push(new google.maps.Marker({map:m,position:{lat:x.p[0],lng:x.p[1]},title:x.m.name+(x.trip?' - visiting':' - '+x.m.chapter),icon:memBadge(x.m.name),zIndex:40}));pts.push(x.p)});
+    const golf=nearCourse(V);
+    if(golf){gExtra.push(new google.maps.Marker({map:m,position:{lat:golf.c.lat,lng:golf.c.lng},title:golf.c.name,icon:pinIcon('flag','#d5dae1'),zIndex:25}));pts.push([golf.c.lat,golf.c.lng])}
+    if(pts.length>1){fit(m,pts,60);google.maps.event.addListenerOnce(m,'idle',()=>{if(m.getZoom()>12)m.setZoom(12)})}else{m.panTo({lat:V.lat,lng:V.lng});m.setZoom(11)}
+  }
+  if(scroll&&window.innerWidth<1000){const el=$('#gmap');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
+}
+function allStadiums(){S.selGame=null;gExtra.forEach(x=>x.setMap(null));gExtra=[];document.querySelectorAll('#v-games .mx').forEach(b=>b.classList.remove('sel'));selPanel();if(maps.games)fit(maps.games,Object.values(VENUES).map(V=>[V.lat,V.lng]),30)}
 function fillGames(){
   const top=$('#gtop'),list=$('#glist');if(!top||!list)return;
   const played=GAMES.filter(g=>g.res),up=GAMES.filter(g=>!g.res);
   const w=played.filter(g=>g.res[0]==='W').length,l=played.filter(g=>g.res[0]==='L').length;
   const bye=`<div class="card" style="padding:12px 14px;color:var(--muted);font-size:14px"><i class="ph-bold ph-pause-circle"></i> Week ${BYE_WEEK} bye</div>`;
   top.innerHTML=`<div class="recbar">${tlogo('LV')}<span class="rec">${esc(LIVE.record||w+'-'+l)}</span><span class="pill">2026 record</span><span class="pill">Bye week ${BYE_WEEK}</span>${LIVE.stamp?'<span class="pill">Live from ESPN</span>':LIVE.sched===-1?'<span class="pill">Saved copy</span>':''}</div>${heroHTML(up[0])}`;
-  list.innerHTML=`<h2 class="sec">Up next</h2><p class="sub">Kickoff times are Pacific. Win chance is ESPN's game projection, for fun only. Tap a game for tickets and directions.</p>
+  list.innerHTML=`<h2 class="sec">Up next</h2><p class="sub">Kickoff times are Pacific. Win chance is ESPN's game projection, for fun only. Tap a game to see its stadium and members nearby on the map.</p>
    <div class="gstack">${up.map(g=>(g.wk===BYE_WEEK+1?bye:'')+matchup(g)).join('')}</div>
    <h2 class="sec">Results</h2><div class="gstack">${played.slice().reverse().map(matchup).join('')}</div>`;
 }
@@ -1370,6 +1431,9 @@ function ffHTML(){
 }
 document.addEventListener('click',e=>{
   const gv=e.target.closest('[data-gv]');if(gv){S.gview=gv.dataset.gv;save();renderGames();return}
+  const sg=e.target.closest('[data-selgame]');if(sg){const id=sg.dataset.selgame;closeSheet();if(S.tab!=='games'||S.gview!=='sched'){S.selGame=id;S.gview='sched';save();setTab('games');return}selectGame(id,true);return}
+  if(e.target.closest('[data-allstad]')){allStadiums();return}
+  if(e.target.closest('[data-signin]')){openSignIn();return}
   const gm=e.target.closest('[data-game]');if(gm){openGame(gm.dataset.game);return}
   if(e.target.closest('[data-gotix]')){closeSheet();S.mview='tix';S.tixFilter='all';save();setTab('members');return}
   if(e.target.closest('[data-gameday]')){closeSheet();S.board='Game Day';S.openThread=null;save();setTab('forum');return}
