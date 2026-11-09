@@ -584,6 +584,12 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .memchip i{font-style:normal;width:24px;height:24px;border-radius:50%;background:#0a0b0d;border:2px solid #fff;display:grid;place-items:center;font-size:10px;font-weight:800}
 .memchip small{color:var(--muted);font-weight:500}
 .linkbtn{color:var(--silver);text-decoration:underline;font-weight:600}
+.mxfoot{display:flex;gap:16px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.mxfoot span{display:inline-flex;align-items:center;gap:6px}
+.mxfoot b{font-family:var(--display);font-size:18px;color:var(--text);line-height:1}
+.mxfoot i{font-size:16px;color:var(--silver-2)}
+.mxfoot .me b,.mxfoot .me i{color:#fff}
+.memchip.you{border-color:var(--silver-2)}
 </style>
 </head>
 <body>
@@ -861,7 +867,7 @@ const BOARDS=['All','Tournaments','Game Day','Golf Tips','Travel','Gear'];
 const KEY='rngc-site-v2';
 let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[],demo:false,tour:-1,gview:'sched',selGame:null,ffJoin:false,eview:'list',sview:'net'};
 try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw),{tab:'home',openThread:null,selCourse:null,selGame:null,tour:-1})}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview,rc27:S.rc27,cview:S.cview}))}catch(e){}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview,rc27:S.rc27,cview:S.cview,gameGo:S.gameGo}))}catch(e){}};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1263,13 +1269,25 @@ function midHTML(g,big){
   return `<div class="ko"><i class="at">@</i><b>${g.tbd?'TBD':g.kick}</b><span>${g.tbd?'Time TBD':big?f.dow+' '+f.m+' '+f.d+' PT':'PT'}</span></div>`;
 }
 const winBar=p=>`<div class="wc"><div class="wcl"><span>Raiders win chance</span><b>${Math.round(p)}%</b></div><div class="wct"><i style="width:${Math.max(3,Math.min(97,p))}%"></i></div></div>`;
+/* who is going to each game (demo: a fixed, seeded set of members; your own tap adds you) */
+function gameGoing(g){
+  if(g.res)return [];
+  const V=VENUES[g.v];
+  const demo=MEMBERS.filter(m=>{const p=memPos(m),near=miles(V.lat,V.lng,p[0],p[1])<=100,r=scHash(m.id+'|'+g.id)%100;return near?r<55:r<(g.home?14:6)});
+  return demo;
+}
+const goingCount=g=>g.res?0:gameGoing(g).length+(S.gameGo&&S.gameGo[g.id]?1:0);
+function cardCounts(g){
+  const n=nearGame(g).filter(x=>!x.trip).length,go=goingCount(g);
+  return `<div class="mxfoot"><span><i class="ph-bold ph-users"></i><b>${n}</b> member${n===1?'':'s'} live nearby</span>${g.res?'':`<span class="${S.gameGo&&S.gameGo[g.id]?'me':''}"><i class="ph-bold ph-check-circle"></i><b>${go}</b> going</span>`}</div>`;
+}
 function matchup(g){
   const [a,h]=sides(g),f=fmtDate(g.date),p=g.eid?LIVE.pred[g.eid]:null;
   return `<button class="card mx ${S.selGame===g.id?'sel':''} ${g.res?'done':''}" data-selgame="${g.id}">
    <div class="mxtop"><span>Week ${g.wk} - ${g.tbd?f.m+' TBD':f.dow+', '+f.m+' '+f.d}</span><span>${g.res?`<em class="wl ${g.res[0]}">${g.res[0]}</em>`:esc(g.tv||'')}</span></div>
    <div class="mxrow">${tside(a)}${midHTML(g)}${tside(h,1)}</div>
    ${!g.res&&p!=null?winBar(p):''}
-   <div class="mxbot"><i class="ph-bold ph-map-pin"></i>${esc(VENUES[g.v].n)}, ${esc(VENUES[g.v].city)}</div></button>`;
+   <div class="mxbot"><i class="ph-bold ph-map-pin"></i>${esc(VENUES[g.v].n)}, ${esc(VENUES[g.v].city)}</div>${cardCounts(g)}</button>`;
 }
 function lineHTML(g){
   const s=g.eid&&LIVE.sum[g.eid],ln=s&&s.line;if(!ln)return '';
@@ -1333,8 +1351,16 @@ function selPanel(){
   box.innerHTML=`<div class="card gsel"><div class="mxtop"><span>Week ${g.wk} - ${g.home?'Home':'Away'}</span><span>${g.res?esc(g.res):''}</span></div>
    <h3 class="cardh">${esc(g.home?'Raiders vs '+TEAMS[g.o]:'Raiders at '+TEAMS[g.o])}</h3><div class="meta">${g.res?'Final':gWhen(g)}</div><div class="meta">${esc(V.n)}, ${esc(V.city)}</div>
    <h4 class="minihead">Members nearby</h4>${who}
+   ${g.res?'':goingHTML(g)}
    ${golf?`<p class="meta"><i class="ph-bold ph-flag-pennant"></i> ${esc(golf.c.name)}, about ${Math.round(golf.d)} miles away</p>`:''}
    <div class="acts">${g.res?'':`<a class="btn small" href="${V.tix}" ${ext}><i class="ph-bold ph-ticket"></i> Tickets</a>`}<button class="btn small ghost" data-game="${g.id}">Game info</button><button class="btn small ghost" data-allstad>All stadiums</button></div></div>`;
+}
+function goingHTML(g){
+  const list=gameGoing(g),me=S.gameGo&&S.gameGo[g.id],n=goingCount(g);
+  const names=!S.member?`<p class="meta">${n} member${n===1?'':'s'} confirmed. <button class="linkbtn" data-signin>Sign in to see who</button></p>`
+    :`<div class="memchips">${me?`<span class="memchip you"><i>${initials(S.name||'You')}</i>You</span>`:''}${list.map(m=>`<span class="memchip"><i>${initials(m.name)}</i>${esc(m.name)}<small>${esc(m.chapter)}</small></span>`).join('')||(me?'':'<span class="meta">Nobody yet. Be the first.</span>')}</div>`;
+  return `<h4 class="minihead">Going to this game - ${n}</h4>${names}
+   <button class="btn small ${me?'ghost':''}" data-gogame="${g.id}" style="margin-top:10px">${me?'<i class="ph-bold ph-check"></i> You\'re going':'<i class="ph-bold ph-hand-waving"></i> I\'m going'}</button>`;
 }
 function selectGame(id,scroll){
   const g=GAMES.find(x=>x.id===id);if(!g)return;const V=VENUES[g.v];
@@ -1433,6 +1459,7 @@ document.addEventListener('click',e=>{
   const gv=e.target.closest('[data-gv]');if(gv){S.gview=gv.dataset.gv;save();renderGames();return}
   const sg=e.target.closest('[data-selgame]');if(sg){const id=sg.dataset.selgame;closeSheet();if(S.tab!=='games'||S.gview!=='sched'){S.selGame=id;S.gview='sched';save();setTab('games');return}selectGame(id,true);return}
   if(e.target.closest('[data-allstad]')){allStadiums();return}
+  const gg=e.target.closest('[data-gogame]');if(gg){if(!S.member){openSignIn();return}const id=gg.dataset.gogame;S.gameGo=S.gameGo||{};S.gameGo[id]=!S.gameGo[id];save();fillGames();selPanel();document.querySelectorAll('#v-games .mx').forEach(b=>b.classList.toggle('sel',b.dataset.selgame===S.selGame));toast(S.gameGo[id]?'Marked going. Members at this game can see you.':'Taken off the list');return}
   if(e.target.closest('[data-signin]')){openSignIn();return}
   const gm=e.target.closest('[data-game]');if(gm){openGame(gm.dataset.game);return}
   if(e.target.closest('[data-gotix]')){closeSheet();S.mview='tix';S.tixFilter='all';save();setTab('members');return}
