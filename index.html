@@ -206,6 +206,37 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .tix .note2{color:#c3c9d2;font-size:14px;margin:8px 0}
 .tix .row2{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 @media (min-width:1000px){.tixgrid{grid-template-columns:repeat(auto-fill,minmax(440px,1fr))}}
+/* games + fantasy */
+.recbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.recbar .rec{font-family:var(--display);font-size:30px;font-weight:800;line-height:1;margin-right:4px}
+.game{width:100%;text-align:left;transition:transform .18s var(--ease),border-color .2s}
+.game:active{transform:scale(.985)}
+.game.sel{border-color:var(--silver-2)}
+.game .res{font-family:var(--display);font-weight:800;font-size:20px}
+.game .res.w{color:#fff}.game .res.l{color:var(--muted)}
+.gstack{display:grid;gap:10px}
+.ftable{width:100%;border-collapse:collapse;font-size:14px}
+.ftable th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+.ftable td{padding:10px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.ftable td.n{font-family:var(--display);font-weight:800;font-size:18px;color:var(--muted);width:28px}
+.ftable td b{font-family:var(--display);font-size:18px;text-transform:uppercase;letter-spacing:.02em;display:block;line-height:1.05}
+.ftable td small{color:var(--muted);font-size:12px}
+.ftable .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ftable tr.cut td{border-bottom:2px solid var(--silver-2)}
+.mu{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;padding:12px 14px}
+.mu .side b{font-family:var(--display);font-size:17px;text-transform:uppercase;line-height:1.05;display:block}
+.mu .side small{color:var(--muted);font-size:12px}
+.mu .side.r{text-align:right}
+.mu .pts{font-family:var(--display);font-weight:800;font-size:22px;text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}
+.mu .pts small{display:block;font-family:var(--body);font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.gwrap,.fwrap2{display:block}
+@media (min-width:1000px){
+  .gwrap{display:grid;grid-template-columns:1fr 430px;gap:28px;align-items:start}
+  .gwrap .mapbox{grid-column:1;grid-row:1/4;position:sticky;top:16px;height:calc(100dvh - 190px);margin-top:14px}
+  .gwrap > *:not(.mapbox){grid-column:2}
+  .fwrap2{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:start}
+  .card.game:hover{border-color:var(--silver-2)}
+}
 /* forum */
 .thread{width:100%;text-align:left;padding:14px;display:grid;gap:8px;transition:transform .18s var(--ease)}
 .thread:active{transform:scale(.985)}
@@ -241,8 +272,8 @@ textarea.field{min-height:110px;resize:vertical}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
 /* tab bar */
-.tabs{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);background:rgba(10,11,13,.94);backdrop-filter:blur(18px);padding:6px 4px max(8px,env(safe-area-inset-bottom));position:relative;z-index:30}
-.tab{min-height:56px;display:grid;justify-items:center;align-content:center;gap:3px;color:var(--muted);font-size:11.5px;font-weight:600;letter-spacing:.03em;border-radius:12px;transition:color .2s,transform .18s var(--ease)}
+.tabs{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--line);background:rgba(10,11,13,.94);backdrop-filter:blur(18px);padding:6px 4px max(8px,env(safe-area-inset-bottom));position:relative;z-index:30}
+.tab{min-height:56px;display:grid;justify-items:center;align-content:center;gap:3px;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.03em;border-radius:12px;transition:color .2s,transform .18s var(--ease)}
 .tab i{font-size:23px}
 .tab:active{transform:scale(.94)}
 .tab[aria-selected="true"]{color:var(--silver)}
@@ -361,11 +392,12 @@ body.thread-open .fab{display:none!important}
     <a class="btn topjoin" href="https://raidernationgolfclub.com/shop/" target="_blank" rel="noopener"><i class="ph-bold ph-identification-badge"></i> Join the club</a>
   </header>
 
-  <div class="banner" id="banner"><i class="ph-bold ph-info"></i><span>Design preview. Events, plans and prices come from the club site. Forum posts, the member map and the ticket exchange use demo people.</span></div>
+  <div class="banner" id="banner"><i class="ph-bold ph-info"></i><span>Design preview. Events, plans, prices and the Raiders schedule are real. Forum posts, the member map, the ticket exchange and the fantasy league use demo people.</span></div>
 
   <main class="views">
     <section class="view on" id="v-home" aria-label="Home"></section>
     <section class="view" id="v-events" aria-label="Events"></section>
+    <section class="view" id="v-games" aria-label="Raiders games"></section>
     <section class="view" id="v-courses" aria-label="Courses"></section>
     <section class="view" id="v-forum" aria-label="Forum"></section>
     <section class="view" id="v-members" aria-label="Members"></section>
@@ -376,6 +408,7 @@ body.thread-open .fab{display:none!important}
   <nav class="tabs" role="tablist" aria-label="Main">
     <button class="tab" role="tab" data-tab="home" aria-selected="true"><i class="ph-fill ph-house"></i>Home<span class="bar"></span></button>
     <button class="tab" role="tab" data-tab="events" aria-selected="false"><i class="ph-fill ph-calendar-check"></i>Events<span class="bar"></span></button>
+    <button class="tab" role="tab" data-tab="games" aria-selected="false"><i class="ph-fill ph-football"></i>Games<span class="bar"></span></button>
     <button class="tab" role="tab" data-tab="courses" aria-selected="false"><i class="ph-fill ph-flag-pennant"></i>Courses<span class="bar"></span></button>
     <button class="tab" role="tab" data-tab="forum" aria-selected="false"><i class="ph-fill ph-chats-circle"></i>Forum<span class="bar"></span></button>
     <button class="tab" role="tab" data-tab="members" aria-selected="false"><i class="ph-fill ph-users-three"></i>Members<span class="bar"></span></button>
@@ -437,6 +470,56 @@ const COURSES=[
  {id:'stgeorge',name:'St. George, UT (Raider Cup)',city:'St. George, UT',chapter:'National',lat:37.0965,lng:-113.5684,note:'Raider Cup 2026 used four courses in the area.'}
 ];
 
+/* ---------- Raiders 2026 schedule (ESPN + NFL release, checked Nov 9 2026). Times are Pacific. ---------- */
+const VENUES={
+ lv:{n:'Allegiant Stadium',city:'Las Vegas, NV',lat:36.0909,lng:-115.1833,tix:'https://www.raiders.com/tickets/'},
+ lac:{n:'SoFi Stadium',city:'Inglewood, CA',lat:33.9535,lng:-118.3392,tix:'https://www.chargers.com/tickets/'},
+ no:{n:'Caesars Superdome',city:'New Orleans, LA',lat:29.9511,lng:-90.0812,tix:'https://www.neworleanssaints.com/tickets/'},
+ ne:{n:'Gillette Stadium',city:'Foxborough, MA',lat:42.0909,lng:-71.2643,tix:'https://www.patriots.com/tickets/'},
+ nyj:{n:'MetLife Stadium',city:'East Rutherford, NJ',lat:40.8135,lng:-74.0745,tix:'https://www.newyorkjets.com/tickets/'},
+ sf:{n:'Levi\'s Stadium',city:'Santa Clara, CA',lat:37.4030,lng:-121.9700,tix:'https://www.49ers.com/tickets/'},
+ den:{n:'Empower Field at Mile High',city:'Denver, CO',lat:39.7439,lng:-105.0201,tix:'https://www.denverbroncos.com/tickets/'},
+ cle:{n:'Huntington Bank Field',city:'Cleveland, OH',lat:41.5061,lng:-81.6995,tix:'https://www.clevelandbrowns.com/tickets/'},
+ ari:{n:'State Farm Stadium',city:'Glendale, AZ',lat:33.5276,lng:-112.2626,tix:'https://www.azcardinals.com/tickets/'},
+ kc:{n:'GEHA Field at Arrowhead',city:'Kansas City, MO',lat:39.0489,lng:-94.4839,tix:'https://www.chiefs.com/tickets/'}
+};
+const GAMES=[
+ {id:'w1',wk:1,date:'2026-09-13',opp:'Miami Dolphins',home:true,v:'lv',res:'W 27-13'},
+ {id:'w2',wk:2,date:'2026-09-20',opp:'Los Angeles Chargers',home:false,v:'lac',res:'W 26-14'},
+ {id:'w3',wk:3,date:'2026-09-27',opp:'New Orleans Saints',home:false,v:'no',res:'W 35-27'},
+ {id:'w4',wk:4,date:'2026-10-04',opp:'Kansas City Chiefs',home:true,v:'lv',res:'L 27-30'},
+ {id:'w5',wk:5,date:'2026-10-11',opp:'New England Patriots',home:false,v:'ne',res:'L 17-45'},
+ {id:'w6',wk:6,date:'2026-10-18',opp:'Buffalo Bills',home:true,v:'lv',res:'L 30-33'},
+ {id:'w7',wk:7,date:'2026-10-25',opp:'Los Angeles Rams',home:true,v:'lv',res:'L 21-35'},
+ {id:'w8',wk:8,date:'2026-11-01',opp:'New York Jets',home:false,v:'nyj',res:'W 38-33'},
+ {id:'w9',wk:9,date:'2026-11-08',opp:'San Francisco 49ers',home:false,v:'sf',res:'L 17-38'},
+ {id:'w10',wk:10,date:'2026-11-15',opp:'Seattle Seahawks',home:true,v:'lv',kick:'1:05 PM',tv:'CBS',note:'The club plays the 12th Man Golf Club at Chimera the day before.'},
+ {id:'w11',wk:11,date:'2026-11-22',opp:'Denver Broncos',home:false,v:'den',kick:'1:25 PM',tv:'CBS'},
+ {id:'w12',wk:12,date:'2026-11-29',opp:'Cleveland Browns',home:false,v:'cle',kick:'10:00 AM',tv:'FOX'},
+ {id:'w14',wk:14,date:'2026-12-13',opp:'Los Angeles Chargers',home:true,v:'lv',kick:'1:05 PM',tv:'CBS'},
+ {id:'w15',wk:15,date:'2026-12-20',opp:'Denver Broncos',home:true,v:'lv',kick:'1:25 PM',tv:'CBS'},
+ {id:'w16',wk:16,date:'2026-12-27',opp:'Tennessee Titans',home:true,v:'lv',kick:'1:05 PM',tv:'FOX'},
+ {id:'w17',wk:17,date:'2027-01-03',opp:'Arizona Cardinals',home:false,v:'ari',kick:'1:05 PM',tv:'CBS'},
+ {id:'w18',wk:18,date:'2027-01-10',opp:'Kansas City Chiefs',home:false,v:'kc',tbd:true,note:'Date and time set by the NFL late in the season.'}
+];
+const BYE_WEEK=13;
+
+/* ---------- club fantasy league (demo teams, demo scores) ---------- */
+const FF_TEAMS=[
+ {id:'f1',n:'Black Hole Bogeys',o:'Chris P.',ch:'Nevada',w:7,l:2,pf:1104.6},
+ {id:'f2',n:'Silver and Slice',o:'Marcus T.',ch:'SoCal',w:7,l:2,pf:1088.2},
+ {id:'f3',n:'Commitment to Eagles',o:'Jason G.',ch:'Nevada',w:6,l:3,pf:1051.9},
+ {id:'f4',n:'Just Win Birdie',o:'Dana R.',ch:'SoCal',w:5,l:4,pf:1012.4},
+ {id:'f5',n:'Pick Six Irons',o:'Rick H.',ch:'NorCal',w:5,l:4,pf:998.7},
+ {id:'f6',n:'Shotgun Start',o:'Lena V.',ch:'SoCal',w:4,l:5,pf:976.3},
+ {id:'f7',n:'Fore the Nation',o:'Rob M.',ch:'National',w:4,l:5,pf:961.8},
+ {id:'f8',n:'Sand Trap Defense',o:'Tony S.',ch:'NorCal',w:3,l:6,pf:934.5},
+ {id:'f9',n:'Mulligan Mayhem',o:'Omar B.',ch:'SoCal',w:2,l:7,pf:902.1},
+ {id:'f10',n:'Hail Mary Hackers',o:'Ken S.',ch:'Nevada',w:2,l:7,pf:887.6}
+];
+const FF_WEEK=10;
+const FF_MATCHUPS=[['f1','f4',118.4,109.9],['f2','f3',121.7,116.2],['f5','f8',104.3,99.8],['f6','f9',112.6,101.5],['f7','f10',107.1,110.4]];
+
 /* ---------- demo members (not real people) ---------- */
 const CITIES={
  hb:{n:'Huntington Beach, CA',lat:33.6603,lng:-117.9992},lb:{n:'Long Beach, CA',lat:33.7701,lng:-118.1937},corona:{n:'Corona, CA',lat:33.8753,lng:-117.5664},
@@ -479,9 +562,9 @@ const BOARDS=['All','Tournaments','Game Day','Golf Tips','Travel','Gear'];
 
 /* ---------- state ---------- */
 const KEY='rngc-site-v2';
-let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[],demo:false,tour:-1};
-try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw),{tab:'home',openThread:null,selCourse:null,tour:-1})}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo}))}catch(e){}};
+let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[],demo:false,tour:-1,gview:'sched',selGame:null,ffJoin:false};
+try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw),{tab:'home',openThread:null,selCourse:null,selGame:null,tour:-1})}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin}))}catch(e){}};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -506,6 +589,7 @@ function renderHome(){
   const next=EVENTS.filter(e=>!isPast(e.date)&&inChapter(e.chapter)).sort((a,b)=>a.date<b.date?-1:1)[0];
   const f=next&&fmtDate(next.date);
   const plans=PLANS.filter(p=>S.chapter==='All'||p.chapter===S.chapter||p.chapter==='National');
+  const ng=GAMES.find(g=>!g.res);
   $('#v-home').innerHTML=`<div class="rise">
    <div class="hero"><div class="bg" style="background-image:url('${UP}2026/06/IMG_5442-1024x768.jpg')"></div><div class="in">
      <span class="tag">Est. 2019 - Travel, Golf, Football</span>
@@ -514,6 +598,7 @@ function renderHome(){
      <div class="acts"><a class="btn" href="#join" data-scroll="join"><i class="ph-bold ph-identification-badge"></i> Join the club</a><button class="btn ghost" data-go="events">See events</button></div>
    </div></div>
    ${next?`<div class="card next"><div class="cd">${daysTo(next.date)}<small>days</small></div><div><span class="pill">Next event - ${esc(next.chapter)}</span><h3 style="margin-top:6px">${esc(next.name)}</h3><div class="meta">${f.dow}, ${f.m} ${f.d} - ${esc(next.where)}</div></div><a class="btn small" href="${next.url}" ${ext}>Register</a></div>`:''}
+   ${ng?`<div class="card next"><div class="cd">${daysTo(ng.date)}<small>days</small></div><div><span class="pill">Raiders - Week ${ng.wk}</span><h3 style="margin-top:6px">${esc(gTitle(ng))}</h3><div class="meta">${gWhen(ng)}</div></div><button class="btn small ghost" data-go="games">Schedule</button></div>`:''}
    </div>
    <div class="homegrid">
     <div>
@@ -594,7 +679,8 @@ const PIN_GLYPH={
   flag:'<path d="M12.5 8v14M12.5 8.5l9 3.6-9 3.6" stroke="#0a0b0d" stroke-width="2.4" fill="#0a0b0d" stroke-linecap="round" stroke-linejoin="round"/>',
   user:'<circle cx="15" cy="11" r="3.4" fill="#0a0b0d"/><path d="M8.6 21c0-3.8 3-6 6.4-6s6.4 2.2 6.4 6z" fill="#0a0b0d"/>',
   plane:'<path d="M7 15.5L23 8l-5.2 15.5-3.2-6.2z" fill="#0a0b0d"/>',
-  star:'<path d="M15 7l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L7.8 12.3l5-.7z" fill="#d5dae1"/>'
+  star:'<path d="M15 7l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L7.8 12.3l5-.7z" fill="#d5dae1"/>',
+  ball:'<ellipse cx="15" cy="14" rx="8" ry="4.8" transform="rotate(-35 15 14)" fill="#0a0b0d"/><path d="M12.6 16.1l4.8-4.2M13.6 13.4l1.2 1.3M15 12.2l1.2 1.3" stroke="#d5dae1" stroke-width="1.1" stroke-linecap="round"/>'
 };
 function pinIcon(glyph,fill,stroke){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="30" height="36" viewBox="0 0 30 36"><path d="${PIN_BASE}" fill="${fill}" stroke="${stroke||'#0a0b0d'}" stroke-width="2"/>${PIN_GLYPH[glyph]}</svg>`;
@@ -633,6 +719,99 @@ function showCourse(id,fly){
   if(fly&&maps.courses){maps.courses.panTo({lat:c.lat,lng:c.lng});maps.courses.setZoom(11)}
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-course]');if(b){showCourse(b.dataset.course,true);$('#v-courses').scrollTo({top:0,behavior:'smooth'})}});
+
+/* ---------- games (Raiders schedule + fantasy) ---------- */
+const gTitle=g=>(g.home?'vs ':'at ')+g.opp;
+function gWhen(g){const f=fmtDate(g.date);return g.tbd?'Jan 9 or 10, time to be set':`${f.dow}, ${f.m} ${f.d} - ${g.kick} PT - ${g.tv}`}
+function gameCard(g){
+  const f=fmtDate(g.date),V=VENUES[g.v],r=g.res;
+  return `<button class="card ev game ${S.selGame===g.id?'sel':''} ${r?'past':''}" data-game="${g.id}"><div class="date"><b>${g.tbd?'TBD':f.d}</b><span>${f.m}</span></div>
+   <div><h3>${esc(gTitle(g))}</h3><div class="where">${esc(V.n)}, ${esc(V.city)}</div>
+   <div class="row"><span class="pill">Week ${g.wk}</span>${r?`<span class="res ${r[0]==='W'?'w':'l'}">${r}</span>`:`<span class="pill">${g.tbd?'Time TBD':g.kick+' PT'}</span>${g.tv?`<span class="pill">${g.tv}</span>`:''}<span class="pill">${g.home?'Home':'Away'}</span>`}</div></div></button>`;
+}
+let gMarkers={};
+function renderGames(){
+  const v=$('#v-games');
+  const seg=`<div class="seg" role="tablist" aria-label="Games"><button class="chip" data-gv="sched" aria-pressed="${S.gview==='sched'}"><i class="ph-bold ph-calendar-dots"></i> Raiders schedule</button><button class="chip" data-gv="ff" aria-pressed="${S.gview==='ff'}"><i class="ph-bold ph-trophy"></i> Fantasy league</button></div>`;
+  if(S.gview==='ff'){v.innerHTML=seg+ffHTML();return}
+  const played=GAMES.filter(g=>g.res),up=GAMES.filter(g=>!g.res);
+  const w=played.filter(g=>g.res[0]==='W').length,l=played.length-w,nx=up[0];
+  const bye=`<div class="card" style="padding:12px 14px;color:var(--muted);font-size:14px"><i class="ph-bold ph-pause-circle"></i> Week ${BYE_WEEK} bye</div>`;
+  v.innerHTML=seg+`<div class="gwrap">
+   <div class="mapbox" id="gmap" aria-label="Map of 2026 Raiders stadiums"></div>
+   <div>
+    <div class="recbar"><span class="rec">${w}-${l}</span><span class="pill">2026 record</span><span class="pill">Bye week ${BYE_WEEK}</span></div>
+    ${nx?`<div class="card next"><div class="cd">${daysTo(nx.date)}<small>days</small></div><div><span class="pill">Next game - Week ${nx.wk}</span><h3 style="margin-top:6px">${esc(gTitle(nx))}</h3><div class="meta">${gWhen(nx)}</div></div><button class="btn small" data-game="${nx.id}">Game info</button></div>`:''}
+   </div>
+   <div>
+    <h2 class="sec">Up next</h2><p class="sub">Kickoff times are Pacific. Tap a game for tickets, directions and members nearby.</p>
+    <div class="gstack rise">${up.map(g=>(g.wk===BYE_WEEK+1?bye:'')+gameCard(g)).join('')}</div>
+    <h2 class="sec">Results</h2>
+    <div class="gstack">${played.slice().reverse().map(gameCard).join('')}</div>
+   </div></div>`;
+  const el=$('#gmap');
+  withMaps(ok=>{
+    const m=makeMap(el,'games',[38,-98],3,ok);gMarkers={};
+    if(!m)return;
+    Object.entries(VENUES).forEach(([k,V])=>{
+      const gs=GAMES.filter(g=>g.v===k);if(!gs.length)return;
+      const live=gs.some(g=>!g.res);
+      const mk=new google.maps.Marker({map:m,position:{lat:V.lat,lng:V.lng},title:V.n+' - '+V.city,zIndex:k==='lv'?20:(live?10:1),
+        icon:k==='lv'?pinIcon('star','#0a0b0d','#d5dae1'):pinIcon('ball',live?'#d5dae1':'#6b727d')});
+      mk.addListener('click',()=>openVenue(k));gMarkers[k]=mk;
+    });
+    fit(m,Object.values(VENUES).map(V=>[V.lat,V.lng]),30);
+  });
+}
+function openVenue(k){
+  const gs=GAMES.filter(g=>g.v===k),V=VENUES[k];
+  if(gs.length===1)return openGame(gs[0].id);
+  openSheet(`<span class="pill">Home stadium</span><h3 style="margin-top:8px">${esc(V.n)}</h3><p class="help" style="margin:0 0 10px;font-size:15px">${esc(V.city)} - ${gs.length} games in 2026</p>
+   <div class="gstack">${gs.map(gameCard).join('')}</div>
+   <a class="btn full" href="${V.tix}" ${ext}><i class="ph-bold ph-ticket"></i> Official tickets</a>`);
+}
+function openGame(id){
+  const g=GAMES.find(x=>x.id===id);if(!g)return;const V=VENUES[g.v];
+  S.selGame=id;
+  document.querySelectorAll('#v-games .game').forEach(b=>b.classList.toggle('sel',b.dataset.game===id));
+  if(maps.games&&S.tab==='games')maps.games.panTo({lat:V.lat,lng:V.lng});
+  const near=MEMBERS.filter(m=>miles(V.lat,V.lng,...memPos(m))<=100);
+  const golf=COURSES.filter(c=>c.id!=='stgeorge').map(c=>({c,d:miles(V.lat,V.lng,c.lat,c.lng)})).sort((a,b)=>a.d-b.d).filter(x=>x.d<=60)[0];
+  const row=(k,b,s)=>`<div class="card"><div class="meta" style="margin:0">${k}</div><b>${b}</b>${s?`<div class="meta" style="margin:0">${s}</div>`:''}</div>`;
+  openSheet(`<span class="pill">Week ${g.wk} - ${g.home?'Home':'Away'}</span><h3 style="margin-top:8px">${esc(gTitle(g))}</h3>
+   <p class="help" style="margin:0 0 10px;font-size:15px">${g.res?'Final: '+g.res:gWhen(g)}</p>
+   <div class="stack">
+    ${row('Stadium',esc(V.n),esc(V.city))}
+    ${g.note?row('Heads up',esc(g.note)):''}
+    ${golf?row('Play a round first',esc(golf.c.name),'About '+Math.round(golf.d)+' miles from the stadium'):''}
+    ${!g.home?row('Members near '+esc(V.city),near.length?near.length+' within 100 miles':'None yet. Post your trip in the Travel board.'):''}
+   </div>
+   ${g.res?'':`<a class="btn full" href="${V.tix}" ${ext}><i class="ph-bold ph-ticket"></i> Official tickets</a>
+   <button class="btn ghost full" data-gotix><i class="ph-bold ph-swap"></i> Member ticket exchange</button>`}
+   <a class="btn ghost full" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(V.n+' '+V.city)}" ${ext}><i class="ph-bold ph-navigation-arrow"></i> Directions</a>
+   <button class="btn ghost full" data-gameday><i class="ph-bold ph-chats-circle"></i> Game Day board</button>`);
+}
+function ffHTML(){
+  const T=id=>FF_TEAMS.find(t=>t.id===id);
+  const rows=FF_TEAMS.slice().sort((a,b)=>b.w-a.w||b.pf-a.pf);
+  return `<div class="tixhead"><div><h2 class="sec" style="margin:18px 0 0">RNGC Fantasy League</h2><p class="sub">Demo league: 10 member teams, week ${FF_WEEK}. Top 4 make the playoffs.</p></div>
+   <button class="btn ${S.ffJoin?'ghost':''}" id="ffJoin">${S.ffJoin?'<i class="ph-bold ph-check"></i> On the list':'<i class="ph-bold ph-plus"></i> Join next season'}</button></div>
+   <div class="fwrap2"><div>
+    <div class="card" style="padding:4px 10px"><table class="ftable"><thead><tr><th>#</th><th>Team</th><th class="num">W-L</th><th class="num">Points</th></tr></thead><tbody>
+    ${rows.map((t,i)=>`<tr class="${i===3?'cut':''}"><td class="n">${i+1}</td><td><b>${esc(t.n)}</b><small>${esc(t.o)} - ${esc(t.ch)}</small></td><td class="num">${t.w}-${t.l}</td><td class="num">${t.pf.toFixed(1)}</td></tr>`).join('')}
+    </tbody></table></div></div>
+    <div><h2 class="sec">Week ${FF_WEEK} matchups</h2><p class="sub">Projected points</p>
+    <div class="gstack">${FF_MATCHUPS.map(([a,b,pa,pb])=>`<div class="card mu"><div class="side"><b>${esc(T(a).n)}</b><small>${esc(T(a).o)}</small></div><div class="pts">${pa.toFixed(1)}-${pb.toFixed(1)}<small>proj</small></div><div class="side r"><b>${esc(T(b).n)}</b><small>${esc(T(b).o)}</small></div></div>`).join('')}</div>
+    <div class="card privacy"><i class="ph-bold ph-info"></i><span>Live version: the club runs a free league on Sleeper and this page pulls standings and scores on its own. Ross sets the entry, rules and prize.</span></div>
+   </div></div>`;
+}
+document.addEventListener('click',e=>{
+  const gv=e.target.closest('[data-gv]');if(gv){S.gview=gv.dataset.gv;save();renderGames();return}
+  const gm=e.target.closest('[data-game]');if(gm){openGame(gm.dataset.game);return}
+  if(e.target.closest('[data-gotix]')){closeSheet();S.mview='tix';S.tixFilter='all';save();setTab('members');return}
+  if(e.target.closest('[data-gameday]')){closeSheet();S.board='Game Day';S.openThread=null;save();setTab('forum');return}
+  if(e.target.closest('#ffJoin')){S.ffJoin=!S.ffJoin;save();renderGames();toast(S.ffJoin?'You are on the list for next season.':'Taken off the list');return}
+});
 
 /* ---------- members (member area) ---------- */
 function visibleMembers(){
@@ -756,7 +935,7 @@ document.addEventListener('click',e=>{
 /* ---------- ticket exchange (member area) ---------- */
 const TIX_DEMO=[
  {id:'x1',event:'Raiders home game vs Broncos',venue:'Allegiant Stadium, Las Vegas',qty:2,mode:'sell',price:140,face:120,sec:'Sec 118, Row 14',by:'Chris P.',chapter:'Nevada',note:'Aisle seats. I will transfer through the ticket app.'},
- {id:'x2',event:'Raiders home game vs Chiefs',venue:'Allegiant Stadium, Las Vegas',qty:4,mode:'trade',want:'Any Broncos or Chargers game, 4 seats together',sec:'Sec 209',by:'Marcus T.',chapter:'SoCal',note:'Open to a 2-for-2 split.'},
+ {id:'x2',event:'Raiders home game vs Chargers',venue:'Allegiant Stadium, Las Vegas',qty:4,mode:'trade',want:'The Broncos or Titans home game, 4 seats together',sec:'Sec 209',by:'Marcus T.',chapter:'SoCal',note:'Open to a 2-for-2 split.'},
  {id:'x3',event:'Chimera scramble spot, Nov 14',venue:'Chimera Golf Club, Henderson NV',qty:1,mode:'sell',price:175,face:175,by:'Lena V.',chapter:'SoCal',note:'Cannot make it. I will move the registration to you.'},
  {id:'x4',event:'Raiders away game in Denver',venue:'Empower Field, Denver',qty:2,mode:'trade',want:'A Vegas home game with similar seats',sec:'Lower level',by:'Mike L.',chapter:'National',note:'Local Denver member.'}
 ];
@@ -903,12 +1082,13 @@ function setTab(t){
   $('#fab').classList.toggle('on',t==='forum'&&(!S.openThread||window.innerWidth>=1000));
   $('#banner').style.display=(t==='home'||window.innerWidth>=1000)?'flex':'none';
   if(t==='courses')renderCourses();
+  if(t==='games')renderGames();
   if(t==='members')renderMembers();else renderCoach();
   if(t==='forum')renderForum();
   document.getElementById('v-'+t).scrollTop=0;
 }
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
-function renderAll(){renderHome();renderEvents();renderForum();if(S.tab==='courses')renderCourses();if(S.tab==='members')renderMembers()}
+function renderAll(){renderHome();renderEvents();renderForum();if(S.tab==='courses')renderCourses();if(S.tab==='games')renderGames();if(S.tab==='members')renderMembers()}
 renderChips();renderAll();setTab('home');
 </script>
 </body>
