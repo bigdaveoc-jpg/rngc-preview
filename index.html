@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="maps-key.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
 <style>
@@ -175,6 +175,20 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .radio span{font-size:14px;color:var(--muted)}
 .radio:has(input:checked){border-color:var(--silver-2);background:var(--panel)}
 
+/* demo tour */
+.coach{position:absolute;left:12px;right:12px;bottom:80px;z-index:35;background:#e9ecf1;color:#0a0b0d;border-radius:18px;padding:14px 16px;box-shadow:0 18px 50px rgba(0,0,0,.65);display:none}
+.coach.on{display:block;animation:rise .4s var(--ease) both}
+.coach .st{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a525d}
+.coach h4{font-family:var(--display);font-size:25px;text-transform:uppercase;line-height:1.02;margin:3px 0 4px;font-weight:800}
+.coach p{font-size:15px;color:#2b3139}
+.coach .cr{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.coach .btn{min-height:44px;background:#0a0b0d;color:#f1f3f6}
+.coach .btn.ghost{background:transparent;color:#0a0b0d;border:1px solid #9aa2ae}
+.coach .x{margin-left:auto;min-height:44px;padding:0 6px;color:#4a525d;font-weight:600;font-size:14px}
+.pill.demo{background:var(--silver);color:var(--on-silver);border-color:var(--silver)}
+.spot{position:relative;animation:spot 1.5s ease-in-out infinite}
+@keyframes spot{0%,100%{box-shadow:0 0 0 0 rgba(213,218,225,.0)}50%{box-shadow:0 0 0 5px rgba(213,218,225,.55)}}
+@media (min-width:1000px){.coach{left:auto;right:56px;bottom:40px;width:390px}}
 /* tickets */
 .seg{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
 .seg .chip{display:inline-flex;align-items:center;gap:6px;min-height:44px}
@@ -362,13 +376,13 @@ body.thread-open .fab{display:none!important}
     <button class="tab" role="tab" data-tab="members" aria-selected="false"><i class="ph-fill ph-users-three"></i>Members<span class="bar"></span></button>
   </nav>
 
+  <div class="coach" id="coach" role="region" aria-label="Demo tour"></div>
   <div class="scrim" id="scrim"></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
   <div class="toast" id="toast" role="status"></div>
 </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const SITE='https://raidernationgolfclub.com';
 const UP=SITE+'/wp-content/uploads/';
@@ -460,9 +474,9 @@ const BOARDS=['All','Tournaments','Game Day','Golf Tips','Travel','Gear'];
 
 /* ---------- state ---------- */
 const KEY='rngc-site-v2';
-let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[]};
-try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw),{tab:'home',openThread:null,selCourse:null})}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers}))}catch(e){}};
+let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[],demo:false,tour:-1};
+try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw),{tab:'home',openThread:null,selCourse:null,tour:-1})}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo}))}catch(e){}};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -546,16 +560,43 @@ document.addEventListener('click',e=>{
 });
 
 /* ---------- maps ---------- */
+/* Google Maps JavaScript API, loaded once with the referrer-locked browser key */
 const maps={};
-function makeMap(el,key,center,zoom){
-  if(maps[key]){maps[key].remove();delete maps[key]}
-  if(typeof L==='undefined'){el.innerHTML='<div class="empty"><i class="ph-bold ph-wifi-slash"></i>Map needs a connection.</div>';return null}
-  const m=L.map(el,{zoomControl:true,attributionControl:true}).setView(center,zoom);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(m);
-  maps[key]=m;setTimeout(()=>m.invalidateSize(),80);return m;
+const DARK=[{elementType:'geometry',stylers:[{color:'#1a1e24'}]},{elementType:'labels.text.fill',stylers:[{color:'#8d95a1'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0b0d'}]},
+ {featureType:'administrative',elementType:'geometry',stylers:[{color:'#2a2f37'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'poi.park',elementType:'geometry',stylers:[{visibility:'on'},{color:'#10231a'}]},
+ {featureType:'road',elementType:'geometry',stylers:[{color:'#262b33'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#3a4049'}]},{featureType:'transit',stylers:[{visibility:'off'}]},
+ {featureType:'water',elementType:'geometry',stylers:[{color:'#0b0d10'}]}];
+let gLoad;
+function withMaps(cb){
+  if(window.google&&google.maps&&google.maps.Map)return cb(true);
+  if(!window.RNGC_MAPS_KEY)return cb(false);
+  if(!gLoad)gLoad=new Promise(res=>{
+    window.gm_authFailure=()=>res(false);
+    window.__gm=()=>res(true);
+    const s=document.createElement('script');s.async=true;s.onerror=()=>res(false);
+    s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(window.RNGC_MAPS_KEY)+'&v=weekly&callback=__gm';
+    document.head.appendChild(s);
+  });
+  gLoad.then(ok=>cb(ok));
 }
-const pinIcon=(id,cls,icon)=>L.divIcon({className:'',html:`<div class="pin ${cls||''}" id="${id}"><i class="ph-fill ${icon}"></i></div>`,iconSize:[30,30],iconAnchor:[8,30]});
-window.addEventListener('resize',()=>Object.values(maps).forEach(m=>m.invalidateSize()));
+function makeMap(el,key,center,zoom,ok){
+  if(!ok){el.innerHTML='<div class="empty"><i class="ph-bold ph-wifi-slash"></i>Map could not load. Check the connection.</div>';return null}
+  const m=new google.maps.Map(el,{center:{lat:center[0],lng:center[1]},zoom,styles:DARK,backgroundColor:'#0d0f12',disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',clickableIcons:false});
+  maps[key]=m;return m;
+}
+const PIN_BASE='M15 1C7.3 1 1.5 6.8 1.5 14.2c0 9.6 13.5 21 13.5 21s13.5-11.4 13.5-21C28.5 6.8 22.7 1 15 1z';
+const PIN_GLYPH={
+  flag:'<path d="M12.5 8v14M12.5 8.5l9 3.6-9 3.6" stroke="#0a0b0d" stroke-width="2.4" fill="#0a0b0d" stroke-linecap="round" stroke-linejoin="round"/>',
+  user:'<circle cx="15" cy="11" r="3.4" fill="#0a0b0d"/><path d="M8.6 21c0-3.8 3-6 6.4-6s6.4 2.2 6.4 6z" fill="#0a0b0d"/>',
+  plane:'<path d="M7 15.5L23 8l-5.2 15.5-3.2-6.2z" fill="#0a0b0d"/>',
+  star:'<path d="M15 7l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L7.8 12.3l5-.7z" fill="#d5dae1"/>'
+};
+function pinIcon(glyph,fill,stroke){
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="30" height="36" viewBox="0 0 30 36"><path d="${PIN_BASE}" fill="${fill}" stroke="${stroke||'#0a0b0d'}" stroke-width="2"/>${PIN_GLYPH[glyph]}</svg>`;
+  return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(30,36),anchor:new google.maps.Point(15,36)};
+}
+function fit(m,pts,pad){const b=new google.maps.LatLngBounds();pts.forEach(p=>b.extend({lat:p[0],lng:p[1]}));m.fitBounds(b,pad||40)}
+window.addEventListener('resize',()=>{if(window.google&&google.maps)Object.values(maps).forEach(m=>google.maps.event.trigger(m,'resize'))});
 
 /* ---------- courses ---------- */
 function renderCourses(){
@@ -564,15 +605,19 @@ function renderCourses(){
    <div class="detail card" id="cdetail"></div>
    <h2 class="sec">Where we play</h2><p class="sub">Tap a course to see it on the map. Pins are approximate.</p>
    <div class="stack">${list.map(c=>`<button class="card course ${S.selCourse===c.id?'sel':''}" data-course="${c.id}"><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(c.name)}</b><small>${esc(c.city)}</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join('')}</div></div>`;
-  const m=makeMap($('#cmap'),'courses',[34.5,-116],6);
-  if(m){list.forEach(c=>{L.marker([c.lat,c.lng],{icon:pinIcon('pin-'+c.id,'','ph-flag-pennant'),title:c.name}).addTo(m).on('click',()=>showCourse(c.id,true))});
-    if(list.length>1)m.fitBounds(list.map(c=>[c.lat,c.lng]),{padding:[30,30]})}
-  showCourse(S.selCourse,false);
+  const el=$('#cmap');
+  withMaps(ok=>{
+    const m=makeMap(el,'courses',[34.5,-116],6,ok);cMarkers={};
+    if(m){list.forEach(c=>{const mk=new google.maps.Marker({map:m,position:{lat:c.lat,lng:c.lng},title:c.name,icon:pinIcon('flag','#d5dae1')});mk.addListener('click',()=>showCourse(c.id,true));cMarkers[c.id]=mk});
+      if(list.length>1)fit(m,list.map(c=>[c.lat,c.lng]))}
+    showCourse(S.selCourse,false);
+  });
 }
+let cMarkers={};
 function showCourse(id,fly){
   S.selCourse=id;const box=$('#cdetail');if(!box)return;
   document.querySelectorAll('.course').forEach(b=>b.classList.toggle('sel',b.dataset.course===id));
-  document.querySelectorAll('#cmap .pin').forEach(p=>p.classList.remove('sel'));
+  Object.entries(cMarkers).forEach(([k,mk])=>{mk.setIcon(pinIcon('flag',k===id?'#ffffff':'#d5dae1'));mk.setZIndex(k===id?10:1)});
   const c=COURSES.find(x=>x.id===id);
   if(!c){box.classList.remove('on');return}
   const n=EVENTS.filter(e=>e.course===c.id).length;
@@ -580,8 +625,7 @@ function showCourse(id,fly){
    <div class="acts"><a class="btn small" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.name+' '+c.city)}" ${ext}><i class="ph-bold ph-navigation-arrow"></i> Directions</a>
    <button class="btn small ghost" data-go="events"><i class="ph-bold ph-calendar"></i> ${n} club event${n===1?'':'s'}</button></div>`;
   box.classList.add('on');
-  const p=document.getElementById('pin-'+id);if(p)p.classList.add('sel');
-  if(fly&&maps.courses)maps.courses.flyTo([c.lat,c.lng],11,{duration:.8});
+  if(fly&&maps.courses){maps.courses.panTo({lat:c.lat,lng:c.lng});maps.courses.setZoom(11)}
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-course]');if(b){showCourse(b.dataset.course,true);$('#v-courses').scrollTo({top:0,behavior:'smooth'})}});
 
@@ -597,12 +641,12 @@ function renderMembers(){
   if(!S.member){
     v.innerHTML=`<div class="card gate rise"><i class="ph-fill ph-lock-key"></i><h3>Members only</h3>
      <p>See where other members live and play, so you can find a round when you travel. Sign in with your club account to open the member map.</p>
-     <div class="acts"><button class="btn" id="demoIn"><i class="ph-bold ph-sign-in"></i> Sign in (demo)</button><a class="btn ghost" href="${SITE}/shop/" ${ext}>Become a member</a></div>
-     <p class="help" style="margin-top:14px">In the live version, sign-in uses the same account members already have on the club site.</p></div>`;
-    return;
+     <div class="acts"><button class="btn" id="demoIn"><i class="ph-bold ph-play-circle"></i> Try demo mode</button><button class="btn ghost" id="realIn"><i class="ph-bold ph-sign-in"></i> Sign in</button><a class="btn ghost" href="${SITE}/shop/" ${ext}>Become a member</a></div>
+     <p class="help" style="margin-top:14px">Demo mode walks you through the map and the ticket exchange with sample members. In the live version, sign-in uses the account members already have on the club site.</p></div>`;
+    renderCoach();return;
   }
-  const seg=`<div class="seg" role="tablist" aria-label="Member area"><button class="chip" data-mv="map" aria-pressed="${S.mview==='map'}"><i class="ph-bold ph-map-trifold"></i> Member map</button><button class="chip" data-mv="tix" aria-pressed="${S.mview==='tix'}"><i class="ph-bold ph-ticket"></i> Ticket exchange</button></div>`;
-  if(S.mview==='tix'){v.innerHTML=seg+tixHTML();return}
+  const seg=`<div class="seg" role="tablist" aria-label="Member area"><button class="chip" data-mv="map" aria-pressed="${S.mview==='map'}"><i class="ph-bold ph-map-trifold"></i> Member map</button><button class="chip" data-mv="tix" aria-pressed="${S.mview==='tix'}"><i class="ph-bold ph-ticket"></i> Ticket exchange</button>${S.demo?`<span class="pill demo">Demo mode</span><button class="chip" data-tour="restart">Restart tour</button><button class="chip" data-tour="exit">Exit demo</button>`:''}</div>`;
+  if(S.mview==='tix'){v.innerHTML=seg+tixHTML();renderCoach();return}
   const list=visibleMembers();
   const dests=Object.entries(CITIES).sort((a,b)=>a[1].n<b[1].n?-1:1);
   let near='';
@@ -620,14 +664,18 @@ function renderMembers(){
      <div class="card privacy"><i class="ph-bold ph-shield-check"></i><span>Only signed-in members see this map. You choose what shows. <button style="color:var(--silver);text-decoration:underline;min-height:44px" id="myVis">Change my visibility</button></span></div>
     </div>
    </div>`;
-  const m=makeMap($('#mmap'),'members',[37.5,-110],4);
-  if(m){
-    const pts=[];
-    list.forEach(mm=>{const p=memPos(mm);pts.push(p);L.marker(p,{icon:pinIcon('mp-'+mm.id,mm.trip?'trip':'',mm.trip?'ph-airplane-tilt':'ph-user'),title:mm.name}).addTo(m).on('click',()=>openMember(mm.id))});
-    if(S.share!=='off'&&myPos()){const p=myPos();L.marker(p,{icon:pinIcon('me','me','ph-star'),title:'You'}).addTo(m).bindTooltip('You',{permanent:false})}
-    if(S.goingTo){const c=CITIES[S.goingTo];m.setView([c.lat,c.lng],8)}
-    else if(pts.length>1)m.fitBounds(pts,{padding:[30,30]});
-  }
+  const el=$('#mmap'),goingTo=S.goingTo;
+  withMaps(ok=>{
+    const m=makeMap(el,'members',[37.5,-110],4,ok);
+    if(m){
+      const pts=[];
+      list.forEach(mm=>{const p=memPos(mm);pts.push(p);const mk=new google.maps.Marker({map:m,position:{lat:p[0],lng:p[1]},title:mm.name+' - '+CITIES[mm.city].n,icon:pinIcon(mm.trip?'plane':'user',mm.trip?'#ffffff':'#d5dae1')});mk.addListener('click',()=>openMember(mm.id))});
+      if(S.share!=='off'&&myPos()){const p=myPos();new google.maps.Marker({map:m,position:{lat:p[0],lng:p[1]},title:'You',zIndex:20,icon:pinIcon('star','#0a0b0d','#d5dae1')})}
+      if(goingTo){const c=CITIES[goingTo];m.setCenter({lat:c.lat,lng:c.lng});m.setZoom(8)}
+      else if(pts.length>1)fit(m,pts);
+    }
+  });
+  renderCoach();
 }
 function openMember(id){
   const mm=MEMBERS.find(x=>x.id===id);if(!mm)return;
@@ -643,7 +691,6 @@ function openMember(id){
 }
 document.addEventListener('click',e=>{
   const mm=e.target.closest('[data-mem]');if(mm)openMember(mm.dataset.mem);
-  if(e.target.closest('#demoIn')){S.member=true;save();renderMembers();toast('Signed in as a demo member')}
   if(e.target.closest('#tripOnly')){S.tripOnly=!S.tripOnly;save();renderMembers()}
   if(e.target.closest('#myVis'))openVisibility();
 });
@@ -664,6 +711,42 @@ function openVisibility(){
     const tc=$('#tc').value;S.trip=tc?{city:tc,dates:$('#td').value.trim()||'dates open'}:null;
     save();closeSheet();renderMembers();toast('Saved. Only members can see your pin.')});
 }
+
+/* ---------- demo tour ---------- */
+const TOUR=[
+ {t:'The member map',x:'Every pin is a member, placed on their city. No addresses. Tap one to see who they are.',spot:'[data-mem=m11]',setup:()=>{S.mview='map';S.goingTo=''},tryL:'Open a member',doit:()=>openMember('m11')},
+ {t:'Heading out of town?',x:'Pick a city and see which members are within 100 miles, so you can find a round.',spot:'#goingTo',setup:()=>{S.mview='map';S.goingTo=''},tryL:'Try Phoenix',doit:()=>{S.goingTo='phx';renderMembers()}},
+ {t:'Tell members you are coming',x:'Set your city, choose who sees you, and post a trip. A plane shows on your pin.',spot:'#myVis',setup:()=>{S.mview='map';S.goingTo=''},tryL:'Open my visibility',doit:()=>openVisibility()},
+ {t:'Ticket exchange',x:'Members sell or trade tickets to Raiders games and club events with each other.',spot:'[data-mv=tix]',setup:()=>{S.mview='tix';S.tixFilter='all'},tryL:'Show trades only',doit:()=>{S.tixFilter='trade';renderMembers()}},
+ {t:'Make an offer',x:'Offer a price or propose a trade. The seller decides. Contact stays inside the app.',spot:'[data-offer=x1]',setup:()=>{S.mview='tix';S.tixFilter='all'},tryL:'Make an offer',doit:()=>openOffer('x1')},
+ {t:'Post your own tickets',x:'Sell at a price you set, or ask for a trade. Your listing shows your name and chapter.',spot:'#postTix',setup:()=>{S.mview='tix';S.tixFilter='all'},tryL:'Post tickets',doit:()=>openPostTix()},
+ {t:'That is the member area',x:'The live version uses each member\'s existing club account and a real database. Ross decides the rules.',setup:()=>{S.mview='map';S.goingTo=''}}
+];
+function goTour(i){
+  S.tour=Math.max(0,Math.min(TOUR.length-1,i));TOUR[S.tour].setup();renderMembers();
+}
+function renderCoach(){
+  const c=$('#coach');if(!c)return;
+  document.querySelectorAll('.spot').forEach(e=>e.classList.remove('spot'));
+  if(!S.demo||S.tab!=='members'||S.tour<0||!S.member){c.classList.remove('on');return}
+  const s=TOUR[S.tour],last=S.tour===TOUR.length-1;
+  c.innerHTML=`<div class="st">Demo tour - step ${S.tour+1} of ${TOUR.length}</div><h4>${s.t}</h4><p>${s.x}</p>
+   <div class="cr">${s.doit?`<button class="btn" data-tour="try">${s.tryL}</button>`:''}${S.tour>0?'<button class="btn ghost" data-tour="back">Back</button>':''}<button class="btn ${s.doit?'ghost':''}" data-tour="${last?'exit':'next'}">${last?'Finish':'Next'}</button><button class="x" data-tour="close">Hide</button></div>`;
+  c.classList.add('on');
+  if(s.spot){const t=document.querySelector('#v-members '+s.spot);if(t)t.classList.add('spot')}
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-tour]');if(t){const a=t.dataset.tour;
+    if(a==='next')goTour(S.tour+1);
+    else if(a==='back')goTour(S.tour-1);
+    else if(a==='try')TOUR[S.tour].doit();
+    else if(a==='close'){S.tour=-1;renderCoach()}
+    else if(a==='restart')goTour(0);
+    else if(a==='exit'){S.demo=false;S.member=false;S.tour=-1;S.tix=[];S.offers=[];S.tixClosed={};S.goingTo='';S.mview='map';S.trip=null;save();renderMembers();toast('Demo ended')}
+    return}
+  if(e.target.closest('#demoIn')){S.member=true;S.demo=true;if(!S.name)S.name='Demo Member';save();goTour(0);return}
+  if(e.target.closest('#realIn')){toast('Sign-in turns on when we connect the club accounts.');return}
+});
 
 /* ---------- ticket exchange (member area) ---------- */
 const TIX_DEMO=[
@@ -774,6 +857,7 @@ $('#scrim').addEventListener('click',closeSheet);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
 
 function ensureName(cb){
+  if(!S.name&&S.demo){S.name='Demo Member';save()}
   if(S.name)return cb();
   openSheet(`<h3>Your name</h3><p class="help" style="margin:0 0 4px">Shown on your posts. First name and last initial works.</p>
    <form id="nameForm"><label for="nm">Name</label><input class="field" id="nm" required maxlength="24" placeholder="Jordan M."><button class="btn full" type="submit">Save and continue</button></form>`);
@@ -814,7 +898,7 @@ function setTab(t){
   $('#fab').classList.toggle('on',t==='forum'&&(!S.openThread||window.innerWidth>=1000));
   $('#banner').style.display=(t==='home'||window.innerWidth>=1000)?'flex':'none';
   if(t==='courses')renderCourses();
-  if(t==='members')renderMembers();
+  if(t==='members')renderMembers();else renderCoach();
   if(t==='forum')renderForum();
   document.getElementById('v-'+t).scrollTop=0;
 }

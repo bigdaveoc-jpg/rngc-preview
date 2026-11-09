@@ -1,0 +1,1 @@
+window.RNGC_MAPS_KEY="AIzaSyBxj0gsF2wDWn12X4FiZt1NsYytDBBuDQw";
