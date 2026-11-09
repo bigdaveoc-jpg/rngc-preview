@@ -598,6 +598,63 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .tixopt b{font-family:var(--display);font-size:20px;text-transform:uppercase;line-height:1.05}
 .tixopt small{color:var(--muted);font-size:12px}
 @media (min-width:700px){.tixopts{grid-template-columns:repeat(4,1fr)}}
+/* ---------- settings ---------- */
+.rolebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r-sm);font-size:13px;color:var(--muted)}
+.rolebar > span{display:inline-flex;gap:6px;align-items:center;font-weight:600}
+.seg2{display:flex;gap:6px;flex-wrap:wrap}
+.seg2 .chip{min-height:32px;font-size:13px}
+.seg2 .chip[aria-pressed="true"],.chips .chip[aria-pressed="true"][data-uf]{background:var(--silver);color:var(--on-silver);border-color:var(--silver)}
+.setcols{display:grid;gap:12px}
+.setgroup{padding:16px}
+.setgh{font-family:var(--display);font-size:20px;text-transform:uppercase;font-weight:800;margin-bottom:6px}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);margin:0;color:var(--text);font-size:15px}
+.setrow:last-child{border-bottom:0}
+.setrow > span:first-child{display:grid;gap:2px;min-width:0}
+.setrow b{font-weight:700}
+.setrow small{color:var(--muted);font-size:13px;font-weight:500}
+.field.sm{min-height:40px;padding:8px 10px;width:auto;max-width:240px;font-size:14px}
+.inrow{display:flex;gap:8px;align-items:center}
+.inrow .field{flex:1}
+.sw{appearance:none;-webkit-appearance:none;flex:none;width:46px;height:28px;border-radius:99px;background:var(--panel-2);border:1px solid var(--line);position:relative;cursor:pointer;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:transform .2s var(--ease),background .2s}
+.sw:checked{background:var(--silver);border-color:var(--silver)}
+.sw:checked::after{transform:translateX(18px);background:#0a0b0d}
+.sw:disabled{opacity:.5;cursor:default}
+.btn.danger{color:#f0b4b4;border-color:#7a3b3b}
+.userrow{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;text-align:left;padding:10px 14px;transition:border-color .2s}
+.userrow:hover{border-color:var(--silver-2)}
+.userrow b{font-family:var(--display);font-size:19px;text-transform:uppercase;display:block;line-height:1.05}
+.userrow small{color:var(--muted);font-size:12px}
+.userrow .ur{display:grid;gap:4px;justify-items:end}
+.pill.role-admin{background:var(--silver);color:var(--on-silver);border-color:var(--silver)}
+.pill.role-chapter{border-color:var(--silver);color:var(--text)}
+.pill.role-sub{border-style:dashed;color:var(--text)}
+.areas{display:grid;gap:4px}
+.areas .check{margin:4px 0;font-size:14px}
+.rolecards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rolecard{display:grid;gap:4px;align-content:start}
+.rolecard b{font-family:var(--display);font-size:30px;font-weight:800;line-height:1;margin-top:6px}
+.rolecard small{color:var(--muted);font-size:12px}
+.permwrap{padding:4px 0;overflow-x:auto}
+.permtable{width:100%;border-collapse:collapse;min-width:560px}
+.permtable th{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 8px;text-align:center}
+.permtable th:first-child{text-align:left;padding-left:14px}
+.permtable td{padding:10px 8px;border-top:1px solid var(--line);text-align:center;vertical-align:middle}
+.permtable td:first-child{text-align:left;padding-left:14px}
+.permtable td b{display:block;font-size:14px}
+.permtable td small{color:var(--muted);font-size:12px}
+.evrow{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 14px}
+.evrow b{font-family:var(--display);font-size:19px;text-transform:uppercase;display:block;line-height:1.05}
+.evrow small{color:var(--muted);font-size:12px}
+.evrow .row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.slogo.mini{height:52px;width:84px;padding:6px;margin:0}
+.slogo.mini img{max-height:40px}
+.slogo.mini .wm{font-size:11px}
+.annt{display:block;font-family:var(--display);font-size:19px;text-transform:uppercase;margin-top:6px}
+.tab-settings-only{display:none}
+@media (min-width:700px){.rolecards{grid-template-columns:repeat(4,1fr)}}
+@media (min-width:1100px){.setcols{grid-template-columns:1fr 1fr;align-items:start}}
+@media (min-width:1000px){.tab-settings-only{display:grid}}
 </style>
 </head>
 <body>
@@ -676,6 +733,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
     <section class="view" id="v-courses" aria-label="Courses"></section>
     <section class="view" id="v-forum" aria-label="Forum"></section>
     <section class="view" id="v-members" aria-label="Members"></section>
+    <section class="view" id="v-settings" aria-label="Settings"></section>
   </main>
 
   <button class="fab" id="fab"><i class="ph-bold ph-plus"></i> New post</button>
@@ -693,6 +751,8 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
     <div class="subnav" data-for="forum"><div></div></div>
     <button class="tab" role="tab" data-tab="members" aria-selected="false"><i class="ph-fill ph-users-three"></i>Members<span class="bar"></span></button>
     <div class="subnav" data-for="members"><div></div></div>
+    <button class="tab tab-settings-only" role="tab" data-tab="settings" aria-selected="false"><i class="ph-fill ph-gear-six"></i>Settings<span class="bar"></span></button>
+    <div class="subnav" data-for="settings"><div></div></div>
   </nav>
 
   <div class="coach" id="coach" role="region" aria-label="Demo tour"></div>
@@ -875,7 +935,7 @@ const BOARDS=['All','Tournaments','Game Day','Golf Tips','Travel','Gear'];
 const KEY='rngc-site-v2';
 let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[],demo:false,tour:-1,gview:'sched',selGame:null,ffJoin:false,eview:'list',sview:'net'};
 try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw),{tab:'home',openThread:null,selCourse:null,selGame:null,tour:-1})}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview,rc27:S.rc27,cview:S.cview,gameGo:S.gameGo,tixGame:S.tixGame}))}catch(e){}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview,rc27:S.rc27,cview:S.cview,gameGo:S.gameGo,tixGame:S.tixGame,cfg:S.cfg,role:S.role,spage:S.spage}))}catch(e){}};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -926,7 +986,7 @@ function renderHome(){
   else v.innerHTML=subChips('home')+overviewHTML();
 }
 function overviewHTML(){
-  const next=EVENTS.filter(e=>!isPast(e.date)&&inChapter(e.chapter)).sort((a,b)=>a.date<b.date?-1:1)[0];
+  const next=EVENTS.filter(e=>!e.status&&!isPast(e.date)&&inChapter(e.chapter)).sort((a,b)=>a.date<b.date?-1:1)[0];
   const f=next&&fmtDate(next.date),ng=GAMES.find(g=>!g.res);
   const tile=(k,ic,t,s)=>`<button class="card tile" data-sub="home|${k}"><i class="ph-bold ph-${ic}"></i><b>${t}</b><small>${s}</small></button>`;
   return `<div class="rise">
@@ -1007,7 +1067,7 @@ document.addEventListener('click',e=>{
 });
 /* club shop: only the store */
 function shopHTML(){
-  const evs=EVENTS.filter(e=>!isPast(e.date));
+  const evs=EVENTS.filter(e=>!e.status&&!isPast(e.date));
   const item=(img,t,price,meta,url,fit)=>`<a class="card shopitem" href="${url}" ${ext}><div class="simg ${fit||''}"><img src="${img}" alt="" loading="lazy"></div><div class="sbody"><b>${t}</b><div class="meta">${meta}</div><div class="sprice">${price}</div><span class="btn small">Buy on club store</span></div></a>`;
   return pageHead('Club shop','Checkout happens on the club store at raidernationgolfclub.com.')+`
    <h3 class="shophead">Club gear</h3><div class="shopgrid rise">${item(UP+'2026/06/RNGC-POLO-26-1-324x324.png','RNGC Golf Polo, The OG Classic','$60 - $65','Sizes S to 4XL',SHOP+'rngc-golf-polo-the-og-classic/')}</div>
@@ -1023,7 +1083,7 @@ function newsHTML(){
 function sponsorsHTML(){
   const logo=s=>s.logo?`<img src="${s.logo}" alt="${esc(s.n)} logo" loading="lazy" ${s.zoom?`style="transform:scale(${s.zoom})"`:''} onerror="this.parentNode.innerHTML='<span class=wm>${esc(s.n).replace(/'/g,'&#39;')}</span>'">`:`<span class="wm">${esc(s.n)}</span>`;
   return pageHead('Sponsors and partners','The brands that make the events happen. Tap one to visit them.')+`
-   <div class="spongrid rise">${SPONS_X.map(s=>{const inner=`<div class="slogo ${s.dark?'light':''}">${logo(s)}</div><b>${esc(s.n)}</b><small>${esc(s.what)}</small>`;
+   <div class="spongrid rise">${SPONS_X.filter(s=>!s.hide).map(s=>{const inner=`<div class="slogo ${s.dark?'light':''}">${logo(s)}</div><b>${esc(s.n)}</b><small>${esc(s.what)}</small>`;
      return s.site?`<a class="card sponcard" href="${s.site}" ${ext}>${inner}</a>`:`<div class="card sponcard">${inner}</div>`}).join('')}</div>
    <div class="card sponcta"><div><b>Sponsor the club</b><p>Put your brand in front of Raiders fans at every scramble, the Raider Cup and on the club channels.</p></div><button class="btn" id="sponBtn"><i class="ph-bold ph-handshake"></i> Talk to Ross</button></div>`;
 }
@@ -1049,7 +1109,7 @@ function renderEvents(){
   if(!S.eview||S.eview==='list')S.eview='up';
   const pg=S.eview,v=$('#v-events');
   if(pg==='scores'){v.innerHTML=subChips('events')+scoresHTML();return}
-  const list=EVENTS.filter(e=>inChapter(e.chapter)||e.chapter==='National');
+  const list=EVENTS.filter(e=>!e.status&&(inChapter(e.chapter)||e.chapter==='National'));
   const up=list.filter(e=>!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1),past=list.filter(e=>isPast(e.date)).sort((a,b)=>a.date<b.date?1:-1);
   if(pg==='cup'){const rc=EVENTS.find(e=>e.id==='rc26');
     v.innerHTML=subChips('events')+pageHead('Raider Cup','The club\'s signature trip, powered by Woodson Bourbon Whiskey.')+`<div class="cupgrid rise">
@@ -1618,7 +1678,7 @@ function tixCard(x){
   const g=x.game&&GAMES.find(y=>y.id===x.game);
   const head=g?(()=>{const [a,h]=sides(g),f=fmtDate(g.date);return `<div class="tixm">${tlogo(a,'tl s')}<span class="at">@</span>${tlogo(h,'tl s')}<span>Week ${g.wk} - ${g.tbd?f.m+' TBD':f.dow+', '+f.m+' '+f.d}${g.kick&&!g.tbd&&!g.res?' - '+g.kick+' PT':''}</span></div>`})()
     :`<div class="tixm"><svg class="logo s" aria-hidden="true"><use href="#mk"/></svg><span>Club event</span></div>`;
-  return `<article class="card tix">${head}<div class="row1"><h3>${esc(x.event)}</h3><span class="pill">${x.qty} ticket${x.qty===1?'':'s'}</span></div>
+  return `<article class="card tix">${head}<div class="row1"><h3>${esc(x.event)}${x.pending?' <span class="pill out">Waiting for approval</span>':''}</h3><span class="pill">${x.qty} ticket${x.qty===1?'':'s'}</span></div>
    <div class="meta" style="margin:2px 0 8px">${esc(x.venue)}</div>
    ${seatStrip(x)}
    <div class="deal">${x.mode==='sell'?`<b>$${x.price}</b><span> each</span>${x.face?`<span class="meta" style="margin:0 0 0 10px">Face value $${x.face}</span>`:''}${above?'<span class="pill" style="margin-left:10px">Above face</span>':''}`:`<span class="pill">Trade</span><span style="margin-left:10px">Wants: ${esc(x.want)}</span>`}</div>
@@ -1678,7 +1738,8 @@ function openPostTix(pre){
       const x={id:'u'+Date.now(),game:$('#tg').value||null,event:$('#te').value.trim(),venue:$('#tv').value.trim()||'Venue to be confirmed',qty:+$('#tq').value||1,mode,by:S.name,chapter:S.chapter==='All'?'National':S.chapter,face:+$('#tf').value||0,
         sec:$('#tsec').value.trim(),row:$('#trow').value.trim(),seats:$('#tseats').value.trim(),together:$('#ttog').checked,note:$('#tnote').value.trim()};
       if(mode==='sell'){const n=parseFloat(p.replace(/[^0-9.]/g,''));if(!n){toast('Enter a price like 140');return}x.price=n}else x.want=p;
-      S.tix.unshift(x);save();closeSheet();renderMembers();toast('Posted to the exchange')});
+      if(!tixRuleOK(x))return;
+      S.tix.unshift(x);save();closeSheet();renderMembers();toast(x.pending?'Posted. A club leader approves it before members see it.':'Posted to the exchange')});
   });
 }
 function openOffer(id){
@@ -1769,6 +1830,7 @@ $('#btnProfile').addEventListener('click',()=>{
   openSheet(`<h3>${S.name?esc(S.name):'Your profile'}</h3>
    <p class="help" style="margin:0 0 10px">${S.name?'Your RSVPs and posts are saved on this device.':'Post once and your name saves here.'}</p>
    <div class="stack">${going.length?going.map(e=>`<div class="card"><b style="font-family:var(--display);font-size:20px;text-transform:uppercase">${esc(e.name)}</b><div class="meta">${fmtDate(e.date).dow}, ${fmtDate(e.date).m} ${fmtDate(e.date).d} - ${esc(e.where)}</div></div>`).join(''):'<div class="empty"><i class="ph-bold ph-calendar-blank"></i>No RSVPs yet.</div>'}</div>
+   <button class="btn full" data-sub="settings|account"><i class="ph-bold ph-gear-six"></i> Settings</button>
    ${S.member?'<button class="btn ghost full" id="vis2">My map visibility</button><button class="btn ghost full" id="so2">Sign out</button>':'<button class="btn full" id="si2">Sign in</button>'}
    <button class="btn ghost full" id="closeP">Close</button>`);
   $('#closeP').addEventListener('click',closeSheet);
@@ -1791,6 +1853,7 @@ function setTab(t){
   $('#fab').classList.toggle('on',t==='forum'&&(!S.openThread||window.innerWidth>=1000));
   $('#banner').style.display=(t==='home'||window.innerWidth>=1000)?'flex':'none';
   if(t==='home')renderHome();
+  if(t==='settings')renderSettings();
   if(t==='events')renderEvents();
   if(t==='courses')renderCourses();
   if(t==='games')renderGames();
@@ -1813,6 +1876,7 @@ function subNow(t){
   if(t==='home')return S.hpage||'overview';
   if(t==='events')return !S.eview||S.eview==='list'?'up':S.eview;
   if(t==='courses')return S.cview||'map';
+  if(t==='settings')return S.spage||'account';
   if(t==='games')return S.gview;
   if(t==='members')return S.mview;
   if(t==='forum')return S.board;
@@ -1830,6 +1894,7 @@ function goSub(t,k){
   if(t==='home'){S.hpage=k;if(k==='join')S.joinSent=null}
   if(t==='events'){S.eview=k;save()}
   if(t==='courses')S.cview=k;
+  if(t==='settings')S.spage=k;
   if(t==='games'){S.gview=k;save()}
   if(t==='members'){S.mview=k;save()}
   if(t==='forum'){S.board=k;S.openThread=null;save()}
@@ -1838,7 +1903,308 @@ function goSub(t,k){
 document.addEventListener('click',e=>{const b=e.target.closest('[data-sub]');if(!b)return;const i=b.dataset.sub.indexOf('|');goSub(b.dataset.sub.slice(0,i),b.dataset.sub.slice(i+1))});
 document.addEventListener('click',e=>{if(e.target.closest('[data-ev],[data-gv],[data-mv],[data-board]'))setTimeout(renderSubnav,0)});
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.tab==='home')S.hpage='overview';setTab(b.dataset.tab)}));
-function renderAll(){renderHome();renderEvents();renderForum();if(S.tab==='courses')renderCourses();if(S.tab==='games')renderGames();if(S.tab==='members')renderMembers()}
+/* ---------- settings (preview: saved on this device; the live app saves for everyone) ---------- */
+/* user types: Member, Sub admin, Chapter admin, Admin. Sub admins get only the areas a leader hands them. */
+const ROLES=[['member','Member','Plays, posts, buys and sells tickets'],['sub','Sub admin','Helps run the areas a leader gives them'],['chapter','Chapter admin','Runs one chapter: members, events, scores'],['admin','Admin','Runs the whole club, every setting']];
+const ROLE_N=Object.fromEntries(ROLES.map(r=>[r[0],r[1]]));
+const PERMS=[
+ ['users','Manage members','Add, edit, suspend members and see dues'],
+ ['events','Create and edit events','Dates, courses, prices, sign-up links'],
+ ['scores','Enter scorecards','Post and fix scores, run the leaderboard'],
+ ['forum','Moderate the forum','Hide posts, pin threads, approve new posters'],
+ ['tix','Run the ticket exchange','Approve or remove listings'],
+ ['sponsors','Edit sponsors','Logos, links, which sponsors show'],
+ ['announce','Send announcements','Messages to a chapter or the whole club'],
+ ['map','See the member map','Members near you and when you travel'],
+ ['trade','Use the ticket exchange','Buy, sell and trade seats'],
+ ['post','Post in the forum','Start threads and reply']];
+const SUB_AREAS=['events','scores','forum','tix','sponsors','announce'];
+const CFG_DEF={
+ perms:{
+  member:{map:true,trade:true,post:true},
+  sub:{events:true,scores:true,forum:true,tix:true,sponsors:false,announce:false,map:true,trade:true,post:true},
+  chapter:{users:true,events:true,scores:true,forum:true,tix:true,announce:true,map:true,trade:true,post:true},
+  admin:Object.fromEntries(PERMS.map(p=>[p[0],true]))},
+ users:{},evEdit:{},events:[],chapters:{},spons:null,ann:[],
+ tix:{cap:'pct',pct:25,approve:false,trades:true,clubSpots:true,expire:true},
+ forum:{boards:{Tournaments:true,'Game Day':true,'Golf Tips':true,Travel:true,Gear:true},approveNew:false,guestsRead:true,filter:true,reports:3},
+ club:{name:'Raider Nation Golf Club',site:'https://raidernationgolfclub.com',store:'https://raidernationgolfclub.com/shop/',ig:'https://www.instagram.com/raidernationgolfclub',yt:'https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ',mapDefault:'optin',hcp:'ghin',feed:'espn',tz:'America/Los_Angeles'},
+ my:{events:true,evWhen:'3d',games:true,gameWhen:'2h',tix:true,forum:true,ann:true,push:true,email:true,sms:false,ghin:'',chapter:'SoCal'}
+};
+const deepMerge=(a,b)=>{const o=Array.isArray(a)?a.slice():{...a};if(b&&typeof b==='object'&&!Array.isArray(b))Object.keys(b).forEach(k=>{o[k]=(a&&a[k]&&typeof a[k]==='object'&&!Array.isArray(a[k]))?deepMerge(a[k],b[k]):b[k]});return o};
+S.cfg=deepMerge(CFG_DEF,S.cfg||{});
+if(!S.role)S.role='admin';
+const cfgSave=()=>{try{const raw=JSON.parse(localStorage.getItem(KEY)||'{}');raw.cfg=S.cfg;raw.role=S.role;raw.spage=S.spage;localStorage.setItem(KEY,JSON.stringify(raw))}catch(e){}};
+const can=p=>S.member&&(S.role==='admin'||!!(S.cfg.perms[S.role]||{})[p]);
+
+/* apply saved admin changes to the live page data */
+(function applyCfg(){
+  Object.entries(S.cfg.evEdit).forEach(([id,f])=>{const e=EVENTS.find(x=>x.id===id);if(e)Object.assign(e,f)});
+  S.cfg.events.forEach(f=>{if(!EVENTS.some(x=>x.id===f.id))EVENTS.push({...f})});
+  Object.entries(S.cfg.chapters).forEach(([ch,c])=>{if(c.pres&&LEAD_X[c.pres])PRES[ch]=c.pres;const p=PLANS.find(x=>x.chapter===ch);if(p&&c.price)p.price=+c.price});
+  if(Array.isArray(S.cfg.spons)){SPONS_X.length=0;S.cfg.spons.forEach(s=>SPONS_X.push({...s}))}
+})();
+
+/* demo member list for the Users page */
+const USERS=(()=>{
+  const L=[{id:'ross',name:'Ross Ricks',chapter:'SoCal',role:'admin'},{id:'duran',name:'Jason Duran',chapter:'NorCal',role:'chapter'},{id:'garrison',name:'Jason Garrison',chapter:'Nevada',role:'chapter'}];
+  [...MEMBERS.filter(m=>m.id!=='m5'&&m.id!=='m8'),...SC_EXTRA].forEach(m=>L.push({id:m.id,name:m.name,chapter:m.chapter,role:m.id==='m9'?'sub':'member',areas:m.id==='m9'?['events','scores']:[]}));
+  return L.map(u=>{const h=scHash(u.id+'dues');const exp=h%6===0&&u.role==='member';return {...u,plan:u.chapter==='National'?'National plan $99':'Chapter plan $225',dues:exp?'2026-10-31':'2027-0'+(1+h%9)+'-01',expired:exp,joined:2019+h%7}});
+})();
+const userNow=u=>({...u,...(S.cfg.users[u.id]||{})});
+
+const SPAGES=[['account','My account',()=>true],['notify','Notifications',()=>true],['users','Users',()=>can('users')],['perms','Roles and permissions',()=>S.member&&S.role==='admin'],['events','Event management',()=>can('events')||can('scores')],['chapters','Chapters',()=>S.member&&S.role==='admin'],['tix','Ticket exchange',()=>can('tix')],['forum','Forum',()=>can('forum')],['sponsors','Sponsors',()=>can('sponsors')],['announce','Announcements',()=>can('announce')],['club','Club settings',()=>S.member&&S.role==='admin']];
+Object.defineProperty(SUBNAV,'settings',{enumerable:true,configurable:true,get:()=>SPAGES.filter(p=>p[2]()).map(p=>[p[1],p[0]])});
+
+/* small building blocks */
+const sw=(path,on,dis)=>`<input type="checkbox" class="sw" data-cfg="${path}" ${on?'checked':''} ${dis?'disabled':''}>`;
+const setRow=(t,d,ctrl)=>`<label class="setrow"><span><b>${t}</b>${d?`<small>${d}</small>`:''}</span>${ctrl}</label>`;
+const selCfg=(path,val,opts)=>`<select class="field sm" data-cfg="${path}">${opts.map(([v,t])=>`<option value="${v}" ${String(val)===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
+const txtCfg=(path,val,ph)=>`<input class="field sm" data-cfg="${path}" value="${esc(val||'')}" placeholder="${esc(ph||'')}">`;
+const group=(title,body,sub)=>`<div class="card setgroup"><h3 class="setgh">${title}</h3>${sub?`<p class="meta" style="margin:-4px 0 6px">${sub}</p>`:''}${body}</div>`;
+const prevNote='<div class="card privacy"><i class="ph-bold ph-info"></i><span>Preview: changes save on this device only. In the live app they apply to the whole club.</span></div>';
+const getPath=(o,p)=>p.split('.').reduce((a,k)=>a&&a[k],o);
+function setPath(o,p,v){const ks=p.split('.');let a=o;ks.slice(0,-1).forEach(k=>{a[k]=a[k]||{};a=a[k]});a[ks[ks.length-1]]=v}
+
+function renderSettings(){
+  const v=$('#v-settings');
+  if(!S.member){v.innerHTML=`<div class="card gate rise" style="margin-top:16px"><i class="ph-fill ph-gear-six"></i><h3>Settings</h3><p>Sign in to change your account, alerts and privacy. Club leaders also manage members, events and the ticket exchange here.</p>
+    <div class="acts"><button class="btn" id="setDemo"><i class="ph-bold ph-play-circle"></i> Try demo mode</button><button class="btn ghost" data-signin><i class="ph-bold ph-sign-in"></i> Sign in</button></div></div>`;return}
+  const ok=SPAGES.find(p=>p[0]===S.spage&&p[2]());if(!ok)S.spage='account';
+  const pg=S.spage||'account';
+  const bar=`<div class="rolebar"><span><i class="ph-bold ph-eye"></i> Preview as</span><div class="seg2">${ROLES.map(r=>`<button class="chip" data-role="${r[0]}" aria-pressed="${S.role===r[0]}">${r[1]}</button>`).join('')}</div></div>`;
+  const body={account:accountHTML,notify:notifyHTML,users:usersHTML,perms:permsHTML,events:evMgrHTML,chapters:chaptersHTML,tix:tixSetHTML,forum:forumSetHTML,sponsors:sponsSetHTML,announce:annHTML,club:clubHTML}[pg]();
+  v.innerHTML=subChips('settings')+bar+body;
+  if(pg==='users')fillUsers();
+}
+function accountHTML(){
+  const cities=Object.entries(CITIES).sort((a,b)=>a[1].n<b[1].n?-1:1);
+  return pageHead('My account','Your profile, chapter and privacy.')+`<div class="setcols rise">
+   ${group('Profile',`<label for="acName">Name shown to members</label><div class="inrow"><input class="field" id="acName" maxlength="24" value="${esc(S.name||'')}"><button class="btn small" id="acSave">Save</button></div>
+     ${setRow('Account type',ROLE_N[S.role]+' - set by club leaders','<span class="pill">'+ROLE_N[S.role]+'</span>')}
+     ${setRow('My chapter','Where your dues go',selCfg('my.chapter',S.cfg.my.chapter,PLANS.map(p=>[p.chapter,p.name])))}
+     ${setRow('GHIN number','Chapter members only. Pulls your handicap.',txtCfg('my.ghin',S.cfg.my.ghin,'1234567'))}`)}
+   ${group('Privacy',`${setRow('Member map','Show your city, or stay hidden','<button class="btn small ghost" id="acVis">'+(S.share==='off'?'Hidden':'Showing city')+'</button>')}
+     <label for="acCity">Home city</label><select class="field" id="acCity">${cities.map(([k,c])=>`<option value="${k}" ${S.myCity===k?'selected':''}>${c.n}</option>`).join('')}</select>
+     <p class="help">Pins sit on city centers, never your address. Phone and email stay private.</p>`)}
+   ${group('Membership',`${setRow('Plan',PLANS.find(p=>p.chapter===S.cfg.my.chapter).name+' - $'+PLANS.find(p=>p.chapter===S.cfg.my.chapter).price+' a year','<a class="btn small ghost" href="'+PLANS.find(p=>p.chapter===S.cfg.my.chapter).url+'" '+ext+'>Renew</a>')}
+     <div class="acts" style="margin-top:12px"><button class="btn ghost small" id="acOut"><i class="ph-bold ph-sign-out"></i> Sign out</button><button class="btn ghost small danger" id="acDel">Delete my account</button></div>`)}
+  </div>`;
+}
+function notifyHTML(){
+  const m=S.cfg.my,when=[['1w','1 week before'],['3d','3 days before'],['1d','1 day before']];
+  return pageHead('Notifications','Pick what the app tells you about and how.')+`<div class="setcols rise">
+   ${group('What you hear about',`${setRow('Event reminders','Before events you marked Interested or paid for',sw('my.events',m.events))}
+     ${setRow('Reminder timing','',selCfg('my.evWhen',m.evWhen,when))}
+     ${setRow('Raiders game day','Kickoff alert and who is going',sw('my.games',m.games))}
+     ${setRow('Game day alert','',selCfg('my.gameWhen',m.gameWhen,[['1d','Day before'],['2h','2 hours before'],['30m','30 minutes before']]))}
+     ${setRow('Ticket offers','When someone offers on your listing',sw('my.tix',m.tix))}
+     ${setRow('Forum replies','Replies to your posts',sw('my.forum',m.forum))}
+     ${setRow('Club announcements','From your chapter and the club',sw('my.ann',m.ann))}`)}
+   ${group('How you get them',`${setRow('In the app','Phone notifications',sw('my.push',m.push))}${setRow('Email','',sw('my.email',m.email))}${setRow('Text message','Standard rates may apply',sw('my.sms',m.sms))}`)}
+  </div>`;
+}
+/* ---- users ---- */
+function usersHTML(){
+  const all=USERS.map(userNow),n=k=>all.filter(u=>u.role===k).length,ex=all.filter(u=>u.expired).length;
+  const f=S.uf||'all';
+  return pageHead('Users','Everyone in the club. Tap a person to change their type, chapter or status.')+`
+   <div class="kpis">${[['Members',all.length],['Leaders',n('admin')+n('chapter')],['Sub admins',n('sub')],['Dues expired',ex]].map(([k,b])=>`<div class="card kpi"><small>${k}</small><b>${b}</b></div>`).join('')}</div>
+   <div class="inrow" style="margin-top:10px"><input class="field" id="usersQ" placeholder="Search by name" value="${esc(S.uq||'')}" autocomplete="off"><button class="btn small" id="userAdd"><i class="ph-bold ph-user-plus"></i> Add</button></div>
+   <div class="chips">${[['all','All'],['leaders','Admins'],['sub','Sub admins'],['member','Members'],['expired','Dues expired']].map(([k,t])=>`<button class="chip" data-uf="${k}" aria-pressed="${f===k}">${t}</button>`).join('')}</div>
+   <div class="stack" id="userList" style="margin-top:12px"></div>${prevNote}`;
+}
+function fillUsers(){
+  const box=$('#userList');if(!box)return;const q=(S.uq||'').toLowerCase(),f=S.uf||'all';
+  let L=USERS.map(userNow).filter(u=>(!q||u.name.toLowerCase().includes(q))&&(S.chapter==='All'||u.chapter===S.chapter));
+  if(S.role==='chapter')L=L.filter(u=>u.chapter===S.cfg.my.chapter||u.role==='admin');
+  L=L.filter(u=>f==='all'||(f==='leaders'?(u.role==='admin'||u.role==='chapter'):f==='expired'?u.expired:u.role===f));
+  const order={admin:0,chapter:1,sub:2,member:3};L.sort((a,b)=>order[a.role]-order[b.role]||a.name.localeCompare(b.name));
+  box.innerHTML=L.length?L.map(u=>`<button class="card userrow" data-user="${u.id}"><span class="av">${initials(u.name)}</span><span><b>${esc(u.name)}</b><small>${esc(u.chapter)} - ${esc(u.plan)} - since ${u.joined}</small></span>
+    <span class="ur"><span class="pill role-${u.role}">${ROLE_N[u.role]}</span>${u.status==='suspended'?'<span class="pill out">Suspended</span>':u.expired?'<span class="pill out">Dues expired</span>':''}</span></button>`).join(''):'<div class="card empty">Nobody matches.</div>';
+}
+function openUser(id){
+  const u=userNow(USERS.find(x=>x.id===id));if(!u)return;const areas=u.areas||[];
+  const roleOpts=ROLES.filter(r=>S.role==='admin'||r[0]==='member'||r[0]==='sub');
+  openSheet(`<span class="pill role-${u.role}">${ROLE_N[u.role]}</span><h3 style="margin-top:8px">${esc(u.name)}</h3>
+   <p class="help" style="margin:0 0 6px;font-size:15px">${esc(u.plan)} - dues ${u.expired?'expired '+fmtDate(u.dues).m+' '+fmtDate(u.dues).d:'paid through '+fmtDate(u.dues).mon} - member since ${u.joined}</p>
+   <form id="userForm" data-id="${u.id}">
+    <label for="uRole">User type</label><select class="field" id="uRole">${roleOpts.map(r=>`<option value="${r[0]}" ${u.role===r[0]?'selected':''}>${r[1]} - ${r[2]}</option>`).join('')}</select>
+    <div id="uAreas" ${u.role==='sub'?'':'hidden'}><label>Areas this sub admin runs</label><div class="areas">${SUB_AREAS.map(a=>{const P=PERMS.find(p=>p[0]===a);return `<label class="check"><input type="checkbox" name="ua" value="${a}" ${areas.includes(a)?'checked':''}> ${P[1]}</label>`}).join('')}</div></div>
+    <label for="uCh">Chapter</label><select class="field" id="uCh" ${S.role==='admin'?'':'disabled'}>${PLANS.map(p=>`<option value="${p.chapter}" ${u.chapter===p.chapter?'selected':''}>${p.name}</option>`).join('')}</select>
+    <label for="uSt">Status</label><select class="field" id="uSt"><option value="active" ${u.status!=='suspended'?'selected':''}>Active</option><option value="suspended" ${u.status==='suspended'?'selected':''}>Suspended - can't sign in</option></select>
+    <button class="btn full" type="submit">Save changes</button></form>
+   ${u.expired?`<button class="btn ghost full" id="uRemind"><i class="ph-bold ph-bell"></i> Send dues reminder</button>`:''}
+   <button class="btn ghost full" id="uMsg"><i class="ph-bold ph-chat-circle"></i> Message ${esc(u.name.split(' ')[0])}</button>`);
+  $('#uRole').addEventListener('change',()=>{$('#uAreas').hidden=$('#uRole').value!=='sub'});
+  const r=$('#uRemind');if(r)r.addEventListener('click',()=>{closeSheet();toast('Dues reminder sent. Preview only, nothing sent.')});
+  $('#uMsg').addEventListener('click',()=>{closeSheet();toast('Messages open in the live app.')});
+}
+/* ---- roles and permissions ---- */
+function permsHTML(){
+  const P=S.cfg.perms;
+  return pageHead('Roles and permissions','What each type of user can do. Admins can always do everything.')+`
+   <div class="rolecards rise">${ROLES.map(r=>`<div class="card rolecard"><span class="pill role-${r[0]}">${r[1]}</span><p class="meta">${r[2]}</p><b>${USERS.map(userNow).filter(u=>u.role===r[0]).length}</b><small>people</small></div>`).join('')}</div>
+   <div class="card permwrap"><table class="permtable"><thead><tr><th>Permission</th>${ROLES.map(r=>`<th>${r[1]}</th>`).join('')}</tr></thead><tbody>
+   ${PERMS.map(([k,t,d])=>`<tr><td><b>${t}</b><small>${d}</small></td>${ROLES.map(r=>`<td>${sw('perms.'+r[0]+'.'+k,r[0]==='admin'||!!(P[r[0]]||{})[k],r[0]==='admin')}</td>`).join('')}</tr>`).join('')}
+   </tbody></table></div>
+   <div class="card privacy"><i class="ph-bold ph-info"></i><span>Chapter admins only see and change their own chapter. Sub admins get the areas ticked in their column, and a leader can narrow that per person on the Users page.</span></div>${prevNote}`;
+}
+/* ---- events ---- */
+const evRegs=e=>scHash(e.id+'regs')%40+(S.rsvp[e.id]?1:0);
+function evMgrHTML(){
+  const L=EVENTS.filter(e=>S.role!=='chapter'||e.chapter===S.cfg.my.chapter||e.chapter==='National').slice().sort((a,b)=>a.date<b.date?1:-1);
+  return pageHead('Event management','Add, edit and publish club events. Drafts stay hidden from members.')+`
+   <div class="inrow" style="margin:4px 0 12px">${can('events')?'<button class="btn" data-evedit="new"><i class="ph-bold ph-plus"></i> New event</button>':''}<button class="btn ghost" data-sub="events|scores"><i class="ph-bold ph-list-numbers"></i> Scorecards</button></div>
+   <div class="stack rise">${L.map(e=>{const f=fmtDate(e.date),past=isPast(e.date),st=e.status==='draft'?'Draft':e.status==='cancelled'?'Cancelled':past?'Done':'Published';
+     return `<div class="card evrow"><div class="date"><b>${f.d}</b><span>${f.m}</span></div><div><b>${esc(e.name)}</b><small>${esc(e.chapter)} - ${esc(e.where)}</small>
+      <div class="row"><span class="pill ${st==='Draft'||st==='Cancelled'?'out':''}">${st}</span><span class="pill">${esc(e.price)}</span>${past?'':`<span class="pill">${evRegs(e)}${e.cap?' / '+e.cap:''} signed up</span>`}</div></div>
+      ${can('events')?`<button class="btn small ghost" data-evedit="${e.id}">Edit</button>`:''}</div>`}).join('')}</div>${prevNote}`;
+}
+function openEvEdit(id){
+  const e=id==='new'?{id:'new',name:'',date:'',chapter:S.role==='chapter'?S.cfg.my.chapter:'SoCal',where:'',course:'',price:'',cap:'',url:'',note:'',status:'draft',fmt:'Scramble',scores:true}:EVENTS.find(x=>x.id===id);if(!e)return;
+  const chs=['National',...PLANS.filter(p=>p.chapter!=='National').map(p=>p.chapter)];
+  openSheet(`<h3>${id==='new'?'New event':'Edit event'}</h3><form id="evForm" data-id="${e.id}">
+   <label for="efN">Event name</label><input class="field" id="efN" required maxlength="70" value="${esc(e.name)}" placeholder="RNGC vs ...">
+   <div class="two"><div><label for="efD">Date</label><input class="field" id="efD" type="date" required value="${esc(e.date)}"></div><div><label for="efC">Chapter</label><select class="field" id="efC">${chs.map(c=>`<option ${e.chapter===c?'selected':''}>${c}</option>`).join('')}</select></div></div>
+   <label for="efCo">Course</label><select class="field" id="efCo"><option value="">Other, type it below</option>${COURSES.map(c=>`<option value="${c.id}" ${e.course===c.id?'selected':''}>${esc(c.name)}, ${esc(c.city)}</option>`).join('')}</select>
+   <label for="efW">Where it shows</label><input class="field" id="efW" maxlength="90" value="${esc(e.where)}" placeholder="Chimera Golf Club, Henderson NV">
+   <div class="two"><div><label for="efP">Price</label><input class="field" id="efP" maxlength="30" value="${esc(e.price)}" placeholder="$175 per player"></div><div><label for="efCap">Spots</label><input class="field" id="efCap" type="number" min="0" value="${esc(e.cap||'')}" placeholder="144"></div></div>
+   <label for="efF">Format</label><select class="field" id="efF">${['Scramble','Stroke play','Best ball','Match play','Social / tailgate'].map(x=>`<option ${e.fmt===x?'selected':''}>${x}</option>`).join('')}</select>
+   <label for="efU">Sign-up and pay link</label><input class="field" id="efU" maxlength="200" value="${esc(e.url||'')}" placeholder="Club store product page">
+   <label for="efNo">Details</label><textarea class="field" id="efNo" maxlength="400">${esc(e.note||'')}</textarea>
+   <label class="check"><input type="checkbox" id="efS" ${e.scores!==false?'checked':''}> Scorecards for this event</label>
+   <label for="efSt">Status</label><select class="field" id="efSt"><option value="draft" ${e.status==='draft'?'selected':''}>Draft - only leaders see it</option><option value="pub" ${e.status!=='draft'&&e.status!=='cancelled'?'selected':''}>Published - members see it</option><option value="cancelled" ${e.status==='cancelled'?'selected':''}>Cancelled</option></select>
+   <button class="btn full" type="submit">${id==='new'?'Save event':'Save changes'}</button></form>`);
+  $('#efCo').addEventListener('change',()=>{const c=COURSES.find(x=>x.id===$('#efCo').value);if(c)$('#efW').value=c.name+', '+c.city});
+}
+/* ---- chapters ---- */
+function chaptersHTML(){
+  return pageHead('Chapters','Who runs each chapter, dues, and whether it takes new members.')+`<div class="setcols rise">${PLANS.map(p=>{const c=S.cfg.chapters[p.chapter]||{};
+   return group(p.name,`${setRow('Chapter admin','Join requests go to them',selCfg('chapters.'+p.chapter+'.pres',PRES[p.chapter],Object.values(LEAD_X).map(L=>[L.id,L.name])))}
+    ${setRow('Yearly dues','Shown on the join form and shop','<span class="inrow"><span>$</span>'+txtCfg('chapters.'+p.chapter+'.price',p.price,'225')+'</span>')}
+    ${p.chapter==='National'?'':setRow('Golf association','For GHIN handicaps',txtCfg('chapters.'+p.chapter+'.assoc',c.assoc||({SoCal:'SCGA',NorCal:'NCGA',Nevada:'NGA'}[p.chapter]),''))}
+    ${setRow('Taking new members','Turn off to pause the join form',sw('chapters.'+p.chapter+'.open',c.open!==false))}`)}).join('')}</div>
+   <button class="btn ghost" style="margin-top:12px" id="chAdd"><i class="ph-bold ph-plus"></i> Start a new chapter</button>${prevNote}`;
+}
+/* ---- ticket exchange ---- */
+function tixSetHTML(){
+  const t=S.cfg.tix,pend=allTix().filter(x=>x.pending);
+  return pageHead('Ticket exchange','Rules for buying, selling and trading between members.')+`<div class="setcols rise">
+   ${group('Price rules',`${setRow('Price limit','Stops members from scalping each other',selCfg('tix.cap',t.cap,[['none','No limit'],['face','Face value or less'],['pct','Face value plus a set percent']]))}
+     ${setRow('Max over face value','Used when the limit is a percent','<span class="inrow">'+txtCfg('tix.pct',t.pct,'25')+'<span>%</span></span>')}`)}
+   ${group('Listings',`${setRow('Leaders approve new listings','Listings wait until a leader OKs them',sw('tix.approve',t.approve))}
+     ${setRow('Allow trades','Seat or game swaps',sw('tix.trades',t.trades))}
+     ${setRow('Allow club event spots','Selling a paid event spot to another member',sw('tix.clubSpots',t.clubSpots))}
+     ${setRow('Close listings at kickoff','Old listings clear themselves',sw('tix.expire',t.expire))}`)}
+   ${group('Waiting for approval - '+pend.length,pend.length?`<div class="stack">${pend.map(x=>`<div class="card evrow"><div><b>${esc(x.event)}</b><small>${esc(x.by)} - ${x.qty} ticket${x.qty===1?'':'s'}${x.price?' - $'+x.price+' each':''}</small></div><span class="inrow"><button class="btn small" data-tixok="${x.id}">Approve</button><button class="btn small ghost" data-tixno="${x.id}">Remove</button></span></div>`).join('')}</div>`:'<p class="meta">Nothing waiting.</p>')}
+  </div>${prevNote}`;
+}
+function tixRuleOK(x){
+  const t=S.cfg.tix;
+  if(x.mode==='trade'&&!t.trades){toast('Trades are turned off by the club.');return false}
+  if(!x.game&&!t.clubSpots){toast('Club event spots can\'t be listed right now.');return false}
+  if(x.mode==='sell'&&x.face){const max=t.cap==='face'?x.face:t.cap==='pct'?Math.floor(x.face*(1+(+t.pct||0)/100)):Infinity;
+    if(x.price>max){toast('Club limit is $'+max+' each for these seats.');return false}}
+  if(t.approve&&!can('tix'))x.pending=true;
+  return true;
+}
+/* ---- forum ---- */
+function forumSetHTML(){
+  const F=S.cfg.forum;
+  return pageHead('Forum','Boards and how posts are moderated.')+`<div class="setcols rise">
+   ${group('Boards',Object.keys(F.boards).map(b=>setRow(b,'',sw('forum.boards.'+b,F.boards[b]))).join('')+'<button class="btn small ghost" id="boardAdd" style="margin-top:10px"><i class="ph-bold ph-plus"></i> Add a board</button>')}
+   ${group('Moderation',`${setRow('Approve first posts','A new member\'s first post waits for a moderator',sw('forum.approveNew',F.approveNew))}
+     ${setRow('Guests can read','Non-members see posts but can\'t reply',sw('forum.guestsRead',F.guestsRead))}
+     ${setRow('Language filter','Hides common swear words',sw('forum.filter',F.filter))}
+     ${setRow('Hide after reports','Post hides when this many members report it',selCfg('forum.reports',F.reports,[[2,'2 reports'],[3,'3 reports'],[5,'5 reports']]))}`)}
+  </div>${prevNote}`;
+}
+/* ---- sponsors ---- */
+function sponsSetHTML(){
+  return pageHead('Sponsors','What shows on the Sponsors page.')+`<div class="stack rise">${SPONS_X.map((s,i)=>`<div class="card evrow"><div class="slogo mini">${s.logo?`<img src="${s.logo}" alt="" loading="lazy">`:`<span class="wm">${esc(s.n)}</span>`}</div><div><b>${esc(s.n)}</b><small>${esc(s.what)}</small>${s.hide?'<div class="row"><span class="pill out">Hidden</span></div>':''}</div><button class="btn small ghost" data-spedit="${i}">Edit</button></div>`).join('')}</div>
+   <button class="btn ghost" style="margin-top:12px" data-spedit="new"><i class="ph-bold ph-plus"></i> Add sponsor</button>${prevNote}`;
+}
+function openSpEdit(i){
+  const s=i==='new'?{n:'',what:'',site:'',logo:''}:SPONS_X[+i];
+  openSheet(`<h3>${i==='new'?'Add sponsor':'Edit sponsor'}</h3><form id="spEditForm" data-i="${i}">
+   <label for="seN">Name</label><input class="field" id="seN" required maxlength="50" value="${esc(s.n)}">
+   <label for="seW">One line about them</label><input class="field" id="seW" maxlength="90" value="${esc(s.what)}">
+   <label for="seS">Website</label><input class="field" id="seS" maxlength="200" value="${esc(s.site||'')}" placeholder="https://">
+   <label for="seL">Logo link</label><input class="field" id="seL" maxlength="300" value="${esc(s.logo||'')}" placeholder="https:// ... .png">
+   <label class="check"><input type="checkbox" id="seH" ${s.hide?'':'checked'}> Show on the Sponsors page</label>
+   <button class="btn full" type="submit">Save</button>${i==='new'?'':'<button class="btn ghost full" type="button" id="seDel">Remove sponsor</button>'}</form>`);
+  const d=$('#seDel');if(d)d.addEventListener('click',()=>{SPONS_X.splice(+i,1);S.cfg.spons=SPONS_X.map(x=>({...x}));cfgSave();closeSheet();renderSettings();toast('Sponsor removed')});
+}
+/* ---- announcements ---- */
+function annHTML(){
+  const chs=S.role==='chapter'?[S.cfg.my.chapter]:['Whole club',...PLANS.filter(p=>p.chapter!=='National').map(p=>p.chapter),'National'];
+  return pageHead('Announcements','Send a message to members. Shows in the app and goes out by their alert settings.')+`<div class="setcols rise">
+   ${group('New announcement',`<form id="annForm"><label for="anTo">Send to</label><select class="field" id="anTo">${chs.map(c=>`<option>${c}</option>`).join('')}</select>
+     <label for="anT">Title</label><input class="field" id="anT" required maxlength="60" placeholder="Nov 14 tee times are out">
+     <label for="anB">Message</label><textarea class="field" id="anB" required maxlength="500"></textarea>
+     <label class="check"><input type="checkbox" id="anE" checked> Also email it</label>
+     <button class="btn full" type="submit" style="width:100%;margin-top:12px"><i class="ph-bold ph-megaphone"></i> Send</button></form>`)}
+   ${group('Sent',S.cfg.ann.length?`<div class="stack">${S.cfg.ann.map(a=>`<div class="card"><span class="pill">${esc(a.to)}</span><b class="annt">${esc(a.t)}</b><p class="meta">${esc(a.b)}</p><small class="meta">${esc(a.when)} - preview, not sent</small></div>`).join('')}</div>`:'<p class="meta">Nothing sent yet.</p>')}
+  </div>`;
+}
+/* ---- club ---- */
+function clubHTML(){
+  const c=S.cfg.club;
+  return pageHead('Club settings','Name, links and how the app works for everyone.')+`<div class="setcols rise">
+   ${group('Club',`${setRow('Club name','',txtCfg('club.name',c.name))}${setRow('Website','',txtCfg('club.site',c.site))}${setRow('Club store','Where dues and entries are paid',txtCfg('club.store',c.store))}${setRow('Instagram','',txtCfg('club.ig',c.ig))}${setRow('YouTube','',txtCfg('club.yt',c.yt))}`)}
+   ${group('Defaults',`${setRow('Member map for new members','',selCfg('club.mapDefault',c.mapDefault,[['optin','Hidden until they turn it on'],['city','Show their city']]))}
+     ${setRow('Handicaps','',selCfg('club.hcp',c.hcp,[['ghin','GHIN for chapters, club handicap for National'],['club','Club handicap for everyone']]))}
+     ${setRow('Raiders scores and news','',selCfg('club.feed',c.feed,[['espn','Free feed - preview only'],['licensed','Licensed sports feed - needed for launch']]))}
+     ${setRow('Time zone','Kickoff and tee times',selCfg('club.tz',c.tz,[['America/Los_Angeles','Pacific'],['America/Denver','Mountain'],['America/Chicago','Central'],['America/New_York','Eastern']]))}`)}
+  </div>${prevNote}`;
+}
+
+/* ---- settings events ---- */
+document.addEventListener('change',e=>{
+  const el=e.target.closest&&e.target.closest('[data-cfg]');if(!el)return;
+  const p=el.dataset.cfg,v=el.type==='checkbox'?el.checked:el.value;
+  setPath(S.cfg,p,v);
+  if(p.startsWith('chapters.')){const [,ch,k]=p.split('.');if(k==='pres')PRES[ch]=v;if(k==='price'){const pl=PLANS.find(x=>x.chapter===ch);if(pl&&+v)pl.price=+v}}
+  cfgSave();renderSubnav();toast('Saved');
+});
+document.addEventListener('input',e=>{if(e.target.id==='usersQ'){S.uq=e.target.value;fillUsers()}});
+document.addEventListener('submit',e=>{
+  const f=e.target;
+  if(f.id==='userForm'){e.preventDefault();const id=f.dataset.id,role=$('#uRole').value;
+    S.cfg.users[id]={role,chapter:$('#uCh').value,status:$('#uSt').value,areas:role==='sub'?[...document.querySelectorAll('input[name=ua]:checked')].map(x=>x.value):[]};
+    cfgSave();closeSheet();fillUsers();toast('Saved. '+ROLE_N[role]+'.')}
+  if(f.id==='evForm'){e.preventDefault();const id=f.dataset.id;
+    const st=$('#efSt').value,fields={name:$('#efN').value.trim(),date:$('#efD').value,chapter:$('#efC').value,course:$('#efCo').value||null,where:$('#efW').value.trim()||'Course to be set',price:$('#efP').value.trim()||'Price to be set',cap:+$('#efCap').value||'',fmt:$('#efF').value,url:$('#efU').value.trim()||SITE+'/shop/',note:$('#efNo').value.trim(),scores:$('#efS').checked,status:st==='pub'?'':st};
+    if(!fields.name||!fields.date){toast('Add a name and date');return}
+    if(id==='new'){const ev={id:'c'+Date.now(),img:UP+'2026/06/IMG_5442-1024x768.jpg',...fields};EVENTS.push(ev);S.cfg.events.push(ev)}
+    else{const ev=EVENTS.find(x=>x.id===id);Object.assign(ev,fields);const ce=S.cfg.events.find(x=>x.id===id);if(ce)Object.assign(ce,fields);else S.cfg.evEdit[id]={...(S.cfg.evEdit[id]||{}),...fields}}
+    cfgSave();closeSheet();renderSettings();renderEvents();renderHome();toast(st==='draft'?'Saved as a draft':'Saved and published')}
+  if(f.id==='spEditForm'){e.preventDefault();const i=f.dataset.i,s={n:$('#seN').value.trim(),what:$('#seW').value.trim(),site:$('#seS').value.trim(),logo:$('#seL').value.trim(),hide:!$('#seH').checked};
+    if(!s.n)return;if(i==='new')SPONS_X.push(s);else Object.assign(SPONS_X[+i],s);S.cfg.spons=SPONS_X.map(x=>({...x}));cfgSave();closeSheet();renderSettings();toast('Sponsor saved')}
+  if(f.id==='annForm'){e.preventDefault();S.cfg.ann.unshift({to:$('#anTo').value,t:$('#anT').value.trim(),b:$('#anB').value.trim(),when:new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})});cfgSave();renderSettings();toast('Announcement saved. Preview only, nothing sent.')}
+});
+document.addEventListener('click',e=>{
+  const t=e.target;
+  const r=t.closest('[data-role]');if(r){S.role=r.dataset.role;cfgSave();renderSettings();renderSubnav();toast('Previewing as '+ROLE_N[S.role]);return}
+  const u=t.closest('[data-user]');if(u){openUser(u.dataset.user);return}
+  const uf=t.closest('[data-uf]');if(uf){S.uf=uf.dataset.uf;renderSettings();return}
+  const ev=t.closest('[data-evedit]');if(ev){openEvEdit(ev.dataset.evedit);return}
+  const sp=t.closest('[data-spedit]');if(sp){openSpEdit(sp.dataset.spedit);return}
+  const ok=t.closest('[data-tixok]');if(ok){const x=allTix().find(y=>y.id===ok.dataset.tixok);if(x)delete x.pending;save();renderSettings();toast('Listing approved');return}
+  const no=t.closest('[data-tixno]');if(no){S.tix=S.tix.filter(y=>y.id!==no.dataset.tixno);save();renderSettings();toast('Listing removed');return}
+  if(t.closest('#userAdd')){toast('Members are added when they join and pay on the club store.');return}
+  if(t.closest('#chAdd')){toast('New chapters: Ross sets these up with the golf association first.');return}
+  if(t.closest('#boardAdd')){const n=prompt('Name of the new board');if(n&&n.trim()){S.cfg.forum.boards[n.trim().slice(0,24)]=true;cfgSave();renderSettings()}return}
+  if(t.closest('#acSave')){const n=$('#acName').value.trim();if(n){S.name=n;save();toast('Name saved')}return}
+  if(t.closest('#acVis')){openVisibility();return}
+  if(t.closest('#acOut')){S.member=false;S.demo=false;S.tour=-1;save();renderAll();renderSettings();setTimeout(openSignIn,200);return}
+  if(t.closest('#setDemo')){S.member=true;S.demo=true;if(!S.name)S.name='Demo Member';save();renderAll();renderSettings();renderSubnav();toast('Demo mode: previewing as '+ROLE_N[S.role]);return}
+  if(t.closest('#acDel')){toast('In the live app this asks you to confirm, then removes your account.');return}
+});
+document.addEventListener('change',e=>{if(e.target.id==='acCity'){S.myCity=e.target.value;save();toast('Home city saved')}});
+
+function renderAll(){renderHome();renderEvents();renderForum();if(S.tab==='courses')renderCourses();if(S.tab==='games')renderGames();if(S.tab==='members')renderMembers();if(S.tab==='settings')renderSettings()}
 renderChips();renderAll();setTab('home');loadSchedule();
 
 /* header logo: tap it to replay the animation; it also replays on its own every few clicks (6+ clicks and 60+ seconds apart) */
