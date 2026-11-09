@@ -607,7 +607,7 @@ const LEADERS=[
 ];
 const EVENTS=[
  {id:'nov14',name:'RNGC vs The 12th Man Golf Club',date:'2026-11-14',where:'Chimera Golf Club, Henderson NV',chapter:'Nevada',price:'$175 per player',course:'chimera',
-  note:'4-man scramble with playoffs. 7:00 am check-in, 8:00 am shotgun start. Golf, cart, giveaways, prizes for the top 2 teams and a taco bar after party. Foursome $700. Raiders and Seahawks fans welcome.',
+  note:'4-man scramble with playoffs. 7:00 am check-in, 8:00 am shotgun start. Golf, cart, giveaways, prizes for the top 2 teams and a taco bar after party. A full foursome is $700, the same $175 each. Raiders and Seahawks fans welcome.',
   url:SHOP+'saturday-november-14th-2026-chimera-golf-club-in-henderson-nevada/',img:UP+'2026/09/CHIMERA-11.14.26-1-819x1024.jpg'},
  {id:'oct3',name:'RNGC vs The Red Kingdom Golf Club',date:'2026-10-03',where:'Chimera Golf Club, Henderson NV',chapter:'Nevada',price:'$160 per player',course:'chimera',
   note:'4-man scramble with playoffs, 8:00 am shotgun start. Raiders and Chiefs fans welcome.',
@@ -760,7 +760,7 @@ const BOARDS=['All','Tournaments','Game Day','Golf Tips','Travel','Gear'];
 const KEY='rngc-site-v2';
 let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[],demo:false,tour:-1,gview:'sched',selGame:null,ffJoin:false,eview:'list',sview:'net'};
 try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw),{tab:'home',openThread:null,selCourse:null,selGame:null,tour:-1})}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview}))}catch(e){}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview,rc27:S.rc27}))}catch(e){}};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -828,8 +828,9 @@ function evCard(e){
   return `<article class="card ev ${past?'past':''}"><div class="date"><b>${f.d}</b><span>${f.m}</span></div>
    <div><h3>${esc(e.name)}</h3><div class="where">${esc(e.where)}</div><div class="note">${esc(e.note)}</div>
    <div class="row"><span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
-   <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Going':'I\'m in'}</button>
-   <a class="btn small" href="${e.url}" ${ext}>Register</a>`}</div></div></article>`;
+   <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
+   <a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`}</div>
+   ${past?'':`<div class="help" style="margin-top:8px;font-size:13px;color:var(--muted)">Interested just lets other members know. Register and pay holds your spot.</div>`}</div></article>`;
 }
 function renderEvents(){
   const chip=(k,ic,t)=>`<button class="chip" data-ev="${k}" aria-pressed="${S.eview===k}"><i class="ph-bold ph-${ic}"></i> ${t}</button>`;
@@ -839,7 +840,9 @@ function renderEvents(){
   const up=list.filter(e=>!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1),past=list.filter(e=>isPast(e.date)).sort((a,b)=>a.date<b.date?1:-1);
   $('#v-events').innerHTML=seg+`<h2 class="sec" id="ev-up">Upcoming</h2>
    <div class="evgrid rise">${up.length?up.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No dates for this chapter yet. More get posted here as they are set.</div>'}</div>
-   <h2 class="sec" id="ev-cup">Raider Cup</h2><p class="sub">The club's signature trip. 2026 ran May 22-24 in St. George, UT.</p>
+   ${up.length&&up.every(e=>e.chapter==='Nevada')&&S.chapter!=='Nevada'?'<p class="sub" style="margin-top:10px">Only Nevada has a date posted right now. SoCal and NorCal chapter events show up here as soon as they are set.</p>':''}
+   <h2 class="sec" id="ev-cup">Raider Cup</h2><p class="sub">The club's signature trip. 2026 ran May 22-24 in St. George, UT. Dates for 2027 are not set yet.</p>
+   <button class="btn ${S.rc27?'ghost':''}" id="rc27" style="margin-bottom:12px">${S.rc27?'<i class="ph-bold ph-check"></i> On the 2027 list':'<i class="ph-bold ph-bell"></i> Get Raider Cup 2027 updates'}</button>
    <div class="flyers">${FLYERS.map(u=>`<img src="${u}" alt="Event flyer" loading="lazy">`).join('')}</div>
    <h2 class="sec" id="ev-past">Past events</h2>
    <div class="evgrid rise">${past.map(evCard).join('')}</div>`;
@@ -868,13 +871,13 @@ function scoresHTML(){
    <div class="fwrap2"><div>
     <div class="seg" style="margin-top:6px">${['net','gross'].map(k=>`<button class="chip" data-sv="${k}" aria-pressed="${key===k}">${k==='net'?'Net':'Gross'}</button>`).join('')}</div>
     <div class="card" style="padding:4px 10px;margin-top:10px"><table class="ftable"><thead><tr><th>#</th><th>Player</th><th class="num">Gross</th><th class="num">Net</th><th class="num">To par</th></tr></thead><tbody>
-    ${rows.map(r=>`<tr data-sc="${r.id}" tabindex="0" role="button" class="${mine&&mine.id===r.id?'me':''}"><td class="n">${pos.get(r.id)}</td><td><b>${esc(r.name)}</b><small>${esc(r.chapter)} - hcp ${r.hcp}</small></td><td class="num">${r.gross}</td><td class="num">${r.net}</td><td class="num"><b style="font-size:16px">${toPar((key==='net'?r.net:r.gross)-SC_PAR)}</b></td></tr>`).join('')}
+    ${rows.map(r=>`<tr data-sc="${r.id}" tabindex="0" role="button" class="${mine&&mine.id===r.id?'me':''}"><td class="n">${pos.get(r.id)}</td><td><b>${esc(r.name)}</b><small>${esc(r.chapter)} - ${r.chapter==='National'?'club hcp':'GHIN'} ${r.hcp}</small></td><td class="num">${r.gross}</td><td class="num">${r.net}</td><td class="num"><b style="font-size:16px">${toPar((key==='net'?r.net:r.gross)-SC_PAR)}</b></td></tr>`).join('')}
     </tbody></table></div></div>
-    <div><h2 class="sec">Chapter cup</h2><p class="sub">Best 4 net scores from each chapter, added up. Low total wins.</p>
+    <div><h2 class="sec">Chapter cup</h2><p class="sub">Ranked by the Best 4 column: each chapter's 4 lowest net scores added up, low total wins. National members play together as one at-large team.</p>
      <div class="card" style="padding:4px 10px"><table class="ftable"><thead><tr><th>#</th><th>Chapter</th><th class="num">Best 4</th><th class="num">Avg net</th></tr></thead><tbody>
-     ${chs.map((c,i)=>`<tr><td class="n">${i+1}</td><td><b>${esc(c.c)}</b><small>${c.n} players</small></td><td class="num">${c.best4}</td><td class="num">${c.avg}</td></tr>`).join('')}
+     ${chs.map((c,i)=>`<tr><td class="n">${i+1}</td><td><b>${esc(c.c==='National'?'National at-large':c.c)}</b><small>${c.n} players</small></td><td class="num">${c.best4}</td><td class="num">${c.avg}</td></tr>`).join('')}
      </tbody></table></div>
-     <div class="card privacy"><i class="ph-bold ph-info"></i><span>Demo: 30 made-up members, one round each on a sample par ${SC_PAR} card. In the live app members post their card from the course and handicaps come from GHIN.</span></div>
+     <div class="card privacy"><i class="ph-bold ph-info"></i><span>Demo: 30 made-up members, one round each on a sample par ${SC_PAR} card. In the live app members post their card from the course. Chapter members play off their GHIN handicap; National members, who don't get GHIN with the $99 plan, show a club handicap.</span></div>
     </div></div>`;
 }
 function openScorecard(id){
@@ -902,7 +905,8 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{const sc=e.target.closest&&e.target.closest('[data-sc]');if(sc&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openScorecard(sc.dataset.sc)}});
 document.addEventListener('click',e=>{
   const r=e.target.closest('[data-rsvp]');
-  if(r){const id=r.dataset.rsvp;S.rsvp[id]=!S.rsvp[id];save();renderEvents();toast(S.rsvp[id]?'Marked as going. Tap Register to pay.':'Removed')}
+  if(r){const id=r.dataset.rsvp;S.rsvp[id]=!S.rsvp[id];save();renderEvents();toast(S.rsvp[id]?'Marked interested. Your spot is held only after Register and pay.':'Removed')}
+  if(e.target.closest('#rc27')){S.rc27=!S.rc27;save();renderEvents();toast(S.rc27?'You will get Raider Cup 2027 updates.':'Taken off the list')}
 });
 
 /* ---------- maps ---------- */
@@ -1104,13 +1108,22 @@ function fillGames(){
    <div class="gstack">${up.map(g=>(g.wk===BYE_WEEK+1?bye:'')+matchup(g)).join('')}</div>
    <h2 class="sec">Results</h2><div class="gstack">${played.slice().reverse().map(matchup).join('')}</div>`;
 }
+const retryBtn='<div><button class="btn small ghost" data-retry style="margin-top:10px"><i class="ph-bold ph-arrow-clockwise"></i> Try again</button></div>';
+/* reload whatever failed: schedule, headlines, injury report */
+function retryLive(){
+  if(LIVE.sched===-1)LIVE.sched=0;
+  if(LIVE.news==='fail')LIVE.news=null;
+  Object.keys(LIVE.sum).forEach(k=>{if(LIVE.sum[k].fail)delete LIVE.sum[k]});
+  loadSchedule();loadNews();const g=nextGame();if(g)loadSummary(g);fillNews();
+}
+document.addEventListener('click',e=>{if(e.target.closest('[data-retry]')){retryLive();toast('Trying again...')}});
 function fillNews(){
   const box=$('#gnews');if(!box)return;
   const g=nextGame(),s=g&&g.eid&&LIVE.sum[g.eid],inj=s&&s.inj,n=LIVE.news;
   const news=Array.isArray(n)?(n.length?n.map(a=>`<a class="card nw" href="${esc(a.u)}" ${ext}>${a.img?`<img src="${esc(a.img)}" alt="" loading="lazy">`:'<span></span>'}<div><span class="meta" style="margin:0">${a.video?'Video - ':''}${ago(a.t)}</span><b>${esc(a.h)}</b><p>${esc(a.d)}</p></div></a>`).join(''):'<div class="card empty">No Raiders headlines right now.</div>')
-    :n==='fail'?'<div class="card empty"><i class="ph-bold ph-wifi-slash"></i>News could not load. Check the connection.</div>':'<div class="card empty">Loading headlines...</div>';
+    :n==='fail'?`<div class="card empty"><i class="ph-bold ph-wifi-slash"></i>Headlines didn't load. The news service may be slow.${retryBtn}</div>`:'<div class="card empty">Loading headlines...</div>';
   const injH=inj?(inj.length?`<table class="ftable"><tbody>${inj.map(x=>`<tr><td><b>${esc(x.n)}</b><small>${esc(x.pos)}${x.why?' - '+esc(x.why):''}</small></td><td class="num"><span class="pill ${/out/i.test(x.st)?'out':''}">${esc(x.st)}</span></td></tr>`).join('')}</tbody></table>`:'<div class="empty">No Raiders injuries listed.</div>')
-    :(LIVE.sched===-1||(s&&s.fail))?'<div class="empty">Injury report could not load.</div>':'<div class="empty">Loading...</div>';
+    :(LIVE.sched===-1||(s&&s.fail))?`<div class="empty">Injury report didn't load.${retryBtn}</div>`:'<div class="empty">Loading...</div>';
   box.innerHTML=`<div class="fwrap2"><div><h2 class="sec">Raiders headlines</h2><p class="sub">Latest from ESPN. Tap a story to read it.</p><div class="gstack">${news}</div></div>
    <div><h2 class="sec">Injury report</h2><p class="sub">${g?'Before '+esc(gTitle(g))+', week '+g.wk:''}</p><div class="card" style="padding:4px 10px">${injH}</div></div></div>`;
 }
