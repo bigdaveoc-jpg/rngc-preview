@@ -561,6 +561,16 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
   .tiles{grid-template-columns:repeat(5,1fr)}
   .cmapwrap .mapbox{height:calc(100dvh - 210px)}
 }
+.tix .row1 .pill{white-space:nowrap;flex:none}
+.tix .deal > span:first-of-type{margin-left:4px}
+.seatbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.seatbar > div{min-width:72px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2)}
+.seatbar small{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.seatbar b{font-family:var(--display);font-size:22px;font-weight:800;line-height:1.05}
+.tix .note2 i{color:var(--silver-2);margin-right:4px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.check{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--text)}
+.check input{width:20px;height:20px;accent-color:#d5dae1}
 </style>
 </head>
 <body>
@@ -1487,12 +1497,20 @@ document.addEventListener('click',e=>{
 
 /* ---------- ticket exchange (member area) ---------- */
 const TIX_DEMO=[
- {id:'x1',game:'w15',event:'Raiders home game vs Broncos',venue:'Allegiant Stadium, Las Vegas',qty:2,mode:'sell',price:140,face:120,sec:'Sec 118, Row 14',by:'Chris P.',chapter:'Nevada',note:'Aisle seats. I will transfer through the ticket app.'},
- {id:'x2',game:'w14',event:'Raiders home game vs Chargers',venue:'Allegiant Stadium, Las Vegas',qty:4,mode:'trade',want:'The Broncos or Titans home game, 4 seats together',sec:'Sec 209',by:'Marcus T.',chapter:'SoCal',note:'Open to a 2-for-2 split.'},
+ {id:'x1',game:'w15',event:'Raiders home game vs Broncos',venue:'Allegiant Stadium, Las Vegas',qty:2,mode:'sell',price:140,face:120,sec:'118',row:'14',seats:'5-6',together:true,by:'Chris P.',chapter:'Nevada',note:'Aisle seats. I will transfer through the ticket app.'},
+ {id:'x2',game:'w14',event:'Raiders home game vs Chargers',venue:'Allegiant Stadium, Las Vegas',qty:4,mode:'trade',want:'The Broncos or Titans home game, 4 seats together',sec:'209',row:'3',seats:'1-4',together:true,by:'Marcus T.',chapter:'SoCal',note:'Open to a 2-for-2 split.'},
  {id:'x3',event:'Chimera scramble spot, Nov 14',venue:'Chimera Golf Club, Henderson NV',qty:1,mode:'sell',price:175,face:175,by:'Lena V.',chapter:'SoCal',note:'Cannot make it. I will move the registration to you.'},
- {id:'x4',game:'w11',event:'Raiders away game in Denver',venue:'Empower Field, Denver',qty:2,mode:'trade',want:'A Vegas home game with similar seats',sec:'Lower level',by:'Mike L.',chapter:'National',note:'Local Denver member.'}
+ {id:'x4',game:'w11',event:'Raiders away game in Denver',venue:'Empower Field, Denver',qty:2,mode:'trade',want:'A Vegas home game with similar seats',sec:'112',row:'22',seats:'9-10',together:true,by:'Mike L.',chapter:'National',note:'Local Denver member.'}
 ];
 const allTix=()=>[...S.tix,...TIX_DEMO].filter(x=>!S.tixClosed[x.id]);
+/* seat location: section, row, seats; older listings may only have a free-text section */
+const seatTxt=x=>[x.sec&&('Sec '+x.sec),x.row&&('Row '+x.row),x.seats&&('Seats '+x.seats)].filter(Boolean).join(', ');
+function seatStrip(x){
+  if(!x.sec&&!x.row&&!x.seats)return '';
+  if(!x.row&&!x.seats)return `<div class="seatbar"><div><small>Seats</small><b>${esc(x.sec)}</b></div></div>`;
+  const c=(k,v)=>`<div><small>${k}</small><b>${v?esc(v):'-'}</b></div>`;
+  return `<div class="seatbar">${c('Section',x.sec)}${c('Row',x.row)}${c('Seats',x.seats)}${x.together&&x.qty>1?'<span class="pill">Together</span>':''}</div>`;
+}
 function tixCard(x){
   const mine=S.tix.some(t=>t.id===x.id);
   const above=x.mode==='sell'&&x.face&&x.price>x.face*1.15;
@@ -1500,9 +1518,10 @@ function tixCard(x){
   const head=g?(()=>{const [a,h]=sides(g),f=fmtDate(g.date);return `<div class="tixm">${tlogo(a,'tl s')}<span class="at">@</span>${tlogo(h,'tl s')}<span>Week ${g.wk} - ${g.tbd?f.m+' TBD':f.dow+', '+f.m+' '+f.d}${g.kick&&!g.tbd&&!g.res?' - '+g.kick+' PT':''}</span></div>`})()
     :`<div class="tixm"><svg class="logo s" aria-hidden="true"><use href="#mk"/></svg><span>Club event</span></div>`;
   return `<article class="card tix">${head}<div class="row1"><h3>${esc(x.event)}</h3><span class="pill">${x.qty} ticket${x.qty===1?'':'s'}</span></div>
-   <div class="meta" style="margin:2px 0 8px">${esc(x.venue)}${x.sec?' - '+esc(x.sec):''}</div>
+   <div class="meta" style="margin:2px 0 8px">${esc(x.venue)}</div>
+   ${seatStrip(x)}
    <div class="deal">${x.mode==='sell'?`<b>$${x.price}</b><span> each</span>${x.face?`<span class="meta" style="margin:0 0 0 10px">Face value $${x.face}</span>`:''}${above?'<span class="pill" style="margin-left:10px">Above face</span>':''}`:`<span class="pill">Trade</span><span style="margin-left:10px">Wants: ${esc(x.want)}</span>`}</div>
-   ${x.note?`<p class="note2">${esc(x.note)}</p>`:''}
+   ${x.note?`<p class="note2"><i class="ph-bold ph-chat-text"></i> ${esc(x.note)}</p>`:''}
    <div class="row2"><span class="who"><span class="av s">${initials(x.by)}</span>${esc(x.by)} <span class="meta" style="margin:0">${esc(x.chapter)}</span></span>
    ${mine?`<span><button class="btn small ghost" data-tixdone="${x.id}">Mark done</button> <button class="btn small ghost" data-tixdel="${x.id}">Remove</button></span>`:`<button class="btn small" data-offer="${x.id}">${x.mode==='sell'?'Make offer':'Propose trade'}</button>`}</div></article>`;
 }
@@ -1518,19 +1537,25 @@ function openPostTix(){
     openSheet(`<h3>Post tickets</h3><form id="tixForm">
      <label for="tg">Which game?</label><select class="field" id="tg"><option value="">Club event or something else</option>${GAMES.filter(g=>!g.res).map(g=>`<option value="${g.id}">Week ${g.wk}: Raiders ${g.home?'vs':'at'} ${TEAMS[g.o]}, ${g.tbd?'date TBD':fmtDate(g.date).m+' '+fmtDate(g.date).d}</option>`).join('')}</select>
      <label for="te">Game or event</label><input class="field" id="te" required maxlength="70" placeholder="Raiders home game vs ...">
-     <label for="tv">Venue and seats (optional)</label><input class="field" id="tv" maxlength="70" placeholder="Allegiant Stadium, Sec 118">
+     <label for="tv">Venue</label><input class="field" id="tv" maxlength="70" placeholder="Allegiant Stadium, Las Vegas">
+     <div class="three"><div><label for="tsec">Section</label><input class="field" id="tsec" maxlength="12" placeholder="118"></div>
+     <div><label for="trow">Row</label><input class="field" id="trow" maxlength="8" placeholder="14"></div>
+     <div><label for="tseats">Seats</label><input class="field" id="tseats" maxlength="16" placeholder="5-6"></div></div>
+     <label class="check"><input type="checkbox" id="ttog" checked> Seats are together</label>
      <div class="two"><div><label for="tq">How many</label><input class="field" id="tq" type="number" min="1" max="8" value="2" required></div>
      <div><label for="tf">Face value each (optional)</label><input class="field" id="tf" type="number" min="0" placeholder="$"></div></div>
      <label class="radio"><input type="radio" name="tm" value="sell" checked><span><b>Sell</b>Set a price per ticket.</span></label>
      <label class="radio"><input type="radio" name="tm" value="trade"><span><b>Trade</b>Say what you want in return.</span></label>
      <label for="tp">Price each, or what you want</label><input class="field" id="tp" required maxlength="80" placeholder="140  or  a Broncos game">
+     <label for="tnote">Comment (optional)</label><textarea class="field" id="tnote" maxlength="200" placeholder="Aisle seats, parking pass included, shade after 2 pm..."></textarea>
      <p class="help">Your name and chapter show on the listing. Contact stays inside the app.</p>
      <button class="btn full" type="submit">Post to exchange</button></form>`);
     $('#tg').addEventListener('change',()=>{const g=GAMES.find(y=>y.id===$('#tg').value);if(!g)return;const V=VENUES[g.v];
       $('#te').value=g.home?'Raiders home game vs '+TEAMS[g.o]:'Raiders at '+TEAMS[g.o]+' in '+V.city.split(',')[0];$('#tv').value=V.n+', '+V.city});
     $('#tixForm').addEventListener('submit',ev=>{ev.preventDefault();
       const mode=document.querySelector('input[name=tm]:checked').value,p=$('#tp').value.trim();
-      const x={id:'u'+Date.now(),game:$('#tg').value||null,event:$('#te').value.trim(),venue:$('#tv').value.trim()||'Venue to be confirmed',qty:+$('#tq').value||1,mode,by:S.name,chapter:S.chapter==='All'?'National':S.chapter,face:+$('#tf').value||0};
+      const x={id:'u'+Date.now(),game:$('#tg').value||null,event:$('#te').value.trim(),venue:$('#tv').value.trim()||'Venue to be confirmed',qty:+$('#tq').value||1,mode,by:S.name,chapter:S.chapter==='All'?'National':S.chapter,face:+$('#tf').value||0,
+        sec:$('#tsec').value.trim(),row:$('#trow').value.trim(),seats:$('#tseats').value.trim(),together:$('#ttog').checked,note:$('#tnote').value.trim()};
       if(mode==='sell'){const n=parseFloat(p.replace(/[^0-9.]/g,''));if(!n){toast('Enter a price like 140');return}x.price=n}else x.want=p;
       S.tix.unshift(x);save();closeSheet();renderMembers();toast('Posted to the exchange')});
   });
@@ -1538,7 +1563,7 @@ function openPostTix(){
 function openOffer(id){
   const x=allTix().find(t=>t.id===id);if(!x)return;
   ensureName(()=>{
-    openSheet(`<h3>${x.mode==='sell'?'Make an offer':'Propose a trade'}</h3><p class="help" style="margin:0 0 4px">${esc(x.event)} - ${x.qty} ticket${x.qty===1?'':'s'} from ${esc(x.by)}</p>
+    openSheet(`<h3>${x.mode==='sell'?'Make an offer':'Propose a trade'}</h3><p class="help" style="margin:0 0 4px">${esc(x.event)} - ${x.qty} ticket${x.qty===1?'':'s'}${seatTxt(x)?', '+esc(seatTxt(x)):''} from ${esc(x.by)}</p>
      <form id="offerForm">${x.mode==='sell'?`<label for="oa">Your offer per ticket</label><input class="field" id="oa" inputmode="decimal" placeholder="$${x.price}" required>`:`<label for="oa">What you can trade</label><input class="field" id="oa" required maxlength="80" placeholder="A Chargers game, 2 seats">`}
      <label for="om">Message</label><textarea class="field" id="om" maxlength="300" placeholder="Say hello and when you can move them"></textarea>
      <p class="help">${esc(x.by.split(' ')[0])} gets a note in the app and decides whether to reply. Settle up only after the transfer shows in your ticket app.</p>
