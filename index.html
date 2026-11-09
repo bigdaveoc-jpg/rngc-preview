@@ -36,6 +36,8 @@ select option{background:#16191e;color:#eef0f3}
 .top{padding:max(14px,env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line);background:linear-gradient(#0f1114,var(--bg))}
 .brandrow{display:flex;align-items:center;gap:12px}
 .logo{width:40px;height:46px;flex:none}
+.top .logo{width:58px;height:67px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s var(--ease)}
+.top .logo:active{transform:scale(.94)}
 .brandtxt{flex:1;line-height:1}
 .brandtxt b{display:block;font-family:var(--display);font-size:21px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
 .brandtxt b em{font-style:normal;color:var(--silver-2);font-weight:700;letter-spacing:.22em;font-size:13px;display:block;margin-top:3px}
@@ -360,6 +362,10 @@ body.thread-open .fab{display:none!important}
   .banner{grid-column:1;grid-row:3;margin:0;border-radius:0;border:0;border-right:1px solid var(--line);border-top:1px solid var(--line);background:var(--bg-2);padding:16px 22px}
   .views{grid-column:2;grid-row:1/5}
   .logo{width:48px;height:56px}
+  .top .logo{width:80px;height:92px}
+  .brandrow{flex-wrap:wrap;row-gap:10px}
+  .brandrow .iconbtn{margin-left:auto;align-self:flex-start}
+  .brandrow .brandtxt{order:3;flex-basis:100%}
   .brandtxt b{font-size:23px;white-space:nowrap}
   .chips{flex-wrap:wrap;padding-top:18px}
   .topjoin{display:flex;margin-top:16px;width:100%}
@@ -495,7 +501,7 @@ body.thread-open .fab{display:none!important}
 
   <header class="top">
     <div class="brandrow">
-      <img class="logo" src="assets/logo/rngc-ball-static.svg" alt="" aria-hidden="true">
+      <img class="logo" id="hdrLogo" src="assets/logo/rngc-ball-static.svg" alt="Raider Nation Golf Club logo. Tap to play the animation" role="button" tabindex="0">
       <div class="brandtxt"><b>Raider Nation<em>Golf Club</em></b></div>
       <button class="iconbtn" id="btnProfile" aria-label="Your profile"><i class="ph-bold ph-user"></i></button>
     </div>
@@ -1308,6 +1314,29 @@ function setTab(t){
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 function renderAll(){renderHome();renderEvents();renderForum();if(S.tab==='courses')renderCourses();if(S.tab==='games')renderGames();if(S.tab==='members')renderMembers()}
 renderChips();renderAll();setTab('home');loadSchedule();
+
+/* header logo: tap it to replay the animation; it also replays on its own every few clicks (6+ clicks and 60+ seconds apart) */
+(function(){
+  const lg=document.getElementById('hdrLogo');if(!lg)return;
+  const STATIC=lg.getAttribute('src'),ANIM='assets/logo/rngc-ball-animated.svg',LEN=7600;
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let busy=false,last=Date.now(),clicks=0,svg=null,url=null;
+  fetch(ANIM).then(r=>r.ok?r.text():null).then(t=>{svg=t}).catch(()=>{});
+  function play(){
+    if(busy||reduce)return;busy=true;last=Date.now();clicks=0;
+    if(url)URL.revokeObjectURL(url);
+    url=svg?URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'})):null;
+    lg.src=url||ANIM+'?r='+Date.now();
+    setTimeout(()=>{lg.src=STATIC;busy=false},LEN);
+  }
+  window.playLogo=play;
+  lg.addEventListener('click',play);
+  lg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();play()}});
+  document.addEventListener('click',e=>{
+    if(e.target.closest('#hdrLogo')||!e.target.closest('button,a,select'))return;
+    if(++clicks>=6&&Date.now()-last>60000)play();
+  });
+})();
 
 /* ---------- sign-in screen (preview: real sign-in connects to club accounts later) ---------- */
 const SI=$('#signin');
