@@ -655,6 +655,8 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 @media (min-width:700px){.rolecards{grid-template-columns:repeat(4,1fr)}}
 @media (min-width:1100px){.setcols{grid-template-columns:1fr 1fr;align-items:start}}
 @media (min-width:1000px){.tab-settings-only{display:grid}}
+.hero2c .mxfoot{margin-top:12px}
+.hero2 .acts{margin-top:12px}
 </style>
 </head>
 <body>
@@ -1366,6 +1368,7 @@ function heroHTML(g){
   return `<div class="card hero2"><div class="mxtop"><span>Next game - Week ${g.wk}</span><span>${g.tbd?'Date TBD':daysTo(g.date)+' days - '+esc(g.tv||'')}</span></div>
    <div class="mxrow big">${tside(a)}${midHTML(g,1)}${tside(h,1)}</div>
    ${p!=null?winBar(p):''}${lineHTML(g)}
+   <div class="hero2c">${cardCounts(g)}</div>
    <div class="acts"><button class="btn small" data-tixgame="${g.id}"><i class="ph-bold ph-ticket"></i> Tickets</button><button class="btn small ghost" data-game="${g.id}">Game info</button></div></div>`;
 }
 let gMarkers={};
