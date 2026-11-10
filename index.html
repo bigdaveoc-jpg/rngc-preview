@@ -744,6 +744,18 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
   .seatbar > div,.invstats div,.invprev,.card .card{border-color:transparent;background:var(--panel-2)}
   .seg .chip{min-height:38px}
 }
+
+/* view switch + preview-as: plain text tabs with an underline, no bubbles */
+.viewbar,.rolebar{display:flex;align-items:flex-end;flex-wrap:nowrap;gap:20px;margin:14px 0 6px;padding:0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;overflow-x:auto;scrollbar-width:none}
+.viewbar::-webkit-scrollbar,.rolebar::-webkit-scrollbar{display:none}
+.viewbar > span,.rolebar > span{flex:none;padding-bottom:11px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.viewbar > span i,.rolebar > span i{display:none}
+.viewbar small{display:none}
+.viewbar .seg2,.rolebar .seg2{display:flex;flex-wrap:nowrap;gap:20px}
+.viewbar .seg2 .chip,.rolebar .seg2 .chip{flex:none;position:relative;min-height:0;padding:0 1px 10px;border:0;border-radius:0;background:none;color:var(--muted);font-size:15px;font-weight:600}
+.viewbar .seg2 .chip[aria-pressed="true"],.rolebar .seg2 .chip[aria-pressed="true"]{background:none;color:var(--text)}
+.viewbar .seg2 .chip[aria-pressed="true"]::after,.rolebar .seg2 .chip[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:var(--silver)}
+.viewbar .seg2 .chip:active,.rolebar .seg2 .chip:active{transform:none;opacity:.7}
 </style>
 </head>
 <body>
@@ -2326,13 +2338,13 @@ const canInvite=()=>S.member&&S.cfg.club.invites&&(S.cfg.club.invWho==='all'||S.
 function syncTop(){const b=document.querySelector('.topjoin');if(!b)return;
   if(S.member&&canInvite()){b.dataset.sub='home|invite';b.innerHTML='<i class="ph-bold ph-paper-plane-tilt"></i> Invite a friend'}
   else{b.dataset.sub='home|join';b.innerHTML='<i class="ph-bold ph-identification-badge"></i> Join the club'}}
-function viewBar(){return `<div class="viewbar"><span><i class="ph-bold ph-eye"></i> See the app as</span><div class="seg2"><button class="chip" data-asview="guest" aria-pressed="${!S.member}">Guest</button><button class="chip" data-asview="member" aria-pressed="${S.member}">Member</button></div><small>Preview switch. In the live app this follows sign-in.</small></div>`}
+function viewBar(){return `<div class="viewbar"><span><i class="ph-bold ph-eye"></i> Viewing as</span><div class="seg2"><button class="chip" data-asview="guest" aria-pressed="${!S.member}">Guest</button><button class="chip" data-asview="member" aria-pressed="${S.member}">Member</button></div><small>Preview switch. In the live app this follows sign-in.</small></div>`}
 const PERKS=[['map-trifold','Member map','See members near you and who is going to each game'],['ticket','Ticket exchange','Buy, sell and trade seats for every Raiders game'],['chats-circle','Forum posting','Start threads and reply. Guests can only read'],['golf','Scorecards and handicap','Club leaderboard, chapter cup, GHIN for chapters'],['paper-plane-tilt','Your own invite link','Bring friends into your chapter']];
 const perksHTML=()=>`<ul class="perks">${PERKS.map(([i,t,d])=>`<li><i class="ph-bold ph-${i}"></i><span><b>${t}</b><small>${d}</small></span></li>`).join('')}</ul>`;
-function guestCard(){return `<div class="card guestcard"><span class="pill"><i class="ph-bold ph-lock-key"></i> Guest view</span><h3 style="margin-top:8px">What members get</h3>${perksHTML()}
+function guestCard(){return `<div class="card guestcard"><h3>What members get</h3>${perksHTML()}
   <div class="acts" style="margin-top:14px"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join from $99 a year</button><button class="btn ghost" data-signin><i class="ph-bold ph-sign-in"></i> Member sign in</button></div></div>`}
 function inviteCard(){if(!canInvite())return '';const n=(S.invLog||{}).shared||0;
-  return `<div class="card invcard"><span class="pill"><i class="ph-bold ph-check-circle"></i> Member view</span><h3 style="margin-top:8px">Invite a friend</h3><p class="meta">Your link opens a welcome page with your name and the ${esc(chName(invChapter()))}.${n?` Shared ${n} time${n===1?'':'s'}.`:''}</p>
+  return `<div class="card invcard"><h3>Invite a friend</h3><p class="meta">Your link opens a welcome page with your name and the ${esc(chName(invChapter()))}.${n?` Shared ${n} time${n===1?'':'s'}.`:''}</p>
   <div class="invlink"><input class="field" readonly value="${esc(invLink())}" aria-label="Your invite link" data-invsel><button class="btn small" data-inv="copy"><i class="ph-bold ph-copy"></i> Copy</button></div>
   <div class="acts" style="margin-top:10px"><button class="btn small ghost" data-inv="share"><i class="ph-bold ph-share-network"></i> Share</button><button class="btn small ghost" data-sub="home|invite">More options</button></div></div>`}
 function inviteHTML(){
