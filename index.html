@@ -831,6 +831,11 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
   .banner{border-top-color:var(--glass-edge)}
 }
 @media (prefers-reduced-transparency:reduce){.card{background:var(--panel);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* faint club shield behind the glass (club's own mark, not the NFL Raiders logo) */
+.views::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:url("assets/logo/rngc-ball-static.svg") center 58%/min(78%,560px) auto no-repeat;opacity:.06;filter:grayscale(1) brightness(1.4)}
+.views > .view{z-index:1}
+@media (prefers-reduced-transparency:reduce){.views::before{opacity:.03}}
 </style>
 </head>
 <body>
