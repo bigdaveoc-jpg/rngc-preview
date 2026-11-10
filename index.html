@@ -171,6 +171,13 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .gate .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .mtools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
 .mtools select{min-height:44px;padding:0 12px;border-radius:var(--pill);background:var(--panel);border:1px solid var(--line);flex:1;min-width:170px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px;margin:3px 5px 0 0;border:1px solid var(--silver-2);color:var(--silver);background:var(--panel-2)}
+.badge.hof{background:var(--silver);color:#0a0b0d;border-color:var(--silver)}
+.mem.alumcard,.card.hofcard{border-color:var(--silver-2)}
+.av.hofav{background:none;border:0;width:44px;height:44px}
+.card.hofcard{background:linear-gradient(135deg,rgba(213,218,225,.16),rgba(213,218,225,.03) 60%),var(--panel)}
+.hofyear{font-family:var(--display);font-weight:800;font-size:30px;color:var(--silver);line-height:1}
+.hofhead{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
 .mem{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;padding:12px 14px;transition:transform .18s var(--ease),border-color .2s}
 .mem:active{transform:scale(.985)}
 .mem b{font-family:var(--display);font-size:20px;text-transform:uppercase;letter-spacing:.02em;line-height:1.05;display:block}
@@ -1079,6 +1086,24 @@ const MEMBERS=[
  {id:'m15',name:'Dre K.',chapter:'National',city:'atl',course:'Bobby Jones'},
  {id:'m16',name:'Hector G.',chapter:'National',city:'tuc',course:'Randolph'}
 ];
+/* alumni = members who played for the team (demo data, not real people); Hall of Fame = club honors, any member */
+const ALUMNI={
+ m3:{pos:'Offensive line',yrs:'2003-2008',note:'Five seasons protecting the quarterback, now a 6 handicap.'},
+ m8:{pos:'Linebacker',yrs:'1999-2005',note:'Runs the Nevada chapter scramble every spring.'},
+ m12:{pos:'Running back',yrs:'1996-2001',note:'Hosts the Dallas watch party and a yearly charity round.'},
+ m15:{pos:'Defensive back',yrs:'2008-2012',note:'Plays Bobby Jones every weekend and mentors new members.'}
+};
+const HOF=[
+ {id:'m8',year:2026,honor:'Chapter Builder',note:'Grew the Nevada chapter from 12 to 60 members.'},
+ {id:'m12',year:2026,honor:'Charity Champion',note:'Raised $18,000 for youth football through the annual charity round.'},
+ {id:'m1',year:2025,honor:'Club Champion',note:'Three Fall Club Championship wins in a row.'},
+ {id:'m3',year:2025,honor:'Alumni of the Year',note:'First former player to join and recruit a full foursome.'},
+ {id:'m6',year:2024,honor:'Founding Member',note:'Signed up in the first week the club opened.'}
+];
+const alumOf=id=>ALUMNI[id]||null,hofOf=id=>HOF.find(h=>h.id===id)||null;
+const HOFLOGO='<svg viewBox="0 0 40 40" width="44" height="44" aria-label="Hall of Fame" role="img"><path d="M20 2 35 8v12c0 9-7 15-15 18C12 35 5 29 5 20V8Z" fill="#e8ecf1" stroke="#9aa3ae" stroke-width="2"/><path d="M20 6 31 10.5V20c0 6.8-5 11.4-11 14-6-2.6-11-7.2-11-14v-9.5Z" fill="none" stroke="#0a0b0d" stroke-opacity=".35"/><polygon points="20,10 22.4,16.2 29,16.6 23.9,20.8 25.6,27.2 20,23.6 14.4,27.2 16.1,20.8 11,16.6 17.6,16.2" fill="#0a0b0d"/></svg>';
+const avOf=m=>hofOf(m.id)?`<span class="av hofav" title="Hall of Fame">${HOFLOGO}</span>`:`<span class="av">${initials(m.name)}</span>`;
+const memBadges=id=>(alumOf(id)?'<span class="badge alum"><i class="ph-fill ph-football"></i> Alumni</span>':'')+(hofOf(id)?'<span class="badge hof"><i class="ph-fill ph-star"></i> Hall of Fame</span>':'');
 const jit=id=>{let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))%997;return[((h%17)-8)*.004,(((h>>2)%17)-8)*.004]};
 const memPos=m=>{const c=CITIES[m.city],j=jit(m.id);return[c.lat+j[0],c.lng+j[1]]};
 
@@ -1746,6 +1771,22 @@ function visibleMembers(){
 function myPos(){const c=CITIES[S.myCity];return c?[c.lat,c.lng]:null}
 function renderMembers(){
   const v=$('#v-members');
+  const seg=`<div class="seg" role="tablist" aria-label="Member area"><button class="chip" data-mv="alumni" aria-pressed="${S.mview==='alumni'}"><i class="ph-bold ph-trophy"></i> Alumni &amp; Hall of Fame</button><button class="chip" data-mv="map" aria-pressed="${S.mview==='map'}"><i class="ph-bold ph-map-trifold"></i> Member map</button><button class="chip" data-mv="tix" aria-pressed="${S.mview==='tix'}"><i class="ph-bold ph-ticket"></i> Ticket exchange</button>${S.demo?`<span class="pill demo">Demo mode</span><button class="chip" data-tour="restart">Restart tour</button><button class="chip" data-tour="exit">Exit demo</button>`:''}</div>`;
+  /* Alumni and Hall of Fame are open to everyone, no sign-in */
+  if(S.mview==='hof'){S.mview='alumni';S.af='hof'}
+  if(S.mview==='alumni'){
+    const af=S.af||'all',byId=id=>MEMBERS.find(m=>m.id===id);
+    const ids=[...new Set([...HOF.map(h=>h.id),...Object.keys(ALUMNI)])].filter(id=>af==='all'||(af==='hof'?hofOf(id):alumOf(id)))
+      .sort((x,y)=>(hofOf(y)?hofOf(y).year:0)-(hofOf(x)?hofOf(x).year:0)||(hofOf(y)?1:0)-(hofOf(x)?1:0));
+    const nHof=HOF.length,nAl=Object.keys(ALUMNI).length;
+    const flt=[['all','Everyone'],['hof','Hall of Fame ('+nHof+')'],['alumni','Alumni ('+nAl+')']];
+    v.innerHTML=seg+`<h2 class="sec" style="margin-bottom:0">Alumni &amp; Hall of Fame</h2><p class="sub">Members who played for the team, and members the club honors. Tap one to see who they are.</p>
+     <div class="seg" style="margin-top:10px">${flt.map(([k,l])=>`<button class="chip" data-af="${k}" aria-pressed="${af===k}">${l}</button>`).join('')}</div>
+     <div class="stack" style="margin-top:12px">${ids.map(id=>{const m=byId(id),a=alumOf(id),h=hofOf(id);
+      return `<button class="card mem ${h?'hofcard':'alumcard'}" data-mem="${id}">${avOf(m)}<span><b>${esc(m.name)}</b><small>${h?'Hall of Fame '+h.year+' - '+esc(h.honor):'Alumni'}${a?' - '+esc(a.pos)+', '+esc(a.yrs):''}</small><span style="display:block">${memBadges(id)}</span><small style="display:block;margin-top:4px">${esc(h?h.note:a.note)}</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`}).join('')}</div>
+     <div class="card" style="margin-top:14px"><b>Played for the team, or know someone who belongs?</b><div class="meta">Tell a chapter leader. Alumni are added when they join, and chapter leaders pick the Hall of Fame class each fall.</div></div>`;
+    renderCoach();return;
+  }
   if(!S.member){
     const tg=S.mview==='tix'&&S.tixGame&&GAMES.find(y=>y.id===S.tixGame);
     v.innerHTML=`<div class="card gate rise"><i class="ph-fill ph-lock-key"></i><h3>Members only</h3>
@@ -1755,7 +1796,6 @@ function renderMembers(){
      <p class="help" style="margin-top:14px">Demo mode walks you through the map and the ticket exchange with sample members. In the live version, sign-in uses the account members already have on the club site.</p></div>`;
     renderCoach();return;
   }
-  const seg=`<div class="seg" role="tablist" aria-label="Member area"><button class="chip" data-mv="map" aria-pressed="${S.mview==='map'}"><i class="ph-bold ph-map-trifold"></i> Member map</button><button class="chip" data-mv="tix" aria-pressed="${S.mview==='tix'}"><i class="ph-bold ph-ticket"></i> Ticket exchange</button>${S.demo?`<span class="pill demo">Demo mode</span><button class="chip" data-tour="restart">Restart tour</button><button class="chip" data-tour="exit">Exit demo</button>`:''}</div>`;
   if(S.mview==='tix'){v.innerHTML=seg+tixHTML();renderCoach();return}
   const list=visibleMembers();
   const dests=Object.entries(CITIES).sort((a,b)=>a[1].n<b[1].n?-1:1);
@@ -1770,7 +1810,7 @@ function renderMembers(){
       <button class="chip" id="tripOnly" aria-pressed="${S.tripOnly}">Traveling now</button>
      </div>
      ${S.goingTo?`<div class="card" style="margin-top:12px"><b style="font-family:var(--display);font-size:20px;text-transform:uppercase">Near ${esc(CITIES[S.goingTo].n)}</b><div class="meta">${near.length?near.length+' member'+(near.length===1?'':'s')+' within 100 miles':'No members within 100 miles yet. You could be the first. Post in the Travel board.'}</div></div>`:''}
-     <div class="stack" style="margin-top:12px">${(S.goingTo?near.map(x=>x.m):list).map(m=>`<button class="card mem" data-mem="${m.id}"><span class="av">${initials(m.name)}</span><span><b>${esc(m.name)}</b><small>${esc(CITIES[m.city].n)} - ${esc(m.chapter)}${m.trip?' - Traveling to '+esc(CITIES[m.trip.city].n):''}</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join('')||'<div class="empty"><i class="ph-bold ph-users-three"></i>No members match this filter.</div>'}</div>
+     <div class="stack" style="margin-top:12px">${(S.goingTo?near.map(x=>x.m):list).map(m=>`<button class="card mem ${hofOf(m.id)?'hofcard':''}" data-mem="${m.id}">${avOf(m)}<span><b>${esc(m.name)}</b><small>${esc(CITIES[m.city].n)} - ${esc(m.chapter)}${m.trip?' - Traveling to '+esc(CITIES[m.trip.city].n):''}</small>${memBadges(m.id)?`<span style="display:block">${memBadges(m.id)}</span>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join('')||'<div class="empty"><i class="ph-bold ph-users-three"></i>No members match this filter.</div>'}</div>
      <div class="card privacy"><i class="ph-bold ph-shield-check"></i><span>Only signed-in members see this map. You choose what shows. <button style="color:var(--silver);text-decoration:underline;min-height:44px" id="myVis">Change my visibility</button></span></div>
     </div>
    </div>`;
@@ -1789,15 +1829,17 @@ function renderMembers(){
 }
 function openMember(id){
   const mm=MEMBERS.find(x=>x.id===id);if(!mm)return;
-  openSheet(`<div class="who" style="gap:14px"><span class="av">${initials(mm.name)}</span><div><h3 style="margin:0">${esc(mm.name)}</h3><span class="pill">${esc(mm.chapter)}</span></div></div>
+  openSheet(`<div class="who" style="gap:14px">${avOf(mm)}<div><h3 style="margin:0">${esc(mm.name)}</h3><span class="pill">${esc(mm.chapter)}</span>${memBadges(mm.id)?`<div>${memBadges(mm.id)}</div>`:''}</div></div>
    <div class="stack" style="margin-top:14px">
-    <div class="card"><div class="meta" style="margin:0">Based in</div><b>${esc(CITIES[mm.city].n)}</b></div>
-    <div class="card"><div class="meta" style="margin:0">Home course</div><b>${esc(mm.course)}</b></div>
-    ${mm.trip?`<div class="card"><div class="meta" style="margin:0">Traveling</div><b>${esc(CITIES[mm.trip.city].n)}, ${esc(mm.trip.dates)}</b></div>`:''}
+    ${alumOf(mm.id)?`<div class="card"><div class="meta" style="margin:0">Played for the team</div><b>${esc(alumOf(mm.id).pos)}, ${esc(alumOf(mm.id).yrs)}</b></div>`:''}
+    ${hofOf(mm.id)?`<div class="card"><div class="meta" style="margin:0">Hall of Fame, class of ${hofOf(mm.id).year}</div><b>${esc(hofOf(mm.id).honor)}</b></div>`:''}
+    ${S.member?`<div class="card"><div class="meta" style="margin:0">Based in</div><b>${esc(CITIES[mm.city].n)}</b></div>
+    <div class="card"><div class="meta" style="margin:0">Home course</div><b>${esc(mm.course)}</b></div>`:''}
+    ${S.member&&mm.trip?`<div class="card"><div class="meta" style="margin:0">Traveling</div><b>${esc(CITIES[mm.trip.city].n)}, ${esc(mm.trip.dates)}</b></div>`:''}
    </div>
-   <button class="btn full" id="sayHi"><i class="ph-bold ph-hand-waving"></i> Say hi</button>
-   <p class="help">No phone or email is shown. They choose whether to reply.</p>`);
-  $('#sayHi').addEventListener('click',()=>{closeSheet();toast('Hello sent to '+mm.name.split(' ')[0]+'. They choose whether to reply.')});
+   ${S.member?`<button class="btn full" id="sayHi"><i class="ph-bold ph-hand-waving"></i> Say hi</button>
+   <p class="help">No phone or email is shown. They choose whether to reply.</p>`:'<p class="help">Sign in as a member to see where members play and say hi.</p>'}`);
+  if(S.member)$('#sayHi').addEventListener('click',()=>{closeSheet();toast('Hello sent to '+mm.name.split(' ')[0]+'. They choose whether to reply.')});
 }
 document.addEventListener('click',e=>{
   const mm=e.target.closest('[data-mem]');if(mm)openMember(mm.dataset.mem);
@@ -1957,6 +1999,7 @@ function openOffer(id){
   });
 }
 document.addEventListener('click',e=>{
+  const af=e.target.closest('[data-af]');if(af){S.af=af.dataset.af;save();renderMembers();return}
   const mv=e.target.closest('[data-mv]');if(mv){S.mview=mv.dataset.mv;save();renderMembers();return}
   const tf=e.target.closest('[data-tf]');if(tf){S.tixFilter=tf.dataset.tf;save();renderMembers();return}
   if(e.target.closest('#postTix')){openPostTix();return}
@@ -2081,7 +2124,7 @@ const SUBNAV={
  games:[['Raiders schedule','sched'],['Player news','news'],['Fantasy league','ff']],
  courses:[['Course map','map'],['Where we play','list']],
  forum:[['All posts','All'],['Tournaments','Tournaments'],['Game Day','Game Day'],['Golf Tips','Golf Tips'],['Travel','Travel'],['Gear','Gear']],
- members:[['Member map','map'],['Ticket exchange','tix']]
+ members:[['Alumni & Hall of Fame','alumni'],['Member map','map'],['Ticket exchange','tix']]
 };
 const SUB={};
 function subNow(t){
