@@ -313,6 +313,10 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
   .tl{width:36px;height:36px}
 }
 /* side menu sub-links (computer layout) */
+/* Golf tab: the golf tracker page runs inside the app */
+#v-golf.view{overflow:hidden;padding-left:0;padding-right:0}
+#v-golf iframe{display:block;width:100%;height:100%;border:0;background:transparent}
+@media (min-width:1000px){#v-golf.view{padding:0}}
 .subnav{display:none}
 @media (min-width:1000px){
   /* the whole left column scrolls as one when the menu is taller than the screen; the page area stays put */
@@ -374,7 +378,7 @@ textarea.field{min-height:110px;resize:vertical}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
 /* tab bar */
-.tabs{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--line);background:rgba(10,11,13,.94);backdrop-filter:blur(18px);padding:6px 4px max(8px,env(safe-area-inset-bottom));position:relative;z-index:30}
+.tabs{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--line);background:rgba(10,11,13,.94);backdrop-filter:blur(18px);padding:6px 4px max(8px,env(safe-area-inset-bottom));position:relative;z-index:30}
 .tab{min-height:56px;display:grid;justify-items:center;align-content:center;gap:3px;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.03em;border-radius:12px;transition:color .2s,transform .18s var(--ease)}
 .tab i{font-size:23px}
 .tab:active{transform:scale(.94)}
@@ -911,6 +915,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
   <main class="views">
     <section class="view on" id="v-home" aria-label="Home"></section>
     <section class="view" id="v-events" aria-label="Events"></section>
+    <section class="view" id="v-golf" aria-label="My golf"><iframe id="golfFrame" title="My golf: rounds, play log, groups and club events"></iframe></section>
     <section class="view" id="v-games" aria-label="Raiders games"></section>
     <section class="view" id="v-courses" aria-label="Courses"></section>
     <section class="view" id="v-forum" aria-label="Forum"></section>
@@ -925,6 +930,8 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
     <div class="subnav" data-for="home"><div></div></div>
     <button class="tab" role="tab" data-tab="events" aria-selected="false"><i class="ph-fill ph-calendar-check"></i>Events<span class="bar"></span></button>
     <div class="subnav" data-for="events"><div></div></div>
+    <button class="tab" role="tab" data-tab="golf" aria-selected="false"><i class="ph-fill ph-golf"></i>Golf<span class="bar"></span></button>
+    <div class="subnav" data-for="golf"><div></div></div>
     <button class="tab" role="tab" data-tab="games" aria-selected="false"><i class="ph-fill ph-football"></i>Games<span class="bar"></span></button>
     <div class="subnav" data-for="games"><div></div></div>
     <button class="tab" role="tab" data-tab="courses" aria-selected="false"><i class="ph-fill ph-flag-pennant"></i>Courses<span class="bar"></span></button>
@@ -1296,7 +1303,7 @@ function evCard(e){
    <div class="row"><span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
    <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
    <a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`}</div>
-   ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a></div>`:''}
+   ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a></div>`:''}
    </div></article>`;
 }
 function renderEvents(){
@@ -2057,12 +2064,19 @@ function setTab(t){
   if(t==='games')renderGames();
   if(t==='members')renderMembers();else renderCoach();
   if(t==='forum')renderForum();
+  if(t==='golf')renderGolf();
   document.getElementById('v-'+t).scrollTop=0;
   renderSubnav();
 }
+/* Golf tab: same golf tracker as the scorecard page, shown inside the app; the side menu picks its section */
+function renderGolf(){const fr=$('#golfFrame'),want=new URL('scorecard/#/'+(S.golfv||'me'),location.href).href;
+  try{const cur=fr.contentWindow&&fr.contentWindow.location.href;if(cur&&cur!=='about:blank'&&cur.split('#')[0]===want.split('#')[0]){if(cur!==want)fr.contentWindow.location.replace(want);return}}catch(e){}
+  fr.src=want}
+window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||!e.data.golf)return;const k=e.data.golf;if(['me','log','groups','events'].includes(k)&&S.golfv!==k){S.golfv=k;renderSubnav()}});
 /* side menu: the open page shows its sub-links underneath it */
 const SUBNAV={
  home:[['Join a chapter','join'],['Invite a friend','invite'],['Club leaders','leaders'],['Club news','news'],['Club shop','shop'],['Sponsors','sponsors']],
+ golf:[['My golf','me'],['Play log','log'],['Groups','groups'],['Club events','events']],
  events:[['Upcoming','up'],['Scorecards','scores'],['Raider Cup','cup'],['Past events','past']],
  games:[['Raiders schedule','sched'],['Player news','news'],['Fantasy league','ff']],
  courses:[['Course map','map'],['Where we play','list']],
@@ -2074,6 +2088,7 @@ function subNow(t){
   if(t==='home')return S.hpage||'overview';
   if(t==='events')return !S.eview||S.eview==='list'?'up':S.eview;
   if(t==='courses')return S.cview||'map';
+  if(t==='golf')return S.golfv||'me';
   if(t==='settings')return S.spage||'account';
   if(t==='games')return S.gview;
   if(t==='members')return S.mview;
@@ -2092,6 +2107,7 @@ function goSub(t,k){
   if(t==='home'){S.hpage=k;if(k==='join')S.joinSent=null}
   if(t==='events'){S.eview=k;save()}
   if(t==='courses')S.cview=k;
+  if(t==='golf')S.golfv=k;
   if(t==='settings')S.spage=k;
   if(t==='games'){S.gview=k;save()}
   if(t==='members'){S.mview=k;save()}

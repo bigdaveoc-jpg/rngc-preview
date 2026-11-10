@@ -98,7 +98,8 @@ function trSeed(){const r=rng(hash('rngc-tracker-demo')),c=COURSES.chimera,tee=c
   G.seeded=true;gsave()}
 
 /* ---------- golf home ---------- */
-function trBar(title,sub,right=''){return `<div class="bar"><a href="../" aria-label="Back to the club app"><img class="logo" src="${LOGO}" alt=""></a><div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${right}</div>`}
+const EMBED=(()=>{try{return window.top!==window}catch(e){return true}})();
+function trBar(title,sub,right=''){return `<div class="bar">${EMBED?'':`<a href="../" aria-label="Back to the club app"><img class="logo" src="${LOGO}" alt=""></a>`}<div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${right}</div>`}
 const trBack=h=>`<a class="ib" href="${h}" aria-label="Back"><i class="ph-bold ph-arrow-left"></i></a>`;
 function trTabs(cur){return `<div class="seg" role="group" aria-label="Golf sections">${[['me','My golf'],['groups','Groups'],['events','Club events']].map(([k,l])=>`<button data-tab="${k}" aria-pressed="${k===cur}">${l}</button>`).join('')}</div>`}
 function trWire(){document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>location.hash='#/'+b.dataset.tab);
@@ -106,6 +107,7 @@ function trWire(){document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=(
 
 function hub(h){$('#app').className='wrap';if(!G.seeded)trSeed();
   const[a,b]=h.split('/');
+  if(EMBED)try{parent.postMessage({golf:a==='group'||a==='new'&&b?'groups':a==='round'||a===''||a==='new'?'me':a},location.origin)}catch(e){}
   if(a==='groups')return trGroups();
   if(a==='group'&&b)return trGroup(b);
   if(a==='events')return trEvents();
