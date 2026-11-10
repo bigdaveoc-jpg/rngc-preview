@@ -756,6 +756,52 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .viewbar .seg2 .chip[aria-pressed="true"],.rolebar .seg2 .chip[aria-pressed="true"]{background:none;color:var(--text)}
 .viewbar .seg2 .chip[aria-pressed="true"]::after,.rolebar .seg2 .chip[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:var(--silver)}
 .viewbar .seg2 .chip:active,.rolebar .seg2 .chip:active{transform:none;opacity:.7}
+
+/* ===== NO BUBBLES (David, 2026-11-09): filters are underline tab rows, buttons and tags have soft square corners ===== */
+.chips:has(> .chip),.seg,.seg2{display:flex;flex-wrap:nowrap;align-items:flex-end;gap:22px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);padding-top:14px}
+.chips:has(> .chip)::-webkit-scrollbar,.seg::-webkit-scrollbar,.seg2::-webkit-scrollbar{display:none}
+.seg2{border-bottom:0;padding-top:0}
+.chips .chip.chip,.seg .chip.chip,.seg2 .chip.chip{flex:none;position:relative;display:inline-flex;align-items:center;gap:6px;min-height:0;padding:0 1px 11px;border:0;border-radius:0;background:none;color:var(--muted);font-family:var(--display);font-size:17px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;transition:color .2s}
+.chips .chip.chip i,.seg .chip.chip i{font-size:16px}
+.chips .chip.chip:hover,.seg .chip.chip:hover,.seg2 .chip.chip:hover{color:var(--text)}
+.chips .chip.chip[aria-pressed="true"][aria-pressed],.seg .chip.chip[aria-pressed="true"][aria-pressed],.seg2 .chip.chip[aria-pressed="true"][aria-pressed]{background:none;color:var(--text);border:0}
+.chips .chip.chip[aria-pressed="true"]::after,.seg .chip.chip[aria-pressed="true"]::after,.seg2 .chip.chip[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:2px 2px 0 0;background:var(--silver)}
+.seg2 .chip.chip[aria-pressed="true"]::after{bottom:0;height:2px}
+.chips .chip.chip:active,.seg .chip.chip:active,.seg2 .chip.chip:active{transform:none;opacity:.7}
+.viewbar .seg2,.rolebar .seg2{gap:20px}
+.viewbar .seg2 .chip.chip,.rolebar .seg2 .chip.chip{font-family:var(--body);font-size:15px;font-weight:600;letter-spacing:0;text-transform:none;padding-bottom:10px}
+.viewbar .seg2 .chip.chip[aria-pressed="true"]::after,.rolebar .seg2 .chip.chip[aria-pressed="true"]::after{bottom:-1px}
+/* buttons: soft square corners in place of round pills */
+.btn,.btn.small,.chsel,.topjoin{border-radius:10px}
+.fab{border-radius:14px}
+/* tags: flat labels, no outline bubble */
+.pill{border:0;border-radius:4px;background:var(--panel-2);color:var(--silver-2);min-height:22px;padding:0 8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.card .pill{background:#232830}
+
+/* ===== GLASS (Apple materials): header and tab bar float over the content; tighter spacing ===== */
+.footnote{display:none}
+@media (max-width:999px){
+  .top{position:absolute;top:0;left:0;right:0;z-index:35;border-bottom:0;background:rgba(10,11,13,.58);-webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);box-shadow:0 1px 0 rgba(255,255,255,.06),0 10px 24px -18px rgba(0,0,0,.9)}
+  .tabs{position:absolute;left:0;right:0;bottom:0;border-top:0;background:rgba(10,11,13,.6);-webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);box-shadow:0 -1px 0 rgba(255,255,255,.07)}
+  .view{padding-top:calc(66px + env(safe-area-inset-top));padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+  #banner.banner{display:none!important}
+  .footnote{display:block;flex-basis:100%;font-size:12px;color:var(--muted)}
+  .fab{bottom:calc(84px + env(safe-area-inset-bottom))}
+  .sheet{background:rgba(22,25,30,.86);-webkit-backdrop-filter:blur(26px) saturate(160%);backdrop-filter:blur(26px) saturate(160%);border-top:1px solid rgba(255,255,255,.08)}
+  .scrim{background:rgba(0,0,0,.5)}
+  /* less dead space */
+  h2.sec{margin:18px 0 4px}
+  h2.sec + .sub,.pagehead + .sub{margin-top:0}
+  .sub{margin:0 0 10px}
+  .hero .bg{height:150px}
+  .hero h1{font-size:32px;margin:6px 0}
+  .hero .acts{margin-top:12px}
+  .next{margin-top:10px;padding:12px 14px}
+  .tiles{margin-top:12px;gap:8px}
+  .foot{margin-top:22px;padding-top:14px}
+  .stack{gap:8px}
+}
+@media (prefers-reduced-transparency:reduce){.top,.tabs,.sheet{background:var(--bg-2);-webkit-backdrop-filter:none;backdrop-filter:none}}
 </style>
 </head>
 <body>
@@ -1098,7 +1144,7 @@ function overviewHTML(){
    <div class="hero"><div class="bg" style="background-image:url('${UP}2026/06/IMG_5442-1024x768.jpg')"></div><div class="in">
      ${S.member?`<span class="tag">Member - ${esc(chName(S.cfg.my.chapter))}</span>
      <h1>Welcome back, ${esc(firstName())}</h1>
-     <p>Your events, your tee times and your seats for game day. Bring a Raiders fan into the club with your invite link.</p>
+     <p>Your events, tee times and game-day seats in one place.</p>
      <div class="acts"><button class="btn" data-sub="home|invite"><i class="ph-bold ph-paper-plane-tilt"></i> Invite a friend</button><button class="btn ghost" data-sub="events|up">See events</button></div>`
      :`<span class="tag">Est. 2019 - Travel, Golf, Football</span>
      <h1>Tee it up with Raider Nation</h1>
@@ -1115,7 +1161,7 @@ function overviewHTML(){
     <a href="https://www.instagram.com/raidernationgolfclub" ${ext}><i class="ph-bold ph-instagram-logo"></i> Instagram</a>
     <a href="https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ" ${ext}><i class="ph-bold ph-youtube-logo"></i> YouTube</a>
     <a href="https://www.facebook.com/search/top?q=raider%20nation%20golf%20club" ${ext}><i class="ph-bold ph-facebook-logo"></i> Facebook</a>
-    <span style="margin-left:auto">&copy; Raider Nation Golf Club 2026</span></div>`;
+    <span style="margin-left:auto">&copy; Raider Nation Golf Club 2026</span><span class="footnote">Preview: events, prices and the Raiders schedule are real. Members, posts and tickets are demo.</span></div>`;
 }
 /* join a chapter: the form goes to that chapter's president (preview: nothing is sent yet) */
 function joinHTML(){
@@ -1127,7 +1173,7 @@ function joinHTML(){
   const ch=S.joinCh||(S.chapter!=='All'?S.chapter:'SoCal');
   const opt=p=>`<label class="radio plan2"><input type="radio" name="jc" value="${p.chapter}" ${ch===p.chapter?'checked':''}><span><b>${p.name} <em>$${p.price}/yr</em></b>${p.blurb}<small>Goes to ${LEAD_X[PRES[p.chapter]].name}</small></span></label>`;
   const inv=S.invite;
-  return pageHead('Join a chapter','Fill this out and it goes straight to the president of the chapter you pick.')+`
+  return pageHead('Join a chapter','Goes straight to the chapter president.')+`
    ${inv?`<span class="pill invpill"><i class="ph-bold ph-paper-plane-tilt"></i> Invited by ${esc(inv.by)}</span>`:''}
    <form id="joinForm" class="joinform rise" novalidate>
     <div class="jcol">${PLANS.map(opt).join('')}</div>
@@ -1160,7 +1206,7 @@ document.addEventListener('submit',e=>{
 document.addEventListener('click',e=>{if(e.target.closest('#joinAgain')){S.joinSent=null;save();renderHome()}});
 /* club leaders: tap for bio and contact */
 function leadersHTML(){
-  return pageHead('Club leaders','Tap a leader for their bio and to send them a message.')+`<div class="leadgrid rise">${Object.values(LEAD_X).map(L=>`<button class="card leadcard" data-leader="${L.id}"><img src="${L.img}" alt="" loading="lazy"><div><b>${esc(L.name)}</b><span>${esc(L.role)}</span><small>${esc(L.chapters)}</small></div><i class="ph-bold ph-caret-right"></i></button>`).join('')}</div>`;
+  return pageHead('Club leaders')+`<div class="leadgrid rise">${Object.values(LEAD_X).map(L=>`<button class="card leadcard" data-leader="${L.id}"><img src="${L.img}" alt="" loading="lazy"><div><b>${esc(L.name)}</b><span>${esc(L.role)}</span><small>${esc(L.chapters)}</small></div><i class="ph-bold ph-caret-right"></i></button>`).join('')}</div>`;
 }
 function openLeader(id){
   const L=LEAD_X[id];if(!L)return;
@@ -1181,7 +1227,7 @@ document.addEventListener('click',e=>{
 function shopHTML(){
   const evs=EVENTS.filter(e=>!e.status&&!isPast(e.date));
   const item=(img,t,price,meta,url,fit)=>`<a class="card shopitem" href="${url}" ${ext}><div class="simg ${fit||''}"><img src="${img}" alt="" loading="lazy"></div><div class="sbody"><b>${t}</b><div class="meta">${meta}</div><div class="sprice">${price}</div><span class="btn small">Buy on club store</span></div></a>`;
-  return pageHead('Club shop','Checkout happens on the club store at raidernationgolfclub.com.')+`
+  return pageHead('Club shop','Checkout is on the club store.')+`
    <h3 class="shophead">Club gear</h3><div class="shopgrid rise">${item(UP+'2026/06/RNGC-POLO-26-1-324x324.png','RNGC Golf Polo, The OG Classic','$60 - $65','Sizes S to 4XL',SHOP+'rngc-golf-polo-the-og-classic/')}</div>
    <h3 class="shophead">Memberships</h3><div class="shopgrid">${PLANS.map(p=>item(p.chapter==='National'?UP+'2026/06/ROSS-PREZ-NATIONAL-324x324.png':LEAD_X[PRES[p.chapter]].img,p.name+' membership','$'+p.price+' per year',p.chapter==='National'?'For fans anywhere':'GHIN handicap, laser bag tag',p.url,'contain')).join('')}</div>
    ${evs.length?`<h3 class="shophead">Event entries</h3><div class="shopgrid">${evs.map(e=>item(e.img,e.name,e.price,fmtDate(e.date).dow+', '+fmtDate(e.date).m+' '+fmtDate(e.date).d+' - '+e.where,e.url,'top')).join('')}</div>`:''}
@@ -1189,12 +1235,12 @@ function shopHTML(){
 }
 /* club news: own page */
 function newsHTML(){
-  return pageHead('Club news','Tap a story to read it.')+`<div class="stack newsgrid rise">${NEWS.map(n=>`<button class="card news" data-news="${n.id}"><img class="thumb" src="${n.img}" alt="" loading="lazy"><div><span class="pill">${n.tag}</span><h3 style="margin-top:6px">${esc(n.title)}</h3><div class="meta">${n.meta}</div></div></button>`).join('')}</div>`;
+  return pageHead('Club news')+`<div class="stack newsgrid rise">${NEWS.map(n=>`<button class="card news" data-news="${n.id}"><img class="thumb" src="${n.img}" alt="" loading="lazy"><div><span class="pill">${n.tag}</span><h3 style="margin-top:6px">${esc(n.title)}</h3><div class="meta">${n.meta}</div></div></button>`).join('')}</div>`;
 }
 /* sponsors: own page with logos */
 function sponsorsHTML(){
   const logo=s=>s.logo?`<img src="${s.logo}" alt="${esc(s.n)} logo" loading="lazy" ${s.zoom?`style="transform:scale(${s.zoom})"`:''} onerror="this.parentNode.innerHTML='<span class=wm>${esc(s.n).replace(/'/g,'&#39;')}</span>'">`:`<span class="wm">${esc(s.n)}</span>`;
-  return pageHead('Sponsors and partners','The brands that make the events happen. Tap one to visit them.')+`
+  return pageHead('Sponsors and partners')+`
    <div class="spongrid rise">${SPONS_X.filter(s=>!s.hide).map(s=>{const inner=`<div class="slogo ${s.dark?'light':''}">${logo(s)}</div><b>${esc(s.n)}</b><small>${esc(s.what)}</small>`;
      return s.site?`<a class="card sponcard" href="${s.site}" ${ext}>${inner}</a>`:`<div class="card sponcard">${inner}</div>`}).join('')}</div>
    <div class="card sponcta"><div><b>Sponsor the club</b><p>Put your brand in front of Raiders fans at every scramble, the Raider Cup and on the club channels.</p></div><button class="btn" id="sponBtn"><i class="ph-bold ph-handshake"></i> Talk to Ross</button></div>`;
@@ -1233,9 +1279,9 @@ function renderEvents(){
       <a class="btn ghost" href="${rc.url}" ${ext}><i class="ph-bold ph-arrow-square-out"></i> Raider Cup page on the club site</a>
      </div></div>`;return}
   if(pg==='past'){const live=new Set([...up.map(e=>e.img),EVENTS.find(e=>e.id==='rc26').img]);
-    v.innerHTML=subChips('events')+pageHead('Past events','Results, recaps and flyers from earlier club events.')+`<div class="evgrid rise">${past.length?past.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No past events for this chapter yet.</div>'}</div>
+    v.innerHTML=subChips('events')+pageHead('Past events')+`<div class="evgrid rise">${past.length?past.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No past events for this chapter yet.</div>'}</div>
      <h3 class="shophead">Flyers from past events</h3><div class="flyers">${FLYERS.filter(u=>!live.has(u)).map(u=>`<img src="${u}" alt="Event flyer" loading="lazy">`).join('')}</div>`;return}
-  v.innerHTML=subChips('events')+pageHead('Upcoming events','Interested lets other members know. Register and pay holds your spot.')+`<div class="evgrid rise">${up.length?up.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No dates for this chapter yet. More get posted here as they are set.</div>'}</div>
+  v.innerHTML=subChips('events')+pageHead('Upcoming events')+`<div class="evgrid rise">${up.length?up.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No dates for this chapter yet. More get posted here as they are set.</div>'}</div>
    ${up.length&&up.every(e=>e.chapter==='Nevada')&&S.chapter!=='Nevada'?'<p class="sub" style="margin-top:10px">Only Nevada has a date posted right now. SoCal and NorCal chapter events show up here as soon as they are set.</p>':''}`;
 }
 /* ---------- club scorecards view ---------- */
@@ -1251,7 +1297,7 @@ function scoresHTML(){
   const mine=S.demo?ROUNDS.find(r=>r.name===S.name):null;
   const kpi=(k,b,s)=>`<div class="card kpi"><small>${k}</small><b>${b}</b><span>${s}</span></div>`;
   return `<div class="tixhead"><div><h2 class="sec" style="margin:18px 0 0">${esc(SC_EVENT.name)}</h2>
-     <p class="sub">${esc(SC_EVENT.course)}, ${esc(SC_EVENT.city)} - ${esc(SC_EVENT.date)} - ${ROUNDS.length} members, par ${SC_PAR}. Tap a name for the full card.</p></div>
+     <p class="sub">${esc(SC_EVENT.course)}, ${esc(SC_EVENT.city)} - ${esc(SC_EVENT.date)} - ${ROUNDS.length} members, par ${SC_PAR}.</p></div>
      <span class="pill demo">Demo scores</span></div>
    <div class="kpis">
     ${kpi('Low net',lowNet.net,esc(lowNet.name)+' - '+toPar(lowNet.net-SC_PAR))}
@@ -1264,7 +1310,7 @@ function scoresHTML(){
     <div class="card" style="padding:4px 10px;margin-top:10px"><table class="ftable"><thead><tr><th>#</th><th>Player</th><th class="num">Gross</th><th class="num">Net</th><th class="num">To par</th></tr></thead><tbody>
     ${rows.map(r=>`<tr data-sc="${r.id}" tabindex="0" role="button" class="${mine&&mine.id===r.id?'me':''}"><td class="n">${pos.get(r.id)}</td><td><b>${esc(r.name)}</b><small>${esc(r.chapter)} - ${r.chapter==='National'?'club hcp':'GHIN'} ${r.hcp}</small></td><td class="num">${r.gross}</td><td class="num">${r.net}</td><td class="num"><b style="font-size:16px">${toPar((key==='net'?r.net:r.gross)-SC_PAR)}</b></td></tr>`).join('')}
     </tbody></table></div></div>
-    <div><h2 class="sec">Chapter cup</h2><p class="sub">Ranked by the Best 4 column: each chapter's 4 lowest net scores added up, low total wins. National members play together as one at-large team.</p>
+    <div><h2 class="sec">Chapter cup</h2><p class="sub">Best 4 net scores per chapter. Low total wins.</p>
      <div class="card" style="padding:4px 10px"><table class="ftable"><thead><tr><th>#</th><th>Chapter</th><th class="num">Best 4</th><th class="num">Avg net</th></tr></thead><tbody>
      ${chs.map((c,i)=>`<tr><td class="n">${i+1}</td><td><b>${esc(c.c==='National'?'National at-large':c.c)}</b><small>${c.n} players</small></td><td class="num">${c.best4}</td><td class="num">${c.avg}</td></tr>`).join('')}
      </tbody></table></div>
@@ -1344,7 +1390,7 @@ window.addEventListener('resize',()=>{if(window.google&&google.maps)Object.value
 function renderCourses(){
   const list=COURSES.filter(c=>inChapter(c.chapter)||c.chapter==='National');
   if(S.cview==='list'){cMarkers={};
-    $('#v-courses').innerHTML=subChips('courses')+pageHead('Where we play','Tap a course to see it on the map. Pins are approximate.')+`<div class="cgrid rise">${list.map(c=>`<button class="card course" data-course="${c.id}"><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(c.name)}</b><small>${esc(c.city)}</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join('')}</div>`;return}
+    $('#v-courses').innerHTML=subChips('courses')+pageHead('Where we play')+`<div class="cgrid rise">${list.map(c=>`<button class="card course" data-course="${c.id}"><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(c.name)}</b><small>${esc(c.city)}</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join('')}</div>`;return}
   $('#v-courses').innerHTML=subChips('courses')+`<div class="cmapwrap"><div class="mapbox" id="cmap" aria-label="Map of club courses"></div>
    <div class="detail card" id="cdetail"></div>
    <p class="sub" style="margin-top:10px">Tap a flag for the course. ${list.length} courses, pins are approximate.</p></div>`;
@@ -1524,7 +1570,7 @@ function nearGame(g){
 const nearCourse=V=>COURSES.filter(c=>c.id!=='stgeorge').map(c=>({c,d:miles(V.lat,V.lng,c.lat,c.lng)})).sort((x,y)=>x.d-y.d).filter(x=>x.d<=60)[0];
 function selPanel(){
   const box=$('#gsel');if(!box)return;const g=S.selGame&&GAMES.find(x=>x.id===S.selGame);
-  if(!g){box.innerHTML='<div class="card gsel empty2"><i class="ph-bold ph-hand-tap"></i> Tap a game to see its stadium and the members near it.</div>';return}
+  if(!g){box.innerHTML='';return}
   const V=VENUES[g.v],near=nearGame(g),golf=nearCourse(V);
   const who=!S.member?`<p class="meta">${near.length} member${near.length===1?'':'s'} within 100 miles. <button class="linkbtn" data-signin>Sign in to see who</button></p>`
     :near.length?`<div class="memchips">${near.map(x=>`<span class="memchip"><i>${initials(x.m.name)}</i>${esc(x.m.name)}<small>${x.trip?'Visiting '+esc(x.m.trip.dates):esc(x.m.chapter)}</small></span>`).join('')}</div>`
@@ -1566,8 +1612,8 @@ function fillGames(){
   const played=GAMES.filter(g=>g.res),up=GAMES.filter(g=>!g.res);
   const w=played.filter(g=>g.res[0]==='W').length,l=played.filter(g=>g.res[0]==='L').length;
   const bye=`<div class="card" style="padding:12px 14px;color:var(--muted);font-size:14px"><i class="ph-bold ph-pause-circle"></i> Week ${BYE_WEEK} bye</div>`;
-  top.innerHTML=`<div class="recbar">${tlogo('LV')}<span class="rec">${esc(LIVE.record||w+'-'+l)}</span><span class="pill">2026 record</span><span class="pill">Bye week ${BYE_WEEK}</span>${LIVE.stamp?'<span class="pill">Live from ESPN</span>':LIVE.sched===-1?'<span class="pill">Saved copy</span>':''}</div>${heroHTML(up[0])}`;
-  list.innerHTML=`<h2 class="sec">Up next</h2><p class="sub">Kickoff times are Pacific. Win chance is ESPN's game projection, for fun only. Tap a game to see its stadium and members nearby on the map.</p>
+  top.innerHTML=`<div class="recbar">${tlogo('LV')}<span class="rec">${esc(LIVE.record||w+'-'+l)}</span><span class="pill">2026 record</span><span class="pill">Bye week ${BYE_WEEK}</span></div>${heroHTML(up[0])}`;
+  list.innerHTML=`<h2 class="sec">Up next</h2><p class="sub">Pacific time. Win chance from ESPN.</p>
    <div class="gstack">${up.map(g=>(g.wk===BYE_WEEK+1?bye:'')+matchup(g)).join('')}</div>
    <h2 class="sec">Results</h2><div class="gstack">${played.slice().reverse().map(matchup).join('')}</div>`;
 }
@@ -1587,7 +1633,7 @@ function fillNews(){
     :n==='fail'?`<div class="card empty"><i class="ph-bold ph-wifi-slash"></i>Headlines didn't load. The news service may be slow.${retryBtn}</div>`:'<div class="card empty">Loading headlines...</div>';
   const injH=inj?(inj.length?`<table class="ftable"><tbody>${inj.map(x=>`<tr><td><b>${esc(x.n)}</b><small>${esc(x.pos)}${x.why?' - '+esc(x.why):''}</small></td><td class="num"><span class="pill ${/out/i.test(x.st)?'out':''}">${esc(x.st)}</span></td></tr>`).join('')}</tbody></table>`:'<div class="empty">No Raiders injuries listed.</div>')
     :(LIVE.sched===-1||(s&&s.fail))?`<div class="empty">Injury report didn't load.${retryBtn}</div>`:'<div class="empty">Loading...</div>';
-  box.innerHTML=`<div class="fwrap2"><div><h2 class="sec">Raiders headlines</h2><p class="sub">Latest from ESPN. Tap a story to read it.</p><div class="gstack">${news}</div></div>
+  box.innerHTML=`<div class="fwrap2"><div><h2 class="sec">Raiders headlines</h2><p class="sub">Latest from ESPN.</p><div class="gstack">${news}</div></div>
    <div><h2 class="sec">Injury report</h2><p class="sub">${g?'Before '+esc(gTitle(g))+', week '+g.wk:''}</p><div class="card" style="padding:4px 10px">${injH}</div></div></div>`;
 }
 function openVenue(k){
@@ -1672,7 +1718,7 @@ function renderMembers(){
   const dests=Object.entries(CITIES).sort((a,b)=>a[1].n<b[1].n?-1:1);
   let near='';
   if(S.goingTo){const c=CITIES[S.goingTo];near=MEMBERS.map(m=>({m,d:miles(c.lat,c.lng,...memPos(m))})).filter(x=>x.d<=100).sort((a,b)=>a.d-b.d)}
-  v.innerHTML=seg+`<h2 class="sec" style="margin-bottom:0">Member map</h2><p class="sub">Demo members shown. Pins sit on city centers, never home addresses.</p>
+  v.innerHTML=seg+`<h2 class="sec" style="margin-bottom:0">Member map</h2><p class="sub">Pins sit on city centers, never addresses.</p>
    <div class="mwrap">
     <div class="mapbox" id="mmap" aria-label="Member map"></div>
     <div>
@@ -1817,8 +1863,8 @@ function tixGameHTML(){
 }
 function tixHTML(){
   const f=S.tixFilter,list=allTix().filter(x=>(f==='all'||x.mode===f)&&(!S.tixGame||x.game===S.tixGame));
-  return `<div class="tixhead"><div><h2 class="sec" style="margin:18px 0 0">Ticket exchange</h2><p class="sub">Members buy, sell and trade Raiders and club event tickets with each other.</p></div><button class="btn" id="postTix"><i class="ph-bold ph-plus"></i> Post tickets</button></div>
-   <div class="card privacy" style="margin-top:0"><i class="ph-bold ph-shield-check"></i><span><b style="color:var(--text)">Keep it safe.</b> Move tickets only through the official ticket app. Pay after the transfer shows in your app. The club does not handle money or guarantee a deal, and resale rules follow your state.</span></div>
+  return `<div class="tixhead"><div><h2 class="sec" style="margin:18px 0 0">Ticket exchange</h2></p></div><button class="btn" id="postTix"><i class="ph-bold ph-plus"></i> Post tickets</button></div>
+   <div class="card privacy" style="margin-top:0"><i class="ph-bold ph-shield-check"></i><span><b style="color:var(--text)">Keep it safe.</b> Transfer in the official ticket app, pay after it lands. The club never holds money.</span></div>
    ${tixGameHTML()}
    <div class="chips" style="padding-top:14px"><button class="chip" data-tf="all" aria-pressed="${f==='all'}">All</button><button class="chip" data-tf="sell" aria-pressed="${f==='sell'}">For sale</button><button class="chip" data-tf="trade" aria-pressed="${f==='trade'}">Trades</button></div>
    <div class="tixgrid rise" style="margin-top:12px">${list.map(tixCard).join('')||'<div class="card empty"><i class="ph-bold ph-ticket"></i>No tickets listed here yet. Post yours.</div>'}</div>`;
@@ -2095,7 +2141,7 @@ function renderSettings(){
 }
 function accountHTML(){
   const cities=Object.entries(CITIES).sort((a,b)=>a[1].n<b[1].n?-1:1);
-  return pageHead('My account','Your profile, chapter and privacy.')+`<div class="setcols rise">
+  return pageHead('My account')+`<div class="setcols rise">
    ${group('Profile',`<label for="acName">Name shown to members</label><div class="inrow"><input class="field" id="acName" maxlength="24" value="${esc(S.name||'')}"><button class="btn small" id="acSave">Save</button></div>
      ${setRow('Account type',ROLE_N[S.role]+' - set by club leaders','<span class="pill">'+ROLE_N[S.role]+'</span>')}
      ${setRow('My chapter','Where your dues go',selCfg('my.chapter',S.cfg.my.chapter,PLANS.map(p=>[p.chapter,p.name])))}
@@ -2110,7 +2156,7 @@ function accountHTML(){
 }
 function notifyHTML(){
   const m=S.cfg.my,when=[['1w','1 week before'],['3d','3 days before'],['1d','1 day before']];
-  return pageHead('Notifications','Pick what the app tells you about and how.')+`<div class="setcols rise">
+  return pageHead('Notifications')+`<div class="setcols rise">
    ${group('What you hear about',`${setRow('Event reminders','Before events you marked Interested or paid for',sw('my.events',m.events))}
      ${setRow('Reminder timing','',selCfg('my.evWhen',m.evWhen,when))}
      ${setRow('Raiders game day','Kickoff alert and who is going',sw('my.games',m.games))}
@@ -2125,7 +2171,7 @@ function notifyHTML(){
 function usersHTML(){
   const all=USERS.map(userNow),n=k=>all.filter(u=>u.role===k).length,ex=all.filter(u=>u.expired).length;
   const f=S.uf||'all';
-  return pageHead('Users','Everyone in the club. Tap a person to change their type, chapter or status.')+`
+  return pageHead('Users')+`
    <div class="kpis">${[['Members',all.length],['Leaders',n('admin')+n('chapter')],['Sub admins',n('sub')],['Dues expired',ex]].map(([k,b])=>`<div class="card kpi"><small>${k}</small><b>${b}</b></div>`).join('')}</div>
    <div class="inrow" style="margin-top:10px"><input class="field" id="usersQ" placeholder="Search by name" value="${esc(S.uq||'')}" autocomplete="off"><button class="btn small" id="userAdd"><i class="ph-bold ph-user-plus"></i> Add</button></div>
    <div class="chips">${[['all','All'],['leaders','Admins'],['sub','Sub admins'],['member','Members'],['expired','Dues expired']].map(([k,t])=>`<button class="chip" data-uf="${k}" aria-pressed="${f===k}">${t}</button>`).join('')}</div>
@@ -2160,7 +2206,7 @@ function openUser(id){
 /* ---- roles and permissions ---- */
 function permsHTML(){
   const P=S.cfg.perms;
-  return pageHead('Roles and permissions','What each type of user can do. Admins can always do everything.')+`
+  return pageHead('Roles and permissions','Admins can always do everything.')+`
    <div class="rolecards rise">${ROLES.map(r=>`<div class="card rolecard"><span class="pill role-${r[0]}">${r[1]}</span><p class="meta">${r[2]}</p><b>${USERS.map(userNow).filter(u=>u.role===r[0]).length}</b><small>people</small></div>`).join('')}</div>
    <div class="card permwrap"><table class="permtable"><thead><tr><th>Permission</th>${ROLES.map(r=>`<th>${r[1]}</th>`).join('')}</tr></thead><tbody>
    ${PERMS.map(([k,t,d])=>`<tr><td><b>${t}</b><small>${d}</small></td>${ROLES.map(r=>`<td>${sw('perms.'+r[0]+'.'+k,r[0]==='admin'||!!(P[r[0]]||{})[k],r[0]==='admin')}</td>`).join('')}</tr>`).join('')}
@@ -2171,7 +2217,7 @@ function permsHTML(){
 const evRegs=e=>scHash(e.id+'regs')%40+(S.rsvp[e.id]?1:0);
 function evMgrHTML(){
   const L=EVENTS.filter(e=>S.role!=='chapter'||e.chapter===S.cfg.my.chapter||e.chapter==='National').slice().sort((a,b)=>a.date<b.date?1:-1);
-  return pageHead('Event management','Add, edit and publish club events. Drafts stay hidden from members.')+`
+  return pageHead('Event management','Drafts stay hidden from members.')+`
    <div class="inrow" style="margin:4px 0 12px">${can('events')?'<button class="btn" data-evedit="new"><i class="ph-bold ph-plus"></i> New event</button>':''}<button class="btn ghost" data-sub="events|scores"><i class="ph-bold ph-list-numbers"></i> Scorecards</button></div>
    <div class="stack rise">${L.map(e=>{const f=fmtDate(e.date),past=isPast(e.date),st=e.status==='draft'?'Draft':e.status==='cancelled'?'Cancelled':past?'Done':'Published';
      return `<div class="card evrow"><div class="date"><b>${f.d}</b><span>${f.m}</span></div><div><b>${esc(e.name)}</b><small>${esc(e.chapter)} - ${esc(e.where)}</small>
@@ -2197,7 +2243,7 @@ function openEvEdit(id){
 }
 /* ---- chapters ---- */
 function chaptersHTML(){
-  return pageHead('Chapters','Who runs each chapter, dues, and whether it takes new members.')+`<div class="setcols rise">${PLANS.map(p=>{const c=S.cfg.chapters[p.chapter]||{};
+  return pageHead('Chapters')+`<div class="setcols rise">${PLANS.map(p=>{const c=S.cfg.chapters[p.chapter]||{};
    return group(p.name,`${setRow('Chapter admin','Join requests go to them',selCfg('chapters.'+p.chapter+'.pres',PRES[p.chapter],Object.values(LEAD_X).map(L=>[L.id,L.name])))}
     ${setRow('Yearly dues','Shown on the join form and shop','<span class="inrow"><span>$</span>'+txtCfg('chapters.'+p.chapter+'.price',p.price,'225')+'</span>')}
     ${p.chapter==='National'?'':setRow('Golf association','For GHIN handicaps',txtCfg('chapters.'+p.chapter+'.assoc',c.assoc||({SoCal:'SCGA',NorCal:'NCGA',Nevada:'NGA'}[p.chapter]),''))}
@@ -2207,7 +2253,7 @@ function chaptersHTML(){
 /* ---- ticket exchange ---- */
 function tixSetHTML(){
   const t=S.cfg.tix,pend=allTix().filter(x=>x.pending);
-  return pageHead('Ticket exchange','Rules for buying, selling and trading between members.')+`<div class="setcols rise">
+  return pageHead('Ticket exchange rules')+`<div class="setcols rise">
    ${group('Price rules',`${setRow('Price limit','Stops members from scalping each other',selCfg('tix.cap',t.cap,[['none','No limit'],['face','Face value or less'],['pct','Face value plus a set percent']]))}
      ${setRow('Max over face value','Used when the limit is a percent','<span class="inrow">'+txtCfg('tix.pct',t.pct,'25')+'<span>%</span></span>')}`)}
    ${group('Listings',`${setRow('Leaders approve new listings','Listings wait until a leader OKs them',sw('tix.approve',t.approve))}
@@ -2229,7 +2275,7 @@ function tixRuleOK(x){
 /* ---- forum ---- */
 function forumSetHTML(){
   const F=S.cfg.forum;
-  return pageHead('Forum','Boards and how posts are moderated.')+`<div class="setcols rise">
+  return pageHead('Forum settings')+`<div class="setcols rise">
    ${group('Boards',Object.keys(F.boards).map(b=>setRow(b,'',sw('forum.boards.'+b,F.boards[b]))).join('')+'<button class="btn small ghost" id="boardAdd" style="margin-top:10px"><i class="ph-bold ph-plus"></i> Add a board</button>')}
    ${group('Moderation',`${setRow('Approve first posts','A new member\'s first post waits for a moderator',sw('forum.approveNew',F.approveNew))}
      ${setRow('Guests can read','Non-members see posts but can\'t reply',sw('forum.guestsRead',F.guestsRead))}
@@ -2239,7 +2285,7 @@ function forumSetHTML(){
 }
 /* ---- sponsors ---- */
 function sponsSetHTML(){
-  return pageHead('Sponsors','What shows on the Sponsors page.')+`<div class="stack rise">${SPONS_X.map((s,i)=>`<div class="card evrow"><div class="slogo mini">${s.logo?`<img src="${s.logo}" alt="" loading="lazy">`:`<span class="wm">${esc(s.n)}</span>`}</div><div><b>${esc(s.n)}</b><small>${esc(s.what)}</small>${s.hide?'<div class="row"><span class="pill out">Hidden</span></div>':''}</div><button class="btn small ghost" data-spedit="${i}">Edit</button></div>`).join('')}</div>
+  return pageHead('Sponsors')+`<div class="stack rise">${SPONS_X.map((s,i)=>`<div class="card evrow"><div class="slogo mini">${s.logo?`<img src="${s.logo}" alt="" loading="lazy">`:`<span class="wm">${esc(s.n)}</span>`}</div><div><b>${esc(s.n)}</b><small>${esc(s.what)}</small>${s.hide?'<div class="row"><span class="pill out">Hidden</span></div>':''}</div><button class="btn small ghost" data-spedit="${i}">Edit</button></div>`).join('')}</div>
    <button class="btn ghost" style="margin-top:12px" data-spedit="new"><i class="ph-bold ph-plus"></i> Add sponsor</button>${prevNote}`;
 }
 function openSpEdit(i){
@@ -2256,7 +2302,7 @@ function openSpEdit(i){
 /* ---- announcements ---- */
 function annHTML(){
   const chs=S.role==='chapter'?[S.cfg.my.chapter]:['Whole club',...PLANS.filter(p=>p.chapter!=='National').map(p=>p.chapter),'National'];
-  return pageHead('Announcements','Send a message to members. Shows in the app and goes out by their alert settings.')+`<div class="setcols rise">
+  return pageHead('Announcements')+`<div class="setcols rise">
    ${group('New announcement',`<form id="annForm"><label for="anTo">Send to</label><select class="field" id="anTo">${chs.map(c=>`<option>${c}</option>`).join('')}</select>
      <label for="anT">Title</label><input class="field" id="anT" required maxlength="60" placeholder="Nov 14 tee times are out">
      <label for="anB">Message</label><textarea class="field" id="anB" required maxlength="500"></textarea>
@@ -2268,7 +2314,7 @@ function annHTML(){
 /* ---- club ---- */
 function clubHTML(){
   const c=S.cfg.club;
-  return pageHead('Club settings','Name, links and how the app works for everyone.')+`<div class="setcols rise">
+  return pageHead('Club settings')+`<div class="setcols rise">
    ${group('Club',`${setRow('Club name','',txtCfg('club.name',c.name))}${setRow('Website','',txtCfg('club.site',c.site))}${setRow('Club store','Where dues and entries are paid',txtCfg('club.store',c.store))}${setRow('Instagram','',txtCfg('club.ig',c.ig))}${setRow('YouTube','',txtCfg('club.yt',c.yt))}`)}
    ${group('Defaults',`${setRow('Member map for new members','',selCfg('club.mapDefault',c.mapDefault,[['optin','Hidden until they turn it on'],['city','Show their city']]))}
      ${setRow('Handicaps','',selCfg('club.hcp',c.hcp,[['ghin','GHIN for chapters, club handicap for National'],['club','Club handicap for everyone']]))}
@@ -2344,26 +2390,24 @@ const perksHTML=()=>`<ul class="perks">${PERKS.map(([i,t,d])=>`<li><i class="ph-
 function guestCard(){return `<div class="card guestcard"><h3>What members get</h3>${perksHTML()}
   <div class="acts" style="margin-top:14px"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join from $99 a year</button><button class="btn ghost" data-signin><i class="ph-bold ph-sign-in"></i> Member sign in</button></div></div>`}
 function inviteCard(){if(!canInvite())return '';const n=(S.invLog||{}).shared||0;
-  return `<div class="card invcard"><h3>Invite a friend</h3><p class="meta">Your link opens a welcome page with your name and the ${esc(chName(invChapter()))}.${n?` Shared ${n} time${n===1?'':'s'}.`:''}</p>
+  return `<div class="card invcard"><h3>Invite a friend</h3>${n?`<p class="meta">Shared ${n} time${n===1?'':'s'}</p>`:''}
   <div class="invlink"><input class="field" readonly value="${esc(invLink())}" aria-label="Your invite link" data-invsel><button class="btn small" data-inv="copy"><i class="ph-bold ph-copy"></i> Copy</button></div>
   <div class="acts" style="margin-top:10px"><button class="btn small ghost" data-inv="share"><i class="ph-bold ph-share-network"></i> Share</button><button class="btn small ghost" data-sub="home|invite">More options</button></div></div>`}
 function inviteHTML(){
   if(!S.member)return pageHead('Invite a friend')+`<div class="card gate rise"><i class="ph-fill ph-paper-plane-tilt"></i><h3>Invite links are for members</h3><p>Every member gets their own link to bring friends into their chapter. Got a link from a member? Open it and you land on their invite.</p><div class="acts"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button><button class="btn ghost" data-signin><i class="ph-bold ph-sign-in"></i> Sign in</button></div></div>`;
   if(!canInvite())return pageHead('Invite a friend')+`<div class="card gate rise"><i class="ph-fill ph-lock-key"></i><h3>Invites are off</h3><p>${S.cfg.club.invites?'Club leaders hand out invite links right now.':'Club leaders turned invite links off for now.'} Ask your chapter president to bring someone in.</p><div class="acts"><button class="btn ghost" data-sub="home|leaders">Club leaders</button></div></div>`;
   const L=S.invLog||{},ex=S.cfg.club.invExpire;
-  return pageHead('Invite a friend','Send your link. Your friend lands on a welcome page with your name and chapter, then picks a plan.')+`<div class="invcols rise">
+  return pageHead('Invite a friend')+`<div class="invcols rise">
    <div class="card"><h3>Your invite link</h3>
     <label for="invCh">Invite them to</label><select class="field" id="invCh">${PLANS.map(p=>`<option value="${p.chapter}" ${invChapter()===p.chapter?'selected':''}>${esc(chName(p.chapter))} - $${p.price} a year</option>`).join('')}</select>
     <div class="invlink"><input class="field" readonly value="${esc(invLink())}" aria-label="Your invite link" data-invsel><button class="btn small" data-inv="copy"><i class="ph-bold ph-copy"></i> Copy</button></div>
     <div class="invacts"><button class="btn ghost" data-inv="share"><i class="ph-bold ph-share-network"></i> Share</button><a class="btn ghost" data-inv="text" href="sms:?&body=${encodeURIComponent(invMsg())}"><i class="ph-bold ph-chat-text"></i> Text</a><a class="btn ghost" data-inv="email" href="mailto:?subject=${encodeURIComponent('Join me in Raider Nation Golf Club')}&body=${encodeURIComponent(invMsg())}"><i class="ph-bold ph-envelope-simple"></i> Email</a><button class="btn ghost" data-inv="preview"><i class="ph-bold ph-eye"></i> See what they see</button></div>
     <p class="help">${ex==='never'?'Your link does not expire.':'Links work for '+ex+' days, then you get a fresh one.'}${S.cfg.club.invApprove?' The chapter president approves new members first.':''}</p>
     <div class="invstats"><div><b>${L.shared||0}</b><small>Shared</small></div><div><b>-</b><small>Opened</small></div><div><b>-</b><small>Joined</small></div></div>
-    <p class="help">Opened and joined counts start when the live app tracks invites.</p>
    </div>
    <div class="card"><h3>What your friend sees</h3>
     <div class="invprev"><img src="assets/logo/rngc-ball-static.svg" alt=""><b>${esc(S.name||'A member')} wants you in</b><p>${esc(chName(invChapter()))} - golf, travel and Raiders football</p></div>
     ${perksHTML()}
-    <p class="help">Guests can browse events, the schedule and courses. Everything above unlocks when they join.</p>
    </div></div>`;
 }
 function invCopy(){const t=invLink(),done=()=>{S.invLog=S.invLog||{};S.invLog.shared=(S.invLog.shared||0)+1;save();toast('Invite link copied');refreshInvite()};
