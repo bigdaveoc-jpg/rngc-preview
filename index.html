@@ -485,7 +485,7 @@ body.thread-open .fab{display:none!important}
 .si-sub{color:var(--muted);margin:14px 0 6px}
 .signin form{text-align:left}
 .si-row{text-align:right;margin-top:8px}
-.si-row a,.si-links a,.si-links button{color:var(--silver);font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px;min-height:44px;display:inline-flex;align-items:center}
+.si-row a,.si-row button,.si-links a,.si-links button{color:var(--silver);font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px;min-height:44px;display:inline-flex;align-items:center}
 .si-full{width:100%;margin-top:12px}
 .si-msg{min-height:0;margin:10px 0 0;color:var(--silver-2);font-size:14px;line-height:1.4}
 .si-msg:empty{margin:0}
@@ -859,9 +859,20 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
   <form id="siForm" novalidate>
    <label for="siEmail">Email or username</label><input class="field" id="siEmail" type="text" autocomplete="username" required>
    <label for="siPass">Password</label><input class="field" id="siPass" type="password" autocomplete="current-password" required>
-   <div class="si-row"><a href="https://raidernationgolfclub.com/my-account/" target="_blank" rel="noopener">Forgot password?</a></div>
+   <div class="si-row"><button type="button" id="siSetupLink">First time or forgot it? Set up your sign-in</button></div>
    <button class="btn si-full" type="submit"><i class="ph-bold ph-sign-in"></i> Sign in</button>
    <p class="si-msg" id="siMsg" role="status"></p>
+  </form>
+  <form id="siSetup" novalidate hidden>
+   <p class="si-sub" style="margin-top:0">Use the details on your club membership list.</p>
+   <label for="suEmail">Email on your membership</label><input class="field" id="suEmail" type="email" autocomplete="username" required>
+   <label for="suGhin" id="suGhinL">GHIN number</label><input class="field" id="suGhin" type="text" inputmode="numeric" autocomplete="off" required>
+   <label for="suDob" id="suDobL">Birth date</label><input class="field" id="suDob" type="date" autocomplete="bday" required>
+   <label for="suPass">Pick a password (8 or more characters)</label><input class="field" id="suPass" type="password" autocomplete="new-password" minlength="8" required>
+   <button class="btn si-full" type="submit" style="margin-top:12px"><i class="ph-bold ph-check"></i> Save and sign in</button>
+   <div class="si-row" style="text-align:center"><button type="button" id="siSetupBack">Back to sign in</button></div>
+   <div class="si-row" style="text-align:center"><button type="button" id="siCodeLink">I have a setup code instead</button></div>
+   <p class="si-msg" id="suMsg" role="status"></p>
   </form>
   <div class="si-or">or</div>
   <button class="btn ghost si-full" id="siDemo" type="button"><i class="ph-bold ph-play-circle"></i> Try demo mode</button>
@@ -2083,7 +2094,7 @@ $('#btnProfile').addEventListener('click',()=>{
    <button class="btn ghost full" id="closeP">Close</button>`);
   $('#closeP').addEventListener('click',closeSheet);
   const si2=$('#si2');if(si2)si2.addEventListener('click',()=>{closeSheet();setTimeout(openSignIn,330)});
-  const so2=$('#so2');if(so2)so2.addEventListener('click',()=>{S.member=false;S.demo=false;S.tour=-1;save();closeSheet();renderAll();setTimeout(openSignIn,330)});
+  const so2=$('#so2');if(so2)so2.addEventListener('click',()=>{signOutReal();S.member=false;S.demo=false;S.tour=-1;save();closeSheet();renderAll();setTimeout(openSignIn,330)});
   const v2=$('#vis2');if(v2)v2.addEventListener('click',()=>{closeSheet();setTimeout(openVisibility,330)});
 });
 
@@ -2229,7 +2240,7 @@ function renderSettings(){
     <div class="acts"><button class="btn" id="setDemo"><i class="ph-bold ph-play-circle"></i> Try demo mode</button><button class="btn ghost" data-signin><i class="ph-bold ph-sign-in"></i> Sign in</button></div></div>`;return}
   const ok=SPAGES.find(p=>p[0]===S.spage&&p[2]());if(!ok)S.spage='account';
   const pg=S.spage||'account';
-  const bar=`<div class="rolebar"><span><i class="ph-bold ph-eye"></i> Preview as</span><div class="seg2">${ROLES.map(r=>`<button class="chip" data-role="${r[0]}" aria-pressed="${S.role===r[0]}">${r[1]}</button>`).join('')}</div></div>`;
+  const bar=(authTok()&&!S.demo&&S.realRole!=='admin')?'':`<div class="rolebar"><span><i class="ph-bold ph-eye"></i> Preview as</span><div class="seg2">${ROLES.map(r=>`<button class="chip" data-role="${r[0]}" aria-pressed="${S.role===r[0]}">${r[1]}</button>`).join('')}</div></div>`;
   const body={account:accountHTML,notify:notifyHTML,users:usersHTML,perms:permsHTML,events:evMgrHTML,chapters:chaptersHTML,tix:tixSetHTML,forum:forumSetHTML,sponsors:sponsSetHTML,announce:annHTML,club:clubHTML}[pg]();
   v.innerHTML=subChips('settings')+bar+body;
   if(pg==='users')fillUsers();
@@ -2460,7 +2471,7 @@ document.addEventListener('click',e=>{
   if(t.closest('#boardAdd')){const n=prompt('Name of the new board');if(n&&n.trim()){S.cfg.forum.boards[n.trim().slice(0,24)]=true;cfgSave();renderSettings()}return}
   if(t.closest('#acSave')){const n=$('#acName').value.trim();if(n){S.name=n;save();toast('Name saved')}return}
   if(t.closest('#acVis')){openVisibility();return}
-  if(t.closest('#acOut')){S.member=false;S.demo=false;S.tour=-1;save();renderAll();renderSettings();setTimeout(openSignIn,200);return}
+  if(t.closest('#acOut')){signOutReal();S.member=false;S.demo=false;S.tour=-1;save();renderAll();renderSettings();setTimeout(openSignIn,200);return}
   if(t.closest('#setDemo')){S.member=true;S.demo=true;if(!S.name)S.name='Demo Member';save();renderAll();renderSettings();renderSubnav();toast('Demo mode: previewing as '+ROLE_N[S.role]);return}
   if(t.closest('#acDel')){toast('In the live app this asks you to confirm, then removes your account.');return}
 });
@@ -2575,8 +2586,40 @@ renderChips();renderAll();setTab('home');loadSchedule();
 const SI=$('#signin');
 function openSignIn(){SI.hidden=false;$('#siMsg').textContent='';requestAnimationFrame(()=>SI.classList.add('on'))}
 function closeSignIn(){SI.classList.remove('on');setTimeout(()=>{SI.hidden=true},360)}
-$('#siForm').addEventListener('submit',e=>{e.preventDefault();
-  $('#siMsg').textContent='Preview only: sign-in connects to your club account in the live app. Tap Try demo mode to look around as a member.'});
+/* real sign-in: our own sign-in service on the cloud server holds the member list; the site only holds a sign-in token */
+const AUTH='https://rngc-auth.137.184.15.101.sslip.io',TOKK='rngc-auth-token';
+const authTok=()=>{try{return localStorage.getItem(TOKK)||''}catch(e){return ''}};
+const setTok=t=>{try{t?localStorage.setItem(TOKK,t):localStorage.removeItem(TOKK)}catch(e){}};
+async function authCall(path,body,tok){
+  const r=await fetch(AUTH+path,{method:body?'POST':'GET',headers:Object.assign(body?{'Content-Type':'application/json'}:{},tok?{Authorization:'Bearer '+tok}:{}),body:body?JSON.stringify(body):undefined});
+  let j={};try{j=await r.json()}catch(e){}
+  if(!r.ok)throw Object.assign(new Error(j.error||'Could not reach the club sign-in. Try again.'),{status:r.status});
+  return j}
+function applyMe(me){
+  S.member=true;S.demo=false;S.tour=-1;S.name=(me.name||'').slice(0,24);S.role=me.role;S.realRole=me.role;S.authMe=me;
+  S.cfg.my.chapter=PLANS.some(p=>p.chapter===me.chapter)?me.chapter:'National';if(me.ghin)S.cfg.my.ghin=me.ghin;
+  cfgSave();save()}
+function signedIn(res){setTok(res.token);applyMe(res.me);closeSignIn();renderAll();syncTop();toast('Signed in as '+res.me.name.split(' ')[0])}
+async function signOutReal(){const t=authTok();setTok('');S.authMe=null;S.realRole=null;if(t){try{await authCall('/auth/logout',{},t)}catch(e){}}}
+$('#siForm').addEventListener('submit',async e=>{e.preventDefault();const m=$('#siMsg'),b=e.target.querySelector('button[type=submit]');
+  const email=$('#siEmail').value.trim(),password=$('#siPass').value;if(!email||!password){m.textContent='Enter your email and password.';return}
+  b.disabled=true;m.textContent='Signing in...';
+  try{signedIn(await authCall('/auth/login',{email,password}));$('#siPass').value=''}catch(err){m.textContent=err.message}b.disabled=false});
+let suCode=false;
+function setupMode(on){$('#siForm').hidden=on;$('#siSetup').hidden=!on;$('#suMsg').textContent='';$('#siMsg').textContent='';
+  if(on)$('#suEmail').value=$('#siEmail').value.trim()}
+function codeMode(on){suCode=on;$('#suGhinL').textContent=on?'Setup code':'GHIN number';$('#suGhin').inputMode=on?'text':'numeric';
+  $('#suDob').hidden=on;$('#suDobL').hidden=on;$('#siCodeLink').textContent=on?'Use my GHIN number and birth date':'I have a setup code instead'}
+$('#siSetupLink').addEventListener('click',()=>{codeMode(false);setupMode(true)});
+$('#siSetupBack').addEventListener('click',()=>setupMode(false));
+$('#siCodeLink').addEventListener('click',()=>codeMode(!suCode));
+$('#siSetup').addEventListener('submit',async e=>{e.preventDefault();const m=$('#suMsg'),b=e.target.querySelector('button[type=submit]');
+  const email=$('#suEmail').value.trim(),password=$('#suPass').value,v=$('#suGhin').value.trim(),dob=$('#suDob').value;
+  if(!email||!v||(!suCode&&!dob)||password.length<8){m.textContent='Fill in every box. The password needs 8 or more characters.';return}
+  b.disabled=true;m.textContent='Saving...';
+  try{signedIn(await authCall('/auth/setup',suCode?{email,code:v,password}:{email,ghin:v,dob,password}));$('#suPass').value='';setupMode(false)}catch(err){m.textContent=err.message}b.disabled=false});
+/* on open: confirm a saved sign-in is still good, otherwise sign out */
+(async()=>{const t=authTok();if(!t)return;try{const r=await authCall('/auth/me',null,t);applyMe(r.me);renderAll();syncTop()}catch(err){if(err.status===401){setTok('');if(S.member&&!S.demo){S.member=false;save();renderAll();syncTop()}}}})();
 $('#siDemo').addEventListener('click',()=>{S.member=true;S.demo=true;if(!S.name)S.name='Demo Member';save();closeSignIn();renderAll();toast('Signed in to demo mode')});
 $('#siGuest').addEventListener('click',()=>{try{sessionStorage.setItem('rngcGuest','1')}catch(e){}closeSignIn()});
 (function(){
