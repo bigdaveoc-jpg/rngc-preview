@@ -686,6 +686,64 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .signin .perks{margin:14px 0 4px;text-align:left}
 .signin .si-plan{margin:10px 0 0;color:var(--muted);font-size:13px}
 @media (min-width:900px){.invcols{grid-template-columns:1.2fr 1fr}}
+
+/* ===== PHONE CLEANUP (2026-11-09): one-row header, fewer boxes, easier reading ===== */
+@media (max-width:999px){
+  .top .topjoin{display:none}
+  :root{--muted:#aab1bc}
+  .top{display:flex;align-items:center;gap:10px;padding:max(10px,env(safe-area-inset-top)) 16px 10px}
+  .brandrow{display:contents}
+  .top .logo{order:0;width:38px;height:44px}
+  .brandtxt{order:1;flex:1;min-width:0}
+  .brandtxt b{font-size:18px;letter-spacing:.04em;white-space:nowrap}
+  .brandtxt b em{font-size:10.5px;letter-spacing:.2em;margin-top:2px}
+  #chapterChips{order:2;flex:none;padding:0}
+  #chapterChips .selwrap{width:auto}
+  .chsel{width:auto;max-width:132px;min-height:36px;padding:0 28px 0 12px;font-size:13px;text-overflow:ellipsis}
+  #chapterChips .selwrap i{right:10px;font-size:12px}
+  .top .iconbtn{order:3;width:38px;height:38px;font-size:18px}
+  .banner{margin:8px 16px 0;padding:0;border:0;background:none;font-size:12px;line-height:1.35;gap:6px}
+  .banner i{font-size:14px;margin-top:0}
+  /* fewer boxes: cards sit on a soft fill with no outline */
+  .card,.hero,.mapbox,.date,.spon{border-color:transparent}
+  .card{border-radius:16px}
+  .viewbar,.rolebar{border:0;padding:0;margin:14px 0 2px;gap:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .viewbar::-webkit-scrollbar,.rolebar::-webkit-scrollbar{display:none}
+  .viewbar > span,.rolebar > span{flex:none;font-size:12px}
+  .viewbar small{display:none}
+  .rolebar .seg2,.viewbar .seg2{flex-wrap:nowrap}
+  .rolebar .chip,.viewbar .chip{flex:none}
+  .gsel.empty2{background:none;padding:4px 2px}
+  /* type: a bit smaller headlines, roomier body */
+  h2.sec{font-size:24px;margin:22px 0 6px}
+  .sub{font-size:14px;line-height:1.5}
+  .hero{margin-top:12px;border-radius:18px}
+  .hero .bg{height:180px}
+  .hero h1{font-size:36px}
+  .hero p{font-size:15px;line-height:1.5}
+  .hero .in{padding:4px 16px 18px}
+  .next{gap:12px}
+  .next .cd{font-size:38px}
+  .next h3{font-size:20px}
+  .next .btn.small{min-height:38px;padding:0 14px;font-size:14px}
+  /* events: date becomes a small tag over full-width text */
+  .ev{grid-template-columns:1fr;gap:8px;padding:16px}
+  .ev .date{display:inline-flex;align-items:baseline;gap:6px;width:auto;justify-self:start;padding:4px 12px;border-radius:999px}
+  .ev .date b{font-size:20px}
+  .ev .date span{font-size:12px}
+  .ev h3{font-size:22px}
+  .ev .note{font-size:15px;line-height:1.5}
+  .ev .row .grow{flex-basis:100%;height:0}
+  .ev .row .btn{flex:1 1 130px}
+  .btn{min-height:44px;font-size:15px}
+  .btn.small{min-height:40px;font-size:14px}
+  /* maps a touch shorter so the list shows sooner */
+  .mapbox{height:210px}
+  .gwrap .mapbox{height:210px}
+  /* boxes inside cards lose their outline too */
+  .seatbar > div,.invstats div,.invprev,.card .card{border-color:transparent;background:var(--panel-2)}
+  .seg .chip{min-height:38px}
+}
 </style>
 </head>
 <body>
@@ -756,7 +814,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
     <button type="button" class="btn topjoin" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button>
   </header>
 
-  <div class="banner" id="banner"><i class="ph-bold ph-info"></i><span>Design preview. Events, plans, prices and the Raiders schedule are real. Forum posts, the member map, the ticket exchange and the fantasy league use demo people.</span></div>
+  <div class="banner" id="banner"><i class="ph-bold ph-info"></i><span>Preview: events, prices and the Raiders schedule are real. Members, posts and tickets are demo.</span></div>
 
   <main class="views">
     <section class="view on" id="v-home" aria-label="Home"></section>
@@ -1145,7 +1203,7 @@ function evCard(e){
    <div class="row"><span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
    <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
    <a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`}</div>
-   ${past?'':`<div class="help" style="margin-top:8px;font-size:13px;color:var(--muted)">Interested just lets other members know. Register and pay holds your spot.</div>`}</div></article>`;
+   </div></article>`;
 }
 function renderEvents(){
   if(!S.eview||S.eview==='list')S.eview='up';
