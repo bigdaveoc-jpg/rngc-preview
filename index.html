@@ -657,6 +657,35 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 @media (min-width:1000px){.tab-settings-only{display:grid}}
 .hero2c .mxfoot{margin-top:12px}
 .hero2 .acts{margin-top:12px}
+
+/* guest vs member view switch, invite link */
+.viewbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:8px 12px;border:1px dashed var(--line);border-radius:var(--r-sm);font-size:13px;color:var(--muted)}
+.viewbar > span{display:inline-flex;gap:6px;align-items:center;font-weight:600}
+.viewbar .seg2{display:flex;gap:6px}
+.viewbar small{flex-basis:100%;font-size:12px}
+.perks{display:grid;gap:10px;margin:12px 0 0;padding:0;list-style:none}
+.perks li{display:flex;gap:10px;align-items:flex-start;font-size:15px}
+.perks li i{font-size:20px;color:var(--silver);flex:none;margin-top:1px}
+.perks li b{display:block}
+.perks li small{color:var(--muted);font-size:13px}
+.guestcard h3,.invcard h3{margin-bottom:2px}
+.invlink{display:flex;gap:8px;margin-top:10px}
+.invlink input{flex:1;min-width:0;font-size:14px}
+.invacts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.invacts .btn{justify-content:center}
+.invcols{display:grid;gap:14px}
+.invstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;text-align:center}
+.invstats div{border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 6px}
+.invstats b{display:block;font-family:var(--display);font-size:28px;line-height:1}
+.invstats small{color:var(--muted);font-size:12px}
+.invprev{border:1px solid var(--line);border-radius:var(--r-sm);padding:14px;text-align:center;margin-top:10px}
+.invprev img{width:54px;height:54px}
+.invprev b{display:block;font-family:var(--display);text-transform:uppercase;font-size:22px;line-height:1.05;margin-top:6px}
+.invprev p{color:var(--muted);font-size:13px;margin:6px 0 0}
+.invpill{display:inline-flex;gap:6px;align-items:center;margin-bottom:10px}
+.signin .perks{margin:14px 0 4px;text-align:left}
+.signin .si-plan{margin:10px 0 0;color:var(--muted);font-size:13px}
+@media (min-width:900px){.invcols{grid-template-columns:1.2fr 1fr}}
 </style>
 </head>
 <body>
@@ -679,6 +708,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
  </div>
 </div>
 
+<div class="signin" id="inviteIn" hidden role="dialog" aria-modal="true" aria-labelledby="invTitle"><div class="si-box" id="inviteBox"></div></div>
 <div class="intro" id="intro" role="img" aria-label="Raider Nation Golf Club"><img src="assets/logo/rngc-ball-animated.svg" alt=""><button class="skip" type="button">Skip</button></div>
 <script>
 (function(){
@@ -937,7 +967,7 @@ const BOARDS=['All','Tournaments','Game Day','Golf Tips','Travel','Gear'];
 const KEY='rngc-site-v2';
 let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[],demo:false,tour:-1,gview:'sched',selGame:null,ffJoin:false,eview:'list',sview:'net'};
 try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw),{tab:'home',openThread:null,selCourse:null,selGame:null,tour:-1})}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview,rc27:S.rc27,cview:S.cview,gameGo:S.gameGo,tixGame:S.tixGame,cfg:S.cfg,role:S.role,spage:S.spage}))}catch(e){}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview,rc27:S.rc27,cview:S.cview,gameGo:S.gameGo,tixGame:S.tixGame,cfg:S.cfg,role:S.role,spage:S.spage,invLog:S.invLog}))}catch(e){}};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -985,24 +1015,32 @@ function renderHome(){
   else if(pg==='shop')v.innerHTML=subChips('home')+shopHTML();
   else if(pg==='sponsors')v.innerHTML=subChips('home')+sponsorsHTML();
   else if(pg==='news')v.innerHTML=subChips('home')+newsHTML();
+  else if(pg==='invite')v.innerHTML=subChips('home')+inviteHTML();
   else v.innerHTML=subChips('home')+overviewHTML();
+  syncTop();
 }
 function overviewHTML(){
   const next=EVENTS.filter(e=>!e.status&&!isPast(e.date)&&inChapter(e.chapter)).sort((a,b)=>a.date<b.date?-1:1)[0];
   const f=next&&fmtDate(next.date),ng=GAMES.find(g=>!g.res);
   const tile=(k,ic,t,s)=>`<button class="card tile" data-sub="home|${k}"><i class="ph-bold ph-${ic}"></i><b>${t}</b><small>${s}</small></button>`;
   return `<div class="rise">
+   ${viewBar()}
    <div class="hero"><div class="bg" style="background-image:url('${UP}2026/06/IMG_5442-1024x768.jpg')"></div><div class="in">
-     <span class="tag">Est. 2019 - Travel, Golf, Football</span>
+     ${S.member?`<span class="tag">Member - ${esc(chName(S.cfg.my.chapter))}</span>
+     <h1>Welcome back, ${esc(firstName())}</h1>
+     <p>Your events, your tee times and your seats for game day. Bring a Raiders fan into the club with your invite link.</p>
+     <div class="acts"><button class="btn" data-sub="home|invite"><i class="ph-bold ph-paper-plane-tilt"></i> Invite a friend</button><button class="btn ghost" data-sub="events|up">See events</button></div>`
+     :`<span class="tag">Est. 2019 - Travel, Golf, Football</span>
      <h1>Tee it up with Raider Nation</h1>
      <p>A national golf club for Raiders fans, with chapters in Southern California, Northern California and Las Vegas.</p>
-     <div class="acts"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button><button class="btn ghost" data-sub="events|up">See events</button></div>
+     <div class="acts"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button><button class="btn ghost" data-sub="events|up">See events</button></div>`}
    </div></div>
+   ${S.member?inviteCard():guestCard()}
    ${next?`<div class="card next"><div class="cd">${daysTo(next.date)}<small>days</small></div><div><span class="pill">Next event - ${esc(next.chapter)}</span><h3 style="margin-top:6px">${esc(next.name)}</h3><div class="meta">${f.dow}, ${f.m} ${f.d} - ${esc(next.where)}</div></div><a class="btn small" href="${next.url}" ${ext}>Register</a></div>`:''}
    ${ng?`<div class="card next"><div class="cd">${daysTo(ng.date)}<small>days</small></div><div><span class="pill">Raiders - Week ${ng.wk}</span><h3 style="margin-top:6px">${esc(gTitle(ng))}</h3><div class="meta">${gWhen(ng)}</div></div><button class="btn small ghost" data-sub="games|sched">Schedule</button></div>`:''}
    ${(()=>{const w=scOrder('net')[0];return `<div class="card next"><div class="cd">${w.net}<small>net</small></div><div><span class="pill">Leaderboard - ${esc(SC_EVENT.name)}</span><h3 style="margin-top:6px">${esc(w.name)} leads ${ROUNDS.length} members</h3><div class="meta">${esc(SC_EVENT.course)} - ${toPar(w.net-SC_PAR)} net, demo scores</div></div><button class="btn small ghost" data-sub="events|scores">Scorecards</button></div>`})()}
    </div>
-   <div class="tiles">${tile('join','identification-badge','Join a chapter','Sign up, the chapter president gets it')}${tile('leaders','users','Club leaders','Bios and how to reach them')}${tile('shop','shopping-bag','Club shop','Polos, memberships, event entries')}${tile('news','newspaper','Club news','Events, membership, interviews')}${tile('sponsors','handshake','Sponsors','The brands behind the club')}</div>
+   <div class="tiles">${S.member?tile('invite','paper-plane-tilt','Invite a friend','Your own link, your chapter'):tile('join','identification-badge','Join a chapter','Sign up, the chapter president gets it')}${tile('leaders','users','Club leaders','Bios and how to reach them')}${tile('shop','shopping-bag','Club shop','Polos, memberships, event entries')}${tile('news','newspaper','Club news','Events, membership, interviews')}${tile('sponsors','handshake','Sponsors','The brands behind the club')}</div>
    <div class="foot"><span>Follow the club</span>
     <a href="https://www.instagram.com/raidernationgolfclub" ${ext}><i class="ph-bold ph-instagram-logo"></i> Instagram</a>
     <a href="https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ" ${ext}><i class="ph-bold ph-youtube-logo"></i> YouTube</a>
@@ -1013,12 +1051,14 @@ function overviewHTML(){
 function joinHTML(){
   if(S.joinSent){const j=S.joinSent,L=LEAD_X[PRES[j.chapter]],p=PLANS.find(x=>x.chapter===j.chapter);
     return pageHead('Join a chapter')+`<div class="card sent rise"><i class="ph-fill ph-check-circle"></i><h3>Thanks, ${esc(j.first)}</h3>
-     <p>Your request went to <b>${esc(L.name)}</b>, ${esc(L.chapters)}${L.id!=='ross'?', with Ross Ricks copied as club president':''}. Expect a reply by email.</p>
+     <p>Your request went to <b>${esc(L.name)}</b>, ${esc(L.chapters)}${L.id!=='ross'?', with Ross Ricks copied as club president':''}. Expect a reply by email.${j.by?` We'll let ${esc(j.by)} know you joined.`:''}</p>
      <p class="help">Preview: nothing is actually sent yet. In the live app this lands in the president's inbox.</p>
      <div class="acts">${p?`<a class="btn" href="${p.url}" ${ext}><i class="ph-bold ph-credit-card"></i> Pay ${esc(p.name)} dues, $${p.price}</a>`:''}<button class="btn ghost" id="joinAgain">Send another</button></div></div>`}
   const ch=S.joinCh||(S.chapter!=='All'?S.chapter:'SoCal');
   const opt=p=>`<label class="radio plan2"><input type="radio" name="jc" value="${p.chapter}" ${ch===p.chapter?'checked':''}><span><b>${p.name} <em>$${p.price}/yr</em></b>${p.blurb}<small>Goes to ${LEAD_X[PRES[p.chapter]].name}</small></span></label>`;
+  const inv=S.invite;
   return pageHead('Join a chapter','Fill this out and it goes straight to the president of the chapter you pick.')+`
+   ${inv?`<span class="pill invpill"><i class="ph-bold ph-paper-plane-tilt"></i> Invited by ${esc(inv.by)}</span>`:''}
    <form id="joinForm" class="joinform rise" novalidate>
     <div class="jcol">${PLANS.map(opt).join('')}</div>
     <div class="jcol">
@@ -1028,8 +1068,8 @@ function joinHTML(){
      <div class="two"><div><label for="jp">Phone (optional)</label><input class="field" id="jp" type="tel" maxlength="20" autocomplete="tel"></div>
      <div><label for="jcity">City</label><input class="field" id="jcity" required maxlength="40" autocomplete="address-level2"></div></div>
      <div class="two"><div><label for="jh">Handicap (optional)</label><input class="field" id="jh" maxlength="6" placeholder="12 or none"></div>
-     <div><label for="jhear">How did you hear about us?</label><select class="field" id="jhear"><option>A member</option><option>Instagram</option><option>YouTube</option><option>Facebook</option><option>At an event</option><option>Other</option></select></div></div>
-     <label for="jm">Anything the president should know?</label><textarea class="field" id="jm" maxlength="500" placeholder="Where you play, who you golf with, events you want in on"></textarea>
+     <div><label for="jhear">How did you hear about us?</label><select class="field" id="jhear"><option ${S.invite?'selected':''}>A member</option><option>Instagram</option><option>YouTube</option><option>Facebook</option><option>At an event</option><option>Other</option></select></div></div>
+     <label for="jm">Anything the president should know?</label><textarea class="field" id="jm" maxlength="500" placeholder="Where you play, who you golf with, events you want in on">${S.invite?'Invited by '+esc(S.invite.by)+'. ':''}</textarea>
      <p class="si-msg" id="joinMsg" role="status"></p>
      <button class="btn full" type="submit" style="width:100%;margin-top:14px"><i class="ph-bold ph-paper-plane-tilt"></i> Send to the chapter president</button>
      <p class="help">Your details go only to the club leaders. Paying dues happens after, on the club store.</p>
@@ -1042,7 +1082,7 @@ document.addEventListener('submit',e=>{
     const ch=(document.querySelector('input[name=jc]:checked')||{}).value;
     if(!v('jf')||!v('jl')||!v('jcity')){msg.textContent='Add your name and city.';return}
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('je'))){msg.textContent='Check the email address.';return}
-    S.joinSent={first:v('jf'),chapter:ch,at:Date.now()};S.joinCh=ch;save();renderHome();$('#v-home').scrollTop=0;
+    S.joinSent={first:v('jf'),chapter:ch,at:Date.now(),by:S.invite?S.invite.by:''};S.joinCh=ch;save();renderHome();$('#v-home').scrollTop=0;
     toast('Sent to '+LEAD_X[PRES[ch]].name)}
   if(e.target.id==='leadMsgForm'){e.preventDefault();const L=LEAD_X[e.target.dataset.lead];if(!$('#lmText').value.trim())return;closeSheet();toast('Message sent to '+L.first+'. Preview only, nothing sent yet.')}
   if(e.target.id==='sponForm'){e.preventDefault();if(!$('#spName').value.trim()||!$('#spEmail').value.trim()){toast('Add a business name and email');return}closeSheet();toast('Sent to Ross. Preview only, nothing sent yet.')}
@@ -1653,7 +1693,7 @@ document.addEventListener('click',e=>{
     else if(a==='try')TOUR[S.tour].doit();
     else if(a==='close'){S.tour=-1;renderCoach()}
     else if(a==='restart')goTour(0);
-    else if(a==='exit'){S.demo=false;S.member=false;S.tour=-1;S.tix=[];S.offers=[];S.tixClosed={};S.goingTo='';S.mview='map';S.trip=null;save();renderMembers();toast('Demo ended')}
+    else if(a==='exit'){S.demo=false;S.member=false;S.tour=-1;S.tix=[];S.offers=[];S.tixClosed={};S.goingTo='';S.mview='map';S.trip=null;save();renderMembers();syncTop();toast('Demo ended')}
     return}
   if(e.target.closest('#demoIn')){S.member=true;S.demo=true;if(!S.name)S.name='Demo Member';save();goTour(0);return}
   if(e.target.closest('#realIn')){openSignIn();return}
@@ -1771,6 +1811,7 @@ document.addEventListener('click',e=>{
 /* ---------- forum ---------- */
 function renderForum(){
   const v=$('#v-forum');
+  if(!S.member&&S.cfg&&!S.cfg.forum.guestsRead){document.body.classList.remove('thread-open');v.innerHTML=`<div class="card gate rise" style="margin-top:16px"><i class="ph-fill ph-lock-key"></i><h3>Members only</h3><p>The club forum is for members. Tournaments, game day, golf tips, travel and gear.</p><div class="acts"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button><button class="btn ghost" data-signin><i class="ph-bold ph-sign-in"></i> Sign in</button></div></div>`;return}
   const open=S.openThread&&allThreads().find(x=>x.id===S.openThread);
   if(S.openThread&&!open)S.openThread=null;
   document.body.classList.toggle('thread-open',!!S.openThread);
@@ -1812,6 +1853,7 @@ $('#scrim').addEventListener('click',closeSheet);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
 
 function ensureName(cb){
+  if(!S.member){openSignIn();$('#siMsg').textContent='Members post and reply in the forum. Sign in, or tap Try demo mode.';return}
   if(!S.name&&S.demo){S.name='Demo Member';save()}
   if(S.name)return cb();
   openSheet(`<h3>Your name</h3><p class="help" style="margin:0 0 4px">Shown on your posts. First name and last initial works.</p>
@@ -1833,6 +1875,7 @@ $('#btnProfile').addEventListener('click',()=>{
   openSheet(`<h3>${S.name?esc(S.name):'Your profile'}</h3>
    <p class="help" style="margin:0 0 10px">${S.name?'Your RSVPs and posts are saved on this device.':'Post once and your name saves here.'}</p>
    <div class="stack">${going.length?going.map(e=>`<div class="card"><b style="font-family:var(--display);font-size:20px;text-transform:uppercase">${esc(e.name)}</b><div class="meta">${fmtDate(e.date).dow}, ${fmtDate(e.date).m} ${fmtDate(e.date).d} - ${esc(e.where)}</div></div>`).join(''):'<div class="empty"><i class="ph-bold ph-calendar-blank"></i>No RSVPs yet.</div>'}</div>
+   ${S.member?'<button class="btn full" data-sub="home|invite"><i class="ph-bold ph-paper-plane-tilt"></i> Invite a friend</button>':''}
    <button class="btn full" data-sub="settings|account"><i class="ph-bold ph-gear-six"></i> Settings</button>
    ${S.member?'<button class="btn ghost full" id="vis2">My map visibility</button><button class="btn ghost full" id="so2">Sign out</button>':'<button class="btn full" id="si2">Sign in</button>'}
    <button class="btn ghost full" id="closeP">Close</button>`);
@@ -1867,7 +1910,7 @@ function setTab(t){
 }
 /* side menu: the open page shows its sub-links underneath it */
 const SUBNAV={
- home:[['Join a chapter','join'],['Club leaders','leaders'],['Club news','news'],['Club shop','shop'],['Sponsors','sponsors']],
+ home:[['Join a chapter','join'],['Invite a friend','invite'],['Club leaders','leaders'],['Club news','news'],['Club shop','shop'],['Sponsors','sponsors']],
  events:[['Upcoming','up'],['Scorecards','scores'],['Raider Cup','cup'],['Past events','past']],
  games:[['Raiders schedule','sched'],['Player news','news'],['Fantasy league','ff']],
  courses:[['Course map','map'],['Where we play','list']],
@@ -1931,7 +1974,7 @@ const CFG_DEF={
  users:{},evEdit:{},events:[],chapters:{},spons:null,ann:[],
  tix:{cap:'pct',pct:25,approve:false,trades:true,clubSpots:true,expire:true},
  forum:{boards:{Tournaments:true,'Game Day':true,'Golf Tips':true,Travel:true,Gear:true},approveNew:false,guestsRead:true,filter:true,reports:3},
- club:{name:'Raider Nation Golf Club',site:'https://raidernationgolfclub.com',store:'https://raidernationgolfclub.com/shop/',ig:'https://www.instagram.com/raidernationgolfclub',yt:'https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ',mapDefault:'optin',hcp:'ghin',feed:'espn',tz:'America/Los_Angeles'},
+ club:{name:'Raider Nation Golf Club',site:'https://raidernationgolfclub.com',store:'https://raidernationgolfclub.com/shop/',ig:'https://www.instagram.com/raidernationgolfclub',yt:'https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ',mapDefault:'optin',hcp:'ghin',feed:'espn',tz:'America/Los_Angeles',invites:true,invWho:'all',invExpire:'30',invApprove:false},
  my:{events:true,evWhen:'3d',games:true,gameWhen:'2h',tix:true,forum:true,ann:true,push:true,email:true,sms:false,ghin:'',chapter:'SoCal'}
 };
 const deepMerge=(a,b)=>{const o=Array.isArray(a)?a.slice():{...a};if(b&&typeof b==='object'&&!Array.isArray(b))Object.keys(b).forEach(k=>{o[k]=(a&&a[k]&&typeof a[k]==='object'&&!Array.isArray(a[k]))?deepMerge(a[k],b[k]):b[k]});return o};
@@ -1990,6 +2033,7 @@ function accountHTML(){
    ${group('Privacy',`${setRow('Member map','Show your city, or stay hidden','<button class="btn small ghost" id="acVis">'+(S.share==='off'?'Hidden':'Showing city')+'</button>')}
      <label for="acCity">Home city</label><select class="field" id="acCity">${cities.map(([k,c])=>`<option value="${k}" ${S.myCity===k?'selected':''}>${c.n}</option>`).join('')}</select>
      <p class="help">Pins sit on city centers, never your address. Phone and email stay private.</p>`)}
+   ${group('Invite friends',`${setRow('My invite link','Friends land on a welcome page with your name','<button class="btn small" data-sub="home|invite"><i class="ph-bold ph-paper-plane-tilt"></i> Open</button>')}`)}
    ${group('Membership',`${setRow('Plan',PLANS.find(p=>p.chapter===S.cfg.my.chapter).name+' - $'+PLANS.find(p=>p.chapter===S.cfg.my.chapter).price+' a year','<a class="btn small ghost" href="'+PLANS.find(p=>p.chapter===S.cfg.my.chapter).url+'" '+ext+'>Renew</a>')}
      <div class="acts" style="margin-top:12px"><button class="btn ghost small" id="acOut"><i class="ph-bold ph-sign-out"></i> Sign out</button><button class="btn ghost small danger" id="acDel">Delete my account</button></div>`)}
   </div>`;
@@ -2160,6 +2204,10 @@ function clubHTML(){
      ${setRow('Handicaps','',selCfg('club.hcp',c.hcp,[['ghin','GHIN for chapters, club handicap for National'],['club','Club handicap for everyone']]))}
      ${setRow('Raiders scores and news','',selCfg('club.feed',c.feed,[['espn','Free feed - preview only'],['licensed','Licensed sports feed - needed for launch']]))}
      ${setRow('Time zone','Kickoff and tee times',selCfg('club.tz',c.tz,[['America/Los_Angeles','Pacific'],['America/Denver','Mountain'],['America/Chicago','Central'],['America/New_York','Eastern']]))}`)}
+   ${group('Invite links',`${setRow('Members can send invite links','Each member gets their own link',sw('club.invites',c.invites))}
+     ${setRow('Who gets a link','',selCfg('club.invWho',c.invWho,[['all','Every member'],['leaders','Club leaders and admins only']]))}
+     ${setRow('Links expire after','',selCfg('club.invExpire',c.invExpire,[['7','7 days'],['30','30 days'],['never','Never']]))}
+     ${setRow('President approves invited members','Before they get member access',sw('club.invApprove',c.invApprove))}`)}
   </div>${prevNote}`;
 }
 
@@ -2207,6 +2255,85 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('change',e=>{if(e.target.id==='acCity'){S.myCity=e.target.value;save();toast('Home city saved')}});
 
+
+/* ---------- guest view vs member view, member invite links ---------- */
+/* preview: the link carries the inviter's name and chapter; the live app looks the code up in the member database */
+const chName=c=>{const p=PLANS.find(x=>x.chapter===c);return p?(p.chapter==='National'?'National':p.name+' chapter'):c};
+const firstName=()=>(S.name||'Member').split(/\s+/)[0];
+const invChapter=()=>S.invCh||S.cfg.my.chapter||'SoCal';
+const invCode=()=>{const b=(S.name||'member').replace(/[^a-z]/gi,'').slice(0,6).toLowerCase()||'member';return b+'-'+scHash((S.name||'')+'|'+invChapter()).toString(36).slice(0,4)};
+const invLink=()=>location.origin+location.pathname+'?invite='+invCode()+'&by='+encodeURIComponent(S.name||'A member')+'&ch='+encodeURIComponent(invChapter());
+const invMsg=()=>'Hey, come golf with us. Raider Nation Golf Club: golf, travel and Raiders football. Here is my invite: '+invLink();
+const canInvite=()=>S.member&&S.cfg.club.invites&&(S.cfg.club.invWho==='all'||S.role!=='member');
+function syncTop(){const b=document.querySelector('.topjoin');if(!b)return;
+  if(S.member&&canInvite()){b.dataset.sub='home|invite';b.innerHTML='<i class="ph-bold ph-paper-plane-tilt"></i> Invite a friend'}
+  else{b.dataset.sub='home|join';b.innerHTML='<i class="ph-bold ph-identification-badge"></i> Join the club'}}
+function viewBar(){return `<div class="viewbar"><span><i class="ph-bold ph-eye"></i> See the app as</span><div class="seg2"><button class="chip" data-asview="guest" aria-pressed="${!S.member}">Guest</button><button class="chip" data-asview="member" aria-pressed="${S.member}">Member</button></div><small>Preview switch. In the live app this follows sign-in.</small></div>`}
+const PERKS=[['map-trifold','Member map','See members near you and who is going to each game'],['ticket','Ticket exchange','Buy, sell and trade seats for every Raiders game'],['chats-circle','Forum posting','Start threads and reply. Guests can only read'],['golf','Scorecards and handicap','Club leaderboard, chapter cup, GHIN for chapters'],['paper-plane-tilt','Your own invite link','Bring friends into your chapter']];
+const perksHTML=()=>`<ul class="perks">${PERKS.map(([i,t,d])=>`<li><i class="ph-bold ph-${i}"></i><span><b>${t}</b><small>${d}</small></span></li>`).join('')}</ul>`;
+function guestCard(){return `<div class="card guestcard"><span class="pill"><i class="ph-bold ph-lock-key"></i> Guest view</span><h3 style="margin-top:8px">What members get</h3>${perksHTML()}
+  <div class="acts" style="margin-top:14px"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join from $99 a year</button><button class="btn ghost" data-signin><i class="ph-bold ph-sign-in"></i> Member sign in</button></div></div>`}
+function inviteCard(){if(!canInvite())return '';const n=(S.invLog||{}).shared||0;
+  return `<div class="card invcard"><span class="pill"><i class="ph-bold ph-check-circle"></i> Member view</span><h3 style="margin-top:8px">Invite a friend</h3><p class="meta">Your link opens a welcome page with your name and the ${esc(chName(invChapter()))}.${n?` Shared ${n} time${n===1?'':'s'}.`:''}</p>
+  <div class="invlink"><input class="field" readonly value="${esc(invLink())}" aria-label="Your invite link" data-invsel><button class="btn small" data-inv="copy"><i class="ph-bold ph-copy"></i> Copy</button></div>
+  <div class="acts" style="margin-top:10px"><button class="btn small ghost" data-inv="share"><i class="ph-bold ph-share-network"></i> Share</button><button class="btn small ghost" data-sub="home|invite">More options</button></div></div>`}
+function inviteHTML(){
+  if(!S.member)return pageHead('Invite a friend')+`<div class="card gate rise"><i class="ph-fill ph-paper-plane-tilt"></i><h3>Invite links are for members</h3><p>Every member gets their own link to bring friends into their chapter. Got a link from a member? Open it and you land on their invite.</p><div class="acts"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button><button class="btn ghost" data-signin><i class="ph-bold ph-sign-in"></i> Sign in</button></div></div>`;
+  if(!canInvite())return pageHead('Invite a friend')+`<div class="card gate rise"><i class="ph-fill ph-lock-key"></i><h3>Invites are off</h3><p>${S.cfg.club.invites?'Club leaders hand out invite links right now.':'Club leaders turned invite links off for now.'} Ask your chapter president to bring someone in.</p><div class="acts"><button class="btn ghost" data-sub="home|leaders">Club leaders</button></div></div>`;
+  const L=S.invLog||{},ex=S.cfg.club.invExpire;
+  return pageHead('Invite a friend','Send your link. Your friend lands on a welcome page with your name and chapter, then picks a plan.')+`<div class="invcols rise">
+   <div class="card"><h3>Your invite link</h3>
+    <label for="invCh">Invite them to</label><select class="field" id="invCh">${PLANS.map(p=>`<option value="${p.chapter}" ${invChapter()===p.chapter?'selected':''}>${esc(chName(p.chapter))} - $${p.price} a year</option>`).join('')}</select>
+    <div class="invlink"><input class="field" readonly value="${esc(invLink())}" aria-label="Your invite link" data-invsel><button class="btn small" data-inv="copy"><i class="ph-bold ph-copy"></i> Copy</button></div>
+    <div class="invacts"><button class="btn ghost" data-inv="share"><i class="ph-bold ph-share-network"></i> Share</button><a class="btn ghost" data-inv="text" href="sms:?&body=${encodeURIComponent(invMsg())}"><i class="ph-bold ph-chat-text"></i> Text</a><a class="btn ghost" data-inv="email" href="mailto:?subject=${encodeURIComponent('Join me in Raider Nation Golf Club')}&body=${encodeURIComponent(invMsg())}"><i class="ph-bold ph-envelope-simple"></i> Email</a><button class="btn ghost" data-inv="preview"><i class="ph-bold ph-eye"></i> See what they see</button></div>
+    <p class="help">${ex==='never'?'Your link does not expire.':'Links work for '+ex+' days, then you get a fresh one.'}${S.cfg.club.invApprove?' The chapter president approves new members first.':''}</p>
+    <div class="invstats"><div><b>${L.shared||0}</b><small>Shared</small></div><div><b>-</b><small>Opened</small></div><div><b>-</b><small>Joined</small></div></div>
+    <p class="help">Opened and joined counts start when the live app tracks invites.</p>
+   </div>
+   <div class="card"><h3>What your friend sees</h3>
+    <div class="invprev"><img src="assets/logo/rngc-ball-static.svg" alt=""><b>${esc(S.name||'A member')} wants you in</b><p>${esc(chName(invChapter()))} - golf, travel and Raiders football</p></div>
+    ${perksHTML()}
+    <p class="help">Guests can browse events, the schedule and courses. Everything above unlocks when they join.</p>
+   </div></div>`;
+}
+function invCopy(){const t=invLink(),done=()=>{S.invLog=S.invLog||{};S.invLog.shared=(S.invLog.shared||0)+1;save();toast('Invite link copied');refreshInvite()};
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(done,()=>{fallbackCopy(t);done()});else{fallbackCopy(t);done()}}
+function fallbackCopy(t){const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()}
+document.addEventListener('click',e=>{
+  const sel=e.target.closest('[data-invsel]');if(sel){sel.select();return}
+  const av=e.target.closest('[data-asview]');if(av){
+    if(av.dataset.asview==='member'){S.member=true;S.demo=true;if(!S.name)S.name='Demo Member';toast('Member view: demo member')}
+    else{S.member=false;S.demo=false;S.tour=-1;toast('Guest view')}
+    save();renderAll();renderSubnav();return}
+  const b=e.target.closest('[data-inv]');if(!b)return;const k=b.dataset.inv;
+  if(k==='copy'){invCopy();return}
+  if(k==='share'){if(navigator.share){navigator.share({title:'Raider Nation Golf Club',text:'Hey, come golf with us. Raider Nation Golf Club: golf, travel and Raiders football.',url:invLink()}).then(()=>{S.invLog=S.invLog||{};S.invLog.shared=(S.invLog.shared||0)+1;save();refreshInvite()}).catch(()=>{})}else invCopy();return}
+  if(k==='text'||k==='email'){S.invLog=S.invLog||{};S.invLog.shared=(S.invLog.shared||0)+1;save();setTimeout(refreshInvite,50);return}
+  if(k==='preview'){openInvite({code:invCode(),by:S.name||'A member',ch:invChapter(),preview:true});return}
+});
+function refreshInvite(){if(S.tab==='home'&&['invite','overview'].includes(S.hpage||'overview'))renderHome()}
+document.addEventListener('change',e=>{if(e.target.id==='invCh'){S.invCh=e.target.value;renderHome()}});
+
+/* someone opens an invite link: welcome page with who invited them */
+const IV=$('#inviteIn');
+function openInvite(inv){
+  const p=PLANS.find(x=>x.chapter===inv.ch)||PLANS[1];
+  $('#inviteBox').innerHTML=`<img class="si-mark" src="assets/logo/rngc-ball-static.svg" alt="">
+   <h2 id="invTitle">You're invited<em>${esc(inv.by)} wants you in</em></h2>
+   <p class="si-sub">Raider Nation Golf Club. Golf, travel and Raiders football, ${esc(chName(p.chapter))}.</p>
+   ${perksHTML()}
+   <p class="si-plan">${esc(p.name)} plan: $${p.price} a year. ${esc(p.blurb)}</p>
+   <button class="btn si-full" type="button" id="ivJoin" style="margin-top:14px"><i class="ph-bold ph-identification-badge"></i> Join the ${esc(chName(p.chapter))}</button>
+   <button class="btn ghost si-full" type="button" id="ivLook" style="margin-top:10px"><i class="ph-bold ph-compass"></i> Look around first</button>
+   <div class="si-links"><button type="button" id="ivSignin">${S.member?'Back to the app':"I'm a member, sign in"}</button></div>
+   ${inv.preview?'<p class="si-msg">Preview: this is the page your friend sees.</p>':''}`;
+  IV.hidden=false;requestAnimationFrame(()=>IV.classList.add('on'));
+  const close=()=>{IV.classList.remove('on');setTimeout(()=>{IV.hidden=true},360)};
+  $('#ivJoin').addEventListener('click',()=>{if(!inv.preview){S.invite=inv;try{sessionStorage.setItem('rngcInvite',JSON.stringify(inv))}catch(e){}}close();S.joinCh=p.chapter;S.joinSent=null;S.hpage='join';setTab('home');if(inv.preview)toast('Preview: your friend lands on the join form')});
+  $('#ivLook').addEventListener('click',()=>{if(!inv.preview){S.invite=inv;try{sessionStorage.setItem('rngcInvite',JSON.stringify(inv));sessionStorage.setItem('rngcGuest','1')}catch(e){}}close()});
+  $('#ivSignin').addEventListener('click',()=>{close();if(!S.member)setTimeout(openSignIn,330)});
+}
+
 function renderAll(){renderHome();renderEvents();renderForum();if(S.tab==='courses')renderCourses();if(S.tab==='games')renderGames();if(S.tab==='members')renderMembers();if(S.tab==='settings')renderSettings()}
 renderChips();renderAll();setTab('home');loadSchedule();
 
@@ -2243,7 +2370,15 @@ $('#siForm').addEventListener('submit',e=>{e.preventDefault();
   $('#siMsg').textContent='Preview only: sign-in connects to your club account in the live app. Tap Try demo mode to look around as a member.'});
 $('#siDemo').addEventListener('click',()=>{S.member=true;S.demo=true;if(!S.name)S.name='Demo Member';save();closeSignIn();renderAll();toast('Signed in to demo mode')});
 $('#siGuest').addEventListener('click',()=>{try{sessionStorage.setItem('rngcGuest','1')}catch(e){}closeSignIn()});
-(function(){let g=null;try{g=sessionStorage.getItem('rngcGuest')}catch(e){}if(!S.member&&!g)openSignIn()})();
+(function(){
+  let g=null,inv=null;try{g=sessionStorage.getItem('rngcGuest');inv=JSON.parse(sessionStorage.getItem('rngcInvite')||'null')}catch(e){}
+  const q=new URLSearchParams(location.search);
+  if(q.get('invite')){const ch=PLANS.some(p=>p.chapter===q.get('ch'))?q.get('ch'):'National';
+    const fresh={code:q.get('invite').slice(0,24),by:(q.get('by')||'A member').slice(0,30),ch};
+    if(S.cfg.club.invites){openInvite(fresh);return}}
+  if(inv)S.invite=inv;
+  if(!S.member&&!g)openSignIn()})();
+syncTop();
 </script>
 </body>
 </html>
