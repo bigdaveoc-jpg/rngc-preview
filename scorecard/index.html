@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0a0b0d">
+<title>RNGC Live Scorecard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+:root{
+  --bg:#0a0b0d;--panel:#16191e;--panel-2:#1d2127;--line:#2a2f37;--text:#eef0f3;--muted:#9aa2ae;
+  --silver:#d5dae1;--silver-2:#aeb5bf;--on-silver:#0a0b0d;--slate:#7d93b8;
+  --glass:linear-gradient(140deg,rgba(255,255,255,.1),rgba(255,255,255,.03) 55%,rgba(255,255,255,.05));
+  --edge:rgba(255,255,255,.11);--hi:rgba(255,255,255,.14);
+  --under:#7fb08a;--over:#c9a27a;
+  --display:'Barlow Condensed',system-ui,sans-serif;--body:'Barlow',system-ui,sans-serif;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+/* Sun mode: high contrast for bright sunlight on the course */
+body.sun{--bg:#f4f5f7;--panel:#fff;--panel-2:#e9ecf0;--line:#c9ced6;--text:#0a0b0d;--muted:#4a515c;--silver:#0a0b0d;--silver-2:#2c323b;--on-silver:#fff;
+  --glass:#fff;--edge:#c9ced6;--hi:transparent;--under:#1f7a3a;--over:#9a4d12;--slate:#2f4f86}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.4}
+body:not(.sun){background:
+  radial-gradient(60% 45% at 8% 0%,rgba(213,218,225,.2),transparent 70%),
+  radial-gradient(55% 50% at 100% 35%,rgba(84,112,160,.3),transparent 72%),
+  radial-gradient(45% 35% at 85% 100%,rgba(70,100,150,.25),transparent 70%),#0a0b0d;background-attachment:fixed}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--silver);outline-offset:2px}
+.wrap{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:0 16px}
+.wrap.wide{max-width:1100px}
+.card{background:var(--glass);border:1px solid var(--edge);border-radius:14px;box-shadow:inset 0 1px 0 var(--hi);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.btn{min-height:52px;padding:0 20px;border-radius:10px;background:var(--silver);color:var(--on-silver);font-weight:700;font-size:17px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s var(--ease)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.tag{display:inline-flex;align-items:center;gap:5px;min-height:22px;padding:0 8px;border-radius:4px;background:var(--panel-2);color:var(--silver-2);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.tag.rngc{background:var(--silver);color:var(--on-silver)}
+.tag.tm{background:rgba(125,147,184,.22);color:var(--slate)}
+h1,h2,.disp{font-family:var(--display);text-transform:uppercase;letter-spacing:.03em}
+.muted{color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* top bar */
+.bar{display:flex;align-items:center;gap:10px;padding:max(12px,env(safe-area-inset-top)) 0 10px}
+.bar .logo{width:34px;height:39px}
+.bar .t{flex:1;min-width:0;line-height:1.1}
+.bar .t b{display:block;font-family:var(--display);font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .t span{font-size:13px;color:var(--muted)}
+.ib{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;border:1px solid var(--line);font-size:20px;flex:none}
+
+/* start screen */
+.ev{padding:16px;margin-top:6px}
+.ev h1{font-size:30px;line-height:1;margin:8px 0 4px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.facts div{background:var(--panel-2);border-radius:8px;padding:8px 10px}
+.facts b{display:block;font-family:var(--display);font-size:20px}
+.facts span{font-size:12px;color:var(--muted)}
+.lbl{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--silver-2);margin:20px 0 8px}
+.seg{display:flex;gap:22px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.seg button{min-height:44px;font-weight:600;color:var(--muted);position:relative;white-space:nowrap}
+.seg button[aria-pressed="true"]{color:var(--text)}
+.seg button[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--silver)}
+.teams{display:grid;gap:8px}
+.team{display:flex;align-items:center;gap:12px;padding:12px 14px;text-align:left;width:100%}
+.team .hn{width:44px;height:44px;border-radius:8px;background:var(--panel-2);display:grid;place-items:center;font-family:var(--display);font-size:20px;font-weight:800;flex:none;line-height:1}
+.team .hn small{display:block;font-size:9px;letter-spacing:.08em;color:var(--muted);font-family:var(--body);font-weight:700}
+.team .nm{flex:1;min-width:0}
+.team .nm b{display:block}
+.team .nm span{font-size:13px;color:var(--muted)}
+.team[aria-pressed="true"]{border-color:var(--silver);box-shadow:inset 0 0 0 1px var(--silver)}
+.stick{position:sticky;bottom:0;padding:12px 0 max(14px,env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%);margin-top:auto}
+.note{font-size:13px;color:var(--muted);margin-top:12px;display:flex;gap:8px}
+.note i{font-size:16px;margin-top:1px}
+
+/* hole screen */
+.prog{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--silver);transition:width .3s var(--ease)}
+.hole{flex:1;display:flex;flex-direction:column;touch-action:pan-y}
+.hhead{display:flex;align-items:flex-end;gap:14px;margin:16px 0 6px}
+.hnum{font-family:var(--display);font-weight:800;font-size:96px;line-height:.8;letter-spacing:-.01em}
+.hnum small{display:block;font-size:13px;letter-spacing:.14em;color:var(--muted);font-family:var(--body);font-weight:700;margin-bottom:8px}
+.hmeta{display:grid;grid-template-columns:repeat(3,auto);gap:4px 16px;padding-bottom:4px}
+.hmeta b{font-family:var(--display);font-size:28px;line-height:1}
+.hmeta span{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.run{margin-left:auto;text-align:right;padding-bottom:4px}
+.run b{font-family:var(--display);font-size:32px;line-height:1;display:block}
+.run span{font-size:12px;color:var(--muted)}
+.under{color:var(--under)}.over{color:var(--over)}
+
+.entry{padding:18px 16px 16px;margin-top:12px}
+.stepper{display:grid;grid-template-columns:76px 1fr 76px;align-items:center;gap:10px}
+.stepper button.pm{height:76px;border-radius:12px;border:1px solid var(--line);font-size:30px;display:grid;place-items:center;background:var(--panel-2)}
+.stepper button.pm:active{transform:scale(.95)}
+.big{text-align:center;font-family:var(--display);font-weight:800;font-size:112px;line-height:.9;min-height:100px}
+.big.ghost{color:var(--line)}
+body.sun .big.ghost{color:#c3c8d0}
+.word{text-align:center;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:14px;min-height:20px;margin-top:6px}
+.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:16px}
+.quick button{min-height:56px;border-radius:10px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.quick button b{font-family:var(--display);font-size:24px}
+.quick button span{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.quick button[aria-pressed="true"]{background:var(--silver);color:var(--on-silver);border-color:var(--silver)}
+.quick button[aria-pressed="true"] span{color:var(--on-silver)}
+
+.prow{display:grid;grid-template-columns:1fr 54px 64px 54px;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+.prow:first-child{border-top:0;padding-top:0}
+.prow .who b{display:block;font-size:17px}
+.prow .who span{font-size:12px;color:var(--muted)}
+.dots{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--silver-2)}
+.prow button.pm{height:54px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);font-size:22px;display:grid;place-items:center}
+.prow .sc{text-align:center;font-family:var(--display);font-size:46px;font-weight:800;line-height:1;cursor:pointer}
+.prow .sc.ghost{color:var(--line)}
+body.sun .prow .sc.ghost{color:#c3c8d0}
+
+.strip{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-top:14px}
+.strip button{height:40px;border-radius:6px;background:var(--panel-2);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;font-size:10px;color:var(--muted);font-weight:700;border:1px solid transparent}
+.strip button b{font-family:var(--display);font-size:16px;color:var(--text)}
+.strip button.cur{border-color:var(--silver)}
+.strip button.done b.u{color:var(--under)}.strip button.done b.o{color:var(--over)}
+.navrow{display:grid;grid-template-columns:64px 1fr;gap:10px}
+.saved{display:flex;align-items:center;gap:6px;justify-content:center;font-size:12px;color:var(--muted);margin-top:8px}
+
+/* paper-style card */
+.paper{overflow-x:auto;padding:12px;margin-top:12px}
+.paper table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:14px;text-align:center}
+.paper col.c0{width:46px}
+.paper th,.paper td{padding:6px 2px;border-bottom:1px solid var(--line)}
+.paper th:first-child,.paper td:first-child{text-align:left;padding-left:2px;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.paper thead th{font-family:var(--display);font-size:15px}
+.paper .tot{font-weight:800}
+.mk{display:inline-grid;place-items:center;width:24px;height:24px;font-family:var(--display);font-size:16px;font-weight:800}
+@media (max-width:420px){.paper{padding:10px 8px}.paper table{font-size:12px}.paper th,.paper td{padding:5px 0}.mk{width:21px;height:21px;font-size:14px}.paper th:first-child,.paper td:first-child{font-size:10px}.paper col.c0{width:38px}}
+.mk.b{border:1.5px solid var(--under);border-radius:50%;color:var(--under)}
+.mk.e{border:1.5px solid var(--under);border-radius:50%;box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--under);color:var(--under)}
+.mk.bo{border:1.5px solid var(--over);color:var(--over)}
+.mk.d{border:1.5px solid var(--over);box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--over);color:var(--over)}
+body.sun .mk.e,body.sun .mk.d{box-shadow:0 0 0 2px #fff,0 0 0 3.5px currentColor}
+.sumrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.sumrow div{padding:12px;text-align:center}
+.sumrow b{display:block;font-family:var(--display);font-size:34px;line-height:1}
+.sumrow span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.done-banner{padding:14px;margin-top:12px;display:flex;gap:10px;align-items:center}
+.done-banner i{font-size:26px;color:var(--under)}
+
+/* board */
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;letter-spacing:.12em;color:#e25c5c}
+.live i{width:8px;height:8px;border-radius:50%;background:#e25c5c;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.battle{padding:14px;margin-top:8px}
+.battle .row{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--display);text-transform:uppercase}
+.battle .row b{font-size:30px;line-height:1}
+.battle .row span{font-size:14px;letter-spacing:.06em;color:var(--muted)}
+.meter{display:flex;height:10px;border-radius:5px;overflow:hidden;margin-top:10px;background:var(--panel-2)}
+.meter i{display:block;height:100%;transition:width .6s var(--ease)}
+.meter .a{background:var(--silver)}.meter .b{background:var(--slate)}
+.battle p{font-size:12px;color:var(--muted);margin-top:8px}
+.lb{margin-top:12px;padding:4px 0}
+.lrow{display:grid;grid-template-columns:42px 1fr auto 52px;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid var(--line);width:100%;text-align:left}
+.lrow:first-child{border-top:0}
+.lrow .pos{font-family:var(--display);font-size:20px;font-weight:800;color:var(--muted)}
+.lrow .nm b{display:block;font-size:16px;line-height:1.2}
+.lrow .nm{min-width:0}
+.lrow .nm>span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .tp{font-family:var(--display);font-size:28px;font-weight:800;text-align:right}
+.lrow .th{text-align:right;font-size:12px;color:var(--muted);line-height:1.1}
+.lrow .th b{display:block;font-size:15px;color:var(--text)}
+.lrow.me{background:rgba(213,218,225,.08)}
+body.sun .lrow.me{background:#eef0f4}
+.lrow.flash{animation:flash 1.4s var(--ease)}
+@keyframes flash{0%{background:rgba(213,218,225,.28)}100%{background:transparent}}
+.lhead{display:grid;grid-template-columns:42px 1fr auto 52px;gap:10px;padding:8px 14px 4px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.lhead span:nth-child(3),.lhead span:nth-child(4){text-align:right}
+.ticker{font-size:13px;color:var(--muted);margin-top:10px;min-height:20px;display:flex;gap:8px;align-items:center}
+.ticker b{color:var(--text)}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:50%;bottom:0;width:min(560px,100%);transform:translate(-50%,100%);z-index:41;background:var(--panel);border-top-left-radius:18px;border-top-right-radius:18px;padding:10px 16px max(18px,env(safe-area-inset-bottom));transition:transform .3s var(--ease);max-height:88dvh;overflow-y:auto;border:1px solid var(--edge)}
+.sheet.on{transform:translate(-50%,0)}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+
+/* big screen */
+body.tv{font-size:20px}
+body.tv .wrap{max-width:none;padding:0 3vw}
+body.tv .lrow{grid-template-columns:70px 1fr auto 90px;padding:.75vh 20px}
+body.tv .bar{padding:2vh 0 1.4vh}
+body.tv .bar .logo{width:3.4vw;height:auto}
+body.tv .bar .t b{font-size:2.4vw}
+body.tv .bar .t span{font-size:1.1vw}
+body.tv .live{font-size:1.2vw}
+body.tv .battle{padding:1.2vh 1.4vw;margin:0 0 1.4vh}
+body.tv .ticker{display:none}
+body.tv .note{display:none}
+body.tv .lhead{grid-template-columns:70px 1fr auto 90px;padding:8px 20px 4px}
+body.tv .lrow .pos{font-size:2.2vw}
+body.tv .lrow .nm b{font-size:1.65vw}
+body.tv .lrow .nm>span{font-size:1.1vw}
+body.tv .lrow .tp{font-size:2.6vw}
+body.tv .lrow .th b{font-size:1.6vw}
+body.tv .tvgrid{display:grid;grid-template-columns:1fr 1fr;gap:2vw;align-items:start}
+body.tv .battle .row b{font-size:2.8vw}
+body.tv h1{font-size:3.2vw}
+@media (min-width:900px){
+  .boardgrid{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start}
+  .boardgrid .side{position:sticky;top:12px}
+}
+@media (max-width:370px){.hnum{font-size:80px}.big{font-size:96px}.stepper{grid-template-columns:66px 1fr 66px}.stepper button.pm{height:66px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Team card"></div>
+<script>
+/* ===================== DATA ===================== */
+/* Chimera Golf Club, Henderson NV. Real card: pars, yardages, stroke index and rating/slope per tee
+   (GolfPass scorecard, checked 2026-11-09; front 36, back 36, par 72). */
+const COURSES={
+ chimera:{name:'Chimera Golf Club',city:'Henderson, NV',
+  par:[4,5,4,3,4,3,4,5,4, 4,5,3,4,4,5,4,3,4],
+  si:[5,15,7,13,3,11,17,9,1, 10,8,16,6,14,12,2,18,4],
+  siW:[11,9,3,13,7,15,17,5,1, 12,10,18,6,14,8,4,16,2],
+  tees:[
+   {id:'pegasus',name:'Pegasus',rating:71.8,slope:124,y:[397,518,384,185,418,200,292,500,436, 374,567,186,411,347,540,441,159,402]},
+   {id:'serpent',name:'Serpent',rating:70.3,slope:122,y:[374,502,364,168,399,180,275,482,405, 353,537,165,385,331,514,405,142,378]},
+   {id:'goat',name:'Goat',rating:67.9,slope:118,y:[346,485,346,147,370,149,260,468,372, 335,501,137,359,313,462,375,124,348]},
+   {id:'lion',name:'Lion',rating:64.7,slope:101,y:[316,446,302,119,317,125,242,448,310, 281,448,112,313,296,429,328,108,290]}
+  ]}
+};
+const EVENTS={
+ nov14:{id:'nov14',name:'RNGC vs The 12th Man',date:'Sat Nov 14, 2026',start:'8:00 am shotgun',course:'chimera',tee:'serpent',format:'scramble',
+  clubs:['RNGC','12th Man']}
+};
+const FIRST=['Marcus','Dana','Omar','Lena','Jason','Rick','Tony','Chris','Ken','Rob','Vince','Mike','Sam','Dre','Hector','Andre','Gabe','Tina','Luis','Derek','Pat','Nina','Carlos','Bobby','Steph','Ray','Manny','Kyle','Jo','Ross','Eddie','Trey','Ben','Cole','Jamal','Will','Grant','Nate','Paul','Ivan','Drew','Russ','Matt','Seth','Ty','Kurt','Lou','Gus','Owen','Zach','Brent','Dale','Hank','Joel','Aaron','Leo','Mo','Rex','Abe','Cal','Don','Earl','Fred','Glen','Hal','Jim','Lars','Ned','Oscar','Pete','Quinn','Reggie'];
+const LAST='ABCDEFGHJKLMNOPRSTVW';
+function rng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const hash=s=>{let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0};
+/* demo field: 18 foursomes, one per starting hole (shotgun). 10 RNGC, 8 12th Man. Same every load. */
+const TEAMS=(()=>{const r=rng(hash('nov14-field')),used=new Set(),out=[];
+  const pick=()=>{let f,k=0;do{f=FIRST[Math.floor(r()*FIRST.length)];k++}while(used.has(f)&&k<400);used.add(f);return f+' '+LAST[Math.floor(r()*LAST.length)]+'.'};
+  for(let i=0;i<18;i++){const club=i%9<5?'RNGC':'12th Man';const players=[0,1,2,3].map(k=>({id:'t'+(i+1)+'p'+k,name:pick(),hcp:Math.round(3+r()*22)}));
+    out.push({id:'t'+(i+1),club,start:i+1,players,name:players[0].name.split(' ')[0]+"'s team",str:(r()-.5)*.24,pace:.85+r()*.3,off:r()})}
+  return out})();
+
+/* ===================== STATE ===================== */
+const KEY='rngc-scorecard-v1';
+const S=Object.assign({event:'nov14',team:null,format:null,tee:null,scores:{},submitted:false,simStart:0,sun:false,hole:null},load());
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}}}
+let bc=null;try{bc=new BroadcastChannel('rngc-scorecard')}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(bc)try{bc.postMessage('u')}catch(e){};flashSaved()}
+const EV=()=>EVENTS[S.event],CO=()=>COURSES[EV().course];
+const FMT=()=>S.format||EV().format,TEE=()=>CO().tees.find(t=>t.id===(S.tee||EV().tee));
+if(!S.simStart){S.simStart=Date.now()-5.2*SIM_MS();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function SIM_MS(){return 30000}   /* demo: the rest of the field plays a hole every ~30 seconds */
+const myTeam=()=>TEAMS.find(t=>t.id===S.team);
+const order=start=>Array.from({length:18},(_,i)=>(start-1+i)%18+1);   /* shotgun: start hole, then around */
+
+/* ===================== HELPERS ===================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toPar=n=>n===0?'E':(n>0?'+'+n:String(n));
+const cls=n=>n<0?'under':(n>0?'over':'');
+const WORDS={'-3':'Albatross','-2':'Eagle','-1':'Birdie','0':'Par','1':'Bogey','2':'Double','3':'Triple'};
+const word=d=>WORDS[d]||(d>0?'+'+d:String(d));
+const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}};
+const courseHcp=h=>{const t=TEE();return Math.round(h*t.slope/113+(t.rating-72))};
+const strokesOn=(ch,hole)=>{const si=CO().si[hole-1];return Math.floor(ch/18)+(si<=ch%18?1:0)};
+const mk=(s,par)=>{const d=s-par;const c=d<=-2?'e':d===-1?'b':d===1?'bo':d>=2?'d':'';return `<span class="mk ${c}">${s}</span>`};
+const tagFor=c=>`<span class="tag ${c==='RNGC'?'rngc':'tm'}">${esc(c)}</span>`;
+const ADMIN=new URLSearchParams(location.search).has('admin');
+
+/* my scores: scramble = one team score per hole, stroke play = each player per hole */
+function myScores(){const k=S.team+'|'+FMT();return S.scores[k]||(S.scores[k]={})}
+const mySc=(who,h)=>{const m=myScores()[who];return m?m[h]:undefined};
+function setSc(who,h,v){const m=myScores();(m[who]||(m[who]={}))[h]=v;save()}
+
+/* demo field scores, seeded so every screen agrees */
+function simHole(team,who,hole,hcp){const r=rng(hash(team.id+who+hole+FMT()));const par=CO().par[hole-1];let x=r();
+  if(FMT()==='scramble'){const s=team.str;
+    if(par===5){if(x<.07+s/3)return par-2;if(x<.62+s)return par-1;if(x<.97)return par;return par+1}
+    if(par===3){if(x<.26+s)return par-1;if(x<.95)return par;return par+1}
+    if(x<.36+s)return par-1;if(x<.95)return par;return par+1}
+  const ch=courseHcp(hcp),rec=strokesOn(ch,hole);const pB=Math.max(.02,.13-hcp*.005),pP=Math.max(.12,.56-hcp*.017);
+  if(x<pB)return par-1;if(x<pB+pP)return par;if(x<pB+pP+.3)return par+1;if(x<pB+pP+.3+.18+rec*.05)return par+2;return par+3}
+function simThru(team){const el=(Date.now()-S.simStart)/SIM_MS();return Math.max(0,Math.min(18,Math.floor(el*team.pace+team.off)))}
+
+/* one entry per team (scramble) or per player (stroke play) */
+function field(){const fmt=FMT(),out=[];
+  for(const t of TEAMS){const mine=t.id===S.team,ord=order(t.start);
+    const units=fmt==='scramble'?[{who:'team',name:t.name,sub:t.players.map(p=>p.name.split(' ')[0]).join(', '),hcp:0}]:t.players.map(p=>({who:p.id,name:p.name,sub:t.name,hcp:p.hcp}));
+    const n=mine?null:simThru(t);
+    for(const u of units){const holes={};
+      if(mine){for(const h of ord){const v=mySc(u.who,h);if(v!=null)holes[h]=v}}
+      else ord.slice(0,n).forEach(h=>holes[h]=simHole(t,u.who,h,u.hcp));
+      const played=Object.keys(holes).map(Number);let gross=0,par=0,net=0;const ch=fmt==='stroke'?courseHcp(u.hcp):0;
+      for(const h of played){gross+=holes[h];par+=CO().par[h-1];net+=holes[h]-strokesOn(ch,h)}
+      out.push({id:t.id+'|'+u.who,team:t,mine,name:u.name,sub:u.sub,club:t.club,holes,thru:played.length,gross,par,tp:gross-par,ntp:net-par,ch,last:mine?null:ord[n-1]})}}
+  return out}
+function ranked(net){const f=field(),k=net?'ntp':'tp';
+  f.sort((a,b)=>(a.thru?0:1)-(b.thru?0:1)||a[k]-b[k]||b.thru-a.thru||a.name.localeCompare(b.name));
+  f.forEach((e,i)=>{const prev=f[i-1];e.pos=prev&&prev.thru&&e.thru&&prev[k]===e[k]?prev.pos:i+1});
+  f.forEach(e=>{e.tie=f.filter(x=>x.thru&&x.pos===e.pos).length>1});return f}
+
+/* ===================== SCREENS ===================== */
+const LOGO='../assets/logo/rngc-ball-static.svg';
+function bar(title,sub,right=''){return `<div class="bar"><a href="../" aria-label="Back to the club app"><img class="logo" src="${LOGO}" alt=""></a><div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${right}</div>`}
+const sunBtn=()=>`<button class="ib" id="sunBtn" aria-pressed="${S.sun}" aria-label="Sun mode, high contrast for bright light" title="Sun mode"><i class="ph-${S.sun?'fill':'bold'} ph-sun"></i></button>`;
+
+function route(){const h=location.hash.replace(/^#\/?/,'');document.body.classList.toggle('sun',!!S.sun&&!h.startsWith('tv'));document.body.classList.toggle('tv',h.startsWith('tv'));
+  closeSheet();
+  if(h.startsWith('board'))return board(false);
+  if(h.startsWith('tv'))return board(true);
+  if(h.startsWith('card'))return review();
+  if(h.startsWith('hole')&&S.team){const n=+h.split('/')[1]||order(myTeam().start)[0];return hole(n)}
+  start()}
+
+function start(){const e=EV(),c=CO(),t=TEE();$('#app').className='wrap';
+  const chosen=myTeam();
+  $('#app').innerHTML=bar('Live scorecard',e.date,`<a class="ib" href="#/board" aria-label="Live leaderboard"><i class="ph-bold ph-ranking"></i></a>`)+`
+  <section class="card ev"><span class="tag">Event day</span><h1>${esc(e.name)}</h1><div class="muted">${esc(c.name)}, ${esc(c.city)} · ${esc(e.start)}</div>
+   <div class="facts"><div><b>${FMT()==='scramble'?'4-man':'Stroke'}</b><span>${FMT()==='scramble'?'Scramble':'Gross and net'}</span></div><div><b>${esc(t.name)}</b><span>${t.y.reduce((a,b)=>a+b,0).toLocaleString()} yds</span></div><div><b>Par ${c.par.reduce((a,b)=>a+b,0)}</b><span>${t.rating} / ${t.slope}</span></div></div></section>
+  ${ADMIN?`<div class="lbl">Format · event admin</div><div class="seg" role="group" aria-label="Format">${[['scramble','4-man scramble'],['stroke','Stroke play']].map(([k,l])=>`<button data-fmt="${k}" aria-pressed="${FMT()===k}">${l}</button>`).join('')}</div>
+  <div class="lbl">Tees · event admin</div><div class="seg" role="group" aria-label="Tees">${c.tees.map(x=>`<button data-tee="${x.id}" aria-pressed="${x.id===t.id}">${x.name}</button>`).join('')}</div>`:''}
+  <div class="lbl">Which group are you in?</div>
+  <div class="teams">${TEAMS.map(x=>`<button class="card team" data-team="${x.id}" aria-pressed="${x.id===S.team}"><div class="hn"><small>HOLE</small>${x.start}</div><div class="nm"><b>${esc(x.players.map(p=>p.name).join(', '))}</b><span>Starts on hole ${x.start}</span></div>${tagFor(x.club)}</button>`).join('')}</div>
+  <p class="note"><i class="ph-bold ph-info"></i><span>One person per group keeps score, like the paper card. Every tap saves right away, so a dead spot on the course loses nothing.</span></p>
+  <div class="stick"><button class="btn block" id="go" ${chosen?'':'disabled'}>${chosen?(Object.keys(myScores()).length?'Keep scoring':'Start on hole '+chosen.start)+' <i class="ph-bold ph-arrow-right"></i>':'Pick your group'}</button></div>`;
+  document.querySelectorAll('[data-team]').forEach(b=>b.onclick=()=>{S.team=b.dataset.team;save();buzz();start()});
+  document.querySelectorAll('[data-fmt]').forEach(b=>b.onclick=()=>{S.format=b.dataset.fmt;save();start()});
+  document.querySelectorAll('[data-tee]').forEach(b=>b.onclick=()=>{S.tee=b.dataset.tee;save();start()});
+  const go=$('#go');if(go)go.onclick=()=>{const t=myTeam(),ord=order(t.start);const next=ord.find(h=>!holeDone(h))||ord[0];location.hash='#/hole/'+next}}
+
+const units=()=>FMT()==='scramble'?[{who:'team',name:'Team score',hcp:0}]:myTeam().players.map(p=>({who:p.id,name:p.name,hcp:p.hcp}));
+const holeDone=h=>units().every(u=>mySc(u.who,h)!=null);
+function totals(){const t=myTeam();let g=0,p=0,n=0;for(const h of order(t.start))if(holeDone(h)){p+=CO().par[h-1];g+=units().reduce((a,u)=>a+mySc(u.who,h),0);n++}
+  if(FMT()==='stroke'){p=p*units().length}
+  return{tp:g-p,thru:n}}
+
+let wl=null;async function wake(){try{if('wakeLock'in navigator&&!wl){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>wl=null)}}catch(e){}}
+
+function hole(n){const t=myTeam(),c=CO(),tee=TEE(),ord=order(t.start),idx=ord.indexOf(n),par=c.par[n-1];S.hole=n;wake();
+  $('#app').className='wrap';
+  const tot=totals();
+  const entry=FMT()==='scramble'?(()=>{const v=mySc('team',n),d=v!=null?v-par:null;
+    return `<div class="card entry"><div class="stepper"><button class="pm" data-step="-1" data-who="team" aria-label="One less"><i class="ph-bold ph-minus"></i></button>
+      <button class="big ${v==null?'ghost':''}" data-set="team" aria-label="Team score ${v??par}, tap to set par">${v??par}</button>
+      <button class="pm" data-step="1" data-who="team" aria-label="One more"><i class="ph-bold ph-plus"></i></button></div>
+      <div class="word ${d!=null?cls(d):'muted'}">${d!=null?word(d):'Tap a score'}</div>
+      <div class="quick">${[-2,-1,0,1,2].filter(k=>par+k>=1).map(k=>`<button data-q="${par+k}" aria-pressed="${v===par+k}"><b>${par+k}</b><span>${word(k)}</span></button>`).join('')}</div></div>`})()
+   :`<div class="card entry">${units().map(u=>{const v=mySc(u.who,n),st=strokesOn(courseHcp(u.hcp),n);
+      return `<div class="prow"><div class="who"><b>${esc(u.name.split(' ')[0])}${st?`<span class="dots" title="${st} shot${st>1?'s':''} here">${'<i></i>'.repeat(st)}</span>`:''}</b><span>Hcp ${courseHcp(u.hcp)}${v!=null?' · net '+(v-st):''}</span></div>
+      <button class="pm" data-step="-1" data-who="${u.who}" aria-label="${esc(u.name)} one less"><i class="ph-bold ph-minus"></i></button>
+      <button class="sc ${v==null?'ghost':''}" data-set="${u.who}" aria-label="${esc(u.name)} ${v??par}, tap to set par">${v??par}</button>
+      <button class="pm" data-step="1" data-who="${u.who}" aria-label="${esc(u.name)} one more"><i class="ph-bold ph-plus"></i></button></div>`}).join('')}
+      <p class="note" style="margin-top:6px"><i class="ph-bold ph-hand-tap"></i><span>Tap a number to give that player par. Dots are handicap shots on this hole.</span></p></div>`;
+  const strip=(rows)=>rows.map(h=>{const d=holeDone(h);let lab='';if(d){const sc=units().reduce((a,u)=>a+mySc(u.who,h),0),pp=c.par[h-1]*units().length,df=sc-pp;lab=`<b class="${df<0?'u':df>0?'o':''}">${FMT()==='scramble'?sc:toPar(df)}</b>`}else lab='<b>·</b>';
+    return `<button class="${h===n?'cur':''} ${d?'done':''}" data-go="${h}" aria-label="Hole ${h}${d?', scored':''}">${lab}${h}</button>`}).join('');
+  const last=idx===17,next=ord[idx+1],prev=ord[idx-1];
+  $('#app').innerHTML=bar(t.name,`Hole ${idx+1} of 18 · ${tee.name} tees`,sunBtn()+`<a class="ib" href="#/board" aria-label="Live leaderboard"><i class="ph-bold ph-ranking"></i></a>`)+
+  `<div class="prog" aria-hidden="true"><i style="width:${tot.thru/18*100}%"></i></div>
+  <section class="hole" id="holeSwipe">
+   <div class="hhead"><div class="hnum"><small>HOLE</small>${n}</div>
+    <div class="hmeta"><div><span>Par</span><b>${par}</b></div><div><span>Yards</span><b>${tee.y[n-1]}</b></div><div><span>Hcp</span><b>${c.si[n-1]}</b></div></div>
+    <div class="run"><b class="${cls(tot.tp)}">${tot.thru?toPar(tot.tp):'E'}</b><span>thru ${tot.thru}</span></div></div>
+   ${entry}
+   <div class="strip">${strip([...Array(9)].map((_,i)=>i+1))}</div><div class="strip" style="margin-top:4px">${strip([...Array(9)].map((_,i)=>i+10))}</div>
+   <div class="stick"><div class="navrow"><button class="btn ghost" id="prev" ${prev?'':'disabled'} aria-label="Previous hole"><i class="ph-bold ph-arrow-left"></i></button>
+    <button class="btn" id="next">${last?'Review card <i class="ph-bold ph-check"></i>':`Hole ${next} <i class="ph-bold ph-arrow-right"></i>`}</button></div>
+    <div class="saved" id="saved"><i class="ph-bold ph-cloud-check"></i><span>Saved</span></div></div>
+  </section>`;
+  const set=(who,v)=>{v=Math.max(1,Math.min(15,v));setSc(who,n,v);buzz();hole(n)};
+  document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{const w=b.dataset.who,cur=mySc(w,n);set(w,(cur??par)+ +b.dataset.step)});
+  document.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{const w=b.dataset.set;if(mySc(w,n)==null)set(w,par)});
+  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>set('team',+b.dataset.q));
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash='#/hole/'+b.dataset.go);
+  $('#prev').onclick=()=>prev&&(location.hash='#/hole/'+prev);
+  $('#next').onclick=()=>{ if(!holeDone(n)&&!confirm('No score on hole '+n+' yet. Move on anyway?'))return;
+    location.hash=last?'#/card':'#/hole/'+next};
+  $('#sunBtn').onclick=()=>{S.sun=!S.sun;save();route()};
+  swipe($('#holeSwipe'),()=>next&&(location.hash='#/hole/'+next),()=>prev&&(location.hash='#/hole/'+prev))}
+
+function swipe(el,left,right){let x0=null,y0=null;el.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+  el.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5)(dx<0?left:right)()})}
+
+let savedT=null;function flashSaved(){const s=$('#saved');if(!s)return;s.innerHTML='<i class="ph-fill ph-cloud-check"></i><span>Saved · '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})+'</span>'}
+
+function paperTable(get,c,rows){const nine=(a)=>a.map(h=>h);const F=[1,2,3,4,5,6,7,8,9],B=[10,11,12,13,14,15,16,17,18];
+  const sum=(hs,f)=>hs.reduce((a,h)=>a+(f(h)||0),0);
+  const half=(hs,lab)=>`<table><colgroup><col class="c0">${hs.map(()=>'<col>').join('')}<col></colgroup><thead><tr><th>Hole</th>${hs.map(h=>`<th>${h}</th>`).join('')}<th>${lab}</th></tr></thead><tbody>
+   <tr><td>Par</td>${hs.map(h=>`<td>${c.par[h-1]}</td>`).join('')}<td class="tot">${sum(hs,h=>c.par[h-1])}</td></tr>
+   <tr><td>Hcp</td>${hs.map(h=>`<td class="muted">${c.si[h-1]}</td>`).join('')}<td></td></tr>
+   ${rows.map(r=>`<tr><td>${esc(r.name)}</td>${hs.map(h=>{const v=get(r.who,h);return `<td>${v!=null?mk(v,c.par[h-1]):'<span class="muted">-</span>'}</td>`}).join('')}<td class="tot">${hs.some(h=>get(r.who,h)!=null)?sum(hs,h=>get(r.who,h)):''}</td></tr>`).join('')}
+  </tbody></table>`;
+  return half(F,'Out')+'<div style="height:10px"></div>'+half(B,'In')}
+
+function review(){const t=myTeam();if(!t){location.hash='';return}const c=CO();$('#app').className='wrap';
+  const rows=FMT()==='scramble'?[{who:'team',name:'Team'}]:t.players.map(p=>({who:p.id,name:p.name.split(' ')[0]}));
+  const missing=order(t.start).filter(h=>!holeDone(h));const tot=totals();
+  const gross=rows.reduce((a,r)=>a+order(t.start).reduce((b,h)=>b+(mySc(r.who,h)||0),0),0);
+  $('#app').innerHTML=bar('Your card',t.name+' · '+c.name,sunBtn())+`
+  <div class="sumrow"><div class="card"><b>${gross||'-'}</b><span>${FMT()==='scramble'?'Team score':'Group strokes'}</span></div><div class="card"><b class="${cls(tot.tp)}">${tot.thru?toPar(tot.tp):'-'}</b><span>To par</span></div><div class="card"><b>${tot.thru}</b><span>Holes</span></div></div>
+  <div class="card paper">${paperTable(mySc,c,rows)}</div>
+  ${S.submitted?`<div class="card done-banner"><i class="ph-fill ph-seal-check"></i><div><b>Card turned in</b><div class="muted" style="font-size:14px">Locked. The event admin can fix a mistake from the clubhouse.</div></div></div>`:
+   missing.length?`<p class="note"><i class="ph-bold ph-warning"></i><span>Still blank: hole${missing.length>1?'s':''} ${missing.join(', ')}.</span></p>`:''}
+  <div class="stick">${S.submitted?`<a class="btn block" href="#/board"><i class="ph-bold ph-ranking"></i> Live leaderboard</a>`:
+   `<button class="btn block" id="submit" ${missing.length?'disabled':''}>Turn in card</button><div style="height:8px"></div><button class="btn ghost block" id="back"><i class="ph-bold ph-pencil-simple"></i> Fix a hole</button>`}</div>`;
+  const sb=$('#submit');if(sb)sb.onclick=()=>{if(confirm('Turn in this card? Have one other player in your group check it first. It locks after this.')){S.submitted=true;save();review()}};
+  const bk=$('#back');if(bk)bk.onclick=()=>location.hash='#/hole/'+(missing[0]||order(t.start)[17]);
+  $('#sunBtn').onclick=()=>{S.sun=!S.sun;save();route()}}
+
+/* ---------- live leaderboard ---------- */
+let NET=false,lastPos={},boardTimer=null;
+function board(tv){const e=EV(),c=CO();$('#app').className='wrap wide';
+  const f=ranked(NET);const clubs=e.clubs.map(k=>{const L=f.filter(x=>x.club===k&&x.thru);const tp=L.reduce((a,x)=>a+(NET?x.ntp:x.tp),0);return{k,tp,n:L.length,thru:L.reduce((a,x)=>a+x.thru,0)}});
+  const lead=clubs.slice().sort((a,b)=>a.tp-b.tp)[0];
+  const strength=x=>Math.max(1,-x.tp+20);const tot=clubs.reduce((a,x)=>a+strength(x),0);
+  const moves=f.filter(x=>x.thru&&x.last).map(x=>({x,h:x.last,v:x.holes[x.last],p:c.par[x.last-1]})).filter(m=>m.v<m.p);
+  const recent=moves.length?moves[Math.floor(Date.now()/5000)%moves.length]:null;
+  const row=x=>{const moved=lastPos[x.id]!=null&&lastPos[x.id]!==x.pos;return `<button class="lrow ${x.mine?'me':''} ${moved?'flash':''}" data-open="${x.id}">
+    <span class="pos">${x.thru?(x.tie?'T':'')+x.pos:'-'}</span>
+    <span class="nm"><b>${esc(x.name)}${x.mine?' · you':''}</b><span>${tagFor(x.club)} ${esc(x.sub)}</span></span>
+    <span class="tp ${cls(NET?x.ntp:x.tp)}">${x.thru?toPar(NET?x.ntp:x.tp):'-'}</span>
+    <span class="th"><b>${x.thru===18?'F':x.thru||'-'}</b>${x.thru===18?'':'thru'}</span></button>`};
+  const list=f;const half=Math.ceil(list.length/2);
+  const lbHtml=tv?`<div class="tvgrid"><div class="card lb">${list.slice(0,half).map(row).join('')}</div><div class="card lb">${list.slice(half).map(row).join('')}</div></div>`
+    :`<div class="card lb"><div class="lhead"><span>Pos</span><span>${FMT()==='scramble'?'Team':'Player'}</span><span>${NET?'Net':'Score'}</span><span>Thru</span></div>${list.map(row).join('')}</div>`;
+  const side=`<section class="card battle"><div class="row"><span>${esc(clubs[0].k)}</span><span>${esc(clubs[1].k)}</span></div>
+     <div class="row"><b class="${cls(clubs[0].tp)}">${toPar(clubs[0].tp)}</b><b class="${cls(clubs[1].tp)}">${toPar(clubs[1].tp)}</b></div>
+     <div class="meter" aria-hidden="true"><i class="a" style="width:${strength(clubs[0])/tot*100}%"></i><i class="b" style="width:${strength(clubs[1])/tot*100}%"></i></div>
+     <p>Club vs club: every ${FMT()==='scramble'?'team':'player'}'s score to par, added up. ${esc(lead.k)} leads right now.</p></section>
+     ${FMT()==='stroke'&&!tv?`<div class="seg" role="group" aria-label="Score type" style="margin-top:10px"><button data-net="0" aria-pressed="${!NET}">Gross</button><button data-net="1" aria-pressed="${NET}">Net</button></div>`:''}
+     <div class="ticker">${recent?`<i class="ph-fill ph-flag-pennant"></i><span><b>${esc(recent.x.name)}</b> ${word(recent.v-recent.p).toLowerCase()} on ${recent.h}</span>`:''}</div>`;
+  $('#app').innerHTML=(tv?`<div class="bar"><img class="logo" src="${LOGO}" alt=""><div class="t"><b>${esc(e.name)}</b><span>${esc(c.name)} · ${esc(e.date)}</span></div><span class="live"><i></i>LIVE</span></div>`
+    :bar('Live leaderboard',e.name,`<span class="live" style="margin-right:4px"><i></i>LIVE</span><a class="ib" href="#/tv" aria-label="Big screen view"><i class="ph-bold ph-television-simple"></i></a>${S.team?`<a class="ib" href="#/hole/${S.hole||order(myTeam().start)[0]}" aria-label="Back to my card"><i class="ph-bold ph-pencil-simple-line"></i></a>`:`<a class="ib" href="#/" aria-label="Scorecard"><i class="ph-bold ph-pencil-simple-line"></i></a>`}`))+
+   `<div class="${tv?'':'boardgrid'}">${tv?side:`<div class="side">${side}</div>`}<div>${lbHtml}</div></div>
+   <p class="note" style="margin:14px 0 24px"><i class="ph-bold ph-info"></i><span>Preview: the other groups are demo scores that move every 30 seconds. Your own card updates this board as you tap, on this phone.${tv?'':' <button id="resetDemo" style="text-decoration:underline;color:var(--silver)">Restart demo</button>'}</span></p>`;
+  lastPos={};f.forEach(x=>lastPos[x.id]=x.pos);
+  document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openCard(b.dataset.open));
+  document.querySelectorAll('[data-net]').forEach(b=>b.onclick=()=>{NET=b.dataset.net==='1';board(tv)});
+  const rd=$('#resetDemo');if(rd)rd.onclick=()=>{if(confirm('Restart the demo? This clears your practice card too.')){localStorage.removeItem(KEY);location.hash='';location.reload()}};
+  clearInterval(boardTimer);boardTimer=setInterval(()=>{const h=location.hash;if(h.startsWith('#/board')||h.startsWith('#/tv'))board(h.startsWith('#/tv'))},5000)}
+
+function openCard(id){const f=field().find(x=>x.id===id);if(!f)return;const c=CO();
+  const get=(who,h)=>f.holes[h];
+  $('#sheet').innerHTML=`<div class="grab"></div><div style="display:flex;align-items:center;gap:10px"><div style="flex:1"><b style="font-size:18px">${esc(f.name)}</b><div class="muted" style="font-size:13px">${tagFor(f.club)} ${esc(f.sub)} · starts hole ${f.team.start}</div></div>
+   <div style="text-align:right"><b class="disp ${cls(NET?f.ntp:f.tp)}" style="font-size:32px;line-height:1">${f.thru?toPar(NET?f.ntp:f.tp):'-'}</b><div class="muted" style="font-size:12px">${f.thru===18?'Finished':'thru '+f.thru}</div></div></div>
+   <div class="paper" style="padding:0">${paperTable(get,c,[{who:'x',name:FMT()==='scramble'?'Team':'Score'}])}</div>
+   <button class="btn ghost block" style="margin-top:14px" id="closeSheet">Close</button>`;
+  $('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#closeSheet').onclick=closeSheet}
+function closeSheet(){$('#scrim').classList.remove('on');$('#sheet').classList.remove('on')}
+$('#scrim').onclick=closeSheet;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+
+/* another tab or the big screen on this device picks up changes right away */
+const reload=()=>{Object.assign(S,load());const h=location.hash;if(h.startsWith('#/board')||h.startsWith('#/tv'))route()};
+window.addEventListener('storage',e=>{if(e.key===KEY)reload()});
+if(bc)bc.onmessage=reload;
+window.addEventListener('hashchange',route);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
+route();
+</script>
+</body>
+</html>

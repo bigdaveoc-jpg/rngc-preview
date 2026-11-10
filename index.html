@@ -976,6 +976,7 @@ const FLYERS=[
  UP+'2026/09/CHIMERA-11.14.26-1-819x1024.jpg',UP+'2026/08/10.3.26-CHIMERA-777x1024.png',UP+'2026/06/RC-2026-FLYER-3-819x1024.jpg',
  UP+'2026/06/LEGACY-9.12.26v3-819x1024.jpg',UP+'2026/06/MEADOWLARK-11.29.25-731x1024.jpg',UP+'2026/06/CHIMERA-10.11.2025-819x1024.jpg',UP+'2026/06/Preseason-Primer-731x1024.jpg'
 ];
+const SCORECARD_EVENTS=['nov14'];   /* events with the event-day scorecard (scorecard/ page) */
 const SPONSORS=['Woodson Bourbon Whiskey','Alpha Team Golf','Black Sunday Brand','Chimera Golf Club','Surf City Sound'];
 const NEWS=[
  {id:'n1',tag:'Next event',title:'Chimera showdown vs the 12th Man',meta:'Nov 14 - Henderson NV',img:UP+'2026/09/CHIMERA-11.14.26-1-819x1024.jpg',body:'Raiders fans and Seahawks fans meet in a 4-man scramble with playoffs. 8:00 am shotgun start at Chimera Golf Club. $175 per player, $700 per foursome. Includes golf, cart, giveaways, prizes for the top 2 teams and a taco bar after party.'},
@@ -1075,10 +1076,10 @@ const jit=id=>{let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))%997;return[((h
 const memPos=m=>{const c=CITIES[m.city],j=jit(m.id);return[c.lat+j[0],c.lng+j[1]]};
 
 /* ---------- club scorecards (demo: 30 members, one round each, same course) ---------- */
-/* Hole pars and stroke index are a demo par-72 layout, not Chimera's real card. Scores come from a seeded
+/* Hole pars and stroke index are Chimera's real card (Serpent tees, par 72). Scores come from a seeded
    random round built from each member's handicap, so the same 30 cards show every time. */
-const SC_EVENT={name:'Fall Club Championship',date:'Nov 8, 2026',course:'Chimera Golf Club',city:'Henderson, NV',tee:'White tees',
- par:[4,4,3,5,4,4,3,4,5,4,3,5,4,4,3,4,4,5],si:[7,3,15,11,1,9,17,5,13,8,16,12,2,6,18,10,4,14]};
+const SC_EVENT={name:'Fall Club Championship',date:'Nov 8, 2026',course:'Chimera Golf Club',city:'Henderson, NV',tee:'Serpent tees',
+ par:[4,5,4,3,4,3,4,5,4,4,5,3,4,4,5,4,3,4],si:[5,15,7,13,3,11,17,9,1,10,8,16,6,14,12,2,18,4]};
 const SC_PAR=SC_EVENT.par.reduce((a,b)=>a+b,0);
 const SC_EXTRA=[
  {id:'x1',name:'Andre W.',chapter:'SoCal'},{id:'x2',name:'Gabe R.',chapter:'SoCal'},{id:'x3',name:'Tina M.',chapter:'SoCal'},{id:'x4',name:'Luis C.',chapter:'SoCal'},
@@ -1295,6 +1296,7 @@ function evCard(e){
    <div class="row"><span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
    <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
    <a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`}</div>
+   ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a></div>`:''}
    </div></article>`;
 }
 function renderEvents(){
