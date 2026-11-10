@@ -802,6 +802,35 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
   .stack{gap:8px}
 }
 @media (prefers-reduced-transparency:reduce){.top,.tabs,.sheet{background:var(--bg-2);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* ===== GLASS, VISIBLE (David, 2026-11-09): a soft silver and slate glow sits behind everything, so frosted panels read as glass ===== */
+:root{--glass:rgba(255,255,255,.055);--glass-2:rgba(255,255,255,.08);--glass-edge:rgba(255,255,255,.11);--glass-hi:rgba(255,255,255,.14)}
+.app{background:
+  radial-gradient(60% 45% at 8% 0%,rgba(213,218,225,.26),transparent 70%),
+  radial-gradient(55% 50% at 100% 35%,rgba(84,112,160,.36),transparent 72%),
+  radial-gradient(50% 40% at 6% 80%,rgba(140,148,160,.22),transparent 70%),
+  radial-gradient(45% 35% at 85% 100%,rgba(70,100,150,.3),transparent 70%),
+  #08090b}
+.card{background:linear-gradient(140deg,rgba(255,255,255,.1),rgba(255,255,255,.03) 55%,rgba(255,255,255,.05));border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(16px) saturate(150%);backdrop-filter:blur(16px) saturate(150%);box-shadow:inset 0 1px 0 var(--glass-hi),0 10px 28px -16px rgba(0,0,0,.75)}
+.hero{background:rgba(255,255,255,.05);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 var(--glass-hi),0 14px 34px -18px rgba(0,0,0,.8)}
+.hero .bg::after{background:linear-gradient(180deg,rgba(10,11,13,0) 45%,rgba(20,23,28,.92) 100%)}
+.seatbar > div,.invstats div,.invprev,.card .card,.date{background:var(--glass-2);border-color:transparent;box-shadow:none}
+.card .pill{background:var(--glass-2)}
+.field,.chsel{background:rgba(255,255,255,.05);border-color:var(--glass-edge)}
+.btn.ghost{background:rgba(255,255,255,.04);border-color:var(--glass-edge)}
+.iconbtn{background:rgba(255,255,255,.07);border-color:var(--glass-edge)}
+.mapbox{border:1px solid var(--glass-edge)}
+@media (max-width:999px){
+  .card,.hero,.mapbox{border-color:var(--glass-edge)}
+  .top{background:rgba(12,14,17,.42);box-shadow:inset 0 -1px 0 var(--glass-edge),0 12px 28px -20px rgba(0,0,0,.9)}
+  .tabs{background:rgba(12,14,17,.48);box-shadow:inset 0 1px 0 var(--glass-edge)}
+}
+@media (min-width:1000px){
+  .app::before{background:rgba(14,16,20,.5);-webkit-backdrop-filter:blur(24px) saturate(150%);backdrop-filter:blur(24px) saturate(150%);border-right:1px solid var(--glass-edge)}
+  .top,.tabs,.banner{background:rgba(14,16,20,.5);-webkit-backdrop-filter:blur(24px) saturate(150%);backdrop-filter:blur(24px) saturate(150%);border-right:1px solid var(--glass-edge)}
+  .banner{border-top-color:var(--glass-edge)}
+}
+@media (prefers-reduced-transparency:reduce){.card{background:var(--panel);-webkit-backdrop-filter:none;backdrop-filter:none}}
 </style>
 </head>
 <body>
