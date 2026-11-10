@@ -32,6 +32,12 @@
 .statc .r>span{font-size:13px;color:var(--muted);width:48px}
 .statc .chip2{min-height:38px;min-width:40px;padding:0 10px}
 .trrow2{display:grid;grid-template-columns:1fr 92px;gap:8px;margin-top:6px}
+.findl{margin-top:8px;min-height:120px}
+.findl .rrow b{font-size:16px}
+.findl .rrow em{font-style:normal;font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
+.ctag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-right:8px}
+.ctag.ok{color:var(--text)}
+.findsrc{font-size:11px;color:var(--muted);margin-top:10px}
 `;document.head.appendChild(s)})();
 
 /* ---------- small helpers ---------- */
@@ -255,7 +261,8 @@ function trNew(gid){const g=gid?G.groups.find(x=>x.id===gid):null;
   const pool=g?g.members:[{id:'me',name:G.me.name,hcp:G.me.hcp}],count=NR.who.length+NR.guests.length;
   $('#app').innerHTML=trBar(g?g.name:'New round',g?'Group round':'Just you, or bring a guest',trBack(g?'#/group/'+g.id:'#/me'))+`
    <div class="lbl">Course</div>
-   <div class="chips2">${Object.entries(COURSES).map(([k,v])=>`<button class="chip2" data-co="${k}" aria-pressed="${k===NR.course}">${esc(v.name)}</button>`).join('')}<button class="chip2" id="addCo"><i class="ph-bold ph-plus"></i> Another course</button></div>
+   <div class="chips2">${trCoChips().map(([k,v])=>`<button class="chip2" data-co="${k}" aria-pressed="${k===NR.course}">${esc(v.name)}</button>`).join('')}<button class="chip2" id="findCo"><i class="ph-bold ph-magnifying-glass"></i> Find a course</button><button class="chip2" id="addCo"><i class="ph-bold ph-plus"></i> Add your own</button></div>
+   ${c.city?`<p class="muted" style="font-size:13px;margin-top:6px">${esc(c.city)}${c.n9?' · 9 holes, played twice for 18':''}</p>`:''}
    <div class="lbl">Tees</div>
    <div class="seg" role="group" aria-label="Tees">${c.tees.map(x=>`<button data-tee="${x.id}" aria-pressed="${x.id===NR.tee}">${esc(x.name)} <span class="muted" style="font-weight:500">${x.rating} / ${x.slope}</span></button>`).join('')}</div>
    <div class="lbl">Who's playing · ${count} of 4</div>
@@ -266,7 +273,8 @@ function trNew(gid){const g=gid?G.groups.find(x=>x.id===gid):null;
    <div class="lbl">Handicaps</div>
    <div class="seg" role="group" aria-label="Handicaps"><button data-h="0" aria-pressed="${!NR.hcp}">Gross</button><button data-h="1" aria-pressed="${NR.hcp}">Net, with strokes</button></div>
    <p class="note"><i class="ph-bold ph-coins"></i><span>Skins, a Nassau or any side bet get added from the first tee.</span></p>
-   ${c.custom?`<p class="note"><i class="ph-bold ph-info"></i><span>${esc(c.name)} uses a standard handicap hole order until its real card is loaded.</span></p>`:''}
+   ${c.custom||c.stdsi?`<p class="note"><i class="ph-bold ph-info"></i><span>${esc(c.name)} uses a standard handicap hole order until its real card is loaded.</span></p>`:''}
+   ${c.est?`<p class="note"><i class="ph-bold ph-info"></i><span>No rating or slope on file for this course yet, so handicaps use par and 113.</span></p>`:''}
    <div class="stick"><button class="btn block" id="goR">Start the round <i class="ph-bold ph-arrow-right"></i></button></div>`;
   document.querySelectorAll('[data-co]').forEach(b=>b.onclick=()=>{NR.course=b.dataset.co;trNew(gid)});
   document.querySelectorAll('[data-tee]').forEach(b=>b.onclick=()=>{NR.tee=b.dataset.tee;trNew(gid)});
@@ -275,7 +283,7 @@ function trNew(gid){const g=gid?G.groups.find(x=>x.id===gid):null;
   document.querySelectorAll('[data-ug]').forEach(b=>b.onclick=()=>{NR.guests.splice(+b.dataset.ug,1);trNew(gid)});
   document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{NR.format=b.dataset.f;trNew(gid)});
   document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{NR.hcp=b.dataset.h==='1';trNew(gid)});
-  $('#addCo').onclick=()=>trAddCourse(gid);
+  $('#addCo').onclick=()=>trAddCourse(gid);$('#findCo').onclick=()=>trFind(gid);
   const ag=$('#addG');if(ag)ag.onclick=()=>{
     $('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">Add a guest</h2>
      <div class="trrow2"><input class="field" id="agN" placeholder="Name" autocomplete="off"><input class="field" id="agI" type="number" inputmode="decimal" step="0.1" placeholder="Index"></div>
@@ -292,9 +300,10 @@ function trCreate(g){const pool=g?g.members:[],me={id:'me',name:G.me.name,hcp:G.
     bench:g?g.members.filter(p=>p.id!=='me'&&!NR.who.includes(p.id)).map(p=>({id:p.id,name:p.name,hcp:p.hcp,club:''})):[]};
   gsave();NR=null;location.href='./?r='+id+'#/hole/1'}
 
-function trAddCourse(gid){const d={name:'',city:'',par:[4,5,4,3,4,4,3,5,4, 4,5,4,3,4,4,3,5,4],rating:'',slope:''};
-  const draw=()=>{const tot=trSum(d.par);$('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">Add a course</h2>
-    <label class="inl"><span>Course name</span><input class="field" id="acN" maxlength="40" value="${esc(d.name)}" placeholder="Course name" autocomplete="off"></label>
+function trAddCourse(gid,pre){const d={name:'',city:'',par:[4,5,4,3,4,4,3,5,4, 4,5,4,3,4,4,3,5,4],rating:'',slope:''};
+  if(pre){d.name=pre.name||'';d.city=pre.city||'';if(pre.pp)d.par=d.par.map((p,i)=>pre.pp[i+1]||4)}
+  const draw=()=>{const tot=trSum(d.par);$('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">${pre?'Finish the card':'Add a course'}</h2>${pre?`<p class="muted" style="font-size:14px">We have ${esc(pre.name)} on the map but not its full scorecard yet. Check the pars against the card at the course, then save.</p>`:''}
+    <label class="inl"><span>Course name</span><input class="field" id="acN" maxlength="70" value="${esc(d.name)}" placeholder="Course name" autocomplete="off"></label>
     <label class="inl"><span>City</span><input class="field" id="acC" maxlength="40" value="${esc(d.city)}" placeholder="Las Vegas, NV" autocomplete="off"></label>
     <div class="lbl">Par for each hole · tap to change · total ${tot}</div>
     <div class="parset">${d.par.slice(0,9).map((p,i)=>`<button data-par="${i}" aria-label="Hole ${i+1}, par ${p}"><small>${i+1}</small>${p}</button>`).join('')}</div>
@@ -306,11 +315,53 @@ function trAddCourse(gid){const d={name:'',city:'',par:[4,5,4,3,4,4,3,5,4, 4,5,4
     $('#acN').oninput=e=>d.name=e.target.value;$('#acC').oninput=e=>d.city=e.target.value;$('#acR').oninput=e=>d.rating=e.target.value;$('#acS').oninput=e=>d.slope=e.target.value;
     document.querySelectorAll('[data-par]').forEach(b=>b.onclick=()=>{const i=+b.dataset.par;d.par[i]=d.par[i]===5?3:d.par[i]+1;draw()});
     $('#acSave').onclick=()=>{const name=d.name.trim();if(!name){$('#acN').focus();return}
-      const rt=parseFloat(d.rating),sl=parseInt(d.slope),id='u'+Date.now().toString(36);
+      const rt=parseFloat(d.rating),sl=parseInt(d.slope),id=pre&&pre.lib?pre.lib:'u'+Date.now().toString(36);
       const co={name,city:d.city.trim(),par:d.par.slice(),si:TR_SI.slice(),siW:TR_SI.slice(),custom:true,
         tees:[{id:'main',name:'Tees',rating:rt>50&&rt<85?Math.round(rt*10)/10:tot,slope:sl>=55&&sl<=155?sl:113,y:Array(18).fill(0)}]};
       G.courses[id]=co;COURSES[id]=co;gsave();NR.course=id;NR.tee='main';closeSheet();trNew(gid)}};
   draw()}
+
+/* ---------- course library: every course in California, Nevada and Arizona ----------
+   courses/index.json lists them all; courses/c/<id>.json holds the card, tees and hole maps (built by tools/courses/build_courses.py).
+   Data: OpenGolfAPI and OpenStreetMap contributors, ODbL 1.0. A picked course is kept on the phone so it works with no signal. */
+let LIB=null,LIBP=null;const FQ={q:'',st:'',near:null};
+function trLib(){if(LIB)return Promise.resolve(LIB);
+  if(!LIBP)LIBP=fetch('courses/index.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(j=>{LIB=j;return j}).catch(e=>{LIBP=null;throw e});return LIBP}
+function trCoChips(){const all=Object.entries(COURSES),out=all.slice(0,1);   /* Chimera first, then the newest picks, always the one picked now */
+  for(const e of all.slice(1).reverse())if(out.length<6)out.push(e);
+  if(!out.find(([k])=>k===NR.course)&&COURSES[NR.course])out.push([NR.course,COURSES[NR.course]]);return out}
+const trMi=(a,b,c,d)=>{const r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 7918*Math.asin(Math.sqrt(x))};
+const trFold=t=>t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function trFind(gid){
+  $('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">Find a course</h2>
+   <input class="field" id="fqQ" type="search" placeholder="Course or city" value="${esc(FQ.q)}" autocomplete="off" aria-label="Search courses">
+   <div class="seg" role="group" aria-label="State" style="margin-top:8px">${[['','All'],['CA','California'],['NV','Nevada'],['AZ','Arizona']].map(([k,n])=>`<button data-fst="${k}" aria-pressed="${FQ.st===k}">${n}</button>`).join('')}</div>
+   <button class="linkbtn" id="fqNear"><i class="ph-bold ph-navigation-arrow"></i> ${FQ.near?'Sorted by closest to you':'Closest to me'}</button>
+   <div class="findl" id="fqL"><p class="muted">Loading courses...</p></div>
+   <p class="findsrc">Course data: OpenGolfAPI and OpenStreetMap contributors, ODbL. Cards can change, check the one at the course.</p>
+   <button class="btn ghost block" style="margin-top:10px" id="closeSheet">Close</button>`;
+  trOpen();
+  const q=$('#fqQ');q.oninput=()=>{FQ.q=q.value;list()};
+  document.querySelectorAll('[data-fst]').forEach(b=>b.onclick=()=>{FQ.st=b.dataset.fst;document.querySelectorAll('[data-fst]').forEach(x=>x.setAttribute('aria-pressed',x===b));list()});
+  $('#fqNear').onclick=()=>{const nb=$('#fqNear');if(!('geolocation'in navigator)){nb.textContent='No location on this phone';return}
+    nb.textContent='Finding you...';navigator.geolocation.getCurrentPosition(p=>{FQ.near=[p.coords.latitude,p.coords.longitude];nb.innerHTML='<i class="ph-bold ph-navigation-arrow"></i> Sorted by closest to you';list()},
+      ()=>{nb.textContent='Location is off for this page'},{maximumAge:600000,timeout:15000})};
+  const list=()=>{const box=$('#fqL');if(!LIB)return;const F=LIB.courses,words=trFold(FQ.q).split(/\s+/).filter(Boolean);
+    let rs=F.filter(c=>(!FQ.st||c[3]===FQ.st)&&words.every(w=>trFold(c[1]+' '+c[2]+' '+c[3]).includes(w)));
+    if(FQ.near)rs=rs.map(c=>[c,trMi(FQ.near[0],FQ.near[1],c[4],c[5])]).sort((a,b)=>a[1]-b[1]);
+    else rs=rs.map(c=>[c,null]).sort((a,b)=>(b[0][7]-a[0][7])||(b[0][8]-a[0][8])||a[0][1].localeCompare(b[0][1]));
+    const n=rs.length;rs=rs.slice(0,40);
+    box.innerHTML=(n?`<p class="muted" style="font-size:13px">${n.toLocaleString()} course${n===1?'':'s'}${n>40?', showing 40':''}</p>`:`<p class="muted">No course by that name. Try the city, or add your own.</p>`)+
+     rs.map(([c,d])=>`<button class="rrow" data-pick="${esc(c[0])}"><div><b>${esc(c[1])}</b><span>${esc(c[2]?c[2]+', ':'')}${c[3]}${c[6]?' · '+c[6]+' holes':''}</span><div style="margin-top:3px"><span class="ctag ${c[7]===2?'ok':''}">${c[7]===2?'Full card':c[7]===1?'Pars only':'Card needed'}</span>${c[8]?'<span class="ctag ok">Hole maps</span>':''}</div></div><em>${d!=null?(d<10?d.toFixed(1):Math.round(d))+' mi':''}</em></button>`).join('');
+    box.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>trPick(b.dataset.pick,gid,b))};
+  trLib().then(list).catch(()=>{$('#fqL').innerHTML='<p class="muted">The course list needs a signal the first time. Try again in a moment, or add your own.</p>'})}
+function trPick(id,gid,btn){
+  if(COURSES[id]){NR.course=id;closeSheet();trNew(gid);return}
+  const row=LIB&&LIB.courses.find(c=>c[0]===id);if(btn)btn.style.opacity=.5;
+  fetch('courses/c/'+encodeURIComponent(id)+'.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>{
+    if(d.app){const co=Object.assign(d.app,{lat:d.lat,lng:d.lng,phone:d.phone||'',web:d.website||''});G.courses[id]=co;COURSES[id]=co;gsave();NR.course=id;closeSheet();trNew(gid);return}
+    trAddCourse(gid,{lib:id,name:d.name,city:((d.city||'')+', '+d.state).replace(/^, /,''),pp:d.pp||null})})
+   .catch(()=>{if(btn)btn.style.opacity=1;if(row)trAddCourse(gid,{lib:id,name:row[1],city:(row[2]?row[2]+', ':'')+row[3]})})}
 
 /* ---------- a saved round ---------- */
 function trRound(id){const r=G.rounds.find(x=>x.id===id);if(!r){location.hash='#/me';return}
