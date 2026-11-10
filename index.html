@@ -171,6 +171,15 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .gate .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .mtools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
 .mtools select{min-height:44px;padding:0 12px;border-radius:var(--pill);background:var(--panel);border:1px solid var(--line);flex:1;min-width:170px}
+.msgrow{display:block;width:100%;text-align:left;padding:12px 14px}
+.msgrow b{font-family:var(--display);font-size:19px;text-transform:uppercase;letter-spacing:.02em;line-height:1.1;display:block}
+.msgrow small{color:var(--muted);font-size:13px;display:block}
+.msgrow p{margin:4px 0 0;color:var(--muted);font-size:14px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.msgrow.unread{border-color:var(--silver)}
+.msgrow.unread b::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--silver);margin-right:8px;vertical-align:middle}
+.msgbody{white-space:pre-wrap;line-height:1.5;margin:12px 0}
+.pickbox{max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:var(--r-sm);padding:4px 10px;margin-top:6px}
+.pickbox label{display:flex;gap:10px;align-items:center;min-height:40px;font-size:15px}
 .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px;margin:3px 5px 0 0;border:1px solid var(--silver-2);color:var(--silver);background:var(--panel-2)}
 .badge.hof{background:var(--silver);color:#0a0b0d;border-color:var(--silver)}
 .mem.alumcard,.card.hofcard{border-color:var(--silver-2)}
@@ -1159,6 +1168,7 @@ const BOARDS=['All','Tournaments','Game Day','Golf Tips','Travel','Gear'];
 
 /* ---------- state ---------- */
 const KEY='rngc-site-v2';
+var MSG={items:null,perm:null,sent:null,unread:0};
 let S={tab:'home',chapter:'All',board:'All',openThread:null,selCourse:null,rsvp:{},likes:{},threads:[],name:'',member:false,share:'city',myCity:'hb',trip:null,tripOnly:false,goingTo:'',mview:'map',tix:[],tixClosed:{},tixFilter:'all',offers:[],demo:false,tour:-1,gview:'sched',selGame:null,ffJoin:false,eview:'list',sview:'net'};
 try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw),{tab:'home',openThread:null,selCourse:null,selGame:null,tour:-1})}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,rsvp:S.rsvp,likes:S.likes,threads:S.threads,name:S.name,board:S.board,member:S.member,share:S.share,myCity:S.myCity,trip:S.trip,tripOnly:S.tripOnly,mview:S.mview,tix:S.tix,tixClosed:S.tixClosed,tixFilter:S.tixFilter,offers:S.offers,demo:S.demo,gview:S.gview,ffJoin:S.ffJoin,eview:S.eview,sview:S.sview,rc27:S.rc27,cview:S.cview,gameGo:S.gameGo,tixGame:S.tixGame,cfg:S.cfg,role:S.role,spage:S.spage,invLog:S.invLog}))}catch(e){}};
@@ -1782,7 +1792,7 @@ function visibleMembers(){
 function myPos(){const c=CITIES[S.myCity];return c?[c.lat,c.lng]:null}
 function renderMembers(){
   const v=$('#v-members');
-  const seg=`<div class="seg" role="tablist" aria-label="Member area"><button class="chip" data-mv="alumni" aria-pressed="${S.mview==='alumni'}"><i class="ph-bold ph-trophy"></i> Alumni &amp; Hall of Fame</button><button class="chip" data-mv="map" aria-pressed="${S.mview==='map'}"><i class="ph-bold ph-map-trifold"></i> Member map</button><button class="chip" data-mv="tix" aria-pressed="${S.mview==='tix'}"><i class="ph-bold ph-ticket"></i> Ticket exchange</button>${S.demo?`<span class="pill demo">Demo mode</span><button class="chip" data-tour="restart">Restart tour</button><button class="chip" data-tour="exit">Exit demo</button>`:''}</div>`;
+  const seg=`<div class="seg" role="tablist" aria-label="Member area"><button class="chip" data-mv="inbox" aria-pressed="${S.mview==='inbox'}"><i class="ph-bold ph-envelope-simple"></i> Messages${MSG.unread?' ('+MSG.unread+')':''}</button><button class="chip" data-mv="alumni" aria-pressed="${S.mview==='alumni'}"><i class="ph-bold ph-trophy"></i> Alumni &amp; Hall of Fame</button><button class="chip" data-mv="map" aria-pressed="${S.mview==='map'}"><i class="ph-bold ph-map-trifold"></i> Member map</button><button class="chip" data-mv="tix" aria-pressed="${S.mview==='tix'}"><i class="ph-bold ph-ticket"></i> Ticket exchange</button>${S.demo?`<span class="pill demo">Demo mode</span><button class="chip" data-tour="restart">Restart tour</button><button class="chip" data-tour="exit">Exit demo</button>`:''}</div>`;
   /* Alumni and Hall of Fame are open to everyone, no sign-in */
   if(S.mview==='hof'){S.mview='alumni';S.af='hof'}
   if(S.mview==='alumni'){
@@ -1798,6 +1808,7 @@ function renderMembers(){
      <div class="card" style="margin-top:14px"><b>Played for the team, or know someone who belongs?</b><div class="meta">Tell a chapter leader. Alumni are added when they join, and chapter leaders pick the Hall of Fame class each fall.</div></div>`;
     renderCoach();return;
   }
+  if(S.mview==='inbox'){inboxView(v,seg);return}
   if(!S.member){
     const tg=S.mview==='tix'&&S.tixGame&&GAMES.find(y=>y.id===S.tixGame);
     v.innerHTML=`<div class="card gate rise"><i class="ph-fill ph-lock-key"></i><h3>Members only</h3>
@@ -2135,7 +2146,7 @@ const SUBNAV={
  games:[['Raiders schedule','sched'],['Player news','news'],['Fantasy league','ff']],
  courses:[['Course map','map'],['Where we play','list']],
  forum:[['All posts','All'],['Tournaments','Tournaments'],['Game Day','Game Day'],['Golf Tips','Golf Tips'],['Travel','Travel'],['Gear','Gear']],
- members:[['Alumni & Hall of Fame','alumni'],['Member map','map'],['Ticket exchange','tix']]
+ members:[['Messages','inbox'],['Alumni & Hall of Fame','alumni'],['Member map','map'],['Ticket exchange','tix']]
 };
 const SUB={};
 function subNow(t){
@@ -2153,7 +2164,7 @@ function renderSubnav(){
   document.querySelectorAll('.subnav').forEach(n=>{
     const t=n.dataset.for,open=t===S.tab,cur=subNow(t);
     n.classList.toggle('open',open);
-    n.firstElementChild.innerHTML=(SUBNAV[t]||[]).map(([l,k])=>`<button type="button" data-sub="${t}|${esc(k)}" aria-current="${open&&k===cur}" ${open?'':'tabindex="-1"'}>${l}</button>`).join('');
+    n.firstElementChild.innerHTML=(SUBNAV[t]||[]).map(([l,k])=>`<button type="button" data-sub="${t}|${esc(k)}" aria-current="${open&&k===cur}" ${open?'':'tabindex="-1"'}>${l}${k==='inbox'&&MSG.unread?' ('+MSG.unread+')':''}</button>`).join('');
   });
 }
 function goSub(t,k){
@@ -2407,6 +2418,7 @@ function openSpEdit(i){
 }
 /* ---- announcements ---- */
 function annHTML(){
+  if(authTok())return pageHead('Announcements')+`<div class="setcols rise">${group('Messages',`<p class="meta">Announcements are now Messages. Write to the whole club, a chapter, the chapter presidents or one member, and email it at the same time.</p><button class="btn full" data-sub="members|inbox"><i class="ph-bold ph-envelope-simple"></i> Open Messages</button>`)}</div>`;
   const chs=S.role==='chapter'?[S.cfg.my.chapter]:['Whole club',...PLANS.filter(p=>p.chapter!=='National').map(p=>p.chapter),'National'];
   return pageHead('Announcements')+`<div class="setcols rise">
    ${group('New announcement',`<form id="annForm"><label for="anTo">Send to</label><select class="field" id="anTo">${chs.map(c=>`<option>${c}</option>`).join('')}</select>
@@ -2582,6 +2594,72 @@ renderChips();renderAll();setTab('home');loadSchedule();
   });
 })();
 
+
+/* ---------- messages: club inbox + email (the sign-in service on the cloud server keeps the messages) ---------- */
+const fmtWhen=ts=>{const d=new Date(ts*1000),n=new Date();return d.toDateString()===n.toDateString()?d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):d.toLocaleDateString([],{month:'short',day:'numeric'})};
+async function loadInbox(quiet){
+  const t=authTok();if(!t)return;
+  try{const r=await authCall('/msg/inbox',null,t);MSG.items=r.items;MSG.unread=r.items.filter(m=>!m.read).length;
+    if(!MSG.perm)MSG.perm=await authCall('/msg/people',null,t);
+    if(MSG.perm.role!=='member'||(MSG.perm.leads||[]).length){try{MSG.sent=(await authCall('/msg/sent',null,t)).items}catch(e){}}
+    renderSubnav();if(S.tab==='members'&&S.mview==='inbox')renderMembers()}catch(e){}}
+function inboxView(v,seg){
+  if(!authTok()){
+    v.innerHTML=seg+`<div class="card gate rise"><i class="ph-fill ph-envelope-simple"></i><h3>Messages</h3><p>The club inbox is for signed-in members. Sign in with the email on your membership to read messages from your chapter and the club.</p><div class="acts"><button class="btn" id="realIn"><i class="ph-bold ph-sign-in"></i> Sign in</button></div></div>`;return}
+  if(!MSG.items){v.innerHTML=seg+'<p class="meta" style="margin-top:14px">Loading your messages...</p>';loadInbox(true);return}
+  const lead=MSG.perm&&(MSG.perm.role!=='member'||(MSG.perm.leads||[]).length);
+  v.innerHTML=seg+`<h2 class="sec" style="margin-bottom:0">Messages</h2><p class="sub">${lead?'Message the club, a chapter or a member. Members can write to their club leaders.':'Messages from your chapter and the club. You can write to your club leaders.'}</p>
+   <div class="acts" style="margin-top:12px"><button class="btn" id="msgNew"><i class="ph-bold ph-pencil-simple-line"></i> New message</button></div>
+   <div class="stack" style="margin-top:12px">${MSG.items.length?MSG.items.map(m=>`<button class="card msgrow ${m.read?'':'unread'}" data-msg="${esc(m.id)}"><b>${esc(m.subject)}</b><small>${esc(m.from)} - ${esc(m.label)} - ${fmtWhen(m.ts)}</small><p>${esc(m.body)}</p></button>`).join(''):'<div class="empty"><i class="ph-bold ph-envelope-simple"></i>No messages yet.</div>'}</div>
+   ${lead&&MSG.sent&&MSG.sent.length?`<h3 class="shophead" style="margin-top:22px">Sent</h3><div class="stack">${MSG.sent.slice(0,15).map(m=>`<div class="card"><b>${esc(m.subject)}</b><small class="meta">${esc(m.label)} - ${m.n} member${m.n===1?'':'s'}${m.emailed?', '+m.emailed+' emailed':''} - ${fmtWhen(m.ts)}</small></div>`).join('')}</div>`:''}`;
+}
+function openMsg(id){
+  const m=(MSG.items||[]).find(x=>x.id===id);if(!m)return;
+  openSheet(`<h3 style="margin:0">${esc(m.subject)}</h3><p class="meta" style="margin:4px 0 0">${esc(m.from)} - ${esc(m.label)} - ${fmtWhen(m.ts)}</p><div class="msgbody">${esc(m.body)}</div>
+   ${m.canReply?'<button class="btn full" id="msgReply"><i class="ph-bold ph-arrow-bend-up-left"></i> Reply</button>':''}`);
+  if(!m.read){m.read=true;MSG.unread=Math.max(0,MSG.unread-1);authCall('/msg/read',{id},authTok()).catch(()=>{});renderSubnav()}
+  const rb=$('#msgReply');if(rb)rb.addEventListener('click',()=>openCompose({reply:m}))}
+async function openCompose(o){
+  o=o||{};const t=authTok();if(!t)return;
+  if(!MSG.perm){try{MSG.perm=await authCall('/msg/people',null,t)}catch(e){toast('Could not load. Try again.');return}}
+  const P=MSG.perm,admin=P.role==='admin',lead=admin||(P.leads||[]).length>0;
+  const opts=o.reply?[['reply','Reply to '+o.reply.from]]:[
+    ...(admin?[['club','Whole club'],['presidents','Chapter presidents']]:[]),
+    ...(lead?(P.chapters||[]).map(c=>['chapter:'+c,c+' chapter (all members)']):[]),
+    ...(lead?[['people','Pick members...']]:[]),
+    ['leaders','Club leaders']];
+  openSheet(`<h3 style="margin:0">${o.reply?'Reply':'New message'}</h3>
+   <form id="cpForm" novalidate>
+    <label for="cpTo">Send to</label><select class="field" id="cpTo" ${o.reply?'disabled':''}>${opts.map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>
+    <div id="cpPick" hidden><input class="field" id="cpFind" placeholder="Search names" style="margin-top:8px"><div class="pickbox" id="cpList">${(P.people||[]).map(x=>`<label data-n="${esc(x.name.toLowerCase())}"><input type="checkbox" value="${esc(x.id)}"> ${esc(x.name)} <small class="meta">${esc(x.chapter)}</small></label>`).join('')}</div></div>
+    <p class="help" id="cpCount" style="margin:6px 0 0"></p>
+    <label for="cpSub">Subject</label><input class="field" id="cpSub" maxlength="90" value="${o.reply?esc(/^re:/i.test(o.reply.subject)?o.reply.subject:'Re: '+o.reply.subject):''}" required>
+    <label for="cpBody">Message</label><textarea class="field" id="cpBody" maxlength="3000" rows="6" required></textarea>
+    <label class="check"><input type="checkbox" id="cpMail" checked> Also email it</label>
+    ${P.emailHold?'<p class="help" style="margin:4px 0 0">Email is in test mode until launch. Messages reach inboxes now.</p>':''}
+    <button class="btn full" type="submit" style="margin-top:12px"><i class="ph-bold ph-paper-plane-tilt"></i> Send</button>
+    <p class="si-msg" id="cpMsg" role="status"></p></form>`);
+  const sel=$('#cpTo'),pick=$('#cpPick'),cnt=$('#cpCount');
+  const target=()=>{const v=sel.value;if(o.reply)return{type:'reply',msg:o.reply.id};
+    if(v==='people')return{type:'people',ids:[...document.querySelectorAll('#cpList input:checked')].map(i=>i.value)};
+    if(v.startsWith('chapter:'))return{type:'chapter',chapter:v.slice(8)};return{type:v}};
+  let ct;const recount=()=>{pick.hidden=sel.value!=='people';clearTimeout(ct);ct=setTimeout(async()=>{
+    const tg=target();if(tg.type==='people'&&!tg.ids.length){cnt.textContent='Pick at least one member.';return}
+    try{const r=await authCall('/msg/count',{to:tg},t);cnt.textContent='Goes to '+r.n+' member'+(r.n===1?'':'s')+' ('+r.label+').'}catch(e){cnt.textContent=e.message}},150)};
+  sel.addEventListener('change',recount);$('#cpList')&&$('#cpList').addEventListener('change',recount);
+  $('#cpFind').addEventListener('input',e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('#cpList label').forEach(l=>l.hidden=!l.dataset.n.includes(q))});
+  recount();
+  $('#cpForm').addEventListener('submit',async ev=>{ev.preventDefault();const m=$('#cpMsg'),b=ev.target.querySelector('button[type=submit]');
+    const subject=$('#cpSub').value.trim(),body=$('#cpBody').value.trim();if(!subject||!body){m.textContent='Add a subject and a message.';return}
+    b.disabled=true;m.textContent='Sending...';
+    try{const r=await authCall('/msg/send',{to:target(),subject,body,email:$('#cpMail').checked},t);closeSheet();
+      toast('Sent to '+r.delivered+' member'+(r.delivered===1?'':'s')+(r.emailed?', '+r.emailed+' emailed':''));
+      if(r.note)setTimeout(()=>toast(r.note),2400);MSG.items=null;MSG.sent=null;loadInbox()}catch(err){m.textContent=err.message;b.disabled=false}})}
+document.addEventListener('click',e=>{
+  const mr=e.target.closest('[data-msg]');if(mr){openMsg(mr.dataset.msg);return}
+  if(e.target.closest('#msgNew')){openCompose();return}});
+setInterval(()=>{if(authTok()&&!document.hidden)loadInbox(true)},60000);
+
 /* ---------- sign-in screen (preview: real sign-in connects to club accounts later) ---------- */
 const SI=$('#signin');
 function openSignIn(){SI.hidden=false;$('#siMsg').textContent='';requestAnimationFrame(()=>SI.classList.add('on'))}
@@ -2599,8 +2677,8 @@ function applyMe(me){
   S.member=true;S.demo=false;S.tour=-1;S.name=(me.name||'').slice(0,24);S.role=me.role;S.realRole=me.role;S.authMe=me;
   S.cfg.my.chapter=PLANS.some(p=>p.chapter===me.chapter)?me.chapter:'National';if(me.ghin)S.cfg.my.ghin=me.ghin;
   cfgSave();save()}
-function signedIn(res){setTok(res.token);applyMe(res.me);closeSignIn();renderAll();syncTop();toast('Signed in as '+res.me.name.split(' ')[0])}
-async function signOutReal(){const t=authTok();setTok('');S.authMe=null;S.realRole=null;if(t){try{await authCall('/auth/logout',{},t)}catch(e){}}}
+function signedIn(res){setTok(res.token);MSG.items=null;MSG.perm=null;MSG.sent=null;applyMe(res.me);closeSignIn();renderAll();syncTop();toast('Signed in as '+res.me.name.split(' ')[0]);loadInbox(true)}
+async function signOutReal(){const t=authTok();setTok('');MSG.items=null;MSG.perm=null;MSG.sent=null;MSG.unread=0;S.authMe=null;S.realRole=null;if(t){try{await authCall('/auth/logout',{},t)}catch(e){}}}
 $('#siForm').addEventListener('submit',async e=>{e.preventDefault();const m=$('#siMsg'),b=e.target.querySelector('button[type=submit]');
   const email=$('#siEmail').value.trim(),password=$('#siPass').value;if(!email||!password){m.textContent='Enter your email and password.';return}
   b.disabled=true;m.textContent='Signing in...';
@@ -2619,7 +2697,7 @@ $('#siSetup').addEventListener('submit',async e=>{e.preventDefault();const m=$('
   b.disabled=true;m.textContent='Saving...';
   try{signedIn(await authCall('/auth/setup',suCode?{email,code:v,password}:{email,ghin:v,dob,password}));$('#suPass').value='';setupMode(false)}catch(err){m.textContent=err.message}b.disabled=false});
 /* on open: confirm a saved sign-in is still good, otherwise sign out */
-(async()=>{const t=authTok();if(!t)return;try{const r=await authCall('/auth/me',null,t);applyMe(r.me);renderAll();syncTop()}catch(err){if(err.status===401){setTok('');if(S.member&&!S.demo){S.member=false;save();renderAll();syncTop()}}}})();
+(async()=>{const t=authTok();if(!t)return;try{const r=await authCall('/auth/me',null,t);applyMe(r.me);renderAll();syncTop();loadInbox(true)}catch(err){if(err.status===401){setTok('');if(S.member&&!S.demo){S.member=false;save();renderAll();syncTop()}}}})();
 $('#siDemo').addEventListener('click',()=>{S.member=true;S.demo=true;if(!S.name)S.name='Demo Member';save();closeSignIn();renderAll();toast('Signed in to demo mode')});
 $('#siGuest').addEventListener('click',()=>{try{sessionStorage.setItem('rngcGuest','1')}catch(e){}closeSignIn()});
 (function(){
