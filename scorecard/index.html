@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0a0b0d">
-<title>RNGC Live Scorecard</title>
+<title>RNGC Golf</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -345,19 +345,35 @@ const LAST='ABCDEFGHJKLMNOPRSTVW';
 function rng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const hash=s=>{let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0};
 /* demo field: 18 foursomes, one per starting hole (shotgun). 10 RNGC, 8 12th Man. Same every load. hcp = handicap index. */
-const TEAMS=(()=>{const r=rng(hash('nov14-field')),used=new Set(),out=[];
+let TEAMS=(()=>{const r=rng(hash('nov14-field')),used=new Set(),out=[];
   const pick=()=>{let f,k=0;do{f=FIRST[Math.floor(r()*FIRST.length)];k++}while(used.has(f)&&k<400);used.add(f);return f+' '+LAST[Math.floor(r()*LAST.length)]+'.'};
   for(let i=0;i<18;i++){const club=i%9<5?'RNGC':'12th Man';const players=[0,1,2,3].map(k=>({id:'t'+(i+1)+'p'+k,name:pick(),hcp:Math.round(3+r()*22)}));
     out.push({id:'t'+(i+1),club,start:i+1,players,name:players[0].name.split(' ')[0]+"'s team",str:(r()-.5)*.24,pace:.85+r()*.3,off:r()})}
   return out})();
 /* registered but not in a group yet (demo) - the scorekeeper can pull them in */
-const SPARE=[{id:'x1',name:'Tyler B.',hcp:14,club:'RNGC'},{id:'x2',name:'Marco V.',hcp:9,club:'RNGC'},{id:'x3',name:'Deon W.',hcp:21,club:'12th Man'},
+let SPARE=[{id:'x1',name:'Tyler B.',hcp:14,club:'RNGC'},{id:'x2',name:'Marco V.',hcp:9,club:'RNGC'},{id:'x3',name:'Deon W.',hcp:21,club:'12th Man'},
  {id:'x4',name:'Kristen L.',hcp:18,club:'RNGC'},{id:'x5',name:'Shawn P.',hcp:6,club:'12th Man'},{id:'x6',name:'Rudy G.',hcp:25,club:'RNGC'}];
 
+/* ===================== TRACKER CONTEXT ===================== */
+/* One page runs three kinds of golf: your own rounds, rounds with your group, and club events.
+   ?r=<round id> opens a personal or group round; no r = the golf home plus the club event. */
+const G_KEY='rngc-golf-v1';
+function gload(){try{return JSON.parse(localStorage.getItem(G_KEY)||'{}')}catch(e){return{}}}
+const G=Object.assign({me:{name:'You',hcp:12.4},groups:[],rounds:[],live:{},courses:{},seeded:false},gload());
+function gsave(){try{localStorage.setItem(G_KEY,JSON.stringify(G))}catch(e){}}
+for(const[id,c]of Object.entries(G.courses||{}))COURSES[id]=c;
+const RID=new URLSearchParams(location.search).get('r')||'';
+const LIVE=RID&&G.live[RID]&&COURSES[G.live[RID].course]?G.live[RID]:null,CASUAL=!!LIVE;
+if(CASUAL){EVENTS[RID]={id:RID,name:LIVE.name,date:LIVE.dateTxt,start:'',course:LIVE.course,clubs:[],cfg:LIVE.cfg,casual:true};
+  TEAMS=[{id:'g',club:'',start:1,players:LIVE.players,name:LIVE.name,str:0,pace:1,off:0}];
+  SPARE=(LIVE.bench||[]).slice()}
+const HOME=CASUAL?'#/':'#/event';
+
 /* ===================== STATE ===================== */
-const KEY='rngc-scorecard-v2';
-const S=Object.assign({event:'nov14',team:null,cfg:{},scores:{},submitted:{},simStart:0,sun:false,hole:null,
-  roster:{},keeper:{},me:null,hcp:{},guests:[],ctp:{},ld:{},bets:{}},load());
+const KEY='rngc-scorecard-v2'+(CASUAL?':'+RID:'');
+const DEF=()=>({event:CASUAL?RID:'nov14',team:CASUAL?'g':null,cfg:{},scores:{},submitted:{},simStart:0,sun:false,hole:null,
+  roster:{},keeper:CASUAL?{g:'me'}:{},me:CASUAL?'me':null,hcp:{},guests:[],ctp:{},ld:{},bets:{},st:{}});
+const S=Object.assign(DEF(),load());
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}}}
 let bc=null;try{bc=new BroadcastChannel('rngc-scorecard')}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(bc)try{bc.postMessage('u')}catch(e){};flashSaved()}
@@ -399,7 +415,7 @@ const strokesOn=(ph,hole)=>{const si=CO().si[hole-1];if(ph>=0)return Math.floor(
 const SCR_W={4:[.25,.2,.15,.1],3:[.3,.2,.1],2:[.35,.15],1:[1]};
 const teamHcp=t=>{if(!CFG().hcp)return 0;const ch=players(t).map(p=>courseHcp(idx(p.id))).sort((a,b)=>a-b),w=SCR_W[ch.length]||SCR_W[4];return Math.round(ch.reduce((a,c,i)=>a+c*(w[i]||0),0))};
 const mk=(s,par)=>{const d=s-par;const c=d<=-2?'e':d===-1?'b':d===1?'bo':d>=2?'d':'';return `<span class="mk ${c}">${s}</span>`};
-const tagFor=c=>`<span class="tag ${c==='RNGC'?'rngc':'tm'}">${esc(c)}</span>`;
+const tagFor=c=>!c?'':`<span class="tag ${c==='RNGC'?'rngc':'tm'}">${esc(c)}</span>`;
 const ADMIN=new URLSearchParams(location.search).has('admin');
 const stbl=(net,par)=>Math.max(0,2-(net-par));
 
@@ -475,7 +491,7 @@ function skinsResults(list){const cfg=CFG();if(cfg.skins==='off')return null;con
 
 /* ===================== SCREENS ===================== */
 const LOGO='../assets/logo/rngc-ball-static.svg';
-function bar(title,sub,right=''){return `<div class="bar"><a href="../" aria-label="Back to the club app"><img class="logo" src="${LOGO}" alt=""></a><div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${right}</div>`}
+function bar(title,sub,right=''){return `<div class="bar"><a href="${CASUAL?'./#/'+(LIVE.group?'group/'+LIVE.group:'me'):'./#/events'}" aria-label="Back to golf home"><img class="logo" src="${LOGO}" alt=""></a><div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${right}</div>`}
 const sunBtn=()=>`<button class="ib" id="sunBtn" aria-pressed="${S.sun}" aria-label="Sun mode, high contrast for bright light" title="Sun mode"><i class="ph-${S.sun?'fill':'bold'} ph-sun"></i></button>`;
 const boardBtn=()=>`<a class="ib" href="#/board" aria-label="Live leaderboard"><i class="ph-bold ph-ranking"></i></a>`;
 const betsBtn=()=>`<a class="ib" href="#/bets" aria-label="Side bets"><i class="ph-bold ph-coins"></i></a>`;
@@ -490,6 +506,7 @@ function route(){const h=location.hash.replace(/^#\/?/,'');document.body.classLi
   if(h.startsWith('team')&&S.team)return teamPage();
   if(h.startsWith('bets')&&S.team)return betsPage();
   if(h.startsWith('hole')&&S.team){const n=+h.split('/')[1]||order(myTeam().start)[0];return hole(n)}
+  if(!CASUAL&&!(h.startsWith('event')||h.startsWith('pick')))return hub(h);
   start()}
 
 const contestLine=()=>{const c=CFG(),a=[];if(c.ctp&&c.ctp.length)a.push('Closest to the pin '+c.ctp.join(', '));if(c.ld)a.push('Long drive '+c.ld);if(c.skins!=='off')a.push((c.skins==='net'?'Net':'Gross')+' skins '+money(c.buyin));return a.join(' · ')};
@@ -498,16 +515,16 @@ const hcpLine=()=>{const c=CFG();if(!c.hcp)return 'Gross, no handicaps';return F
 function start(){const e=EV(),c=CO(),t=TEE(),cfg=CFG(),me=myTeam();$('#app').className='wrap';
   const pick=!me||location.hash.includes('pick');
   $('#app').innerHTML=bar('Live scorecard',e.date,boardBtn())+`
-  <section class="card ev"><span class="tag">Event day</span><h1>${esc(e.name)}</h1><div class="muted">${esc(c.name)}, ${esc(c.city)} · ${esc(e.start)}</div>
-   <div class="facts"><div><b>${esc(F().name)}</b><span>${esc(hcpLine())}</span></div><div><b>${esc(t.name)}</b><span>${t.y.reduce((a,b)=>a+b,0).toLocaleString()} yds</span></div><div><b>Par ${c.par.reduce((a,b)=>a+b,0)}</b><span>${t.rating} / ${t.slope}</span></div></div>
+  <section class="card ev"><span class="tag">${CASUAL?'Your round':'Event day'}</span><h1>${esc(e.name)}</h1><div class="muted">${esc(c.name)}${c.city?', '+esc(c.city):''}${e.start?' · '+esc(e.start):''}</div>
+   <div class="facts"><div><b>${esc(F().name)}</b><span>${esc(hcpLine())}</span></div><div><b>${esc(t.name)}</b><span>${t.y.reduce((a,b)=>a+b,0)?t.y.reduce((a,b)=>a+b,0).toLocaleString()+' yds':'No yardages yet'}</span></div><div><b>Par ${c.par.reduce((a,b)=>a+b,0)}</b><span>${t.rating} / ${t.slope}</span></div></div>
    ${contestLine()?`<p class="note" style="margin-top:10px"><i class="ph-bold ph-trophy"></i><span>${esc(contestLine())}</span></p>`:''}
-   ${ADMIN?`<a class="btn ghost block" style="margin-top:12px" href="#/setup"><i class="ph-bold ph-sliders-horizontal"></i> Set up the day · admin</a>`:''}</section>
+   ${ADMIN||CASUAL?`<a class="btn ghost block" style="margin-top:12px" href="#/setup"><i class="ph-bold ph-sliders-horizontal"></i> ${CASUAL?'Change the game':'Set up the day · admin'}</a>`:''}</section>
   ${!pick?teamCard(me):`
   <div class="lbl">Which group are you in?</div>
   <div class="teams">${TEAMS.map(x=>`<button class="card team" data-team="${x.id}" aria-pressed="${x.id===S.team}"><div class="hn"><small>HOLE</small>${x.start}</div><div class="nm"><b>${esc(players(x).map(p=>p.name).join(', '))}</b><span>Starts on hole ${x.start}</span></div>${tagFor(x.club)}</button>`).join('')}</div>
   <p class="note"><i class="ph-bold ph-info"></i><span>One person per group keeps score, like the paper card. Every tap saves right away, so a dead spot on the course loses nothing.</span></p>`}
   <div class="stick">${me&&!pick?`<button class="btn block" id="go">${Object.keys(myScores()).length?'Keep scoring':'Start on hole '+me.start} <i class="ph-bold ph-arrow-right"></i></button>`:'<button class="btn block" disabled>Pick your group</button>'}</div>`;
-  document.querySelectorAll('[data-team]').forEach(b=>b.onclick=()=>{const t=TEAMS.find(x=>x.id===b.dataset.team);S.team=t.id;if(!ids(t).includes(S.me))S.me=keeperOf(t);save();buzz();if(location.hash==='#/'||location.hash==='')start();else location.hash='#/'});
+  document.querySelectorAll('[data-team]').forEach(b=>b.onclick=()=>{const t=TEAMS.find(x=>x.id===b.dataset.team);S.team=t.id;if(!ids(t).includes(S.me))S.me=keeperOf(t);save();buzz();if(location.hash===HOME||(CASUAL&&location.hash===''))start();else location.hash=HOME});
   const go=$('#go');if(go)go.onclick=()=>{const t=myTeam(),ord=order(t.start);const next=ord.find(h=>!holeDone(h))||ord[0];location.hash='#/hole/'+next};
   if(location.hash.includes('pick'))return;
   wireTeamCard()}
@@ -518,7 +535,7 @@ function teamCard(t){const k=keeperOf(t);
     <span class="muted">Index ${idx(p.id)} · course ${courseHcp(idx(p.id))}${CFG().hcp&&F().entry!=='team'?' · plays '+playHcp(idx(p.id)):''}</span></div></div>`).join('')}
    ${F().entry==='team'&&CFG().hcp?`<p class="note" style="margin-top:6px"><i class="ph-bold ph-users-three"></i><span>Team handicap ${teamHcp(t)}</span></p>`:''}
    <div class="row2"><a class="btn ghost" href="#/team"><i class="ph-bold ph-users"></i> Team and handicaps</a><a class="btn ghost" href="#/bets"><i class="ph-bold ph-coins"></i> Side bets</a></div>
-   <button class="linkbtn" id="changeGroup">Not your group? Pick another</button></section>`}
+   ${CASUAL?'':'<button class="linkbtn" id="changeGroup">Not your group? Pick another</button>'}</section>`}
 function wireTeamCard(){const c=$('#changeGroup');if(c)c.onclick=()=>{location.hash='#/pick'}}
 
 /* ---------- team page: scorekeeper, players, handicaps ---------- */
@@ -537,7 +554,7 @@ function teamPage(){const t=myTeam(),k=keeperOf(t),ps=players(t);$('#app').class
    ${edit&&ps.length<4?`<button class="btn ghost block" style="margin-top:10px" id="addP"><i class="ph-bold ph-user-plus"></i> Add a player</button>`:''}</section>
   ${F().entry==='team'&&CFG().hcp?`<p class="note"><i class="ph-bold ph-users-three"></i><span>Team handicap ${teamHcp(t)}: 25% of the lowest course handicap, then 20, 15 and 10%.</span></p>`:''}
   <p class="note"><i class="ph-bold ph-lock-simple"></i><span>${edit?'You keep score for this group, so you can swap players and fix anyone\'s handicap.':'Only '+esc(first(PEOPLE()[k].name))+' can swap players or pick a new scorekeeper. You can fix your own handicap.'}</span></p>
-  <div class="stick"><a class="btn block" href="#/">Done</a></div>`;
+  <div class="stick"><a class="btn block" href="${HOME}">Done</a></div>`;
   document.querySelectorAll('[data-me]').forEach(b=>b.onclick=()=>{S.me=b.dataset.me;save();teamPage()});
   document.querySelectorAll('[data-keeper]').forEach(b=>b.onclick=()=>{if(confirm('Make '+first(PEOPLE()[b.dataset.keeper].name)+' the scorekeeper? Only they can enter scores after this.')){S.keeper[t.id]=b.dataset.keeper;save();teamPage()}});
   document.querySelectorAll('[data-hcp]').forEach(inp=>inp.onchange=()=>{let v=parseFloat(inp.value);if(isNaN(v))return;v=Math.max(-5,Math.min(54,Math.round(v*10)/10));S.hcp[inp.dataset.hcp]=v;save();teamPage()});
@@ -548,7 +565,7 @@ function openPicker(out){const t=myTeam(),P=PEOPLE();
   const pool=[...SPARE,...S.guests].filter(p=>!teamOf(p.id));
   const others=TEAMS.filter(x=>x.id!==t.id).flatMap(x=>players(x).map(p=>({...p,on:x.name})));
   const draw=q=>{q=(q||'').toLowerCase();const m=p=>!q||p.name.toLowerCase().includes(q);
-    $('#plist').innerHTML=pool.filter(m).map(p=>`<button class="prow3" data-pick="${p.id}"><b>${esc(p.name)}</b><span>Index ${idx(p.id)} · not in a group yet</span></button>`).join('')+
+    $('#plist').innerHTML=pool.filter(m).map(p=>`<button class="prow3" data-pick="${p.id}"><b>${esc(p.name)}</b><span>Index ${idx(p.id)} · ${CASUAL?'in your group, not playing today':'not in a group yet'}</span></button>`).join('')+
      others.filter(m).slice(0,q?20:6).map(p=>`<div class="prow3 off"><b>${esc(p.name)}</b><span>Already on ${esc(p.on)}</span></div>`).join('')||'<p class="muted">Nobody by that name. Add them as a guest below.</p>';
     document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>place(b.dataset.pick))};
   const place=pid=>{const list=ids(t).slice();if(out){list[list.indexOf(out)]=pid;if(S.keeper[t.id]===out)S.keeper[t.id]=pid;if(S.me===out)S.me=pid}else list.push(pid);
@@ -615,12 +632,13 @@ function hole(n){const t=myTeam(),c=CO(),tee=TEE(),f=F(),ord=order(t.start),idx_
   `<div class="prog" aria-hidden="true"><i style="width:${(myUnits()[0]||{thru:0}).thru/18*100}%"></i></div>
   <section class="hole" id="holeSwipe">
    <div class="hhead"><div class="hnum"><small>HOLE</small>${n}</div>
-    <div class="hmeta"><div><span>Par</span><b>${par}</b></div><div><span>Yards</span><b>${tee.y[n-1]}</b></div><div><span>Hcp</span><b>${c.si[n-1]}</b></div></div>
+    <div class="hmeta"><div><span>Par</span><b>${par}</b></div><div><span>Yards</span><b>${tee.y[n-1]||'-'}</b></div><div><span>Hcp</span><b>${c.si[n-1]}</b></div></div>
     <div class="run"><b class="${tot.c}">${tot.txt}</b><span>${tot.who?esc(tot.who)+' · ':''}${f.points?'pts · ':''}thru ${tot.thru}</span></div></div>
    ${holeInfoBtn(n)}
    ${ro?`<div class="card lock"><i class="ph-bold ph-lock-simple"></i><span>${esc(first(PEOPLE()[k].name))} keeps score for your group. <a href="#/team">Change</a></span></div>`:''}
    ${entry}
    ${contestCard(n)}
+   ${statCard(n)}
    <div class="strip">${strip([...Array(9)].map((_,i)=>i+1))}</div><div class="strip" style="margin-top:4px">${strip([...Array(9)].map((_,i)=>i+10))}</div>
    <div class="stick"><div class="navrow"><button class="btn ghost" id="prev" ${prev?'':'disabled'} aria-label="Previous hole"><i class="ph-bold ph-arrow-left"></i></button>
     <button class="btn" id="next">${last?'Review card <i class="ph-bold ph-check"></i>':`Hole ${next} <i class="ph-bold ph-arrow-right"></i>`}</button></div>
@@ -638,7 +656,7 @@ function hole(n){const t=myTeam(),c=CO(),tee=TEE(),f=F(),ord=order(t.start),idx_
   $('#prev').onclick=()=>prev&&(location.hash='#/hole/'+prev);
   $('#next').onclick=()=>{if(!ro&&!holeDone(n)&&!confirm('No score on hole '+n+' yet. Move on anyway?'))return;location.hash=last?'#/card':'#/hole/'+next};
   const hi=$('#hinfo');if(hi)hi.onclick=()=>openHole(n);
-  wireSun();
+  wireSun();wireStat(n);
   swipe($('#holeSwipe'),()=>next&&(location.hash='#/hole/'+next),()=>prev&&(location.hash='#/hole/'+prev))}
 
 
@@ -709,7 +727,7 @@ function swipe(el,left,right){let x0=null,y0=null;el.addEventListener('touchstar
 function flashSaved(){const s=$('#saved');if(!s)return;s.innerHTML='<i class="ph-fill ph-cloud-check"></i><span>Saved · '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})+'</span>'}
 
 /* paper-style card: rows = [{name, get(h), k}] (k = how many scores a team row adds up) */
-function paperTable(rows){const c=CO(),F9=[1,2,3,4,5,6,7,8,9],B9=[10,11,12,13,14,15,16,17,18];
+function paperTable(rows,co){const c=co||CO(),F9=[1,2,3,4,5,6,7,8,9],B9=[10,11,12,13,14,15,16,17,18];
   const sum=(hs,f)=>hs.reduce((a,h)=>a+(f(h)||0),0);
   const half=(hs,lab)=>`<table><colgroup><col class="c0">${hs.map(()=>'<col>').join('')}<col></colgroup><thead><tr><th>Hole</th>${hs.map(h=>`<th>${h}</th>`).join('')}<th>${lab}</th></tr></thead><tbody>
    <tr><td>Par</td>${hs.map(h=>`<td>${c.par[h-1]}</td>`).join('')}<td class="tot">${sum(hs,h=>c.par[h-1])}</td></tr>
@@ -730,17 +748,18 @@ function review(){const t=myTeam(),f=F();$('#app').className='wrap';
   ${done?`<div class="card done-banner"><i class="ph-fill ph-seal-check"></i><div><b>Card turned in</b><div class="muted" style="font-size:14px">Locked. The event admin can fix a mistake from the clubhouse.</div></div></div>`:
    missing.length?`<p class="note"><i class="ph-bold ph-warning"></i><span>Still blank: hole${missing.length>1?'s':''} ${missing.join(', ')}.</span></p>`:''}
   <div class="stick">${done?`<a class="btn block" href="#/board"><i class="ph-bold ph-ranking"></i> Live leaderboard</a>`:
-   `<button class="btn block" id="submit" ${missing.length||!canScore()?'disabled':''}>Turn in card</button><div style="height:8px"></div><button class="btn ghost block" id="back"><i class="ph-bold ph-pencil-simple"></i> Fix a hole</button>`}</div>`;
-  const sb=$('#submit');if(sb)sb.onclick=()=>{if(confirm('Turn in this card? Have one other player in your group check it first. It locks after this.')){S.submitted[scoreKey(t.id)]=true;save();review()}};
+   `${CASUAL?`<button class="btn block" id="finish" ${18-missing.length<9?'disabled':''}>Finish and save the round</button>`:`<button class="btn block" id="submit" ${missing.length||!canScore()?'disabled':''}>Turn in card</button>`}<div style="height:8px"></div><button class="btn ghost block" id="back"><i class="ph-bold ph-pencil-simple"></i> Fix a hole</button>`}</div>`;
+  const sb=$('#submit');if(sb)sb.onclick=()=>{if(confirm('Turn in this card? Have one other player in your group check it first. It locks after this.')){S.submitted[scoreKey(t.id)]=true;save();logEvent();review()}};
+  const fn=$('#finish');if(fn)fn.onclick=finishRound;
   const bk=$('#back');if(bk)bk.onclick=()=>location.hash='#/hole/'+(missing[0]||order(t.start)[17]);
   wireSun()}
 
 /* ---------- event setup (admin): pick the game, tees, handicaps and contests ---------- */
-function setup(){if(!ADMIN){location.hash='#/';return}const c=CO(),cfg=CFG();$('#app').className='wrap';
+function setup(){if(!ADMIN&&!CASUAL){location.hash=HOME;return}const c=CO(),cfg=CFG();$('#app').className='wrap';
   const par3=c.par.map((p,i)=>p===3?i+1:0).filter(Boolean);
-  $('#app').innerHTML=bar('Set up the day',EV().name)+`
+  $('#app').innerHTML=bar(CASUAL?'Round setup':'Set up the day',EV().name)+`
   <div class="lbl">Game</div>
-  <div class="fmt">${Object.entries(FORMATS).map(([k,v])=>`<button class="card fmtc" data-f="${k}" aria-pressed="${cfg.format===k}"><b>${v.name}${v.team?' <span class="tag">Team</span>':' <span class="tag">Each player</span>'}</b><span>${v.desc}</span></button>`).join('')}</div>
+  <div class="fmt">${Object.entries(FORMATS).filter(([k,v])=>!CASUAL||!v.team).map(([k,v])=>`<button class="card fmtc" data-f="${k}" aria-pressed="${cfg.format===k}"><b>${v.name}${v.team?' <span class="tag">Team</span>':' <span class="tag">Each player</span>'}</b><span>${v.desc}</span></button>`).join('')}</div>
   <div class="lbl">Tees</div>
   <div class="seg" role="group" aria-label="Tees">${c.tees.map(x=>`<button data-tee="${x.id}" aria-pressed="${x.id===cfg.tee}">${x.name} <span class="muted" style="font-weight:500">${x.y.reduce((a,b)=>a+b,0).toLocaleString()}</span></button>`).join('')}</div>
   <div class="lbl">Handicaps</div>
@@ -758,7 +777,7 @@ function setup(){if(!ADMIN){location.hash='#/';return}const c=CO(),cfg=CFG();$('
   ${cfg.skins!=='off'?`<div class="steprow"><span>Buy-in per ${FORMATS[cfg.format].team?'team':'player'}</span><button class="pm2" data-bi="-5" aria-label="Lower buy-in"><i class="ph-bold ph-minus"></i></button><b>${money(cfg.buyin)}</b><button class="pm2" data-bi="5" aria-label="Raise buy-in"><i class="ph-bold ph-plus"></i></button></div>
    <p class="note"><i class="ph-bold ph-info"></i><span>The pot splits evenly across every skin won. The app tracks it; the money is collected at check-in, not through the app.</span></p>`:''}
   <p class="note" style="margin-top:18px"><i class="ph-bold ph-floppy-disk"></i><span>Changes apply to every phone right away. Scores already entered stay put.</span></p>
-  <div class="stick"><div class="navrow"><button class="btn ghost" id="reset" aria-label="Back to the event's defaults"><i class="ph-bold ph-arrow-counter-clockwise"></i></button><a class="btn" href="#/">Done</a></div></div>`;
+  <div class="stick"><div class="navrow"><button class="btn ghost" id="reset" aria-label="Back to the event's defaults"><i class="ph-bold ph-arrow-counter-clockwise"></i></button><a class="btn" href="${HOME}">Done</a></div></div>`;
   const put=o=>{Object.assign(S.cfg,o);save();setup()};
   document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>put({format:b.dataset.f,allow:FORMATS[b.dataset.f].allow}));
   document.querySelectorAll('[data-tee]').forEach(b=>b.onclick=()=>put({tee:b.dataset.tee}));
@@ -819,7 +838,7 @@ function betsPage(){const t=myTeam(),P=PEOPLE(),list=field(),bets=myBets(),ps=id
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('Remove this bet?')){bets.splice(+b.dataset.del,1);save();betsPage()}});
   document.querySelectorAll('[data-win]').forEach(b=>b.onclick=()=>{const[i,pid]=b.dataset.win.split('|');bets[+i].winner=pid;save();betsPage()});
   $('#addBet').onclick=()=>openBet()}
-function openBet(type){const t=myTeam(),P=PEOPLE(),ps=ids(t),f=F();type=type||'team';
+function openBet(type){const t=myTeam(),P=PEOPLE(),ps=ids(t),f=F();type=type||(TEAMS.length>1?'team':'skins');
   const needPlayers=f.entry==='team';const d={amt:type==='skins'?5:type==='team'?20:10,net:false,carry:true,a:[],b:[],who:ps.slice(),vs:'',label:''};
   const chips=(key,arr)=>`<div class="chips2">${ps.map(pid=>`<button class="chip2" data-${key}="${pid}" aria-pressed="${arr.includes(pid)}">${esc(first(P[pid].name))}</button>`).join('')}</div>`;
   const draw=()=>{$('#betForm').innerHTML=
@@ -844,7 +863,7 @@ function openBet(type){const t=myTeam(),P=PEOPLE(),ps=ids(t),f=F();type=type||'t
     const lb=$('#bLabel');if(lb)lb.oninput=()=>d.label=lb.value;
     const cr=$('#bCarry');if(cr)cr.onchange=()=>d.carry=cr.checked};
   $('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">Add a bet</h2>
-   <div class="seg" role="group" aria-label="Bet type" style="margin-top:8px">${Object.entries(BET_TYPES).map(([k,l])=>`<button data-bt="${k}" aria-pressed="${k===type}">${l}</button>`).join('')}</div>
+   <div class="seg" role="group" aria-label="Bet type" style="margin-top:8px">${Object.entries(BET_TYPES).filter(([k])=>k!=='team'||TEAMS.length>1).map(([k,l])=>`<button data-bt="${k}" aria-pressed="${k===type}">${l}</button>`).join('')}</div>
    <div id="betForm" style="margin-top:6px"></div>
    <div class="steprow"><span>${type==='skins'?'Per skin':type==='team'?'Per man':type==='nassau'?'Each way':'Each player'}</span><button class="pm2" id="bMinus" aria-label="Less"><i class="ph-bold ph-minus"></i></button><b id="bAmtV"></b><button class="pm2" id="bPlus" aria-label="More"><i class="ph-bold ph-plus"></i></button></div>
    <button class="btn block" style="margin-top:12px" id="bSave">Add bet</button>
@@ -868,13 +887,13 @@ function board(tv){const e=EV(),c=CO(),list=field(),f=ranked(list.slice()),fm=F(
   const recent=moves.length?moves[Math.floor(Date.now()/5000)%moves.length]:null;
   const row=x=>{const moved=lastPos[x.id]!=null&&lastPos[x.id]!==x.pos;return `<button class="lrow ${x.mine?'me':''} ${moved?'flash':''}" data-open="${x.id}">
     <span class="pos">${x.thru?(x.tie?'T':'')+x.pos:'-'}</span>
-    <span class="nm"><b>${esc(x.name)}${x.mine?' · you':''}</b><span>${tagFor(x.club)} ${esc(x.sub)}</span></span>
+    <span class="nm"><b>${esc(x.name)}${x.mine&&(fm.team||x.who===S.me)?' · you':''}</b><span>${tagFor(x.club)} ${esc(x.sub)}</span></span>
     <span class="tp ${scoreCls(x)}">${showScore(x)}</span>
     <span class="th"><b>${x.thru===18?'F':x.thru||'-'}</b>${x.thru===18?'':'thru'}</span></button>`};
   const half=Math.ceil(f.length/2);
   const lbHtml=tv?`<div class="tvgrid"><div class="card lb">${f.slice(0,half).map(row).join('')}</div><div class="card lb">${f.slice(half).map(row).join('')}</div></div>`
     :`<div class="card lb"><div class="lhead"><span>Pos</span><span>${fm.team?'Team':'Player'}</span><span>${pts?'Pts':useNet()?'Net':'Score'}</span><span>Thru</span></div>${f.map(row).join('')}</div>`;
-  const side=`<section class="card battle"><div class="row"><span>${esc(clubs[0].k)}</span><span>${esc(clubs[1].k)}</span></div>
+  const side=!e.clubs.length?'':`<section class="card battle"><div class="row"><span>${esc(clubs[0].k)}</span><span>${esc(clubs[1].k)}</span></div>
      <div class="row"><b class="${pts?'':cls(clubs[0].v)}">${pts?clubs[0].v:toPar(clubs[0].v)}</b><b class="${pts?'':cls(clubs[1].v)}">${pts?clubs[1].v:toPar(clubs[1].v)}</b></div>
      <div class="meter" aria-hidden="true"><i class="a" style="width:${strength(clubs[0])/tot*100}%"></i><i class="b" style="width:${strength(clubs[1])/tot*100}%"></i></div>
      <p>Club vs club: every ${fm.team?'team':'player'}'s ${pts?'points':'score to par'}, added up. ${esc(lead.k)} leads right now.</p></section>
@@ -890,15 +909,15 @@ function board(tv){const e=EV(),c=CO(),list=field(),f=ranked(list.slice()),fm=F(
     return parts.length?`<div class="ctgrid">${parts.join('')}</div>`:'<section class="card ct"><div class="muted">No contests set up for this event.</div></section>'};
   const hasCt=(cfg.ctp&&cfg.ctp.length)||cfg.ld||cfg.skins!=='off';
   $('#app').innerHTML=(tv?`<div class="bar"><img class="logo" src="${LOGO}" alt=""><div class="t"><b>${esc(e.name)}</b><span>${esc(c.name)} · ${esc(fm.name)} · ${esc(e.date)}</span></div><span class="live"><i></i>LIVE</span></div>`
-    :bar('Live leaderboard',e.name+' · '+fm.name,`<span class="live" style="margin-right:4px"><i></i>LIVE</span><a class="ib" href="#/tv" aria-label="Big screen view"><i class="ph-bold ph-television-simple"></i></a>${S.team?`<a class="ib" href="#/hole/${S.hole||order(myTeam().start)[0]}" aria-label="Back to my card"><i class="ph-bold ph-pencil-simple-line"></i></a>`:`<a class="ib" href="#/" aria-label="Scorecard"><i class="ph-bold ph-pencil-simple-line"></i></a>`}`))+
+    :bar('Live leaderboard',e.name+' · '+fm.name,`<span class="live" style="margin-right:4px"><i></i>LIVE</span><a class="ib" href="#/tv" aria-label="Big screen view"><i class="ph-bold ph-television-simple"></i></a>${S.team?`<a class="ib" href="#/hole/${S.hole||order(myTeam().start)[0]}" aria-label="Back to my card"><i class="ph-bold ph-pencil-simple-line"></i></a>`:`<a class="ib" href="${HOME}" aria-label="Scorecard"><i class="ph-bold ph-pencil-simple-line"></i></a>`}`))+
    (!tv&&hasCt?`<div class="seg" role="group" aria-label="Board view" style="margin-bottom:10px"><button data-bt2="lb" aria-pressed="${BTAB==='lb'}">Leaderboard</button><button data-bt2="ct" aria-pressed="${BTAB==='ct'}">Contests</button></div>`:'')+
    (!tv&&BTAB==='ct'&&hasCt?contests():`<div class="${tv?'':'boardgrid'}">${tv?side:`<div class="side">${side}</div>`}<div>${lbHtml}</div></div>`)+
-   `<p class="note" style="margin:14px 0 24px"><i class="ph-bold ph-info"></i><span>Preview: the other groups are demo scores that move every 30 seconds. Your own card updates this board as you tap, on this phone.${tv?'':' <button id="resetDemo" style="text-decoration:underline;color:var(--silver)">Restart demo</button>'}</span></p>`;
+   (CASUAL?'':`<p class="note" style="margin:14px 0 24px"><i class="ph-bold ph-info"></i><span>Preview: the other groups are demo scores that move every 30 seconds. Your own card updates this board as you tap, on this phone.${tv?'':' <button id="resetDemo" style="text-decoration:underline;color:var(--silver)">Restart demo</button>'}</span></p>`);
   lastPos={};f.forEach(x=>lastPos[x.id]=x.pos);
   document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openCard(b.dataset.open));
   document.querySelectorAll('[data-net]').forEach(b=>b.onclick=()=>{VIEWNET=b.dataset.net==='1';board(tv)});
   document.querySelectorAll('[data-bt2]').forEach(b=>b.onclick=()=>{BTAB=b.dataset.bt2;board(tv)});
-  const rd=$('#resetDemo');if(rd)rd.onclick=()=>{if(confirm('Restart the demo? This clears your practice card, team changes and bets too.')){localStorage.removeItem(KEY);location.hash='';location.reload()}};
+  const rd=$('#resetDemo');if(rd)rd.onclick=()=>{if(confirm('Restart the demo? This clears your practice card, team changes and bets too.')){localStorage.removeItem(KEY);location.hash=HOME;location.reload()}};
   clearInterval(boardTimer);boardTimer=setInterval(()=>{const h=location.hash;if(h.startsWith('#/board')||h.startsWith('#/tv'))board(h.startsWith('#/tv'))},5000)}
 
 function openCard(id){const u=field().find(x=>x.id===id);if(!u)return;
@@ -912,14 +931,13 @@ $('#scrim').onclick=closeSheet;
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
 
 /* another tab or the big screen on this device picks up changes right away */
-const reload=()=>{const fresh=load();for(const k of Object.keys(S))delete S[k];Object.assign(S,{event:'nov14',team:null,cfg:{},scores:{},submitted:{},simStart:0,sun:false,hole:null,roster:{},keeper:{},me:null,hcp:{},guests:[],ctp:{},ld:{},bets:{}},fresh);
+const reload=()=>{const fresh=load();for(const k of Object.keys(S))delete S[k];Object.assign(S,DEF(),fresh);
   const h=location.hash;if(h.startsWith('#/board')||h.startsWith('#/tv'))route()};
 window.addEventListener('storage',e=>{if(e.key===KEY)reload()});
 if(bc)bc.onmessage=reload;
 window.addEventListener('hashchange',route);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
-route();
-
 </script>
+<script src="tracker.js"></script>
 </body>
 </html>
