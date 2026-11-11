@@ -634,7 +634,7 @@ function hole(n){if(n!==STRIP_N){STRIP_ALT=false;STRIP_N=n;QP=null}const t=myTea
     entry=`<div class="card entry"><div class="stepper"><button class="pm" data-step="-1" data-who="${p.id}" aria-label="One less" ${dis}><i class="ph-bold ph-minus"></i></button>
       <button class="big ${v==null?'ghost':''}" data-set="${p.id}" data-dflt="${par+st}" aria-label="Score ${v??par+st}, tap to keep it" ${dis}>${v??par+st}</button>
       <button class="pm" data-step="1" data-who="${p.id}" aria-label="One more" ${dis}><i class="ph-bold ph-plus"></i></button></div>
-      <div class="word ${d!=null?cls(d):'muted'}">${d!=null?word(d)+(CFG().hcp&&st?` · ${word(v-st-par)} with handicap`:''):(st?`You get ${st} extra shot${st>1?'s':''} here. A ${par+st} counts as par.`:'Tap your score and it moves to the next hole')}</div>
+      <div class="word ${d!=null?cls(d):'muted'}">${d!=null?word(d)+(CFG().hcp&&st?` · ${word(v-st-par)} with handicap`:''):(st?`<span style="text-transform:none;letter-spacing:0;font-size:15px;font-weight:600">Your handicap gives you ${st} free stroke${st>1?'s':''} here, so ${par+st} is par for you.</span>`:'Tap your score and it moves to the next hole')}</div>
       <div class="quick">${[-1,0,1,2,3].filter(x=>par+x>=1).map(x=>`<button data-q="${par+x}" data-qw="${p.id}" aria-pressed="${v===par+x}" ${dis}><b>${par+x}</b><span>${word(x)}</span></button>`).join('')}</div></div>`}
   else{const ps=players(t),nets={};
     for(const p of ps){const v=mySc(p.id,n);if(v!=null)nets[p.id]=v-strokesOn(playHcp(idx(p.id)),n)}
@@ -776,12 +776,12 @@ function review(){const t=myTeam(),f=F();$('#app').className='wrap';
   const box=f.team?(()=>{const u=us[0];const g=rows[rows.length-1];const gross=order(t.start).reduce((a,h)=>a+(g.get(h)||0),0);
       return `<div class="card"><b>${gross||'-'}</b><span>Team score</span></div><div class="card"><b class="${scoreCls(u)}">${showScore(u)}</b><span>${useNet()?'With handicap':'To par'}</span></div><div class="card"><b>${u.thru}</b><span>Holes</span></div>`})()
     :us.length===1&&us[0].rows.length===1?(()=>{const u=us[0],rw=u.rows[0],hs=order(t.start).filter(x=>rw.get(x)!=null),g=hs.reduce((a,x)=>a+rw.get(x),0),pr=hs.reduce((a,x)=>a+CO().par[x-1],0);
-      return `<div class="card"><b>${hs.length?g:'-'}</b><span>Score${hs.length&&hs.length<18?' · '+hs.length+' holes':''}</span></div><div class="card"><b class="${g-pr<0?'under':g-pr>0?'over':''}">${hs.length?toPar(g-pr):'-'}</b><span>To par</span></div>${f.points||useNet()?`<div class="card"><b class="${scoreCls(u)}">${(x=>x==='E'?'Even':x)(showScore(u))}</b><span>${f.points?'Points':'With handicap'}</span></div>`:''}`})()
+      return `<div class="card"><b>${hs.length?g:'-'}</b><span>Strokes${hs.length&&hs.length<18?' · '+hs.length+' holes':''}</span></div><div class="card"><b class="${g-pr<0?'under':g-pr>0?'over':''}">${hs.length?toPar(g-pr):'-'}</b><span>${(d=>d>0?'Over par':d<0?'Under par':'Par')(hs.length?g-pr:0)}</span></div>${f.points||useNet()?`<div class="card"><b class="${scoreCls(u)}">${(x=>x==='E'?'Even':x)(showScore(u))}</b><span>${f.points?'Points':'After handicap'}</span></div>`:''}`})()
     :(()=>{const r=ranked(us.slice());const b=r[0];return `<div class="card"><b>${us[0]?us[0].thru:0}</b><span>Holes</span></div><div class="card"><b class="${scoreCls(b)}">${showScore(b)}</b><span>${esc(first(b.name))} leads${useNet()?', net':''}</span></div><div class="card"><b style="font-size:22px;padding-top:8px">${esc(f.name)}</b><span>${useNet()?'Net':'Gross'}</span></div>`})();
   $('#app').innerHTML=bar('Your card',t.name+' · '+CO().name,sunBtn())+`
   <div class="sumrow">${box}</div>
   <div class="card paper" id="revCard">${paperTable(rows)}</div>
-  ${done?'':(()=>{const n=rows.reduce((a,r)=>a+order(t.start).filter(h=>r.id&&S.au&&S.au[r.id+':'+h]&&r.get(h)!=null).length,0);return `<p class="note"><i class="ph-bold ph-hand-tap"></i><span>Tap any hole on the card to fix it.${n?` A dot means it was left blank and saved as par${useNet()?' after your extra shots':''} (${n} score${n>1?'s':''}).`:''}</span></p>`})()}
+  ${done?'':(()=>{const n=rows.reduce((a,r)=>a+order(t.start).filter(h=>r.id&&S.au&&S.au[r.id+':'+h]&&r.get(h)!=null).length,0);return `<p class="note"><i class="ph-bold ph-hand-tap"></i><span>Tap any hole on the card to fix it.${n?` A dot means it was left blank and saved as par${useNet()?' after your free strokes':''} (${n} score${n>1?'s':''}).`:''}</span></p>`})()}
   ${done?`<div class="card done-banner"><i class="ph-fill ph-seal-check"></i><div><b>Card turned in</b><div class="muted" style="font-size:14px">Locked. The event admin can fix a mistake from the clubhouse.</div></div></div>`:
    missing.length?`<p class="note"><i class="ph-bold ph-warning"></i><span>Still blank: hole${missing.length>1?'s':''} ${missing.join(', ')}.</span></p>`:''}
   ${done?'':betWinPrompt()}
@@ -978,6 +978,6 @@ if(bc)bc.onmessage=reload;
 window.addEventListener('hashchange',()=>{route();scrollTo(0,0)});   /* a new screen always opens at its top */
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
-<script src="tracker.js?v=32"></script>
+<script src="tracker.js?v=33"></script>
 </body>
 </html>
