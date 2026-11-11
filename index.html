@@ -1367,7 +1367,7 @@ function evCard(e){
    <div class="row"><span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
    <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
    <a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`}</div>
-   ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a></div>`:''}
+   ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>${typeof passBtn==='function'?passBtn(e):''}</div>`:''}
    </div></article>`;
 }
 function renderEvents(){
@@ -2168,7 +2168,7 @@ document.addEventListener('click',e=>{
 });
 /* the club website is Home only; every other page is for signed-in members */
 const PUBLIC_TABS=['home'];
-const locked=t=>!PUBLIC_TABS.includes(t)&&!authTok();
+const locked=t=>!PUBLIC_TABS.includes(t)&&!authTok()&&!(t==='golf'&&window.RNGCPASS&&RNGCPASS.active());   /* guest pass opens golf only (guestpass.js) */
 const GATE_N={events:'Club events',golf:'Golf',games:'Raiders games',courses:'Courses',forum:'The forum',members:'The member area',settings:'Settings'};
 let gateOn=false;
 function showGate(t){
@@ -2805,5 +2805,7 @@ $('#siJoin').addEventListener('click',()=>{try{sessionStorage.setItem('rngcGuest
   })();
 syncTop();
 </script>
+<script src="fantasy.js"></script>
+<script src="guestpass.js"></script>
 </body>
 </html>

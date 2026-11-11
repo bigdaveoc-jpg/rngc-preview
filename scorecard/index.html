@@ -322,7 +322,9 @@ body.bigt #app.wrap{min-height:calc(100dvh / 1.13)}
 </head>
 <body>
 <script>/* golf is for signed-in club members: no club sign-in on this browser = members-only screen, nothing else loads */
-(function(){var ok=false;try{ok=!!localStorage.getItem('rngc-auth-token')}catch(e){}if(ok)return;
+(function(){var ok=false;try{ok=!!localStorage.getItem('rngc-auth-token');
+  /* or a guest pass inside its window: event day plus 72 hours (guestpass.js) */
+  var gp=JSON.parse(localStorage.getItem('rngc-guest-pass')||'null'),now=Date.now();if(gp&&now>=gp.start&&now<gp.exp)ok=true}catch(e){}if(ok)return;
 document.write('<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;background:#0b0b0c;color:#e9e9ea"><div style="max-width:420px"><div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#a7a9ac">Raider Nation Golf Club</div><h1 style="font-size:30px;text-transform:uppercase;margin:10px 0">Members only</h1><p style="color:#a7a9ac;line-height:1.5;margin:0 0 20px">The golf scorecard is for club members. Sign in on the club app with the email on your membership, then come back.</p><a href="../" style="display:inline-block;background:#e9e9ea;color:#0b0b0c;padding:12px 20px;font-weight:700;text-decoration:none">Go to the club app</a></div></div><plaintext style="display:none">');})();
 </script>
 <div class="wrap" id="app"></div>
