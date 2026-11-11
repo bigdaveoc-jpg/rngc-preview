@@ -900,6 +900,14 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
    <div class="si-row" style="text-align:center"><button type="button" id="siCodeLink">I have a setup code instead</button></div>
    <p class="si-msg" id="suMsg" role="status"></p>
   </form>
+  <form id="siInvite" novalidate hidden>
+   <p class="si-sub" id="ivHello" style="margin-top:0">Checking your link...</p>
+   <p class="meta" id="ivEmail" style="text-align:center;margin:0 0 10px"></p>
+   <label for="ivPass">Pick a password (8 or more characters)</label><input class="field" id="ivPass" type="password" autocomplete="new-password" minlength="8" required>
+   <button class="btn si-full" type="submit" style="margin-top:12px"><i class="ph-bold ph-check"></i> Save and sign in</button>
+   <div class="si-row" style="text-align:center"><button type="button" id="ivBack">Use my GHIN number and birth date instead</button></div>
+   <p class="si-msg" id="ivMsg" role="status"></p>
+  </form>
   <div class="si-links"><button type="button" id="siJoin">Become a member</button><span aria-hidden="true">·</span><button type="button" id="siGuest">Continue as guest</button></div>
  </div>
 </div>
@@ -1786,12 +1794,12 @@ const roleTag=m=>m.leads&&m.leads.length?(m.role==='admin'?'Club admin':'Chapter
 function dirView(v,seg){
   const f=S.dirCh||'All',q=(S.dirQ||'').toLowerCase(),chs=['All','SoCal','NorCal','Nevada'];
   const L=DIR.items.filter(m=>(f==='All'||(m.chapters||[]).includes(f))&&(!q||m.name.toLowerCase().includes(q)));
-  v.innerHTML=seg+`<h2 class="sec" style="margin-bottom:0">Members</h2><p class="sub">${DIR.items.length} club members. Names and chapters only.</p>
+  v.innerHTML=seg+`<h2 class="sec" style="margin-bottom:0">Members</h2><p class="sub">${DIR.items.length} club members. Names and chapters only.</p>${DIR.admin?`<p class="meta" style="margin:6px 0 0"><b>${DIR.items.filter(m=>m.signedUp).length} of ${DIR.items.length}</b> have set up their sign-in. Tap a name to send a setup link.</p>`:''}
    <div class="seg" style="margin-top:10px">${chs.map(c=>`<button class="chip" data-dch="${c}" aria-pressed="${f===c}">${c}</button>`).join('')}</div>
    <input class="field" id="dirQ" placeholder="Search by name" value="${esc(S.dirQ||'')}" autocomplete="off" style="margin-top:10px">
    <div class="stack" id="dirList" style="margin-top:12px">${dirRows(L)}</div>`;
 }
-const dirRows=L=>L.length?L.map(m=>`<button class="card mem ${m.hof?'hofcard':''}" data-dm="${esc(m.id)}">${avOf(m)}<span><b>${esc(m.name)}</b><small>${esc(chapLine(m))}${roleTag(m)?' - '+roleTag(m):''}</small>${memBadges(m)?`<span style="display:block">${memBadges(m)}</span>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join(''):'<div class="empty"><i class="ph-bold ph-users-three"></i>No members match.</div>';
+const dirRows=L=>L.length?L.map(m=>`<button class="card mem ${m.hof?'hofcard':''}" data-dm="${esc(m.id)}">${avOf(m)}<span><b>${esc(m.name)}</b><small>${esc(chapLine(m))}${roleTag(m)?' - '+roleTag(m):''}${DIR.admin&&!m.signedUp?' - not set up yet':''}</small>${memBadges(m)?`<span style="display:block">${memBadges(m)}</span>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join(''):'<div class="empty"><i class="ph-bold ph-users-three"></i>No members match.</div>';
 function alumniView(v,seg){
   const af=S.af||'all',admin=MSG.perm?MSG.perm.role==='admin':DIR.admin;
   const L=DIR.items.filter(m=>m.alum||m.hof).filter(m=>af==='all'||(af==='hof'?m.hof:m.alum))
@@ -1803,6 +1811,13 @@ function alumniView(v,seg){
    <div class="seg" style="margin-top:10px">${flt.map(([k,l])=>`<button class="chip" data-af="${k}" aria-pressed="${af===k}">${l}</button>`).join('')}</div>
    <div class="stack" style="margin-top:12px">${L.length?L.map(m=>`<button class="card mem ${m.hof?'hofcard':'alumcard'}" data-dm="${esc(m.id)}">${avOf(m)}<span><b>${esc(m.name)}</b><small>${m.hof?'Hall of Fame '+m.hof.year+(m.hof.honor?' - '+esc(m.hof.honor):''):'Alumni'}${m.alum&&(m.alum.pos||m.alum.yrs)?' - '+esc([m.alum.pos,m.alum.yrs].filter(Boolean).join(', ')):''}</small><span style="display:block">${memBadges(m)}</span>${(m.hof&&m.hof.note)||(m.alum&&m.alum.note)?`<small style="display:block;margin-top:4px">${esc((m.hof&&m.hof.note)||m.alum.note)}</small>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join(''):`<div class="empty"><i class="ph-bold ph-trophy"></i>${admin?'Nobody added yet. Tap Add or edit.':'Nobody added yet. Club leaders add members here.'}</div>`}</div>`;
 }
+const canLink=m=>!!S.authMe&&(S.authMe.role==='admin'||(S.authMe.leads||[]).some(c=>(m.chapters||[]).includes(c)));
+async function sendSetLink(id){try{const r=await authCall('/admin/link',{id},authTok()),first=r.name.split(' ')[0];
+  const text=`Hey ${first}, our Raider Nation Golf Club app is ready. Tap your own link, pick a password and you're in: ${r.link} Then tap Share and Add to Home Screen so it's one tap on game day.`;
+  if(navigator.share){try{await navigator.share({text});toast('Setup link ready for '+first);return}catch(e){if(e&&e.name==='AbortError')return}}
+  if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(text)}catch(e){fallbackCopy(text)}}else fallbackCopy(text);
+  toast('Text for '+first+' copied. Paste it in a text. The link works once, for 21 days.')}catch(err){toast(err.message)}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-setlink]');if(b)sendSetLink(b.dataset.setlink)});
 function openDirMember(id){
   const m=(DIR.items||[]).find(x=>x.id===id);if(!m)return;
   const admin=DIR.admin,lead=MSG.perm&&(MSG.perm.role==='admin'||(MSG.perm.leads||[]).length>0);
@@ -1813,6 +1828,7 @@ function openDirMember(id){
     ${m.hof?`<div class="card"><div class="meta" style="margin:0">Hall of Fame, class of ${m.hof.year}</div><b>${esc(m.hof.honor||'Hall of Fame')}</b>${m.hof.note?`<p class="meta">${esc(m.hof.note)}</p>`:''}</div>`:''}
     ${admin?`<div class="card"><div class="meta" style="margin:0">Email</div><b style="word-break:break-all">${esc(m.email||'')}</b><p class="meta">${m.signedUp?'Has set up a sign-in':'Has not set up a sign-in yet'} - GHIN ${esc(m.ghin||'')}${m.hi?', index '+esc(m.hi):''}</p></div>`:''}
    </div>
+   ${canLink(m)?`<button class="btn ghost full" data-setlink="${esc(m.id)}" style="margin-bottom:8px"><i class="ph-bold ph-link"></i> ${admin&&m.signedUp?'Send a new sign-in link':'Send a setup link'}</button>`:''}
    ${lead?`<button class="btn full" data-msgto="${esc(m.id)}"><i class="ph-bold ph-paper-plane-tilt"></i> Message ${esc(m.name.split(' ')[0])}</button>`:''}
    ${MSG.perm&&MSG.perm.role==='admin'?`<button class="btn ghost full" data-honor="${esc(m.id)}" style="margin-top:8px"><i class="ph-bold ph-trophy"></i> Alumni and Hall of Fame</button>`:''}`);
 }
@@ -2697,6 +2713,21 @@ $('#siForm').addEventListener('submit',async e=>{e.preventDefault();const m=$('#
   b.disabled=true;m.textContent='Signing in...';
   try{signedIn(await authCall('/auth/login',{email,password}));$('#siPass').value=''}catch(err){m.textContent=err.message}b.disabled=false});
 let suCode=false;
+/* personal setup link: ?setup=CODE opens a one-box screen, the member only picks a password */
+let ivCode='';
+function inviteMode(on){$('#siForm').hidden=on;$('#siSetup').hidden=true;$('#siInvite').hidden=!on;$('#ivMsg').textContent=''}
+(async()=>{const q=new URLSearchParams(location.search),c=(q.get('setup')||'').trim();if(!c)return;
+  q.delete('setup');try{history.replaceState(null,'',location.pathname+(q.toString()?'?'+q:'')+location.hash)}catch(e){}
+  ivCode=c;inviteMode(true);openSignIn();
+  try{const r=await authCall('/auth/invite?c='+encodeURIComponent(c));
+    $('#ivHello').textContent='Welcome, '+r.name.split(' ')[0]+'! Pick a password and you are in.';
+    $('#ivEmail').textContent='Next time you sign in with '+r.email;$('#siEmail').value=r.email;$('#ivPass').focus()}
+  catch(err){$('#ivHello').textContent='Set up your sign-in';$('#ivMsg').textContent=err.message}})();
+$('#ivBack').addEventListener('click',()=>{inviteMode(false);codeMode(false);setupMode(true)});
+$('#siInvite').addEventListener('submit',async e=>{e.preventDefault();const m=$('#ivMsg'),b=e.target.querySelector('button[type=submit]'),password=$('#ivPass').value;
+  if(password.length<8){m.textContent='The password needs 8 or more characters.';return}
+  b.disabled=true;m.textContent='Saving...';
+  try{signedIn(await authCall('/auth/invite',{code:ivCode,password}));$('#ivPass').value='';inviteMode(false);setTimeout(()=>toast('You are in. Tip: Share, then Add to Home Screen, for one tap next time.'),2300)}catch(err){m.textContent=err.message}b.disabled=false});
 function setupMode(on){$('#siForm').hidden=on;$('#siSetup').hidden=!on;$('#suMsg').textContent='';$('#siMsg').textContent='';
   if(on)$('#suEmail').value=$('#siEmail').value.trim()}
 function codeMode(on){suCode=on;$('#suGhinL').textContent=on?'Setup code':'GHIN number';$('#suGhin').inputMode=on?'text':'numeric';
