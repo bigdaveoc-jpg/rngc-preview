@@ -525,18 +525,19 @@ function route(){const h=location.hash.replace(/^#\/?/,'');document.body.classLi
   start()}
 
 const contestLine=()=>{const c=CFG(),a=[];if(c.ctp&&c.ctp.length)a.push('Closest to the pin '+c.ctp.join(', '));if(c.ld)a.push('Long drive '+c.ld);if(c.skins!=='off')a.push((c.skins==='net'?'Net':'Gross')+' skins '+money(c.buyin));return a.join(' · ')};
-const hcpLine=()=>{const c=CFG();if(!c.hcp)return 'Gross, no handicaps';return F().entry==='team'&&!F().count?'Net, team handicap 25/20/15/10%':'Net, '+c.allow+'% of course handicap'};
+const hcpLine=()=>{const c=CFG();if(!c.hcp)return 'No handicaps, lowest score wins';return F().entry==='team'&&!F().count?'Net, team handicap 25/20/15/10%':'Net, '+c.allow+'% of course handicap'};
 
 function start(){const e=EV(),c=CO(),t=TEE(),cfg=CFG(),me=myTeam();$('#app').className='wrap';
   const pick=!me||location.hash.includes('pick');
   $('#app').innerHTML=bar('Live scorecard',e.date,boardBtn())+`
   <section class="card ev"><span class="tag">${CASUAL?'Your round':'Event day'}</span><h1>${esc(e.name)}</h1><div class="muted">${esc(c.name)}${c.city?', '+esc(c.city):''}${e.start?' · '+esc(e.start):''}</div>
-   <div class="facts"><div><b>${esc(F().name)}</b><span>${esc(hcpLine())}</span></div><div><b>${esc(t.name)}</b><span>${t.y.reduce((a,b)=>a+b,0)?t.y.reduce((a,b)=>a+b,0).toLocaleString()+' yds':'No yardages yet'}</span></div><div><b>Par ${c.par.reduce((a,b)=>a+b,0)}</b><span>${t.rating} / ${t.slope}</span></div></div>
+   <div class="facts"><div><b>${esc(F().name)}</b><span>${esc(hcpLine())}</span></div><div><b>${esc(t.name)}</b><span>${t.y.reduce((a,b)=>a+b,0)?t.y.reduce((a,b)=>a+b,0).toLocaleString()+' yds':'No yardages yet'}</span></div><div><b>Par ${c.par.reduce((a,b)=>a+b,0)}</b><span>Rating ${t.rating} · slope ${t.slope}</span></div></div>
+   ${!CASUAL?`<p class="note" style="margin-top:10px"><i class="ph-bold ph-info"></i><span>${esc(F().desc||'')}${/shotgun/i.test(e.start||'')?' Shotgun start: every group tees off at the same time, each on its own hole.':''}</span></p>`:''}
    ${contestLine()?`<p class="note" style="margin-top:10px"><i class="ph-bold ph-trophy"></i><span>${esc(contestLine())}</span></p>`:''}
    ${ADMIN||CASUAL?`<a class="btn ghost block" style="margin-top:12px" href="#/setup"><i class="ph-bold ph-sliders-horizontal"></i> ${CASUAL?'Change the game':'Set up the day · admin'}</a>`:''}</section>
   ${!pick?teamCard(me):`
   <div class="lbl">Which group are you in?</div>
-  <div class="teams">${TEAMS.map(x=>`<button class="card team" data-team="${x.id}" aria-pressed="${x.id===S.team}"><div class="hn"><small>HOLE</small>${x.start}</div><div class="nm"><b>${esc(players(x).map(p=>p.name).join(', '))}</b><span>Starts on hole ${x.start}</span></div>${tagFor(x.club)}</button>`).join('')}</div>
+  <div class="teams">${TEAMS.map(x=>`<button class="card team" data-team="${x.id}" aria-pressed="${x.id===S.team}"><div class="hn"><small>START</small>${x.start}</div><div class="nm"><b>${esc(players(x).map(p=>p.name).join(', '))}</b></div>${tagFor(x.club)}</button>`).join('')}</div>
   <p class="note"><i class="ph-bold ph-info"></i><span>One person per group keeps score, like the paper card. Every tap saves right away, so a dead spot on the course loses nothing.</span></p>`}
   <div class="stick">${me&&!pick?`<button class="btn block" id="go">${Object.keys(myScores()).length?'Keep scoring':'Start on hole '+me.start} <i class="ph-bold ph-arrow-right"></i></button>`:'<button class="btn block" disabled>Pick your group</button>'}</div>`;
   document.querySelectorAll('[data-team]').forEach(b=>b.onclick=()=>{const t=TEAMS.find(x=>x.id===b.dataset.team);S.team=t.id;if(!ids(t).includes(S.me))S.me=keeperOf(t);save();buzz();if(location.hash===HOME||(CASUAL&&location.hash===''))start();else location.hash=HOME});
@@ -634,7 +635,7 @@ function hole(n){if(n!==STRIP_N){STRIP_ALT=false;STRIP_N=n;QP=null}const t=myTea
     entry=`<div class="card entry"><div class="stepper"><button class="pm" data-step="-1" data-who="${p.id}" aria-label="One less" ${dis}><i class="ph-bold ph-minus"></i></button>
       <button class="big ${v==null?'ghost':''}" data-set="${p.id}" data-dflt="${par+st}" aria-label="Score ${v??par+st}, tap to keep it" ${dis}>${v??par+st}</button>
       <button class="pm" data-step="1" data-who="${p.id}" aria-label="One more" ${dis}><i class="ph-bold ph-plus"></i></button></div>
-      <div class="word ${d!=null?cls(d):'muted'}">${d!=null?word(d)+(CFG().hcp&&st?` · ${word(v-st-par)} with handicap`:''):(st?`<span style="text-transform:none;letter-spacing:0;font-size:15px;font-weight:600">Your handicap gives you ${st} free stroke${st>1?'s':''} here, so ${par+st} is par for you.</span>`:'Tap your score and it moves to the next hole')}</div>
+      <div class="word ${d!=null?cls(d):'muted'}">${d!=null?word(d)+(CFG().hcp&&st?` · ${word(v-st-par)} with handicap`:''):(st?`<span style="text-transform:none;letter-spacing:0;font-size:15px;font-weight:600">Your handicap gives you ${st} free stroke${st>1?'s':''} here, so a ${word(st).toLowerCase()} ${par+st} counts as par for you.</span>`:'Tap your score and it moves to the next hole')}</div>
       <div class="quick">${[-1,0,1,2,3].filter(x=>par+x>=1).map(x=>`<button data-q="${par+x}" data-qw="${p.id}" aria-pressed="${v===par+x}" ${dis}><b>${par+x}</b><span>${word(x)}</span></button>`).join('')}</div></div>`}
   else{const ps=players(t),nets={};
     for(const p of ps){const v=mySc(p.id,n);if(v!=null)nets[p.id]=v-strokesOn(playHcp(idx(p.id)),n)}
@@ -751,7 +752,7 @@ function openHole(n){const h=holeNotes(n);if(!h)return;const c=CO(),tee=TEE();
    <ul class="hlist">${h.items.map(([ic,t,sub])=>`<li><i class="ph-bold ph-${ic}"></i><div><b>${esc(t)}</b>${sub?`<small>${esc(sub)}</small>`:''}</div></li>`).join('')}</ul></div></div>
    <div class="card gps"><div style="display:flex;align-items:center;gap:10px"><b style="flex:1">Yards from where you stand</b><button class="btn ghost" style="min-height:40px;font-size:15px" id="gpsGo"><i class="ph-bold ph-crosshair"></i> Use my location</button></div><div id="gpsNums"><p class="muted" style="font-size:14px">Finding you...</p></div></div>
    <p class="src">Hole shapes © OpenStreetMap contributors. White dots are yards to the middle of the green. Close, not laser exact.</p>
-   <button class="btn ghost block" style="margin-top:12px" id="closeSheet">Back to scoring</button>`;
+   <button class="btn ghost block" style="margin-top:12px;position:sticky;bottom:0;z-index:2;background:var(--panel)" id="closeSheet">Back to scoring</button>`;
   $('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#closeSheet').onclick=closeSheet;$('#gpsGo').onclick=()=>startGps(n);if(G.gps!==false)startGps(n);else $('#gpsNums').innerHTML='<p class="muted" style="font-size:14px">Tap to see front, center and back from where you stand.</p>'}
 
 function swipe(el,left,right){let x0=null,y0=null;el.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
@@ -978,6 +979,6 @@ if(bc)bc.onmessage=reload;
 window.addEventListener('hashchange',()=>{route();scrollTo(0,0)});   /* a new screen always opens at its top */
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
-<script src="tracker.js?v=33"></script>
+<script src="tracker.js?v=34"></script>
 </body>
 </html>
