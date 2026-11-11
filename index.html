@@ -869,10 +869,41 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 }
 @media (prefers-reduced-transparency:reduce){.card{background:var(--panel);-webkit-backdrop-filter:none;backdrop-filter:none}}
 
+@media (max-width:999px){body.golffull .top,body.golffull .tabs,body.golffull .banner{display:none}body.golffull #v-golf.view{padding:0!important;inset:0}}
 /* faint club shield behind the glass (club's own mark, not the NFL Raiders logo) */
 .views::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:url("assets/logo/rngc-ball-static.svg") center 58%/min(78%,560px) auto no-repeat;opacity:.06;filter:grayscale(1) brightness(1.4)}
 .views > .view{z-index:1}
 @media (prefers-reduced-transparency:reduce){.views::before{opacity:.03}}
+/* 2026-11-11 line + control review: one line color, one gap, one radius, 44px taps on phone */
+:root{--line:rgba(255,255,255,.11)}
+.gate .btn i{font-size:1em;color:inherit}
+.gate .acts .btn{flex:0 1 auto;min-width:200px}
+.acts{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.sheet .acts>.btn{flex:1 1 0;min-width:0;padding:0 10px;white-space:normal;line-height:1.15}
+.sheet .card+.acts{margin-top:10px}
+.hero{margin-bottom:12px}
+.view>.card+.card{margin-top:12px}
+.stack,.shopgrid,.sponsgrid{gap:12px}
+.iconbtn,.tab{border-radius:10px}
+.ev .date{border-radius:4px}
+.card,.hero,.mapbox,.sheet{border-radius:16px}
+.inrow{align-items:stretch}
+.sheet{border-top-color:var(--glass-edge)}
+@media (max-width:999px){
+  .stack{gap:12px}
+  .hero .bg{background-size:cover}
+  .sheet{border-radius:16px 16px 0 0}
+  .btn.small,.next .btn.small{min-height:44px}
+  .top .iconbtn{width:44px;height:44px}
+  .chsel{min-height:44px}
+  .chips .chip.chip,.seg .chip.chip{min-height:44px;align-items:flex-end}
+}
+@media (min-width:1000px){
+  .top{padding-left:14px;padding-right:14px}
+  .brandrow .iconbtn{right:14px}
+  .subnav button{padding-left:54px}
+  .subnav button::before{left:25px}
+}
 </style>
 </head>
 <body>
@@ -1841,7 +1872,7 @@ function openDirMember(id){
     ${m.hof?`<div class="card"><div class="meta" style="margin:0">Hall of Fame, class of ${m.hof.year}</div><b>${esc(m.hof.honor||'Hall of Fame')}</b>${m.hof.note?`<p class="meta">${esc(m.hof.note)}</p>`:''}</div>`:''}
     ${admin?`<div class="card"><div class="meta" style="margin:0">Email</div><b style="word-break:break-all">${esc(m.email||'')}</b><p class="meta">${m.signedUp?'Has set up a sign-in':'Has not set up a sign-in yet'} - GHIN ${esc(m.ghin||'')}${m.hi?', index '+esc(m.hi):''}</p></div>`:''}
    </div>
-   ${canLink(m)?`<div class="acts" style="display:flex;gap:8px;margin-bottom:8px"><button class="btn ghost" style="flex:1" data-setlink="${esc(m.id)}"><i class="ph-bold ph-chat-text"></i> Text a setup link</button><button class="btn ghost" style="flex:1" data-setqr="${esc(m.id)}"><i class="ph-bold ph-qr-code"></i> Show a setup code</button></div>${admin&&m.signedUp?'<p class="meta" style="margin:0 0 8px">Already set up. A new link lets them pick a new password.</p>':''}`:''}
+   ${canLink(m)?`<div class="acts" style="margin-bottom:8px"><button class="btn ghost" data-setlink="${esc(m.id)}"><i class="ph-bold ph-chat-text"></i> Text a setup link</button><button class="btn ghost" data-setqr="${esc(m.id)}"><i class="ph-bold ph-qr-code"></i> Show a setup code</button></div>${admin&&m.signedUp?'<p class="meta" style="margin:0 0 8px">Already set up. A new link lets them pick a new password.</p>':''}`:''}
    ${lead?`<button class="btn full" data-msgto="${esc(m.id)}"><i class="ph-bold ph-paper-plane-tilt"></i> Message ${esc(m.name.split(' ')[0])}</button>`:''}
    ${MSG.perm&&MSG.perm.role==='admin'?`<button class="btn ghost full" data-honor="${esc(m.id)}" style="margin-top:8px"><i class="ph-bold ph-trophy"></i> Alumni and Hall of Fame</button>`:''}`);
 }
@@ -2150,6 +2181,7 @@ function showGate(t){
 function setTab(t){
   S.tab=t;
   document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  if(t!=='golf')document.body.classList.remove('golffull');
   if(locked(t)){showGate(t);return}
   gateOn=false;
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+t));
@@ -2170,6 +2202,8 @@ function setTab(t){
 function renderGolf(){const fr=$('#golfFrame'),want=new URL('scorecard/#/'+(S.golfv||'me'),location.href).href;
   try{const cur=fr.contentWindow&&fr.contentWindow.location.href;if(cur&&cur!=='about:blank'&&cur.split('#')[0]===want.split('#')[0]){if(cur!==want)fr.contentWindow.location.replace(want);return}}catch(e){}
   fr.src=want}
+/* in a round the golf screen takes the whole phone: the club header and tab bar step aside until the round screen closes */
+window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&'golfFull' in e.data)document.body.classList.toggle('golffull',!!e.data.golfFull&&S.tab==='golf')});
 window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||!e.data.golf)return;const k=e.data.golf;if(['me','log','groups','events'].includes(k)&&S.golfv!==k){S.golfv=k;renderSubnav()}});
 /* side menu: the open page shows its sub-links underneath it */
 const SUBNAV={

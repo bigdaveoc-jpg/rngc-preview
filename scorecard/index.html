@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
 <style>
 :root{
-  --bg:#0a0b0d;--panel:#16191e;--panel-2:#1d2127;--line:#2a2f37;--text:#eef0f3;--muted:#c9ced6;
+  --bg:#0a0b0d;--panel:#16191e;--panel-2:#1d2127;--line:rgba(255,255,255,.11);--text:#eef0f3;--muted:#c9ced6;
   --silver:#d5dae1;--silver-2:#aeb5bf;--on-silver:#0a0b0d;--slate:#7d93b8;
   --glass:linear-gradient(140deg,rgba(255,255,255,.1),rgba(255,255,255,.03) 55%,rgba(255,255,255,.05));
   --edge:rgba(255,255,255,.11);--hi:rgba(255,255,255,.14);
@@ -307,6 +307,17 @@ select.field{appearance:none;-webkit-appearance:none}
 .paper td.au{position:relative}.paper td.au::after{content:'';position:absolute;top:3px;right:2px;width:6px;height:6px;border-radius:50%;background:#d6aa78}.paper th.hl{cursor:pointer;text-decoration:underline;text-underline-offset:3px}#revCard td{cursor:pointer}
 .advt{position:fixed;left:50%;transform:translateX(-50%);top:12px;z-index:60;display:flex;gap:12px;align-items:center;background:#1d2127;color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:8px 8px 8px 14px;font-size:15px;box-shadow:0 6px 20px rgba(0,0,0,.4);max-width:calc(100vw - 32px)}.advt button{min-height:40px;padding:0 12px;border-radius:9px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-weight:700;font-size:14px}
 body.bigt .sstrip .chip2{min-height:44px;min-width:38px;font-size:16px}body.bigt .quick button{min-height:62px}
+
+/* in-round fit steps (see fitRound) */
+body.bigt #app.wrap{min-height:calc(100dvh / 1.13)}
+.sheet.tight .src{display:none}.sheet.tight .hd{gap:8px}.sheet.tight{max-height:100dvh}body.bigt .sheet{max-height:calc(88dvh / 1.13)}body.bigt .sheet.tight{max-height:calc(100dvh / 1.13)}.sheet.tight .gzoom{display:none}
+.wrap.f1 .qphint,.wrap.f1 #liveCard{display:none}
+.wrap.f1 .hhead{margin:8px 0 4px}.wrap.f1 .entry{margin-top:8px}.wrap.f1 .htop,.wrap.f1 .betl,.wrap.f1 .solol{margin-top:8px}
+.wrap.f2 .prow{padding:6px 0}.wrap.f2 .prow button.pm{height:46px}.wrap.f2 .prow .sc{font-size:38px}.wrap.f2 .hnum{font-size:64px}
+.wrap.f2 .entry{padding:12px 14px}.wrap.f2 .stick{padding-top:8px}
+.wrap.f3 .bar{padding-bottom:6px}.wrap.f3 .betl .betst{display:none}.wrap.f3 .quick{margin-top:8px}.wrap.f3 .quick button{min-height:44px}
+.wrap.f3 .big{font-size:76px;min-height:72px}.wrap.f3 .stepper button.pm{height:56px}
+.wrap.f4 .hmeta div:nth-child(3){display:none}.wrap.f4 .prow .who span{font-size:13px}
 </style>
 </head>
 <body>
@@ -981,6 +992,28 @@ const reload=()=>{const fresh=load();for(const k of Object.keys(S))delete S[k];O
 window.addEventListener('storage',e=>{if(e.key===KEY)reload()});
 if(bc)bc.onmessage=reload;
 window.addEventListener('hashchange',()=>{route();scrollTo(0,0)});   /* a new screen always opens at its top */
+/* ===== in a round nothing scrolls (David 2026-11-11): every hole screen, the card review and the hole map fit the phone.
+   Steps: f1-f4 tighten spacing and fold extras that also live in the header (live share, hints), then the blocks above the
+   Next bar shrink together until the screen fits. Inside the club app the club's own header and tab bar step aside. */
+const inRound=()=>/^#\/(hole|card)/.test(location.hash);
+const FITS=['f1','f2','f3','f4'];
+function fitParts(root){const out=[];for(const ch of root.children){if(ch.classList.contains('stick')||ch.id==='sheet'||ch.classList.contains('grab'))continue;
+  if(ch.tagName==='SECTION'&&ch.querySelector(':scope > .stick'))out.push(...fitParts(ch));else out.push(ch)}return out}
+function shrinkToFit(parts,over,min=.55){if(!parts.length)return;parts.forEach(e=>e.style.zoom='');let o=over();
+  for(let i=0;i<10&&o>0;i++){const cur=parseFloat(parts[0].style.zoom)||1,tall=parts.reduce((a,e)=>a+e.getBoundingClientRect().height,0)||1;
+    const z=Math.max(min,cur*(1-(o+2)/tall));parts.forEach(e=>e.style.zoom=z);o=over()}}
+function fitRound(){const a=$('#app');if(!a)return;FITS.forEach(c=>a.classList.remove(c));fitParts(a).forEach(e=>e.style.zoom='');
+  if(!inRound())return;const de=document.documentElement,over=()=>de.scrollHeight-innerHeight;
+  for(const c of FITS){if(over()<=0)break;a.classList.add(c)}
+  if(over()>0)shrinkToFit(fitParts(a),over)}
+function fitSheet(){const sh=$('#sheet');if(!sh)return;const parts=[...sh.children].filter(e=>!e.classList.contains('grab'));parts.forEach(e=>e.style.zoom='');sh.classList.remove('tight');
+  if(!inRound()||!sh.classList.contains('on'))return;const o=()=>sh.scrollHeight-sh.clientHeight;if(o()>0)sh.classList.add('tight');shrinkToFit(parts,o,.42)}
+let fitQ=0;const fitSoon=()=>{cancelAnimationFrame(fitQ);fitQ=requestAnimationFrame(()=>{fitRound();if(typeof shObs!=='undefined'){shObs.disconnect();fitSheet();shObs.takeRecords();shObs.observe($('#sheet'),shOpt)}else fitSheet()})};
+new MutationObserver(fitSoon).observe($('#app'),{childList:true});
+const shObs=new MutationObserver(fitSoon),shOpt={childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']};shObs.observe($('#sheet'),shOpt);
+addEventListener('resize',fitSoon);addEventListener('hashchange',fitSoon);
+function tellClub(){try{if(window.parent!==window)window.parent.postMessage({golfFull:inRound()},location.origin)}catch(e){}}
+addEventListener('hashchange',tellClub);tellClub();fitSoon();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
 <script src="tracker.js?v=34"></script>
