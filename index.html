@@ -5,7 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0a0b0d">
-<title>Raider Nation Golf Club - Preview</title>
+<title>Raider Nation Golf Club | Raiders, Travel and Golf</title>
+<meta name="description" content="Raider Nation Golf Club: Raiders fans who golf. Chapters in SoCal, NorCal and Nevada, club events, the Raider Cup and a free golf scorecard app.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Raider Nation Golf Club">
+<meta property="og:title" content="Raider Nation Golf Club">
+<meta property="og:description" content="Raider Nation Golf Club: Raiders fans who golf. Chapters in SoCal, NorCal and Nevada, club events, the Raider Cup and a free golf scorecard app.">
+<meta property="og:image" content="https://bigdaveoc-jpg.github.io/rngc-preview/assets/original/YT-BANNER-1024x576.jpg">
+<meta property="og:url" content="https://bigdaveoc-jpg.github.io/rngc-preview/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/logo/rngc-ball-static.svg">
+<link rel="apple-touch-icon" href="assets/original/cropped-footer-logo-270x270.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -98,6 +108,13 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .next .cd small{display:block;font-family:var(--body);font-weight:600;font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
 .next h3{font-family:var(--display);text-transform:uppercase;font-size:22px;line-height:1.05;font-weight:700}
 
+/* about + interviews */
+.vidgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.card.vid{display:flex;flex-direction:column;gap:10px;padding:10px;text-decoration:none;color:inherit}
+.card.vid b{font-size:15px;line-height:1.35;font-weight:600}
+.vthumb{position:relative;display:block;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#111;max-width:100%}
+.vthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.vthumb i{position:absolute;inset:0;margin:auto;width:52px;height:52px;font-size:52px;color:#fff;opacity:.9}
 /* membership */
 .plans{display:grid;gap:10px}
 .plan{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:16px}
@@ -947,6 +964,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
     <section class="view" id="v-forum" aria-label="Forum"></section>
     <section class="view" id="v-members" aria-label="Members"></section>
     <section class="view" id="v-settings" aria-label="Settings"></section>
+    <section class="view" id="v-gate" aria-label="Members only"></section>
   </main>
 
   <button class="fab" id="fab"><i class="ph-bold ph-plus"></i> New post</button>
@@ -1167,6 +1185,7 @@ function renderHome(){
   else if(pg==='sponsors')v.innerHTML=subChips('home')+sponsorsHTML();
   else if(pg==='news')v.innerHTML=subChips('home')+newsHTML();
   else if(pg==='invite')v.innerHTML=subChips('home')+inviteHTML();
+  else if(pg==='about')v.innerHTML=subChips('home')+aboutHTML();
   else v.innerHTML=subChips('home')+overviewHTML();
   syncTop();
 }
@@ -1273,6 +1292,15 @@ function shopHTML(){
    <a class="btn ghost" style="margin-top:16px" href="${SITE}/shop/" ${ext}><i class="ph-bold ph-storefront"></i> Open the full club store</a>`;
 }
 /* club news: own page */
+const INTERVIEWS=[['Jzl6c1z3H9Y','Charles Woodson talks golf, Raiders legacy and Lake Tahoe'],['RSqMjjuzWA8','Derek Carr in Lake Tahoe: golf, the Raiders and life after football'],['lT_1-HuLAfo','Rich Eisen talks Raiders, Jets and golf at Edgewood Tahoe'],['XXqf9MVxXLM','Mervyn Fernandez on the Bay Area rivalry and Alumni Weekend'],['T6cvMTRLq0I','Matt Leinart talks Raiders, USC and golf at Lake Tahoe'],['PU1tMFodGiQ','Ray Romano talks golf and Raiders hopes at Edgewood Tahoe'],['9AuhZ22Fqt4','Carson Daly talks golf and his love for the Raiders'],['UJqjaeqE62w','Dylan Dreyer talks golf and weather at Edgewood'],['HkRwaS3zIoY','Big Sloan talks Raiders, Long Beach and golf at Cherry Park'],['y1_enhJEKeU','Mellow Man Ace on music, golf and Raider Nation']];
+function aboutHTML(){
+  return pageHead('About the club','Raiders, travel and golf.')+`<div class="card rise" style="padding:18px"><p style="margin:0;font-size:16px;line-height:1.6">We are a national club for everything Raiders, travel and golf. We connect members with Raiders alumni, celebrities and one-of-a-kind experiences through our events and our videos. Join us as we follow our team around the country and tee it up everywhere we go.</p>
+   <div class="acts" style="margin-top:14px"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join a chapter</button><button class="btn ghost" data-sub="events|up">See events</button></div></div>
+   <h3 class="shophead" style="margin-top:22px">Interviews</h3><p class="sub" style="margin-top:0">Raiders legends and famous fans on the course. Opens on YouTube.</p>
+   <div class="vidgrid rise">${INTERVIEWS.map(([id,t])=>`<a class="card vid" href="https://www.youtube.com/watch?v=${id}" ${ext}><span class="vthumb"><img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy"><i class="ph-fill ph-play-circle"></i></span><b>${esc(t)}</b></a>`).join('')}</div>
+   <h3 class="shophead" style="margin-top:22px">Follow the club</h3>
+   <div class="acts"><a class="btn ghost" href="https://www.instagram.com/raidernationgolfclub" ${ext}><i class="ph-bold ph-instagram-logo"></i> Instagram</a><a class="btn ghost" href="https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ" ${ext}><i class="ph-bold ph-youtube-logo"></i> YouTube</a></div>`;
+}
 function newsHTML(){
   return pageHead('Club news')+`<div class="stack newsgrid rise">${NEWS.map(n=>`<button class="card news" data-news="${n.id}"><img class="thumb" src="${n.img}" alt="" loading="lazy"><div><span class="pill">${n.tag}</span><h3 style="margin-top:6px">${esc(n.title)}</h3><div class="meta">${n.meta}</div></div></button>`).join('')}</div>`;
 }
@@ -2078,9 +2106,23 @@ document.addEventListener('click',e=>{
   const g=e.target.closest('[data-go]');if(g){closeSheet();setTab(g.dataset.go)}
   const sc=e.target.closest('[data-scroll]');if(sc){e.preventDefault();const t=document.getElementById(sc.dataset.scroll);t&&t.scrollIntoView({behavior:'smooth'})}
 });
+/* the club website is Home only; every other page is for signed-in members */
+const PUBLIC_TABS=['home'];
+const locked=t=>!PUBLIC_TABS.includes(t)&&!authTok();
+const GATE_N={events:'Club events',golf:'Golf',games:'Raiders games',courses:'Courses',forum:'The forum',members:'The member area',settings:'Settings'};
+let gateOn=false;
+function showGate(t){
+  gateOn=true;
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-gate'));
+  $('#fab').classList.remove('on');$('#banner').style.display='none';
+  $('#v-gate').innerHTML=`<div class="card gate rise"><i class="ph-fill ph-lock-key"></i><h3>Members only</h3><p>${esc(GATE_N[t]||'This page')} opens for club members. Sign in with the email on your membership to see events, golf, games, courses and the member area.</p><div class="acts"><button class="btn" data-signin><i class="ph-bold ph-sign-in"></i> Sign in</button><button class="btn ghost" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Become a member</button></div></div>`;
+  $('#v-gate').scrollTop=0;renderSubnav();
+}
 function setTab(t){
   S.tab=t;
   document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  if(locked(t)){showGate(t);return}
+  gateOn=false;
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+t));
   $('#fab').classList.toggle('on',t==='forum'&&(!S.openThread||window.innerWidth>=1000));
   $('#banner').style.display='none';
@@ -2102,7 +2144,7 @@ function renderGolf(){const fr=$('#golfFrame'),want=new URL('scorecard/#/'+(S.go
 window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||!e.data.golf)return;const k=e.data.golf;if(['me','log','groups','events'].includes(k)&&S.golfv!==k){S.golfv=k;renderSubnav()}});
 /* side menu: the open page shows its sub-links underneath it */
 const SUBNAV={
- home:[['Join a chapter','join'],['Invite a friend','invite'],['Club leaders','leaders'],['Club news','news'],['Club shop','shop'],['Sponsors','sponsors']],
+ home:[['About and media','about'],['Join a chapter','join'],['Invite a friend','invite'],['Club leaders','leaders'],['Club news','news'],['Club shop','shop'],['Sponsors','sponsors']],
  golf:[['My golf','me'],['Play log','log'],['Groups','groups'],['Club events','events']],
  events:[['Upcoming','up'],['Raider Cup','cup'],['Past events','past']],
  games:[['Raiders schedule','sched'],['Player news','news']],
@@ -2124,7 +2166,7 @@ function subNow(t){
 }
 function renderSubnav(){
   document.querySelectorAll('.subnav').forEach(n=>{
-    const t=n.dataset.for,open=t===S.tab,cur=subNow(t);
+    const t=n.dataset.for,open=t===S.tab&&!locked(t),cur=subNow(t);
     n.classList.toggle('open',open);
     n.firstElementChild.innerHTML=(SUBNAV[t]||[]).map(([l,k])=>`<button type="button" data-sub="${t}|${esc(k)}" aria-current="${open&&k===cur}" ${open?'':'tabindex="-1"'}>${l}${k==='inbox'&&MSG.unread?' ('+MSG.unread+')':''}</button>`).join('');
   });
@@ -2536,7 +2578,7 @@ function openInvite(inv){
   $('#ivSignin').addEventListener('click',()=>{close();if(!S.member)setTimeout(openSignIn,330)});
 }
 
-function renderAll(){renderHome();renderEvents();renderForum();if(S.tab==='courses')renderCourses();if(S.tab==='games')renderGames();if(S.tab==='members')renderMembers();if(S.tab==='settings')renderSettings()}
+function renderAll(){renderHome();renderEvents();renderForum();if(S.tab==='courses')renderCourses();if(S.tab==='games')renderGames();if(S.tab==='members')renderMembers();if(S.tab==='settings')renderSettings();if(S.tab&&gateOn!==locked(S.tab))setTab(S.tab)}
 renderChips();renderAll();setTab('home');loadSchedule();
 
 /* header logo: tap it to replay the animation; it also replays on its own every few clicks (6+ clicks and 60+ seconds apart) */
@@ -2678,7 +2720,7 @@ $('#siJoin').addEventListener('click',()=>{try{sessionStorage.setItem('rngcGuest
     const fresh={code:q.get('invite').slice(0,24),by:(q.get('by')||'A member').slice(0,30),ch};
     if(S.cfg.club.invites){openInvite(fresh);return}}
   if(inv)S.invite=inv;
-  if(!S.member&&!g)openSignIn()})();
+  })();
 syncTop();
 </script>
 </body>
