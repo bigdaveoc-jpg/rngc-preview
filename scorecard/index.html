@@ -746,7 +746,7 @@ function startGps(n){const box=$('#gpsNums');if(!('geolocation'in navigator)){bo
    e=>{box.innerHTML='<p class="muted">'+(e.code===1?'Location is off for this page. Turn it on in your phone settings to see yards.':'No GPS signal yet. Try again in a moment.')+'</p>';stopGps()},{enableHighAccuracy:true,maximumAge:3000,timeout:20000})}
 
 function openHole(n){const h=holeNotes(n);if(!h)return;const c=CO(),tee=TEE();
-  $('#sheet').innerHTML=`<div class="grab"></div><div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 style="font-size:30px;line-height:1">Hole ${n}</h2><span class="muted">Par ${c.par[n-1]} · ${tee.y[n-1]} yds ${esc(tee.name)} · difficulty ${c.si[n-1]} of 18</span></div>
+  $('#sheet').innerHTML=`<div class="grab"></div><div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 style="font-size:30px;line-height:1">Hole ${n}</h2><button class="ib" type="button" aria-label="Close the map" onclick="document.getElementById('closeSheet').click()" style="margin-left:auto;min-width:44px;min-height:44px"><i class="ph-bold ph-x"></i></button><span class="muted">Par ${c.par[n-1]} · ${tee.y[n-1]} yds ${esc(tee.name)} · difficulty ${c.si[n-1]} of 18</span></div>
    <div class="hd"><div class="hmap">${holeSvg(n,true)}</div><div class="hdr"><div class="gzoom">${greenSvg(n)}</div>
    ${(()=>{const m=CO().maps&&CO().maps[n];if(!m)return'';const y=tee.y[n-1]||m.yd,hh=Math.round(m.depth/2);return `<div class="teey"><div><b>${y-hh}</b><span>Front</span></div><div><b>${y}</b><span>Center</span></div><div><b>${y+hh}</b><span>Back</span></div><small>from the ${esc(tee.name)} tee</small></div>`})()}
    <ul class="hlist">${h.items.map(([ic,t,sub])=>`<li><i class="ph-bold ph-${ic}"></i><div><b>${esc(t)}</b>${sub?`<small>${esc(sub)}</small>`:''}</div></li>`).join('')}</ul></div></div>
@@ -979,6 +979,6 @@ if(bc)bc.onmessage=reload;
 window.addEventListener('hashchange',()=>{route();scrollTo(0,0)});   /* a new screen always opens at its top */
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
-<script src="tracker.js?v=29"></script>
+<script src="tracker.js?v=30"></script>
 </body>
 </html>
