@@ -1812,7 +1812,20 @@ function alumniView(v,seg){
    <div class="stack" style="margin-top:12px">${L.length?L.map(m=>`<button class="card mem ${m.hof?'hofcard':'alumcard'}" data-dm="${esc(m.id)}">${avOf(m)}<span><b>${esc(m.name)}</b><small>${m.hof?'Hall of Fame '+m.hof.year+(m.hof.honor?' - '+esc(m.hof.honor):''):'Alumni'}${m.alum&&(m.alum.pos||m.alum.yrs)?' - '+esc([m.alum.pos,m.alum.yrs].filter(Boolean).join(', ')):''}</small><span style="display:block">${memBadges(m)}</span>${(m.hof&&m.hof.note)||(m.alum&&m.alum.note)?`<small style="display:block;margin-top:4px">${esc((m.hof&&m.hof.note)||m.alum.note)}</small>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join(''):`<div class="empty"><i class="ph-bold ph-trophy"></i>${admin?'Nobody added yet. Tap Add or edit.':'Nobody added yet. Club leaders add members here.'}</div>`}</div>`;
 }
 const canLink=m=>!!S.authMe&&(S.authMe.role==='admin'||(S.authMe.leads||[]).some(c=>(m.chapters||[]).includes(c)));
-async function sendSetLink(id){try{const r=await authCall('/admin/link',{id},authTok()),first=r.name.split(' ')[0];
+const SETLINK={};
+async function getSetLink(id){if(!SETLINK[id])SETLINK[id]=await authCall('/admin/link',{id},authTok());return SETLINK[id]}
+let qrLib=null;
+function loadQR(){return qrLib||(qrLib=new Promise((ok,no)=>{const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';sc.onload=()=>ok(window.qrcode);sc.onerror=()=>{qrLib=null;no(new Error('Could not load the code. Check the signal and try again.'))};document.head.appendChild(sc)}))}
+async function showSetQR(id){try{const [r,qr]=await Promise.all([getSetLink(id),loadQR()]),first=r.name.split(' ')[0],code=r.link.split('setup=')[1];
+  const q=qr(0,'M');q.addData(r.link);q.make();
+  openSheet(`<h3 style="margin:0;text-align:center">Scan to set up, ${esc(first)}</h3>
+   <p class="meta" style="text-align:center;margin:6px 0 12px">Point your phone camera at the code, tap the link, pick a password.</p>
+   <div style="background:#fff;padding:14px;max-width:300px;margin:0 auto">${q.createSvgTag({cellSize:6,margin:0,scalable:true})}</div>
+   <p class="meta" style="text-align:center;margin:14px 0 4px">No camera? On the club site tap Sign in, First time, I have a setup code, and type:</p>
+   <p style="text-align:center;font:700 26px/1.2 ui-monospace,monospace;letter-spacing:.12em;margin:0">${esc(code.match(/.{1,4}/g).join('-'))}</p>
+   <p class="meta" style="text-align:center;margin:10px 0 0">Works once, for 21 days.</p>`)}catch(err){toast(err.message)}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-setqr]');if(b)showSetQR(b.dataset.setqr)});
+async function sendSetLink(id){try{const r=await getSetLink(id),first=r.name.split(' ')[0];
   const text=`Hey ${first}, our Raider Nation Golf Club app is ready. Tap your own link, pick a password and you're in: ${r.link} Then tap Share and Add to Home Screen so it's one tap on game day.`;
   if(navigator.share){try{await navigator.share({text});toast('Setup link ready for '+first);return}catch(e){if(e&&e.name==='AbortError')return}}
   if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(text)}catch(e){fallbackCopy(text)}}else fallbackCopy(text);
@@ -1828,7 +1841,7 @@ function openDirMember(id){
     ${m.hof?`<div class="card"><div class="meta" style="margin:0">Hall of Fame, class of ${m.hof.year}</div><b>${esc(m.hof.honor||'Hall of Fame')}</b>${m.hof.note?`<p class="meta">${esc(m.hof.note)}</p>`:''}</div>`:''}
     ${admin?`<div class="card"><div class="meta" style="margin:0">Email</div><b style="word-break:break-all">${esc(m.email||'')}</b><p class="meta">${m.signedUp?'Has set up a sign-in':'Has not set up a sign-in yet'} - GHIN ${esc(m.ghin||'')}${m.hi?', index '+esc(m.hi):''}</p></div>`:''}
    </div>
-   ${canLink(m)?`<button class="btn ghost full" data-setlink="${esc(m.id)}" style="margin-bottom:8px"><i class="ph-bold ph-link"></i> ${admin&&m.signedUp?'Send a new sign-in link':'Send a setup link'}</button>`:''}
+   ${canLink(m)?`<div class="acts" style="display:flex;gap:8px;margin-bottom:8px"><button class="btn ghost" style="flex:1" data-setlink="${esc(m.id)}"><i class="ph-bold ph-chat-text"></i> Text a setup link</button><button class="btn ghost" style="flex:1" data-setqr="${esc(m.id)}"><i class="ph-bold ph-qr-code"></i> Show a setup code</button></div>${admin&&m.signedUp?'<p class="meta" style="margin:0 0 8px">Already set up. A new link lets them pick a new password.</p>':''}`:''}
    ${lead?`<button class="btn full" data-msgto="${esc(m.id)}"><i class="ph-bold ph-paper-plane-tilt"></i> Message ${esc(m.name.split(' ')[0])}</button>`:''}
    ${MSG.perm&&MSG.perm.role==='admin'?`<button class="btn ghost full" data-honor="${esc(m.id)}" style="margin-top:8px"><i class="ph-bold ph-trophy"></i> Alumni and Hall of Fame</button>`:''}`);
 }
@@ -2730,13 +2743,17 @@ $('#siInvite').addEventListener('submit',async e=>{e.preventDefault();const m=$(
   try{signedIn(await authCall('/auth/invite',{code:ivCode,password}));$('#ivPass').value='';inviteMode(false);setTimeout(()=>toast('You are in. Tip: Share, then Add to Home Screen, for one tap next time.'),2300)}catch(err){m.textContent=err.message}b.disabled=false});
 function setupMode(on){$('#siForm').hidden=on;$('#siSetup').hidden=!on;$('#suMsg').textContent='';$('#siMsg').textContent='';
   if(on)$('#suEmail').value=$('#siEmail').value.trim()}
-function codeMode(on){suCode=on;$('#suGhinL').textContent=on?'Setup code':'GHIN number';$('#suGhin').inputMode=on?'text':'numeric';
+function codeMode(on){suCode=on;$('#suGhinL').textContent=on?'Setup code (email not needed for a 12-letter code)':'GHIN number';$('#suGhin').inputMode=on?'text':'numeric';
   $('#suDob').hidden=on;$('#suDobL').hidden=on;$('#siCodeLink').textContent=on?'Use my GHIN number and birth date':'I have a setup code instead'}
 $('#siSetupLink').addEventListener('click',()=>{codeMode(false);setupMode(true)});
 $('#siSetupBack').addEventListener('click',()=>setupMode(false));
 $('#siCodeLink').addEventListener('click',()=>codeMode(!suCode));
 $('#siSetup').addEventListener('submit',async e=>{e.preventDefault();const m=$('#suMsg'),b=e.target.querySelector('button[type=submit]');
   const email=$('#suEmail').value.trim(),password=$('#suPass').value,v=$('#suGhin').value.trim(),dob=$('#suDob').value;
+  const inv=suCode&&v.replace(/[^A-Za-z0-9]/g,'').length===12;
+  if(inv){if(password.length<8){m.textContent='The password needs 8 or more characters.';return}
+    b.disabled=true;m.textContent='Saving...';
+    try{signedIn(await authCall('/auth/invite',{code:v.replace(/[^A-Za-z0-9]/g,'').toUpperCase(),password}));$('#suPass').value='';setupMode(false)}catch(err){m.textContent=err.message}b.disabled=false;return}
   if(!email||!v||(!suCode&&!dob)||password.length<8){m.textContent='Fill in every box. The password needs 8 or more characters.';return}
   b.disabled=true;m.textContent='Saving...';
   try{signedIn(await authCall('/auth/setup',suCode?{email,code:v,password}:{email,ghin:v,dob,password}));$('#suPass').value='';setupMode(false)}catch(err){m.textContent=err.message}b.disabled=false});
