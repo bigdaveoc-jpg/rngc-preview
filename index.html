@@ -892,9 +892,10 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 <script>
 (function(){
   var el=document.getElementById('intro'),seen=null;
-  try{seen=sessionStorage.getItem('rngcIntro')}catch(e){}
+  var day=new Date().toDateString();   /* once a day, not every time the app opens on the course */
+  try{seen=localStorage.getItem('rngcIntroDay')===day}catch(e){}
   if(seen||matchMedia('(prefers-reduced-motion: reduce)').matches){el.remove();return}
-  try{sessionStorage.setItem('rngcIntro','1')}catch(e){}
+  try{localStorage.setItem('rngcIntroDay',day)}catch(e){}
   var done=function(){if(!el.isConnected)return;el.classList.add('out');setTimeout(function(){el.remove()},600)};
   setTimeout(done,7600);el.addEventListener('click',done);
 })();
@@ -2467,14 +2468,14 @@ function syncTop(){const b=document.querySelector('.topjoin');if(!b)return;
   if(S.member&&canInvite()){b.dataset.sub='home|invite';b.innerHTML='<i class="ph-bold ph-paper-plane-tilt"></i> Invite a friend'}
   else{b.dataset.sub='home|join';b.innerHTML='<i class="ph-bold ph-identification-badge"></i> Join the club'}}
 function viewBar(){return '';return `<div class="viewbar"><span><i class="ph-bold ph-eye"></i> Viewing as</span><div class="seg2"><button class="chip" data-asview="guest" aria-pressed="${!S.member}">Guest</button><button class="chip" data-asview="member" aria-pressed="${S.member}">Member</button></div><small>Preview switch. In the live app this follows sign-in.</small></div>`}
-const PERKS=[['map-trifold','Member map','See members near you and who is going to each game'],['ticket','Ticket exchange','Buy, sell and trade seats for every Raiders game'],['chats-circle','Forum posting','Start threads and reply. Guests can only read'],['golf','Scorecards and handicap','Club leaderboard, chapter cup, GHIN for chapters'],['paper-plane-tilt','Your own invite link','Bring friends into your chapter']];
+const PERKS=[['map-trifold','Member map','See members near you and who is going to each game'],['ticket','Ticket exchange','Buy, sell and trade seats for every Raiders game'],['chats-circle','Chat with members','Start a talk or reply. Guests can read only'],['golf','Scorecards and handicap','Club leaderboard, chapter cup, official handicap'],['paper-plane-tilt','Your own invite link','Bring friends into your chapter']];
 const perksHTML=()=>`<ul class="perks">${PERKS.map(([i,t,d])=>`<li><i class="ph-bold ph-${i}"></i><span><b>${t}</b><small>${d}</small></span></li>`).join('')}</ul>`;
 function guestCard(){return `<div class="card guestcard"><h3>What members get</h3>${perksHTML()}
   <div class="acts" style="margin-top:14px"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join from $99 a year</button><button class="btn ghost" data-signin><i class="ph-bold ph-sign-in"></i> Member sign in</button></div></div>`}
 function inviteCard(){if(!canInvite())return '';const n=(S.invLog||{}).shared||0;
   return `<div class="card invcard"><h3>Invite a friend</h3>${n?`<p class="meta">Shared ${n} time${n===1?'':'s'}</p>`:''}
-  <div class="invlink"><input class="field" readonly value="${esc(invLink())}" aria-label="Your invite link" data-invsel><button class="btn small" data-inv="copy"><i class="ph-bold ph-copy"></i> Copy</button></div>
-  <div class="acts" style="margin-top:10px"><button class="btn small ghost" data-inv="share"><i class="ph-bold ph-share-network"></i> Share</button><button class="btn small ghost" data-sub="home|invite">More options</button></div></div>`}
+  <div class="invlink"><input class="field" readonly value="${esc(invLink())}" aria-label="Your invite link" data-invsel><button class="btn small" data-inv="copy"><i class="ph-bold ph-copy"></i> Copy link</button></div>
+  <div class="acts" style="margin-top:10px"><button class="btn small ghost" data-inv="share"><i class="ph-bold ph-share-network"></i> Share link</button><button class="btn small ghost" data-sub="home|invite">More options</button></div></div>`}
 function inviteHTML(){
   if(!S.member)return pageHead('Invite a friend')+`<div class="card gate rise"><i class="ph-fill ph-paper-plane-tilt"></i><h3>Invite links are for members</h3><p>Every member gets their own link to bring friends into their chapter. Got a link from a member? Open it and you land on their invite.</p><div class="acts"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button><button class="btn ghost" data-signin><i class="ph-bold ph-sign-in"></i> Sign in</button></div></div>`;
   if(!canInvite())return pageHead('Invite a friend')+`<div class="card gate rise"><i class="ph-fill ph-lock-key"></i><h3>Invites are off</h3><p>${S.cfg.club.invites?'Club leaders hand out invite links right now.':'Club leaders turned invite links off for now.'} Ask your chapter president to bring someone in.</p><div class="acts"><button class="btn ghost" data-sub="home|leaders">Club leaders</button></div></div>`;
@@ -2482,8 +2483,8 @@ function inviteHTML(){
   return pageHead('Invite a friend')+`<div class="invcols rise">
    <div class="card"><h3>Your invite link</h3>
     <label for="invCh">Invite them to</label><select class="field" id="invCh">${PLANS.map(p=>`<option value="${p.chapter}" ${invChapter()===p.chapter?'selected':''}>${esc(chName(p.chapter))} - $${p.price} a year</option>`).join('')}</select>
-    <div class="invlink"><input class="field" readonly value="${esc(invLink())}" aria-label="Your invite link" data-invsel><button class="btn small" data-inv="copy"><i class="ph-bold ph-copy"></i> Copy</button></div>
-    <div class="invacts"><button class="btn ghost" data-inv="share"><i class="ph-bold ph-share-network"></i> Share</button><a class="btn ghost" data-inv="text" href="sms:?&body=${encodeURIComponent(invMsg())}"><i class="ph-bold ph-chat-text"></i> Text</a><a class="btn ghost" data-inv="email" href="mailto:?subject=${encodeURIComponent('Join me in Raider Nation Golf Club')}&body=${encodeURIComponent(invMsg())}"><i class="ph-bold ph-envelope-simple"></i> Email</a><button class="btn ghost" data-inv="preview"><i class="ph-bold ph-eye"></i> See what they see</button></div>
+    <div class="invlink"><input class="field" readonly value="${esc(invLink())}" aria-label="Your invite link" data-invsel><button class="btn small" data-inv="copy"><i class="ph-bold ph-copy"></i> Copy link</button></div>
+    <div class="invacts"><button class="btn ghost" data-inv="share"><i class="ph-bold ph-share-network"></i> Share link</button><a class="btn ghost" data-inv="text" href="sms:?&body=${encodeURIComponent(invMsg())}"><i class="ph-bold ph-chat-text"></i> Text</a><a class="btn ghost" data-inv="email" href="mailto:?subject=${encodeURIComponent('Join me in Raider Nation Golf Club')}&body=${encodeURIComponent(invMsg())}"><i class="ph-bold ph-envelope-simple"></i> Email</a><button class="btn ghost" data-inv="preview"><i class="ph-bold ph-eye"></i> See what they see</button></div>
     <p class="help">${ex==='never'?'Your link does not expire.':'Links work for '+ex+' days, then you get a fresh one.'}${S.cfg.club.invApprove?' The chapter president approves new members first.':''}</p>
     <div class="invstats"><div><b>${L.shared||0}</b><small>Shared</small></div><div><b>-</b><small>Opened</small></div><div><b>-</b><small>Joined</small></div></div>
    </div>

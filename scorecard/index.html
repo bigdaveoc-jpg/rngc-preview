@@ -122,7 +122,7 @@ body.sun .big.ghost{color:#c3c8d0}
 body.sun .prow .sc.ghost{color:#c3c8d0}
 
 .strip{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-top:14px}
-.strip button{height:40px;border-radius:6px;background:var(--panel-2);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;font-size:10px;color:var(--muted);font-weight:700;border:1px solid transparent}
+.strip button{height:44px;border-radius:6px;background:var(--panel-2);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;font-size:10px;color:var(--muted);font-weight:700;border:1px solid transparent}
 .strip button b{font-family:var(--display);font-size:16px;color:var(--text)}
 .strip button.cur{border-color:var(--silver)}
 .strip button.done b.u{color:var(--under)}.strip button.done b.o{color:var(--over)}
@@ -238,7 +238,7 @@ body.sun{--rough:#dfe8dc}
 .gps .nums span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .gps .nums div:nth-child(2) b{font-size:48px}
 .src{font-size:11px;color:var(--muted);margin-top:12px}
-@media (max-height:700px){.hhead{margin-top:10px}.hnum{font-size:80px}.entry{padding:14px 14px 12px;margin-top:8px}.big{font-size:92px;min-height:84px}.quick{margin-top:10px}.quick button{min-height:50px}.stepper button.pm{height:66px}.strip{margin-top:10px}.strip button{height:34px}.hinfo{margin-top:8px;min-height:46px}}
+@media (max-height:700px){.hhead{margin-top:10px}.hnum{font-size:80px}.entry{padding:14px 14px 12px;margin-top:8px}.big{font-size:92px;min-height:84px}.quick{margin-top:10px}.quick button{min-height:50px}.stepper button.pm{height:66px}.strip{margin-top:10px}.strip button{height:40px}.hinfo{margin-top:8px;min-height:46px}}
 
 /* teams, setup, contests, bets */
 .tcard{padding:4px 14px}
@@ -506,7 +506,7 @@ function skinsResults(list){const cfg=CFG();if(cfg.skins==='off')return null;con
 /* ===================== SCREENS ===================== */
 const LOGO='../assets/logo/rngc-ball-static.svg';
 function bar(title,sub,right=''){return `<div class="bar"><a href="${CASUAL?'./#/'+(LIVE.group?'group/'+LIVE.group:'me'):'./#/events'}" aria-label="Back to golf home"><img class="logo" src="${LOGO}" alt=""></a><div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${right}</div>`}
-const sunBtn=()=>`<button class="ib" id="sunBtn" aria-pressed="${sunOn()}" aria-label="Sun mode, high contrast for bright light" title="Sun mode"><i class="ph-${sunOn()?'fill':'bold'} ph-sun"></i><span>Sun</span></button>`;
+const sunBtn=()=>`<button class="ib" id="sunBtn" aria-pressed="${sunOn()}" aria-label="Sun mode, high contrast for bright light" title="Sun mode"><i class="ph-${sunOn()?'fill':'bold'} ph-sun"></i><span>Bright</span></button>`;
 const boardBtn=()=>`<a class="ib" href="#/board" aria-label="Live leaderboard"><i class="ph-bold ph-ranking"></i></a>`;
 const betsBtn=()=>`<a class="ib" href="#/bets" aria-label="Side bets"><i class="ph-bold ph-coins"></i></a>`;
 const sunOn=()=>typeof G!=='undefined'&&G.pref&&G.pref.sun!=null?!!G.pref.sun:!!S.sun;
@@ -634,7 +634,7 @@ function hole(n){if(n!==STRIP_N){STRIP_ALT=false;STRIP_N=n;QP=null}const t=myTea
     entry=`<div class="card entry"><div class="stepper"><button class="pm" data-step="-1" data-who="${p.id}" aria-label="One less" ${dis}><i class="ph-bold ph-minus"></i></button>
       <button class="big ${v==null?'ghost':''}" data-set="${p.id}" data-dflt="${par+st}" aria-label="Score ${v??par+st}, tap to keep it" ${dis}>${v??par+st}</button>
       <button class="pm" data-step="1" data-who="${p.id}" aria-label="One more" ${dis}><i class="ph-bold ph-plus"></i></button></div>
-      <div class="word ${d!=null?cls(d):'muted'}">${d!=null?word(d)+(CFG().hcp&&st?` · net ${v-st}`:''):(st?`You get ${st} stroke${st>1?'s':''} here, so a ${par+st} counts as par for you`:'Tap your score and it moves to the next hole')}</div>
+      <div class="word ${d!=null?cls(d):'muted'}">${d!=null?word(d)+(CFG().hcp&&st?` · net ${v-st}`:''):(st?`You get ${st} extra shot${st>1?'s':''} here. A ${par+st} counts as par.`:'Tap your score and it moves to the next hole')}</div>
       <div class="quick">${[-1,0,1,2,3].filter(x=>par+x>=1).map(x=>`<button data-q="${par+x}" data-qw="${p.id}" aria-pressed="${v===par+x}" ${dis}><b>${par+x}</b><span>${word(x)}</span></button>`).join('')}</div></div>`}
   else{const ps=players(t),nets={};
     for(const p of ps){const v=mySc(p.id,n);if(v!=null)nets[p.id]=v-strokesOn(playHcp(idx(p.id)),n)}
@@ -656,18 +656,18 @@ function hole(n){if(n!==STRIP_N){STRIP_ALT=false;STRIP_N=n;QP=null}const t=myTea
   `<div class="prog" aria-hidden="true"><i style="width:${(myUnits()[0]||{thru:0}).thru/18*100}%"></i></div>
   <section class="hole${f.entry!=='team'&&players(t).length>1?' grp':''}" id="holeSwipe">
    <div class="hhead"><div class="hnum"><small>HOLE</small>${n}</div>
-    <div class="hmeta"><div><span>Par</span><b>${par}</b></div><div><span>Yards</span><b>${tee.y[n-1]||'-'}</b></div><div><span>Difficulty</span><b>${c.si[n-1]}<small class="of18">/18</small></b></div></div>
-    <div class="run"><b class="${tot.c}">${tot.txt}</b><span>${tot.who?esc(tot.who)+' · ':''}${f.points?'pts · ':useNet()?'net · ':''}thru ${tot.thru}</span><div class="saved" id="saved" style="justify-content:flex-end;margin-top:4px"><i class="ph-bold ph-cloud-check"></i><span>Saved</span></div></div></div>
+    <div class="hmeta"><div><span>Par</span><b>${par}</b></div><div><span>Yards</span><b>${tee.y[n-1]||'-'}</b></div><div><span>Hole rank</span><b>${c.si[n-1]}<small class="of18">/18</small></b></div></div>
+    <div class="run"><b class="${tot.c}">${tot.txt==='E'?'Even':tot.txt}</b><span>${tot.who?esc(tot.who)+' · ':''}${f.points?'points · ':useNet()?'with handicap · ':''}${tot.thru} played</span><div class="saved" id="saved" style="justify-content:flex-end;margin-top:4px"><i class="ph-bold ph-cloud-check"></i><span>Saved</span></div></div></div>
    <div class="strip strip10">${strip([...Array(9)].map((_,i)=>i+((n>9)!==STRIP_ALT?10:1)))}<button class="flip9" id="flip9" aria-label="Show holes ${(n>9)!==STRIP_ALT?'1 to 9':'10 to 18'}">${(n>9)!==STRIP_ALT?'1-9':'10-18'}</button></div>
-   ${holeTop(n)}${typeof trSoloLine==='function'&&CASUAL&&players(t).length===1?trSoloLine(n):''}${typeof trLiveCard==='function'?trLiveCard(idx_):''}
    ${ro&&!(LIVE&&LIVE.follow)?`<div class="card lock"><i class="ph-bold ph-lock-simple"></i><span>${esc(first(PEOPLE()[k].name))} keeps score for your group. <a href="#/team">Change</a></span></div>`:''}
    ${entry}
+   ${holeTop(n)}${typeof trSoloLine==='function'&&CASUAL&&players(t).length===1?trSoloLine(n):''}${typeof trLiveCard==='function'?trLiveCard(idx_):''}
    ${statCard(n)}
    ${betLine()}${typeof trSoloLine==='function'&&!(CASUAL&&players(t).length===1)?trSoloLine(n):''}
    ${contestCard(n)}
    <div style="height:12px"></div>
    <div class="stick">${typeof statStrip==='function'?statStrip(n):''}<div class="navrow"><button class="btn ghost" id="prev" ${prev?'':'disabled'} aria-label="Previous hole"><i class="ph-bold ph-arrow-left"></i></button>
-    <button class="btn" id="next">${last?'Review card <i class="ph-bold ph-check"></i>':`<span style="display:flex;flex-direction:column;align-items:center;line-height:1.1"><span>Hole ${next} <i class="ph-bold ph-arrow-right"></i></span>${!ro&&f.entry!=='team'&&players(t).some(p=>mySc(p.id,n)==null)?'<small style="font-weight:600;font-size:12px;opacity:.75;margin-top:2px">blank scores save as net par</small>':''}</span>`}</button></div>
+    <button class="btn" id="next">${last?'Review card <i class="ph-bold ph-check"></i>':`<span style="display:flex;flex-direction:column;align-items:center;line-height:1.1"><span>Hole ${next} <i class="ph-bold ph-arrow-right"></i></span>${!ro&&f.entry!=='team'&&players(t).some(p=>mySc(p.id,n)==null)?'<small style="font-weight:600;font-size:12px;opacity:.75;margin-top:2px">Blank scores count as par</small>':''}</span>`}</button></div>
     </div>
   </section>`;
   const set=(who,v)=>{if(!canScore())return;v=Math.max(1,Math.min(15,v));setSc(who,n,v);buzz();hole(n)};
@@ -750,7 +750,7 @@ function openHole(n){const h=holeNotes(n);if(!h)return;const c=CO(),tee=TEE();
    <div class="hd"><div class="hmap">${holeSvg(n,true)}</div><div class="hdr"><div class="gzoom">${greenSvg(n)}</div>
    ${(()=>{const m=CO().maps&&CO().maps[n];if(!m)return'';const y=tee.y[n-1]||m.yd,hh=Math.round(m.depth/2);return `<div class="teey"><div><b>${y-hh}</b><span>Front</span></div><div><b>${y}</b><span>Center</span></div><div><b>${y+hh}</b><span>Back</span></div><small>from the ${esc(tee.name)} tee</small></div>`})()}
    <ul class="hlist">${h.items.map(([ic,t,sub])=>`<li><i class="ph-bold ph-${ic}"></i><div><b>${esc(t)}</b>${sub?`<small>${esc(sub)}</small>`:''}</div></li>`).join('')}</ul></div></div>
-   <div class="card gps"><div style="display:flex;align-items:center;gap:10px"><b style="flex:1">Yards from where you stand</b><button class="btn ghost" style="min-height:40px;font-size:15px" id="gpsGo"><i class="ph-bold ph-crosshair"></i> Use my spot</button></div><div id="gpsNums"><p class="muted" style="font-size:14px">Finding you...</p></div></div>
+   <div class="card gps"><div style="display:flex;align-items:center;gap:10px"><b style="flex:1">Yards from where you stand</b><button class="btn ghost" style="min-height:40px;font-size:15px" id="gpsGo"><i class="ph-bold ph-crosshair"></i> Use my location</button></div><div id="gpsNums"><p class="muted" style="font-size:14px">Finding you...</p></div></div>
    <p class="src">Hole shapes © OpenStreetMap contributors. White dots are yards to the middle of the green. Close, not laser exact.</p>
    <button class="btn ghost block" style="margin-top:12px" id="closeSheet">Back to scoring</button>`;
   $('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#closeSheet').onclick=closeSheet;$('#gpsGo').onclick=()=>startGps(n);if(G.gps!==false)startGps(n);else $('#gpsNums').innerHTML='<p class="muted" style="font-size:14px">Tap to see front, center and back from where you stand.</p>'}
@@ -765,7 +765,7 @@ function paperTable(rows,co){const c=co||CO(),F9=[1,2,3,4,5,6,7,8,9],B9=[10,11,1
   const sum=(hs,f)=>hs.reduce((a,h)=>a+(f(h)||0),0);
   const half=(hs,lab)=>`<table><colgroup><col class="c0">${hs.map(()=>'<col>').join('')}<col></colgroup><thead><tr><th>Hole</th>${hs.map(h=>`<th>${h}</th>`).join('')}<th>${lab}</th></tr></thead><tbody>
    <tr><td>Par</td>${hs.map(h=>`<td>${c.par[h-1]}</td>`).join('')}<td class="tot">${sum(hs,h=>c.par[h-1])}</td></tr>
-   <tr><td>Hcp</td>${hs.map(h=>`<td class="muted">${c.si[h-1]}</td>`).join('')}<td></td></tr>
+   <tr><td>Rank</td>${hs.map(h=>`<td class="muted">${c.si[h-1]}</td>`).join('')}<td></td></tr>
    ${rows.map(r=>`<tr${r.k>1||r.name==='Team'?' class="teamrow"':''}><td>${esc(r.name)}</td>${hs.map(h=>{const v=r.get(h);return `<td${v!=null&&r.id&&S.au&&S.au[r.id+':'+h]?' class="au"':''}>${v!=null?mk(v,c.par[h-1]*(r.k||1)):'<span class="muted">-</span>'}</td>`}).join('')}<td class="tot">${hs.some(h=>r.get(h)!=null)?sum(hs,h=>r.get(h)):''}</td></tr>`).join('')}
   </tbody></table>`;
   return half(F9,'Out')+'<div style="height:10px"></div>'+half(B9,'In')+(()=>{const used=new Set();for(const r of rows)for(const h of [...F9,...B9]){const v=r.get(h);if(v!=null){const d=v-c.par[h-1]*(r.k||1);used.add(d<=-2?'e':d===-1?'b':d===1?'bo':d>=2?'d':'')}}
@@ -775,9 +775,9 @@ function review(){const t=myTeam(),f=F();$('#app').className='wrap';
   const us=myUnits(),rows=us.flatMap(u=>u.rows);
   const missing=order(t.start).filter(h=>!holeDone(h));const done=!!S.submitted[scoreKey(t.id)];
   const box=f.team?(()=>{const u=us[0];const g=rows[rows.length-1];const gross=order(t.start).reduce((a,h)=>a+(g.get(h)||0),0);
-      return `<div class="card"><b>${gross||'-'}</b><span>Team score</span></div><div class="card"><b class="${scoreCls(u)}">${showScore(u)}</b><span>${useNet()?'Net to par':'To par'}</span></div><div class="card"><b>${u.thru}</b><span>Holes</span></div>`})()
+      return `<div class="card"><b>${gross||'-'}</b><span>Team score</span></div><div class="card"><b class="${scoreCls(u)}">${showScore(u)}</b><span>${useNet()?'With handicap':'To par'}</span></div><div class="card"><b>${u.thru}</b><span>Holes</span></div>`})()
     :us.length===1&&us[0].rows.length===1?(()=>{const u=us[0],rw=u.rows[0],hs=order(t.start).filter(x=>rw.get(x)!=null),g=hs.reduce((a,x)=>a+rw.get(x),0),pr=hs.reduce((a,x)=>a+CO().par[x-1],0);
-      return `<div class="card"><b>${hs.length?g:'-'}</b><span>Score${hs.length&&hs.length<18?' · '+hs.length+' holes':''}</span></div><div class="card"><b class="${g-pr<0?'under':g-pr>0?'over':''}">${hs.length?toPar(g-pr):'-'}</b><span>To par</span></div>${f.points||useNet()?`<div class="card"><b class="${scoreCls(u)}">${showScore(u)}</b><span>${f.points?'Points':'Net to par'}</span></div>`:''}`})()
+      return `<div class="card"><b>${hs.length?g:'-'}</b><span>Score${hs.length&&hs.length<18?' · '+hs.length+' holes':''}</span></div><div class="card"><b class="${g-pr<0?'under':g-pr>0?'over':''}">${hs.length?toPar(g-pr):'-'}</b><span>To par</span></div>${f.points||useNet()?`<div class="card"><b class="${scoreCls(u)}">${showScore(u)}</b><span>${f.points?'Points':'With handicap'}</span></div>`:''}`})()
     :(()=>{const r=ranked(us.slice());const b=r[0];return `<div class="card"><b>${us[0]?us[0].thru:0}</b><span>Holes</span></div><div class="card"><b class="${scoreCls(b)}">${showScore(b)}</b><span>${esc(first(b.name))} leads${useNet()?', net':''}</span></div><div class="card"><b style="font-size:22px;padding-top:8px">${esc(f.name)}</b><span>${useNet()?'Net':'Gross'}</span></div>`})();
   $('#app').innerHTML=bar('Your card',t.name+' · '+CO().name,sunBtn())+`
   <div class="sumrow">${box}</div>
@@ -976,9 +976,9 @@ const reload=()=>{const fresh=load();for(const k of Object.keys(S))delete S[k];O
   const h=location.hash;if(h.startsWith('#/board')||h.startsWith('#/tv'))route()};
 window.addEventListener('storage',e=>{if(e.key===KEY)reload()});
 if(bc)bc.onmessage=reload;
-window.addEventListener('hashchange',route);
+window.addEventListener('hashchange',()=>{route();scrollTo(0,0)});   /* a new screen always opens at its top */
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
-<script src="tracker.js?v=27"></script>
+<script src="tracker.js?v=29"></script>
 </body>
 </html>
