@@ -141,6 +141,7 @@ body.sun .mk.bo{border-color:#b48a5a}
 .prow .sc{display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none!important}.prow .sc small.parlab{font-size:10px;margin-top:3px;letter-spacing:.06em}
 .mk.d{background:rgba(214,120,90,.3)}.hole .stick{background:var(--bg);border-top:1px solid var(--line);margin-top:6px;padding-top:8px}.hole .stick::before{content:none}
 .entry:has(.quick) .big{font-size:84px;min-height:74px}.entry:has(.quick) .stepper button.pm{height:62px}.entry:has(.quick) .quick{margin-top:10px}
+@media (max-height:560px){.hole .hnum{font-size:60px}.hole .hhead{margin-top:6px}.entry:has(.quick) .big{font-size:68px;min-height:60px}.entry:has(.quick) .stepper button.pm{height:54px}.hole .strip{margin-top:8px}.hole>.sopen{margin-top:8px}}
 .solol{padding:7px 10px;font-size:14px;margin-top:8px}.hint1{margin:6px 0 0;font-size:14px}.hole.grp .strip{margin-top:8px}.hole.grp .strip button{height:34px}.hole.grp .hnum{font-size:56px}
 .statc{padding:8px 12px!important;margin-top:8px}.statc .r{margin-top:4px!important;gap:5px}.statc .chip2{min-height:36px;padding:0 9px}
 .htop{margin-top:8px;padding:6px 10px}.htop .ysub{min-height:22px}
@@ -263,7 +264,7 @@ function trMe(){const my=trMine(),full=my.filter(x=>x.p.holes===18&&x.p.par>=66)
   const MIXL=[['e','Eagles','var(--under)',1],['b','Birdies','var(--under)',.6],['p','Pars','var(--silver-2)',.75],['bo','Bogeys','var(--over)',.55],['d','Doubles+','var(--over)',1]];
   const tile=(v,l,s,h)=>`<div class="card"><b>${v}</b><span>${l}${h?' '+hlp(h):''}</span><small>${s}</small></div>`;
   const notT='tap Drive or Putts on a hole to start',few=(n,v)=>n>=1?v:'-',fewS=(n,t)=>n>=5?t:t+' · small sample';
-  $('#app').innerHTML=trBar('My golf',G.me.name+' · index '+trHc(G.me.hcp))+trTabs('me')+`
+  $('#app').innerHTML=trBar('My golf',G.me.name+' · handicap '+trHc(G.me.hcp))+trTabs('me')+`
    ${live.map(l=>`<section class="card ev" style="padding:14px;margin-top:14px"><span class="tag rngc">In progress</span><h2 style="font-size:24px;margin:6px 0 2px">${esc(l.name)}</h2>
      <div class="muted">${esc(COURSES[l.course].name)} · ${esc(l.dateTxt)} · thru ${trThru(l.id)}</div>
      <div class="row2"><a class="btn" href="./?r=${l.id}#/hole/${trNextHole(l.id)}">Keep scoring</a><button class="btn ghost" data-drop="${l.id}">Throw it out</button></div></section>`).join('')}
@@ -277,9 +278,9 @@ function trMe(){const my=trMine(),full=my.filter(x=>x.p.holes===18&&x.p.par>=66)
    ${trCoach(my,full)}
    <div class="lbl">Handicap ${hlp('index')}</div>
    <div class="tiles">${G.me.hcp!=null?`<button class="card" id="editMe"><b>${trHc(G.me.hcp)}</b><span>Your handicap</span><small>official · tap to change</small></button>`:`<button class="card" id="editMe"><b>${est.v==null?'-':trHc(est.v)}</b><span>Your index</span><small>${est.v==null?(3-est.n)+' more full round'+(3-est.n===1?'':'s'):'worked out by the app'}</small></button>`}
-    <button class="card" id="estBtn">${(()=>{const g=G.me.hcp!=null&&est.v!=null?est.v-G.me.hcp:null;return g==null?`<b>${est.n}</b><span>Rounds counted</span><small>${est.n<3?(3-est.n)+' more to check your index':est.n<20?'best '+(est.k||0)+' count':'best 8 of 20'}</small>`:`<b><i class="ph-bold ph-${g<=-1?'trend-down':g>=1?'trend-up':'equals'}"></i></b><span>${g<=-1?'Heading down':g>=1?'Heading up':'Steady'}</span><small>your rounds work out to ${trHc(est.v)}</small>`})()}</button>
+    <button class="card" id="estBtn">${(()=>{const g=G.me.hcp!=null&&est.v!=null?est.v-G.me.hcp:null;return g==null?`<b>${est.n}</b><span>Rounds for handicap</span><small>${est.n<3?(3-est.n)+' more to get your handicap':est.n<20?'best '+(est.k||0)+' count':'best 8 of 20'}</small>`:`<b><i class="ph-bold ph-${g<=-1?'trend-down':g>=1?'trend-up':'equals'}"></i></b><span>${g<=-1?'Heading down':g>=1?'Heading up':'Steady'}</span><small>your rounds work out to ${trHc(est.v)}</small>`})()}</button>
     <div class="card"><b>${my.length}</b><span>Rounds</span><small>${full.length} full 18${full.length===1?'':'s'}${nines?' · '+nines+' nine'+(nines===1?'':'s'):''}</small></div></div>
-   ${est.v==null?`<p class="note"><i class="ph-bold ph-info"></i><span>Play ${3-est.n} more full 18${3-est.n===1?'':'s'} on a rated course and the app works out an estimate.${est.skip?' '+est.skip+' of your rounds were on courses with no rating on file, so they don\'t count.':''}</span></p>`:trHcLine(est)+`<details class="whyd"><summary><i class="ph-bold ph-caret-right"></i> How it's worked out</summary>${trWhy(est)}</details>`}
+   ${est.v==null?`<p class="note"><i class="ph-bold ph-info"></i><span>Play ${3-est.n} more full 18${3-est.n===1?'':'s'} on a regular course and the app works out an estimate.${est.skip?' '+est.skip+' of your rounds were on courses with no rating on file, so they don\'t count.':''}</span></p>`:trHcLine(est)+`<details class="whyd"><summary><i class="ph-bold ph-caret-right"></i> How it's worked out</summary>${trWhy(est)}</details>`}
    ${est.v!=null&&est.n>=20&&est.v!==G.me.hcp?`<button class="btn ghost block" id="useEst" style="margin-top:8px">Use ${trHc(est.v)} as my index</button>`:''}
    <div class="lbl">Your stats ${hlp('tracked')}</div>
    ${pn<9&&fwn<5?`<p class="note"><i class="ph-bold ph-chart-bar"></i><span>${pn?`Only ${pn} hole${pn===1?'':'s'} tracked so far, so no stats yet.`:'Want putts, fairways and greens?'} Tap Track my stats on the hole screen. Skip it and you still get score, handicap and the play log.</span></p>`:''}
@@ -321,8 +322,8 @@ function trPlay(){const d=trMine().filter(x=>x.p.diff!=null&&!x.r.est&&x.p.holes
 function trHcLine(est){const h=G.me.hcp,g=h!=null&&est.v!=null?Math.round((est.v-h)*10)/10:null;return `<p class="note"><i class="ph-bold ph-check-circle"></i><span>${h==null?`<b>${trHc(est.v)}</b> is your index from your ${est.n} rounds here, worked out the World Handicap way. Got an official GHIN index? Tap it to use that instead.`:`<b>${trHc(h)}</b> is your official index, and handicaps here use it. ${g<=-1?`Your rounds here work out to ${trHc(est.v)}, so expect it to drop as you post them.`:g>=1?`Your rounds here work out to ${trHc(est.v)}, so it may go up as you post them.`:`Your rounds here back it up.`}`}</span></p>`}
 /* match vs the course: each hole your net score beats, ties or loses to par */
 function trVs(sc,par,si,ph){let up=0,t=0;for(let h=1;h<=18;h++){if(sc[h]==null)continue;const n=sc[h]-trSt(ph,si[h-1]);up+=n<par[h-1]?1:n>par[h-1]?-1:0;t++}return{up,t}}
-const trVsTxt=up=>up===0?'all square':Math.abs(up)+(up>0?' up':' down');
-const trVsEnd=up=>up>0?`You beat the course, ${up} up`:up<0?`The course won, ${-up} down`:`You halved the course, all square`;
+const trVsTxt=up=>up===0?'tied':Math.abs(up)+(up>0?' up':' down');
+const trVsEnd=up=>up>0?`You beat the course, ${up} up`:up<0?`The course won, ${-up} down`:`You tied the course`;
 function trPlayWhy(){const pl=trPlay();return `<section class="card whyest">Each round gets a rating: your score with blow-up holes capped at double bogey plus your strokes, minus the course rating, times 113 over the slope. Recent form is the average of your last ${pl.n}. It moves every round; your index counts your best 8 of 20, so it moves slowly and sits about 3 lower.
    <table class="stbl" style="margin-top:6px"><thead><tr><th>Round</th><th>Score</th><th>Course</th><th>Rating</th></tr></thead><tbody>${pl.rows.map(x=>`<tr><td>${trDay(x.r.date)}<br><span class="muted" style="font-size:12px">${esc(x.r.cname)}</span></td><td>${x.p.gross}</td><td>${x.r.rating}/${x.r.slope}</td><td><b>${x.p.diff}</b></td></tr>`).join('')}</tbody></table></section>`}
 /* why the estimate is what it is, in plain words, with the rounds that count */
@@ -365,7 +366,7 @@ function trRow(r,p){const m=(r.money||{}).me,pts=p&&p.pts!=null&&r.format==='sta
   return `<button class="rrow" data-round="${r.id}"><div><b>${esc(r.kind==='event'?r.name:r.cname)}</b><span>${trDay(r.date)}${r.date?' '+new Date(r.date).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):''} · ${who}</span>
    ${m||(r.bets&&r.bets.length)?`<span class="${m>0?'under':m<0?'over':''}" style="display:block;font-weight:700">${r.bets&&r.bets.length?esc(r.bets[0].replace(' each way',''))+(r.bets.length>1?' +'+(r.bets.length-1):'')+': ':'Side bets: '}${m>0?'won ':m<0?'lost ':'even'}${m?money(Math.abs(m)):''}</span>`:''}
    ${r.note?`<span style="display:block;font-style:italic">${esc(r.note.length>70?r.note.slice(0,70)+'...':r.note)}</span>`:''}</div>
-   <div class="sc">${p?(pts?p.pts+'<small>points · '+p.gross+'</small>':`<span class="${cls(p.gross-p.par)}">${p.gross}</span><small>${toPar(p.gross-p.par)}${r.hcp&&p.net!=null?' · net '+p.net+' ('+toPar(p.net-p.par)+')':''}${p.holes<18?' · '+p.holes+' holes':''}${p.pn&&p.pn===p.holes?' · '+p.putts+' putts':''}</small>`):`${esc(r.result||'-')}<small>${r.pos?'place '+r.pos:'event'}</small>`}</div></button>`}
+   <div class="sc">${p?(pts?p.pts+'<small>points · '+p.gross+'</small>':`<span class="${cls(p.gross-p.par)}">${p.gross}</span><small>${toPar(p.gross-p.par)}${r.hcp&&p.net!=null?' · '+(x=>x==='E'?'even':x)(toPar(p.net-p.par))+' with handicap':''}${p.holes<18?' · '+p.holes+' holes':''}${p.pn&&p.pn===p.holes?' · '+p.putts+' putts':''}</small>`):`${esc(r.result||'-')}<small>${r.pos?'place '+r.pos:'event'}</small>`}</div></button>`}
 
 /* ---------- plain-words help for golf terms ---------- */
 const GLOSS={index:['Handicap index','Your skill as a number. A 15 shoots about 15 over par on a normal course on a good day. Lower is better. Your official one comes from GHIN; type it in here.'],
@@ -388,7 +389,7 @@ const trHc=v=>v==null?'-':v<0?'+'+Math.abs(v):String(v);
 function trEstSheet(){const est=trEst(),rows=trMine().filter(x=>x.p.diff!=null&&!x.r.est).slice(0,20),keep=new Set(rows.map((x,i)=>[x.p.diff,i]).sort((a,b)=>a[0]-b[0]).slice(0,est.k||0).map(x=>x[1]));
   const left=trMine().filter(x=>x.r.est&&x.p.holes===18).length;
   $('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">How your estimate is figured</h2>
-   ${est.v==null?`<p style="font-size:16px;margin-top:8px">Play ${3-est.n} more full 18-hole round${3-est.n===1?'':'s'} on a rated course and the estimate shows up here.</p>`:
+   ${est.v==null?`<p style="font-size:16px;margin-top:8px">Play ${3-est.n} more full 18-hole round${3-est.n===1?'':'s'} on a regular course and the estimate shows up here.</p>`:
    `<p style="font-size:16px;line-height:1.45;margin-top:8px">Your last ${est.n} full rounds. The app keeps your best ${est.k} differentials (marked), averages them${est.adj?' and takes off '+Math.abs(est.adj):''}. That gives <b>${trHc(est.v)}</b>. With 20 rounds it uses the best 8, like GHIN.</p>`}
    <section class="card" style="padding:4px 12px;margin-top:10px"><table class="stbl"><thead><tr><th>Round</th><th>Score</th><th>Tees</th><th>Diff</th></tr></thead><tbody>
     ${rows.map((x,i)=>`<tr${keep.has(i)?' style="font-weight:800"':''}><td>${trDay(x.r.date)}<br><span class="muted" style="font-size:12px">${esc(x.r.cname)}</span></td><td>${x.p.gross}${x.p.ags!=null&&x.p.ags!==x.p.gross?`<br><span class="muted" style="font-size:12px">adj ${x.p.ags}</span>`:''}</td><td>${x.r.rating}/${x.r.slope}</td><td>${keep.has(i)?'<i class="ph-fill ph-check-circle"></i> ':''}${x.p.diff}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">No full rounds yet</td></tr>'}</tbody></table></section>
@@ -434,7 +435,7 @@ function trEditMe(){$('#sheet').innerHTML=`<div class="grab"></div><h2 style="fo
 
 /* ---------- groups ---------- */
 function trGroups(){
-  $('#app').innerHTML=trBar('My golf',G.me.name+' · index '+G.me.hcp)+trTabs('groups')+`
+  $('#app').innerHTML=trBar('My golf',G.me.name+' · handicap '+G.me.hcp)+trTabs('groups')+`
    <p class="note" style="margin-top:14px"><i class="ph-bold ph-info"></i><span>Your regular crew. Play rounds together, keep a season table and track who owes who.</span></p>
    ${G.groups.map(g=>{const rs=G.rounds.filter(r=>r.group===g.id);return `<a class="card gcard" href="#/group/${g.id}"><div><b>${esc(g.name)}${g.manager==='me'?' <span class="tag">You manage</span>':''}</b><span>${g.members.map(m=>esc(first(m.name))).join(', ')}</span></div><div class="sc">${rs.length}<small>round${rs.length===1?'':'s'}</small></div></a>`}).join('')}
    <button class="btn ghost block" style="margin-top:14px" id="newG"><i class="ph-bold ph-plus"></i> New group</button><div style="height:28px"></div>`;
@@ -496,7 +497,7 @@ function trGroup(id){const g=G.groups.find(x=>x.id===id);if(!g){location.hash='#
 
 /* ---------- club events ---------- */
 function trEvents(){const e=EVENTS.nov14,c=COURSES[e.course],past=G.rounds.filter(r=>r.kind==='event').sort((a,b)=>b.date-a.date),t=S.team&&TEAMS.find(x=>x.id===S.team);
-  $('#app').innerHTML=trBar('My golf',G.me.name+' · index '+G.me.hcp)+trTabs('events')+`
+  $('#app').innerHTML=trBar('My golf',G.me.name+' · handicap '+G.me.hcp)+trTabs('events')+`
    <section class="card ev" style="padding:16px;margin-top:14px"><span class="tag">Next club event</span><h1>${esc(e.name)}</h1><div class="muted">${esc(e.date)} · ${esc(e.start)} · ${esc(c.name)}</div>
     <div class="facts"><div><b>${esc(F().name)}</b><span>${esc(hcpLine())}</span></div><div><b>${TEAMS.length}</b><span>groups</span></div><div><b>${esc(TEE().name)}</b><span>tees</span></div></div>
     ${t?`<p class="note"><i class="ph-bold ph-users"></i><span>You're with ${esc(t.name)}, starting on hole ${t.start}.</span></p>`:''}
@@ -804,7 +805,7 @@ function trRound(id){const r=G.rounds.find(x=>x.id===id);if(!r){location.hash='#
   const nmOf=pid=>{const p=r.players.find(x=>x.id===pid);return p?first(p.name):'?'},tx=trSettle(led,nmOf);
   const sub=trDay(r.date)+' · '+(r.kind==='event'?r.cname:(r.kind==='group'?r.name:'Solo'))+(r.tee&&r.tee!=='Tees'?' · '+r.tee+' tees':'');
   $('#app').innerHTML=trBar(r.kind==='event'?r.name:r.cname,sub,trBack(back))+`
-   ${me?`<div class="sumrow">${r.format==='stableford'&&me.pts!=null?`<div class="card"><b>${me.pts}</b><span>Points</span></div><div class="card"><b>${me.gross}</b><span>Score ${toPar(me.gross-me.par)}</span></div>`:`<div class="card"><b>${me.gross}</b><span>Score</span></div><div class="card"><b class="${cls(me.gross-me.par)}">${toPar(me.gross-me.par)}</b><span>To par</span></div>`}${r.hcp&&me.net!=null&&r.format!=='stableford'?`<div class="card"><b class="${cls(me.net-me.par)}">${me.net}</b><span>Net ${toPar(me.net-me.par)}</span></div>`:`<div class="card"><b>${me.holes}</b><span>Holes</span></div>`}</div>
+   ${me?`<div class="sumrow">${r.format==='stableford'&&me.pts!=null?`<div class="card"><b>${me.pts}</b><span>Points</span></div><div class="card"><b>${me.gross}</b><span>Score ${toPar(me.gross-me.par)}</span></div>`:`<div class="card"><b>${me.gross}</b><span>Score</span></div><div class="card"><b class="${cls(me.gross-me.par)}">${toPar(me.gross-me.par)}</b><span>To par</span></div>`}${r.hcp&&me.net!=null&&r.format!=='stableford'?`<div class="card"><b class="${cls(me.net-me.par)}">${me.net}</b><span>With handicap · ${(x=>x==='E'?'even':x)(toPar(me.net-me.par))}</span></div>`:`<div class="card"><b>${me.holes}</b><span>Holes</span></div>`}</div>
      ${r.format==='stableford'&&me.pts!=null?trPtsRow(r,me):''}
      ${me.par<66&&me.holes===18?`<p class="note"><i class="ph-bold ph-info"></i><span>Short course, par ${me.par}. It's in your play log but stays out of your handicap read, average and goals.</span></p>`:''}
      ${me.diff!=null&&me.ags!=null&&me.d9==null&&me.par>=66?`<details class="moretees"><summary>How this round counts for your handicap</summary><p class="note"><i class="ph-bold ph-calculator"></i><span>You played like a <b>${trHc(me.diff)}</b> handicap today${G.me.hcp!=null?`, ${trDayVs(me.diff-G.me.hcp)} your ${trHc(G.me.hcp)} handicap`:''}.${r.est?' No rating on file for this course, so it stays out of your estimate.':''} <button class="linkbtn" data-math style="margin:0;min-height:0">How it's figured</button><span class="math" hidden> Your score with blow-up holes capped at double bogey plus your strokes: ${me.ags}. Tees rated ${r.rating} / ${r.slope}. (${me.ags} - ${r.rating}) x 113 / ${r.slope} = ${me.diff}.</span></span></p></details>`:''}
