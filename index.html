@@ -507,7 +507,7 @@ body.thread-open .fab{display:none!important}
 .intro{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(circle at 50% 42%,#16181c,#050506 70%);transition:opacity .5s ease;cursor:pointer}
 .intro img{width:min(78vw,420px);height:auto}
 .intro.out{opacity:0;pointer-events:none}
-.intro .skip{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));font:600 13px system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#aab2be;background:none;border:1px solid #2a2f37;border-radius:999px;padding:9px 16px;cursor:pointer}
+.intro .skip{position:absolute;right:16px;top:calc(16px + env(safe-area-inset-top));min-height:44px;font:600 15px system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#aab2be;background:none;border:1px solid #2a2f37;border-radius:999px;padding:9px 16px;cursor:pointer}
 
 /* ---------- sub-pages: each side-menu link is its own page ---------- */
 .subchips{padding-top:14px}
@@ -888,7 +888,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 </div>
 
 <div class="signin" id="inviteIn" hidden role="dialog" aria-modal="true" aria-labelledby="invTitle"><div class="si-box" id="inviteBox"></div></div>
-<div class="intro" id="intro" role="img" aria-label="Raider Nation Golf Club"><img src="assets/logo/rngc-ball-animated.svg" alt=""><button class="skip" type="button">Skip</button></div>
+<div class="intro" id="intro" role="img" aria-label="Raider Nation Golf Club"><img src="assets/logo/rngc-ball-animated.svg" alt=""><button class="skip" type="button">Skip intro</button></div>
 <script>
 (function(){
   var el=document.getElementById('intro'),seen=null;
@@ -897,7 +897,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
   if(seen||matchMedia('(prefers-reduced-motion: reduce)').matches){el.remove();return}
   try{localStorage.setItem('rngcIntroDay',day)}catch(e){}
   var done=function(){if(!el.isConnected)return;el.classList.add('out');setTimeout(function(){el.remove()},600)};
-  setTimeout(done,7600);el.addEventListener('click',done);
+  setTimeout(done,5400);el.addEventListener('click',done);
 })();
 </script>
 

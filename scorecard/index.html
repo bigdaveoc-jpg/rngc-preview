@@ -250,7 +250,7 @@ body.sun{--rough:#dfe8dc}
 .trow .muted{font-size:13px;display:block}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 4px}
 .row2 .btn{min-height:46px;font-size:15px;padding:0 10px}
-.linkbtn{color:var(--silver);text-decoration:underline;font-size:13px;min-height:32px;margin-top:2px}
+.linkbtn{color:var(--silver);text-decoration:underline;font-size:14px;min-height:44px;margin-top:2px}
 .tcard > .linkbtn{display:block;margin:4px 0 8px}
 .chips2{display:flex;flex-wrap:wrap;gap:6px}
 .chip2{min-height:42px;min-width:44px;padding:0 12px;border-radius:8px;border:1px solid var(--line);font-weight:600;font-size:15px;background:var(--panel-2)}
@@ -289,7 +289,7 @@ select.field{appearance:none;-webkit-appearance:none}
 #sunBtn{width:auto;padding:0 10px;gap:6px;display:flex;align-items:center;font-size:18px}#sunBtn span{font-size:13px;font-weight:700}
 .moretees{margin-top:6px}.moretees summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700;color:var(--muted);font-size:14px}
 .allpar{width:100%;min-height:48px;margin-top:8px;font-weight:700}
-.strip10{grid-template-columns:repeat(9,1fr) 1.3fr;margin-bottom:8px}.flip9{height:40px;border-radius:6px;border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--text)}
+.strip10{grid-template-columns:repeat(9,1fr) 1.3fr;margin-bottom:8px}button.hpick{background:none;border:0;padding:0;color:inherit;text-align:left;cursor:pointer;min-height:44px}button.hpick small i{font-size:12px;vertical-align:1px}.strip.hgrid{grid-template-columns:repeat(6,1fr);gap:8px;margin-top:0}.strip.hgrid button{height:56px;font-size:15px;color:var(--text)}.strip.hgrid button b{font-size:13px}.flip9{height:40px;border-radius:6px;border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--text)}
 .bline{font-size:14px;margin-top:4px}
 .prow3{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:10px;background:var(--panel-2)}
 .prow3 b{display:block}
@@ -354,7 +354,7 @@ const FIRST=['Marcus','Dana','Omar','Lena','Jason','Rick','Tony','Chris','Ken','
 const LAST='ABCDEFGHJKLMNOPRSTVW';
 function rng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const hash=s=>{let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0};
-/* demo field: 18 foursomes, one per starting hole (shotgun). 10 RNGC, 8 12th Man. Same every load. hcp = handicap index. */
+/* demo field: 18 foursomes, one per starting hole (shotgun). 10 RNGC, 8 12th Man. Same every load. hcp = handicap. */
 let TEAMS=(()=>{const r=rng(hash('nov14-field')),used=new Set(),out=[];
   const pick=()=>{let f,k=0;do{f=FIRST[Math.floor(r()*FIRST.length)];k++}while(used.has(f)&&k<400);used.add(f);return f+' '+LAST[Math.floor(r()*LAST.length)]+'.'};
   for(let i=0;i<18;i++){const club=i%9<5?'RNGC':'12th Man';const players=[0,1,2,3].map(k=>({id:'t'+(i+1)+'p'+k,name:pick(),hcp:Math.round(3+r()*22)}));
@@ -565,7 +565,7 @@ function teamPage(){const t=myTeam(),k=keeperOf(t),ps=players(t);$('#app').class
     <div><b>${esc(p.name)}${p.id===k?' <span class="tag rngc">Scorekeeper</span>':''}</b>
      <span class="muted">Course hcp ${ch}${CFG().hcp?(F().entry==='team'&&!F().count?'':' · plays '+playHcp(i)):''} from the ${esc(TEE().name)} tees</span>
      ${edit&&p.id!==k?`<button class="linkbtn" data-keeper="${p.id}">Make scorekeeper</button>`:''}${edit?` <button class="linkbtn" data-swap="${p.id}">Swap player</button>`:''}</div>
-    <label class="idxbox"><span>Index</span><input class="field idx" type="number" inputmode="decimal" step="0.1" min="-5" max="54" value="${i}" data-hcp="${p.id}" ${canHcp(p.id)?'':'disabled'} aria-label="${esc(p.name)} handicap index"></label></div>`}).join('')}
+    <label class="idxbox"><span>Index</span><input class="field idx" type="number" inputmode="decimal" step="0.1" min="-5" max="54" value="${i}" data-hcp="${p.id}" ${canHcp(p.id)?'':'disabled'} aria-label="${esc(p.name)} handicap"></label></div>`}).join('')}
    ${edit&&ps.length<4?`<button class="btn ghost block" style="margin-top:10px" id="addP"><i class="ph-bold ph-user-plus"></i> Add a player</button>`:''}</section>
   ${F().entry==='team'&&CFG().hcp?`<p class="note"><i class="ph-bold ph-users-three"></i><span>Team handicap ${teamHcp(t)}: 25% of the lowest course handicap, then 20, 15 and 10%.</span></p>`:''}
   <p class="note"><i class="ph-bold ph-lock-simple"></i><span>${edit?'You keep score for this group, so you can swap players and fix anyone\'s handicap.':'Only '+esc(first(PEOPLE()[k].name))+' can swap players or pick a new scorekeeper. You can fix your own handicap.'}</span></p>
@@ -655,10 +655,9 @@ function hole(n){if(n!==STRIP_N){STRIP_ALT=false;STRIP_N=n;QP=null}const t=myTea
   $('#app').innerHTML=bar(t.name,idx_+1===n?gname:`Hole ${idx_+1} of 18`,sunBtn()+(CASUAL&&players(t).length===1&&!myBets().length?'':betsBtn()+(CASUAL&&typeof liveBtn==='function'&&players(t).length>1?liveBtn():boardBtn())))+
   `<div class="prog" aria-hidden="true"><i style="width:${(myUnits()[0]||{thru:0}).thru/18*100}%"></i></div>
   <section class="hole${f.entry!=='team'&&players(t).length>1?' grp':''}" id="holeSwipe">
-   <div class="hhead"><div class="hnum"><small>HOLE</small>${n}</div>
+   <div class="hhead"><button class="hnum hpick" id="hpick" aria-label="Hole ${n}. Tap to pick another hole"><small>HOLE <i class="ph-bold ph-caret-down"></i></small>${n}</button>
     <div class="hmeta"><div><span>Par</span><b>${par}</b></div><div><span>Yards</span><b>${tee.y[n-1]||'-'}</b></div><div><span>Hole rank</span><b>${c.si[n-1]}<small class="of18">/18</small></b></div></div>
     <div class="run"><b class="${tot.c}">${tot.txt==='E'?'Even':tot.txt}</b><span>${tot.who?esc(tot.who)+' · ':''}${f.points?'points · ':useNet()?'with handicap · ':''}${tot.thru} played</span><div class="saved" id="saved" style="justify-content:flex-end;margin-top:4px"><i class="ph-bold ph-cloud-check"></i><span>Saved</span></div></div></div>
-   <div class="strip strip10">${strip([...Array(9)].map((_,i)=>i+((n>9)!==STRIP_ALT?10:1)))}<button class="flip9" id="flip9" aria-label="Show holes ${(n>9)!==STRIP_ALT?'1 to 9':'10 to 18'}">${(n>9)!==STRIP_ALT?'1-9':'10-18'}</button></div>
    ${ro&&!(LIVE&&LIVE.follow)?`<div class="card lock"><i class="ph-bold ph-lock-simple"></i><span>${esc(first(PEOPLE()[k].name))} keeps score for your group. <a href="#/team">Change</a></span></div>`:''}
    ${entry}
    ${holeTop(n)}${typeof trSoloLine==='function'&&CASUAL&&players(t).length===1?trSoloLine(n):''}${typeof trLiveCard==='function'?trLiveCard(idx_):''}
@@ -679,7 +678,7 @@ function hole(n){if(n!==STRIP_N){STRIP_ALT=false;STRIP_N=n;QP=null}const t=myTea
   document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{const w=b.dataset.who,cur=mySc(w,n);set(w,(cur??dfl(w,n))+ +b.dataset.step)});
   document.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{const w=b.dataset.set,grp=b.classList.contains('sc');if(grp)QP=QP===w&&mySc(w,n)!=null?null:w;if(mySc(w,n)==null){set(w,dfl(w,n));if(!grp)adv()}else if(grp)hole(n);else adv()});
   document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{QP=null;set(b.dataset.qw||'team',+b.dataset.q);adv()});
-  const f9=$('#flip9');if(f9)f9.onclick=()=>{STRIP_ALT=!STRIP_ALT;hole(n)};
+  const hp=$('#hpick');if(hp)hp.onclick=()=>{const sh=$('#sheet');sh.setAttribute('aria-label','Pick a hole');sh.innerHTML=`<h3 style="margin:6px 0 4px">Pick a hole</h3><p class="muted" style="margin:0 0 12px;font-size:14px">Holes you scored show your score.</p><div class="strip hgrid">${strip([...Array(18)].map((_,i)=>i+1))}</div><button class="btn ghost block" style="margin-top:14px" id="closeSheet">Close</button>`;$('#scrim').classList.add('on');sh.classList.add('on');$('#closeSheet').onclick=closeSheet;sh.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{closeSheet();location.hash='#/hole/'+b.dataset.go})};
   const ap=$('#allPar');if(ap)ap.onclick=()=>{if(!canScore())return;for(const p of players(t))if(mySc(p.id,n)==null)setSc(p.id,n,dfl(p.id,n));buzz();hole(n)};
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash='#/hole/'+b.dataset.go);
   document.querySelectorAll('[data-ctp]').forEach(b=>b.onclick=()=>{S.ctp[n]=b.dataset.ctp?{pid:b.dataset.ctp,ft:(S.ctp[n]||{}).ft||''}:{};save();hole(n);const i=$('#ctpFt');if(i&&!i.value)i.focus()});
@@ -979,6 +978,6 @@ if(bc)bc.onmessage=reload;
 window.addEventListener('hashchange',()=>{route();scrollTo(0,0)});   /* a new screen always opens at its top */
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
-<script src="tracker.js?v=31"></script>
+<script src="tracker.js?v=32"></script>
 </body>
 </html>
