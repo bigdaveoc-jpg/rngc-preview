@@ -883,7 +883,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
    <div class="si-row" style="text-align:center"><button type="button" id="siCodeLink">I have a setup code instead</button></div>
    <p class="si-msg" id="suMsg" role="status"></p>
   </form>
-  <div class="si-links"><a href="https://raidernationgolfclub.com/shop/" target="_blank" rel="noopener">Become a member</a><span aria-hidden="true">·</span><button type="button" id="siGuest">Continue as guest</button></div>
+  <div class="si-links"><button type="button" id="siJoin">Become a member</button><span aria-hidden="true">·</span><button type="button" id="siGuest">Continue as guest</button></div>
  </div>
 </div>
 
@@ -1202,7 +1202,6 @@ function joinHTML(){
   if(S.joinSent){const j=S.joinSent,L=LEAD_X[PRES[j.chapter]],p=PLANS.find(x=>x.chapter===j.chapter);
     return pageHead('Join a chapter')+`<div class="card sent rise"><i class="ph-fill ph-check-circle"></i><h3>Thanks, ${esc(j.first)}</h3>
      <p>Your request went to <b>${esc(L.name)}</b>, ${esc(L.chapters)}${L.id!=='ross'?', with Ross Ricks copied as club president':''}. Expect a reply by email.${j.by?` We'll let ${esc(j.by)} know you joined.`:''}</p>
-     <p class="help">Preview: nothing is actually sent yet. In the live app this lands in the president's inbox.</p>
      <div class="acts">${p?`<a class="btn" href="${p.url}" ${ext}><i class="ph-bold ph-credit-card"></i> Pay ${esc(p.name)} dues, $${p.price}</a>`:''}<button class="btn ghost" id="joinAgain">Send another</button></div></div>`}
   const ch=S.joinCh||(S.chapter!=='All'?S.chapter:'SoCal');
   const opt=p=>`<label class="radio plan2"><input type="radio" name="jc" value="${p.chapter}" ${ch===p.chapter?'checked':''}><span><b>${p.name} <em>$${p.price}/yr</em></b>${p.blurb}<small>Goes to ${LEAD_X[PRES[p.chapter]].name}</small></span></label>`;
@@ -1219,6 +1218,7 @@ function joinHTML(){
      <div><label for="jcity">City</label><input class="field" id="jcity" required maxlength="40" autocomplete="address-level2"></div></div>
      <div class="two"><div><label for="jh">Handicap (optional)</label><input class="field" id="jh" maxlength="6" placeholder="12 or none"></div>
      <div><label for="jhear">How did you hear about us?</label><select class="field" id="jhear"><option ${S.invite?'selected':''}>A member</option><option>Instagram</option><option>YouTube</option><option>Facebook</option><option>At an event</option><option>Other</option></select></div></div>
+     <input id="jweb" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
      <label for="jm">Anything the president should know?</label><textarea class="field" id="jm" maxlength="500" placeholder="Where you play, who you golf with, events you want in on">${S.invite?'Invited by '+esc(S.invite.by)+'. ':''}</textarea>
      <p class="si-msg" id="joinMsg" role="status"></p>
      <button class="btn full" type="submit" style="width:100%;margin-top:14px"><i class="ph-bold ph-paper-plane-tilt"></i> Send to the chapter president</button>
@@ -1232,8 +1232,13 @@ document.addEventListener('submit',e=>{
     const ch=(document.querySelector('input[name=jc]:checked')||{}).value;
     if(!v('jf')||!v('jl')||!v('jcity')){msg.textContent='Add your name and city.';return}
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('je'))){msg.textContent='Check the email address.';return}
-    S.joinSent={first:v('jf'),chapter:ch,at:Date.now(),by:S.invite?S.invite.by:''};S.joinCh=ch;save();renderHome();$('#v-home').scrollTop=0;
-    toast('Sent to '+LEAD_X[PRES[ch]].name)}
+    if(!ch){msg.textContent='Pick a chapter.';return}
+    const btn=e.target.querySelector('button[type=submit]');btn.disabled=true;msg.textContent='Sending...';
+    fetch(AUTH+'/club/join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({first:v('jf'),last:v('jl'),email:v('je'),phone:v('jp'),city:v('jcity'),hcp:v('jh'),heard:v('jhear'),note:v('jm'),chapter:ch,by:S.invite?S.invite.by:'',website:v('jweb')})})
+     .then(r=>r.json().then(d=>({ok:r.ok,d})))
+     .then(({ok,d})=>{if(!ok||!d.ok)throw new Error(d.error||'');
+       S.joinSent={first:v('jf'),chapter:ch,at:Date.now(),by:S.invite?S.invite.by:''};S.joinCh=ch;save();renderHome();$('#v-home').scrollTop=0;toast('Sent to '+LEAD_X[PRES[ch]].name)})
+     .catch(err=>{btn.disabled=false;msg.textContent=err.message||'That did not go through. Check your connection and try again.'})}
   if(e.target.id==='leadMsgForm'){e.preventDefault();const L=LEAD_X[e.target.dataset.lead];if(!$('#lmText').value.trim())return;closeSheet();toast('Message sent to '+L.first+'. Preview only, nothing sent yet.')}
   if(e.target.id==='sponForm'){e.preventDefault();if(!$('#spName').value.trim()||!$('#spEmail').value.trim()){toast('Add a business name and email');return}closeSheet();toast('Sent to Ross. Preview only, nothing sent yet.')}
 });
@@ -2665,6 +2670,7 @@ $('#siSetup').addEventListener('submit',async e=>{e.preventDefault();const m=$('
 /* on open: confirm a saved sign-in is still good, otherwise sign out */
 (async()=>{const t=authTok();if(!t){if(S.member||S.demo){S.member=false;S.demo=false;S.tour=-1;save();renderAll();syncTop()}return}try{const r=await authCall('/auth/me',null,t);applyMe(r.me);renderAll();syncTop();loadInbox(true)}catch(err){if(err.status===401){setTok('');if(S.member&&!S.demo){S.member=false;save();renderAll();syncTop()}}}})();
 $('#siGuest').addEventListener('click',()=>{try{sessionStorage.setItem('rngcGuest','1')}catch(e){}closeSignIn()});
+$('#siJoin').addEventListener('click',()=>{try{sessionStorage.setItem('rngcGuest','1')}catch(e){}closeSignIn();S.joinSent=null;S.hpage='join';setTab('home')});
 (function(){
   let g=null,inv=null;try{g=sessionStorage.getItem('rngcGuest');inv=JSON.parse(sessionStorage.getItem('rngcInvite')||'null')}catch(e){}
   const q=new URLSearchParams(location.search);
