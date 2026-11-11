@@ -396,12 +396,13 @@ function trEstSheet(){const est=trEst(),rows=trMine().filter(x=>x.p.diff!=null&&
    <button class="btn block" style="margin-top:12px" id="closeSheet">Close</button>`;trOpen()}
 
 /* ---------- first open: who you are, your tees, your home course ---------- */
-function trWelcome(){const d=Object.assign({tees:'mid',w:false},G.pref||{}),home=G.home&&COURSES[G.home]?COURSES[G.home]:G.homeInfo;
+function trWelcome(){const sm=trSiteMe(),d=Object.assign({tees:'mid',w:false},G.pref||{}),home=G.home&&COURSES[G.home]?COURSES[G.home]:G.homeInfo;
   $('#app').innerHTML=trBar('Welcome','RNGC golf · set up in 30 seconds')+`
    <section class="card wl"><h2>Let's get you set up</h2>
     <div class="lbl" style="margin-top:0">Text size</div>
     <div class="teel" role="group" aria-label="Text size" style="grid-template-columns:repeat(3,1fr)"><button data-big="0" aria-pressed="${!G.big}"><b>Regular</b><span>&nbsp;</span></button><button data-big="1" id="wlBig" aria-pressed="${!!G.big&&!(G.pref||{}).sun}"><b style="font-size:19px">Bigger text</b><span>easier to read</span></button><button data-big="2" id="wlBright" aria-pressed="${!!G.big&&!!(G.pref||{}).sun}"><b style="font-size:19px">Bigger + bright</b><span>best in the sun</span></button></div>
-    <label class="inl"><span>Your name</span><input class="field" id="wlName" maxlength="24" placeholder="Like Mike R." value="${esc(G.me.name==='You'?'':G.me.name)}" autocomplete="off"></label>
+    ${sm?`<div class="lbl">You</div><p style="font-size:18px;margin:0 0 10px"><b>${esc(sm.name)}</b> <span class="muted" style="font-size:15px">· signed in${sm.ghin?' · GHIN '+esc(sm.ghin):''}</span></p><input type="hidden" id="wlName" value="${esc(sm.name)}">`
+     :`<label class="inl"><span>Your name</span><input class="field" id="wlName" maxlength="24" placeholder="Like Mike R." value="${esc(G.me.name==='You'?'':G.me.name)}" autocomplete="off"></label>`}
     <label class="inl"><span>Handicap index</span><input class="field" id="wlIdx" type="number" inputmode="decimal" step="0.1" placeholder="Don't know it? Leave blank" value="${G.me.set?G.me.hcp:''}"></label>
     <p class="note" style="margin-top:4px"><i class="ph-bold ph-info"></i><span>Blank is fine. After 3 rounds the app works out an index from your scores.</span></p>
     <div class="lbl">Home course</div>
@@ -664,8 +665,11 @@ function trPick(id,gid,btn,cb){const row=LIB&&LIB.courses.find(c=>c[0]===id),inf
    .catch(()=>{if(btn)btn.style.opacity=1;if(cb&&info)return cb(id,info);if(row)trAddCourse(gid,{lib:id,name:row[1],city:(row[2]?row[2]+', ':'')+row[3]})})}
 
 /* ---------- a saved round ---------- */
+/* signed in to the club site: the golf tab already knows who you are */
+function trSiteMe(){try{const s=JSON.parse(localStorage.getItem('rngc-site-v2')||'{}');if(!s.member||s.demo||!s.name)return null;return{name:String(s.name).slice(0,24),ghin:(s.cfg&&s.cfg.my&&s.cfg.my.ghin)||null}}catch(e){return null}}
 function trBig(){document.body.classList.toggle('bigt',!!G.big);document.body.classList.toggle('sun',!!(G.pref||{}).sun&&!location.hash.startsWith('#/tv'))}
 trBig();
+{const sm=trSiteMe();if(sm&&G.me.name!==sm.name)trSetMe(sm.name,G.me.hcp)}
 
 /* solo games: what a golfer playing alone plays against */
 const TR_SG=[['course','Match vs the course','Each hole, your net score against par: win, lose or halve, like match play.'],['best','Beat my best here','See how you stand against your best round at this course, hole by hole.'],['pts','Points goal','Net Stableford: 2 points for net par, 3 for a birdie. 36 means you played to your handicap.'],['none','Just my score','No game, just keep score.']];
