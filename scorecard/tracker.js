@@ -164,7 +164,7 @@ const trIdx=v=>{const i=parseFloat(v);return isNaN(i)?18:Math.max(-5,Math.min(54
 function gfresh(){const f=gload();for(const k of Object.keys(f))G[k]=f[k]}
 function trOpen(){$('#scrim').classList.add('on');$('#sheet').classList.add('on');const c=$('#closeSheet');if(c)c.onclick=closeSheet}
 function trSetMe(n,i){G.me.name=n;G.me.hcp=i;for(const g of G.groups)for(const m of g.members)if(m.id==='me'){m.name=n;m.hcp=i}gsave()}
-const trBetName=b=>b.type==='skins'?'Skins $'+b.amt:b.type==='nassau'?'Nassau $'+b.amt+' each way':(b.label||b.name||'Side bet');
+const trBetName=b=>b.type==='skins'?'Skins '+money(b.amt):b.type==='nassau'?'Nassau '+money(b.amt)+' each way':(b.label||b.name||'Side bet');
 function trShare(btn,text){const done=t=>{btn.innerHTML='<i class="ph-bold ph-check"></i> '+t;setTimeout(()=>btn.innerHTML=btn.dataset.l,2200)};btn.dataset.l=btn.dataset.l||btn.innerHTML;
   if(navigator.share){navigator.share({text}).catch(()=>{});return}
   try{navigator.clipboard.writeText(text).then(()=>done('Copied, paste it in your group text'),()=>done('Copy failed'))}catch(e){done('Copy failed')}}
@@ -210,7 +210,7 @@ function trWinner(r){const full=r.players.filter(p=>p.holes===18);if(full.length
   if(r.format==='stableford'&&full.every(p=>p.pts!=null)){const hi=Math.max(...full.map(p=>p.pts)),w=full.filter(p=>p.pts===hi);return w.length===1?w[0]:null}const lo=Math.min(...full.map(p=>p.net-p.par)),w=full.filter(p=>p.net-p.par===lo);return w.length===1?w[0]:null}
 function trStandings(g,rs){const m={};
   for(const r of rs){const w=trWinner(r);
-    for(const p of r.players){const x=m[p.id]||(m[p.id]={id:p.id,name:p.name,n:0,w:0,nets:[],pts:[],money:0});x.n++;if(p.holes===18)x.nets.push(p.net-p.par);if(p.holes===18&&p.pts!=null&&r.format==='stableford')x.pts.push(p.pts);if(w&&w.id===p.id)x.w++;x.money+=(r.money||{})[p.id]||0}}
+    for(const p of r.players){const x=m[p.id]||(m[p.id]={id:p.id,name:p.name,n:0,w:0,nets:[],pts:[],money:0});x.n++;if(p.holes===18)x.nets.push(p.net-p.par);if(p.holes===18&&p.pts!=null&&r.format==='stableford')x.pts.push(p.pts);if(w&&w.id===p.id)x.w++;if((r.cur||'usd')!=='rb')x.money+=(r.money||{})[p.id]||0}}   /* Raider Bucks rounds live in the wallet, not the cash table */
   return Object.values(m).sort((a,b)=>b.w-a.w||b.money-a.money||(trAvg(a.nets)??99)-(trAvg(b.nets)??99))}
 function trSkins(ids,scores,amt){const led={};let carry=1;
   for(let h=1;h<=18;h++){const v=ids.map(id=>({id,v:scores[id][h]})).sort((a,b)=>a.v-b.v);
@@ -896,11 +896,13 @@ function finishRound(){const t=myTeam(),miss=order(t.start).filter(h=>!holeDone(
   gfresh();const live=G.live[RID]||LIVE,list=field(),led={};
   for(const b of myBets()){const r=settleBet(b,list);for(const[k,v]of Object.entries(r.led))led[k]=(led[k]||0)+v}
   const m={...live,cfg:CFG(),players:players(t).map(p=>({id:p.id,name:p.name,hcp:idx(p.id)}))};
-  const sm=trSummary(m,S.scores[scoreKey(t.id)]||{},S.st,led);sm.bets=myBets().map(trBetName);
+  const sm=trSummary(m,S.scores[scoreKey(t.id)]||{},S.st,led);sm.bets=myBets().map(trBetName);sm.cur=curNow();
   /* skins hole by hole, so the parking-lot argument settles itself */
   sm.betLines=myBets().filter(b=>b.type!=='skins').map(b=>({name:trBetName(b),line:settleBet(b,list).line}));
   for(const b of myBets())if(b.type==='skins'){const r=settleBet(b,list);sm.skins={amt:b.amt,net:!!b.net,won:(r.won||[]).map(w=>({h:w.h,pid:w.pid,n:w.n,amt:w.amt})),carry:r.carry||0}}
   G.rounds.unshift(sm);delete G.live[RID];
+  /* Raider Bucks: side-bet result and the round bonus go to the wallet once (keyed by round) */
+  if(window.RNGCBUCKS&&!live.follow){const v=Math.round(led.me||0);if(sm.cur==='rb'&&v)RNGCBUCKS.post('bets:'+sm.id,v,(v>0?'Won':'Lost')+' side bets, '+(sm.cname||'round'),'bet');RNGCBUCKS.earn('round',sm.id)}
   const me=sm.players.find(p=>p.id==='me');if(me&&me.hcp!==G.me.hcp&&!live.follow)trSetMe(G.me.name,me.hcp);const fin=S.share&&!live.follow?trLivePush(true):null;
   if(live.group){const g=G.groups.find(x=>x.id===live.group);if(g)for(const p of m.players){const gm=g.members.find(x=>x.id===p.id);if(gm)gm.hcp=p.hcp}}
   gsave();try{localStorage.removeItem(KEY)}catch(e){}
@@ -908,6 +910,7 @@ function finishRound(){const t=myTeam(),miss=order(t.start).filter(h=>!holeDone(
 
 /* a turned-in event card also lands under Club events */
 function logEvent(){try{gfresh();const t=myTeam(),e=EV(),c=CO(),P=PEOPLE(),raw=S.scores[scoreKey(t.id)]||{},u=ranked(field()).find(x=>x.mine)||{};
+  if(window.RNGCBUCKS)RNGCBUCKS.earn('event',S.event||'event');
   const pl=Object.entries(raw).map(([w,s])=>{const hs=Object.keys(s).filter(h=>s[h]!=null);
     return{id:w,name:w==='team'?'Team':(P[w]?P[w].name:'Player'),scores:s,holes:hs.length,gross:trSum(hs.map(h=>s[h])),par:trSum(hs.map(h=>c.par[h-1]))}});
   G.rounds=G.rounds.filter(r=>r.id!=='ev-'+e.id);
@@ -1002,4 +1005,7 @@ function trJoin(code){code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'
      location.href='./?r='+rid+'#/hole/'+(j.at||1)})}).catch(()=>alert('Could not reach the live service. Check your signal and try again.'))}
 {const jq=new URLSearchParams(location.search).get('join');if(jq&&!CASUAL)setTimeout(()=>trJoin(jq),400)}
 
+/* history rows and round pages show each round in its own currency (dollars or Raider Bucks) */
+{const _row=trRow;trRow=function(r,p){const pc=window.__cur;window.__cur=r.cur||'usd';try{return _row(r,p)}finally{window.__cur=pc}};
+ const _rd=trRound;trRound=function(id){const r=G.rounds.find(x=>x.id===id);window.__cur=(r&&r.cur)||'usd';return _rd(id)}}
 route();
