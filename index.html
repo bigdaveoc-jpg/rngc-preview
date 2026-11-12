@@ -409,6 +409,26 @@ textarea.field{min-height:110px;resize:vertical}
 .field::placeholder{color:#7d8591}
 .sheet .btn.full{width:100%;margin-top:16px}
 .help{font-size:13px;color:var(--muted);margin-top:6px}
+/* club setup checklist */
+.csnudge{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-color:var(--silver-2);margin:0 0 12px}
+.csnudge .meta{margin-top:4px}
+.csbar{height:10px;border-radius:6px;background:var(--panel-2);overflow:hidden;margin:6px 0 16px}
+.csbar i{display:block;height:100%;background:var(--silver)}
+.cscard .cshead{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+.cscard .cshead .meta{margin-top:2px}
+.csnum{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--silver);color:var(--on-silver);font-weight:800;font-size:16px}
+.cscard.done .csnum{background:#1f7a3f;color:#fff}
+.cscard label.csl{display:block;font-weight:600;margin:4px 0 6px}
+.cspick{border:0;padding:0;margin:2px 0;min-width:0}
+.cspick legend{font-weight:600;margin-bottom:8px;padding:0}
+.cspick .row{display:flex;flex-wrap:wrap;gap:8px}
+.cschip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;font-weight:600}
+.cschip input{width:20px;height:20px;margin:0;accent-color:var(--silver)}
+.cschip:has(input:checked){border-color:var(--silver);background:var(--panel-2)}
+.cssteps{margin:0 0 12px;padding-left:22px;display:grid;gap:12px}
+.cssteps li{line-height:1.45}
+.cssteps .btn{margin-top:6px}
+.cssend{margin-top:14px;width:100%}
 .adminstrip{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px;padding:10px 12px;border:1px solid var(--line);border-left:3px solid #e8ecf1;background:var(--panel-2);font-size:13px;font-weight:700}
 .adminstrip button{font:inherit;font-weight:600;color:var(--silver-2);background:none;border:0;text-decoration:underline;min-height:36px;padding:0 4px;cursor:pointer}
 details.fold{border:1px solid var(--line);margin-top:8px}
@@ -1238,7 +1258,7 @@ function renderHome(){
   else if(pg==='news')v.innerHTML=subChips('home')+newsHTML();
   else if(pg==='invite')v.innerHTML=subChips('home')+inviteHTML();
   else if(pg==='about')v.innerHTML=subChips('home')+aboutHTML();
-  else v.innerHTML=subChips('home')+overviewHTML();
+  else v.innerHTML=subChips('home')+setupNudge()+overviewHTML();
   syncTop();
 }
 function overviewHTML(){
@@ -2403,7 +2423,7 @@ const can=p=>S.member&&(S.role==='admin'||!!(S.cfg.perms[S.role]||{})[p]);
 const USERS=[];
 const userNow=u=>({...u,...(S.cfg.users[u.id]||{})});
 
-const SPAGES=[['account','My account',()=>true],['users','Members',()=>S.member&&S.realRole==='admin'],['announce','Messages',()=>S.member&&!!authTok()]];
+const SPAGES=[['setup','Club setup',()=>csCan()],['account','My account',()=>true],['users','Members',()=>S.member&&S.realRole==='admin'],['announce','Messages',()=>S.member&&!!authTok()]];
 Object.defineProperty(SUBNAV,'settings',{enumerable:true,configurable:true,get:()=>SPAGES.filter(p=>p[2]()).map(p=>[p[1],p[0]])});
 
 /* small building blocks */
@@ -2416,6 +2436,86 @@ const prevNote='<div class="card privacy"><i class="ph-bold ph-info"></i><span>P
 const getPath=(o,p)=>p.split('.').reduce((a,k)=>a&&a[k],o);
 function setPath(o,p,v){const ks=p.split('.');let a=o;ks.slice(0,-1).forEach(k=>{a[k]=a[k]||{};a=a[k]});a[ks[ks.length-1]]=v}
 
+/* ---------- Club setup: a plain checklist for the club admin. Each answer goes to David's club inbox as a message
+   (the existing message service, nothing new on the server). Never asks for passwords: account access is by invite. ---------- */
+const CS_GMAIL='David\'s Gmail is the address his Nov 11 email to you came from.';
+const CSETUP=[
+ {id:'nov14',sec:'Due this week',t:'Nov 14 Chimera groups',why:'The live scorecard needs this before Saturday.',f:[
+   ['ta','Groups and starting holes','One group per line. Example: Hole 1: Ross, Mike, Tony, Sal'],
+   ['ta','Handicaps','One player per line. Example: Mike Smith 12.4'],
+   ['pick','Format',['4-man scramble','Best ball','Stroke play']]]},
+ {id:'rc27',sec:'Due this week',t:'Raider Cup 2027 pay link',why:'The event is in the app, but players can only tap Interested until we have this.',f:[
+   ['url','Link where players pay','Paste the web address here'],
+   ['num','Spots left','2']]},
+ {id:'access',sec:'Due this week',t:'Give David access to 3 accounts',why:'So we can run the website, the domain and club email for you. No passwords: you just invite David. '+CS_GMAIL,
+  steps:[['DigitalOcean','https://cloud.digitalocean.com/account/team','Tap Invite Members, type David\'s Gmail, send'],
+         ['GoDaddy','https://account.godaddy.com/access','Tap Invite to Access, type David\'s Gmail, pick Products and Domains'],
+         ['Resend','https://resend.com/login','Sign in, open Settings, then Team, invite David\'s Gmail']],
+  f:[['checks','Which ones did you send?',['DigitalOcean','GoDaddy','Resend']]]},
+ {id:'dob',sec:'Member info',t:'Two missing birth dates',why:'James Harris and Ron Maurice can\'t set up their sign-in without them.',f:[
+   ['date','James Harris'],['date','Ron Maurice']]},
+ {id:'honor',sec:'Member info',t:'Alumni and Hall of Fame',why:'They get their own page in the app.',f:[
+   ['ta','Names','One per line. Put HOF after each Hall of Famer.']]},
+ {id:'bios',sec:'Member info',t:'Club leader bios',why:'The app shows placeholders right now. A few lines each is plenty.',f:[
+   ['ta','Ross Ricks',''],['ta','Jason Duran',''],['ta','Jason Garrison','']]},
+ {id:'ghin',sec:'Member info',t:'GHIN access from USGA',why:'Official handicaps show in the app once this comes through.',f:[
+   ['pick','Where it stands',['Not started','Waiting on USGA','Approved']],['ta','Anything we should know','']]},
+ {id:'ok',sec:'Your OK',t:'Quick yes or no',why:'Tap an answer for each one.',f:[
+   ['pick','Show sponsor logos in the app?',['Yes','No']],
+   ['pick','Use the golf-ball club logo?',['Yes','No']],
+   ['pick','Who can send invite links?',['Any member','Leaders only']],
+   ['pick','Do new members need your OK?',['Yes','No']],
+   ['text','Who runs the forum?','Name']]}
+];
+const CS={sent:null,busy:false,open:{}};
+const csSubj=it=>'Club setup: '+it.t;
+const csCan=()=>S.member&&S.realRole==='admin'&&!!authTok();
+function csDraft(){try{return JSON.parse(localStorage.getItem('rngc-setup')||'{}')}catch(e){return {}}}
+function csKeep(id,vals){if(id==='dob')return;try{const d=csDraft();d[id]=vals;localStorage.setItem('rngc-setup',JSON.stringify(d))}catch(e){}}
+async function csLoad(){if(CS.busy||CS.sent||!authTok())return;CS.busy=true;
+  try{const r=await authCall('/msg/sent',null,authTok());const m={};(r.items||[]).forEach(x=>{if(!m[x.subject])m[x.subject]=x.ts});CS.sent=m}catch(e){CS.sent={}}
+  CS.busy=false;if(S.tab==='settings'&&S.spage==='setup')renderSettings();if(S.tab==='home')renderHome()}
+const csDone=it=>!!(CS.sent&&CS.sent[csSubj(it)]);
+const csLeft=()=>CSETUP.filter(it=>!csDone(it)).length;
+function setupNudge(){if(!csCan())return '';if(!CS.sent){csLoad();return ''}
+  const n=csLeft();if(!n)return '';
+  return `<div class="card csnudge rise"><div><b>Club setup: ${n} ${n===1?'thing':'things'} left</b><p class="meta">Quick answers so the app works for the club. Each one goes straight to David.</p></div><button class="btn" data-csgo><i class="ph-bold ph-list-checks"></i> Open the checklist</button></div>`}
+function csField(it,f,i,val){const id=`cs-${it.id}-${i}`,[k,label,x]=f;
+  if(k==='ta')return `<div><label class="csl" for="${id}">${label}</label><textarea class="field" id="${id}" data-csf="${i}" maxlength="1500" placeholder="${esc(x||'')}">${esc(val||'')}</textarea></div>`;
+  if(k==='pick'||k==='checks'){const t=k==='pick'?'radio':'checkbox',on=String(val||'').split(', ');
+    return `<fieldset class="cspick"><legend>${label}</legend><div class="row">${x.map(o=>`<label class="cschip"><input type="${t}" name="${id}" value="${esc(o)}" data-csf="${i}" ${on.includes(o)?'checked':''}>${esc(o)}</label>`).join('')}</div></fieldset>`}
+  const type={url:'url',num:'number',date:'date'}[k]||'text';
+  return `<div><label class="csl" for="${id}">${label}</label><input class="field" id="${id}" type="${type}" data-csf="${i}" ${k==='num'?'min="0" max="24" inputmode="numeric"':''} placeholder="${esc(x||'')}" value="${esc(val||'')}"></div>`}
+function csVals(it,box){const v={};it.f.forEach((f,i)=>{const els=[...box.querySelectorAll(`[data-csf="${i}"]`)];
+  v[i]=f[0]==='pick'||f[0]==='checks'?els.filter(e=>e.checked).map(e=>e.value).join(', '):((els[0]&&els[0].value)||'').trim()});return v}
+function csCard(it,n){const done=csDone(it),open=!done||CS.open[it.id],d=it.id==='dob'?{}:(csDraft()[it.id]||{});
+  const when=done?new Date(CS.sent[csSubj(it)]*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+  return `<div class="card cscard ${done?'done':''}" id="cs-${it.id}"><div class="cshead"><span class="csnum" aria-hidden="true">${done?'<i class="ph-bold ph-check"></i>':n}</span><div><h3 class="cardh">${it.t}</h3><p class="meta">${it.why}</p></div></div>
+   ${done&&!open?`<div class="row"><span class="pill">Sent ${when}</span><span class="grow"></span><button class="btn small ghost" data-csedit="${it.id}">Change answer</button></div>`:
+   `${it.steps?`<ol class="cssteps">${it.steps.map(st=>`<li><b>${st[0]}:</b> ${esc(st[2])}.<br><a class="btn small ghost" href="${st[1]}" target="_blank" rel="noopener"><i class="ph-bold ph-arrow-square-out"></i> Open ${st[0]}</a></li>`).join('')}</ol>`:''}
+    <div class="stack">${it.f.map((f,i)=>csField(it,f,i,d[i])).join('')}</div>
+    <button class="btn cssend" data-cssend="${it.id}"><i class="ph-bold ph-paper-plane-tilt"></i> ${done?'Send update to David':'Send to David'}</button>`}</div>`}
+function setupHTML(){if(!CS.sent){csLoad();return pageHead('Club setup')+'<div class="card empty">Loading your checklist...</div>'}
+  const left=csLeft(),tot=CSETUP.length,first=(S.name||'').split(' ')[0];let n=0,sec='';
+  return pageHead('Club setup',left?`${tot-left} of ${tot} done. Fill one in, tap Send, and it goes straight to David. No passwords needed.`:`All done${first?', '+esc(first):''}. Thanks! You can still change any answer.`)+
+   `<div class="csbar" role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${tot-left}"><i style="width:${Math.round((tot-left)/tot*100)}%"></i></div>
+   <div class="stack rise">${CSETUP.map(it=>{n++;const h=it.sec!==sec?`<h3 class="shophead">${it.sec}</h3>`:'';sec=it.sec;return h+csCard(it,n)}).join('')}</div>`}
+async function csSend(id,btn){const it=CSETUP.find(x=>x.id===id),box=$('#cs-'+id);if(!it||!box)return;
+  const vals=csVals(it,box);if(!Object.values(vals).some(Boolean)){toast('Fill in at least one answer first.');return}
+  const body=it.f.map((f,i)=>`${f[1]}: ${vals[i]||'(blank)'}`).join('\n');
+  btn.disabled=true;
+  try{const ppl=await authCall('/msg/people',null,authTok()),me=((S.authMe&&S.authMe.name)||'').toLowerCase();
+    const to=(ppl.people||[]).find(x=>/^david\b.*blake/i.test(x.name)&&x.name.toLowerCase()!==me)||(ppl.people||[]).find(x=>/^ross\b.*ricks/i.test(x.name)&&x.name.toLowerCase()!==me);
+    if(!to)throw new Error('Could not find David in the member list. Try again later.');
+    await authCall('/msg/send',{to:{type:'people',ids:[to.id]},subject:csSubj(it),body,email:false},authTok());
+    csKeep(id,vals);CS.sent=Object.assign({},CS.sent,{[csSubj(it)]:Math.floor(Date.now()/1000)});CS.open[id]=false;MSG.sent=null;
+    renderSettings();toast('Sent to '+to.name.split(' ')[0]+'. Thanks!')}
+  catch(e){toast(e.message||'That did not send. Try again.');btn.disabled=false}}
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-csgo]')){S.spage='setup';save();setTab('settings');return}
+  const sb=e.target.closest('[data-cssend]');if(sb){csSend(sb.dataset.cssend,sb);return}
+  const ce=e.target.closest('[data-csedit]');if(ce){CS.open[ce.dataset.csedit]=true;renderSettings();return}});
+document.addEventListener('input',e=>{const box=e.target.closest('.cscard');if(!box)return;const it=CSETUP.find(x=>'cs-'+x.id===box.id);if(it)csKeep(it.id,csVals(it,box))});
 function renderSettings(){
   const v=$('#v-settings');
   if(!S.member){v.innerHTML=`<div class="card gate rise" style="margin-top:16px"><i class="ph-fill ph-gear-six"></i><h3>Settings</h3><p>Sign in to change your account, alerts and privacy. Club leaders also manage members, events and the ticket exchange here.</p>
@@ -2423,7 +2523,7 @@ function renderSettings(){
   const ok=SPAGES.find(p=>p[0]===S.spage&&p[2]());if(!ok)S.spage='account';
   const pg=S.spage||'account';
   const bar=true?'':`<div class="rolebar"><span><i class="ph-bold ph-eye"></i> Preview as</span><div class="seg2">${ROLES.map(r=>`<button class="chip" data-role="${r[0]}" aria-pressed="${S.role===r[0]}">${r[1]}</button>`).join('')}</div></div>`;
-  const body={account:accountHTML,notify:notifyHTML,users:usersHTML,perms:permsHTML,events:evMgrHTML,chapters:chaptersHTML,tix:tixSetHTML,forum:forumSetHTML,sponsors:sponsSetHTML,announce:annHTML,club:clubHTML}[pg]();
+  const body={setup:setupHTML,account:accountHTML,notify:notifyHTML,users:usersHTML,perms:permsHTML,events:evMgrHTML,chapters:chaptersHTML,tix:tixSetHTML,forum:forumSetHTML,sponsors:sponsSetHTML,announce:annHTML,club:clubHTML}[pg]();
   v.innerHTML=subChips('settings')+bar+body;
   if(pg==='users')fillUsers();
 }
@@ -2890,7 +2990,7 @@ function applyMe(me){
   S.cfg.my.chapter=PLANS.some(p=>p.chapter===me.chapter)?me.chapter:'National';if(me.ghin)S.cfg.my.ghin=me.ghin;
   cfgSave();save()}
 function signedIn(res){setTok(res.token);MSG.items=null;MSG.perm=null;MSG.sent=null;DIR.items=null;applyMe(res.me);closeSignIn();renderAll();syncTop();toast('Signed in as '+res.me.name.split(' ')[0]);loadInbox(true)}
-async function signOutReal(){const t=authTok();setTok('');MSG.items=null;MSG.perm=null;MSG.sent=null;MSG.unread=0;DIR.items=null;S.authMe=null;S.realRole=null;if(t){try{await authCall('/auth/logout',{},t)}catch(e){}}}
+async function signOutReal(){const t=authTok();setTok('');MSG.items=null;MSG.perm=null;MSG.sent=null;MSG.unread=0;DIR.items=null;S.authMe=null;S.realRole=null;CS.sent=null;CS.open={};if(t){try{await authCall('/auth/logout',{},t)}catch(e){}}}
 $('#siForm').addEventListener('submit',async e=>{e.preventDefault();const m=$('#siMsg'),b=e.target.querySelector('button[type=submit]');
   const email=$('#siEmail').value.trim(),password=$('#siPass').value;if(!email||!password){m.textContent='Enter your email and password.';return}
   b.disabled=true;m.textContent='Signing in...';
