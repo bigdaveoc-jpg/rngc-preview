@@ -12,7 +12,7 @@
 (function(){
 'use strict';
 const KEY='rngc-bucks',CACHE='rngc-bucks-server',OUTBOX='rngc-bucks-outbox';
-const CLUB_API='';   /* e.g. 'https://rngc-club.137.184.15.101.sslip.io' once the server is deployed */
+const CLUB_API='https://rngc-club.137.184.15.101.sslip.io';   /* club server live 2026-11-12 */
 const api=()=>{try{const o=localStorage.getItem('rngc-club-api');if(o)return o.replace(/\/$/,'')}catch(e){}return CLUB_API};
 const tok=()=>{try{return localStorage.getItem('rngc-auth-token')||''}catch(e){return ''}};
 const remote=()=>!!api()&&!!tok();
