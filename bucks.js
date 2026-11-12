@@ -75,7 +75,7 @@ function bet(rid,amt,where){if(remote()){queue('/bucks/bet',{rid:String(rid),amt
 function applyRules(r){if(r.earn)for(const [k,v] of Object.entries(r.earn))EARN[k]=Object.assign({},EARN[k]||{},v);if(r.welcome)EARN.welcome.amt=r.welcome;
   if(Array.isArray(r.store)&&r.store.length){STORE.length=0;r.store.forEach(x=>STORE.push(x))}}
 function ensureWelcome(){if(remote()){if(Date.now()-lastSync>30e3){lastSync=Date.now();sync()}return}const w=load();if(!w.tx.some(t=>t.kind==='welcome'))post('welcome',EARN.welcome.amt,EARN.welcome.label,'welcome')}
-async function redeemAsync(id){if(!remote())return redeem(id);try{const r=await club('/bucks/redeem',{item:id});await sync();return r}catch(e){return {ok:false,why:e.message}}}
+async function redeemAsync(id,extra){if(!remote())return redeem(id);try{const r=await club('/bucks/redeem',Object.assign({item:id},extra||{}));await sync();return r}catch(e){return {ok:false,why:e.message}}}
 function redeem(id,now){
   const it=STORE.find(x=>x.id===id),w=load();if(!it)return {ok:false,why:'No such item'};
   if(bal(w)<it.b)return {ok:false,why:'Not enough Raider Bucks yet'};

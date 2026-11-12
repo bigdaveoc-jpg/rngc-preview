@@ -3,7 +3,10 @@
    Drawn product pictures with the club shield stand in for the vendor's product photos, and the prices are samples.
    Nothing here takes money: "Buy" says checkout opens once the vendor is connected and keeps a "tell me" list on this
    phone; members can trade Raider Bucks for the same items (a request a club leader confirms).
-   Loads after the main script and bucks.js; adds the collection to Home > Club shop. */
+   Loads after the main script and bucks.js; adds the collection to Home > Club shop.
+   Connected mode: when the club server (CLUB_API in bucks.js) answers /shop/products, the real Printful products and
+   their photos replace the drawings. Buy opens the product on the club's WordPress store (payment happens there), and
+   a Raider Bucks trade asks for a shipping address; an admin's approval makes a draft order in Printful. */
 (function(){
 'use strict';
 if(typeof shopHTML!=='function')return;
@@ -100,9 +103,10 @@ function art(p,ck){
 document.body.insertAdjacentHTML('beforeend',SPRITE);
 
 /* ---------- page ---------- */
-let cat='all',sel=null;
+let cat='all',sel=null,LIVE=null,lsel=null;
 const dot=k=>`<i style="background:${C[k][0]}"></i>`;
 function collectionHTML(){
+  if(LIVE)return liveHTML();
   const list=P.filter(p=>cat==='all'||p.cat===cat);
   const rbOn=!!window.RNGCBUCKS&&typeof S!=='undefined'&&S.member;
   return `<div class="rgx"><h3 class="shophead">The club collection</h3>
@@ -144,4 +148,54 @@ document.addEventListener('click',e=>{
     if(!confirm('Trade '+RNGCBUCKS.fmtN(rbOf(p))+' Raider Bucks for the '+p.n.toLowerCase()+(sel.z?' ('+CN[sel.c]+', '+sel.z+')':'')+'? A club leader confirms and ships it.'))return;
     RNGCBUCKS.redeemAsync(p.id).then(r=>{closeSheet();toast(r.ok?'Requested. '+RNGCBUCKS.fmtN(RNGCBUCKS.balance())+' RB left.':r.why);redraw()});return}
 });
+
+/* ---------- connected: the club's Printful store ---------- */
+const catOf=n=>/hat|cap|beanie|visor/i.test(n)?'hats':/polo|tee\b|t-shirt|shirt|hoodie|zip|pullover|jacket|crew/i.test(n)?'apparel':/ball|marker|towel|head ?cover|divot|tees/i.test(n)?'golf':'fan';
+const uniq=a=>[...new Set(a.filter(Boolean))];
+const pimg=u=>`<img src="${esc(u)}" alt="" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;background:#fff;display:block">`;
+function liveHTML(){
+  const list=LIVE.filter(p=>cat==='all'||catOf(p.name)===cat),rbOn=!!window.RNGCBUCKS&&typeof S!=='undefined'&&S.member;
+  return `<div class="rgx"><h3 class="shophead">The club collection</h3>
+   <div class="card mock"><i class="ph-bold ph-package"></i><span><b>Made to order</b> by our print partner and shipped to your door. Buy checks out on the club store${rbOn?'; members can also trade Raider Bucks':''}.</span></div>
+   <div class="cats" role="tablist">${CATS.map(([k,t])=>`<button class="chip" data-rgcat="${k}" aria-pressed="${cat===k}">${t}</button>`).join('')}</div>
+   <div class="grid">${list.map(p=>`<button class="card it" data-rlp="${esc(p.id)}">${pimg(p.image)}<div class="b"><b>${esc(p.name)}</b>
+     <div class="pr"><span class="usd">$${Math.round(p.usd)}</span>${rbOn?`<span class="rb">or ${RNGCBUCKS.fmtN(p.rb)} RB</span>`:''}</div></div></button>`).join('')||'<p class="sub">Nothing in this group yet.</p>'}</div></div>`;
+}
+const lv=()=>{const p=LIVE.find(x=>x.id===lsel.id);const v=p.variants.find(x=>(x.color||'')===(lsel.c||'')&&(x.size||'')===(lsel.z||''))||null;return {p,v}};
+function lsheet(){
+  const {p,v}=lv(),colors=uniq(p.variants.map(x=>x.color)),sizes=uniq(p.variants.filter(x=>(x.color||'')===(lsel.c||'')).map(x=>x.size));
+  const rbOn=!!window.RNGCBUCKS&&S.member,bal=rbOn?RNGCBUCKS.balance():0,img=(v&&v.image)||p.image,usd=v?v.usd:p.usd,rb=v?v.rb:p.rb;
+  openSheet(`<div class="rgsheet"><div class="art">${pimg(img)}</div><h3>${esc(p.name)}</h3>
+   ${colors.length>1?`<div class="lbl">Color${lsel.c?': '+esc(lsel.c):''}</div><div class="opt">${colors.map(k=>`<button class="chip" data-rlc="${esc(k)}" aria-pressed="${lsel.c===k}">${esc(k)}</button>`).join('')}</div>`:''}
+   ${sizes.length>1?`<div class="lbl">Size</div><div class="opt">${sizes.map(z=>`<button class="chip" data-rlz="${esc(z)}" aria-pressed="${lsel.z===z}">${esc(z)}</button>`).join('')}</div>`:''}
+   <div class="acts"><button class="btn" data-rlbuy><i class="ph-bold ph-shopping-cart"></i> Buy $${usd.toFixed(2).replace(/\.00$/,'')}</button>
+    ${rbOn?`<button class="btn ghost" data-rltrade ${bal<rb?'disabled':''}><i class="ph-bold ph-coins"></i> ${bal<rb?RNGCBUCKS.fmtN(rb-bal)+' RB to go':'Trade '+RNGCBUCKS.fmtN(rb)+' RB'}</button>`:''}</div>
+   <p class="meta" style="margin-top:12px">Made to order and shipped to you. Checkout is on the club store.</p></div>`);
+}
+const ST='AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' ');
+function shipSheet(){
+  const {p,v}=lv(),f=(id,l,ac,ex)=>`<label class="meta" for="${id}" style="display:block;margin:10px 0 4px">${l}</label><input class="field" id="${id}" autocomplete="${ac}" ${ex||''}>`;
+  openSheet(`<div class="rgsheet"><h3 style="margin-top:0">Where should it go?</h3><p class="sub" style="margin:4px 0 8px">${esc(p.name)}${v.color||v.size?' - '+esc([v.color,v.size].filter(Boolean).join(', ')):''} for ${RNGCBUCKS.fmtN(v.rb)} RB. A club leader approves it, then it's made and shipped to you. We keep the address only until it ships.</p>
+   <form id="rlShip">${f('shN','Name','name','maxlength="60" required')}${f('shA1','Street address','address-line1','maxlength="80" required')}${f('shA2','Apt or suite (optional)','address-line2','maxlength="80"')}${f('shC','City','address-level2','maxlength="40" required')}
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label class="meta" for="shS" style="display:block;margin:10px 0 4px">State</label><select class="field" id="shS" autocomplete="address-level1">${ST.map(x=>`<option ${x==='NV'?'selected':''}>${x}</option>`).join('')}</select></div>
+   <div>${f('shZ','Zip','postal-code','inputmode="numeric" maxlength="10" required')}</div></div>
+   <div class="acts"><button class="btn" type="submit"><i class="ph-bold ph-coins"></i> Trade ${RNGCBUCKS.fmtN(v.rb)} RB</button></div></form></div>`);
+  const nm=$('#shN');if(nm&&S.name)nm.value=S.name;
+}
+document.addEventListener('click',e=>{
+  if(!LIVE)return;
+  const it=e.target.closest('[data-rlp]');if(it){const p=LIVE.find(x=>x.id===it.dataset.rlp);lsel={id:p.id,c:p.variants[0].color||'',z:''};
+    const sz=uniq(p.variants.filter(x=>(x.color||'')===lsel.c).map(x=>x.size));if(sz.length<=1)lsel.z=sz[0]||'';lsheet();return}
+  if(!lsel)return;
+  const c=e.target.closest('[data-rlc]');if(c){lsel.c=c.dataset.rlc;const sz=uniq(LIVE.find(x=>x.id===lsel.id).variants.filter(x=>(x.color||'')===lsel.c).map(x=>x.size));if(!sz.includes(lsel.z))lsel.z=sz.length<=1?(sz[0]||''):'';lsheet();return}
+  const z=e.target.closest('[data-rlz]');if(z){lsel.z=z.dataset.rlz;lsheet();return}
+  if(e.target.closest('[data-rlbuy]')){const {p,v}=lv();if(!v){toast('Pick a size');return}if(p.buy)window.open(p.buy,'_blank','noopener');else toast('Checkout opens soon.');return}
+  if(e.target.closest('[data-rltrade]')){const {v}=lv();if(!v){toast('Pick a size');return}shipSheet();return}
+});
+document.addEventListener('submit',e=>{
+  if(!e.target||e.target.id!=='rlShip')return;e.preventDefault();
+  const {v}=lv(),ship={name:$('#shN').value,address1:$('#shA1').value,address2:$('#shA2').value,city:$('#shC').value,state_code:$('#shS').value,zip:$('#shZ').value};
+  RNGCBUCKS.redeemAsync('pf:'+v.id,{ship}).then(r=>{if(r.ok){closeSheet();toast('Requested. A club leader approves it, then it ships to you.');redraw()}else toast(r.why)});
+});
+if(window.RNGCBUCKS&&RNGCBUCKS.api())RNGCBUCKS.club('/shop/products').then(r=>{if(r&&Array.isArray(r.products)&&r.products.length){LIVE=r.products;redraw()}}).catch(()=>{});
 })();
