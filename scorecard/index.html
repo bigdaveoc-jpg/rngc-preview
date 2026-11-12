@@ -322,15 +322,12 @@ body.bigt #app.wrap{min-height:calc(100dvh / 1.13)}
 </head>
 <body>
 <script>/* golf is for signed-in club members: no club sign-in on this browser = members-only screen, nothing else loads */
-(function(){var ok=false;try{ok=!!localStorage.getItem('rngc-auth-token');
-  /* or a guest pass inside its window: event day plus 72 hours (guestpass.js) */
-  var gp=JSON.parse(localStorage.getItem('rngc-guest-pass')||'null'),now=Date.now();if(gp&&now>=gp.start&&now<gp.exp)ok=true}catch(e){}if(ok)return;
+(function(){var ok=false;try{ok=!!localStorage.getItem('rngc-auth-token')}catch(e){}if(ok)return;
 document.write('<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;background:#0b0b0c;color:#e9e9ea"><div style="max-width:420px"><div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#a7a9ac">Raider Nation Golf Club</div><h1 style="font-size:30px;text-transform:uppercase;margin:10px 0">Members only</h1><p style="color:#a7a9ac;line-height:1.5;margin:0 0 20px">The golf scorecard is for club members. Sign in on the club app with the email on your membership, then come back.</p><a href="../" style="display:inline-block;background:#e9e9ea;color:#0b0b0c;padding:12px 20px;font-weight:700;text-decoration:none">Go to the club app</a></div></div><plaintext style="display:none">');})();
 </script>
 <div class="wrap" id="app"></div>
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Team card"></div>
-<script src="../bucks.js"></script>
 <script src="holes-chimera.js?v=27"></script>
 <script>
 /* ===================== DATA ===================== */
@@ -436,9 +433,7 @@ const WORDS={'-3':'Albatross','-2':'Eagle','-1':'Birdie','0':'Par','1':'Bogey','
 const word=d=>WORDS[d]||(d>0?'+'+d:String(d));
 const dfl=(who,n)=>{const par=CO().par[n-1];return who==='team'?par:par+strokesOn(playHcp(idx(who)),n)};
 const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}};
-/* side bets are in dollars (settled off-app) or Raider Bucks (club points, see ../bucks.js); history pages set window.__cur per round */
-const curNow=()=>window.__cur||S.betCur||'usd';
-const money=n=>curNow()==='rb'&&window.RNGCBUCKS?RNGCBUCKS.fmt(n):(n<0?'-':'')+'$'+Math.abs(Math.round(n*100)/100).toLocaleString(undefined,{maximumFractionDigits:2});
+const money=n=>(n<0?'-':'')+'$'+Math.abs(Math.round(n*100)/100).toLocaleString(undefined,{maximumFractionDigits:2});
 /* World Handicap System: course handicap from the tee's slope and rating; playing handicap applies the event allowance */
 const courseHcp=i=>{const t=TEE();return Math.round(i*t.slope/113+(t.rating-CO().par.reduce((a,b)=>a+b,0)))};
 const playHcp=i=>CFG().hcp?Math.round(courseHcp(i)*CFG().allow/100):0;
@@ -532,7 +527,7 @@ const betsBtn=()=>`<a class="ib" href="#/bets" aria-label="Side bets"><i class="
 const sunOn=()=>typeof G!=='undefined'&&G.pref&&G.pref.sun!=null?!!G.pref.sun:!!S.sun;
 const wireSun=()=>{const b=$('#sunBtn');if(b)b.onclick=()=>{const on=!sunOn();S.sun=on;save();if(typeof G!=='undefined'){(G.pref||(G.pref={})).sun=on;gsave()}route()}};
 
-function route(){const h=location.hash.replace(/^#\/?/,'');window.__cur=/^(me|events|groups?|round|log)(\/|$)/.test(h)?'usd':null;document.body.classList.toggle('sun',sunOn()&&!h.startsWith('tv'));document.body.classList.toggle('tv',h.startsWith('tv'));
+function route(){const h=location.hash.replace(/^#\/?/,'');document.body.classList.toggle('sun',sunOn()&&!h.startsWith('tv'));document.body.classList.toggle('tv',h.startsWith('tv'));
   closeSheet();clearInterval(boardTimer);
   if(h.startsWith('board'))return board(false);
   if(h.startsWith('tv'))return board(true);
@@ -881,17 +876,11 @@ function settleUp(led){const P=PEOPLE(),pos=[],neg=[],tx=[];for(const[pid,v]of O
   while(i<neg.length&&j<pos.length){const x=Math.min(neg[i].v,pos[j].v);tx.push(`${first(P[neg[i].pid].name)} pays ${first(P[pos[j].pid].name)} ${money(x)}`);neg[i].v-=x;pos[j].v-=x;if(neg[i].v<.005)i++;if(pos[j].v<.005)j++}
   return tx}
 function betsPage(){const t=myTeam(),P=PEOPLE(),list=field(),bets=myBets(),ps=ids(t);$('#app').className='wrap';
-  /* Raider Bucks are for signed-in members; guests on a pass keep cash tallies */
-  const RBOK=!!window.RNGCBUCKS&&(()=>{try{return !!localStorage.getItem('rngc-auth-token')}catch(e){return false}})();
-  if(!RBOK&&S.betCur==='rb'){S.betCur='usd';save()}
-  if(RBOK){RNGCBUCKS.ensureWelcome();if(!S.betCur&&!bets.length){S.betCur='rb';save()}}const RB=curNow()==='rb';
   const res=bets.map(b=>({b,r:settleBet(b,list)}));const led={};for(const{r}of res)for(const[k,v]of Object.entries(r.led))led[k]=(led[k]||0)+v;
   const inGroup=res.filter(x=>x.b.type!=='team'),teamBets=res.filter(x=>x.b.type==='team'),inLed={};for(const{b,r}of inGroup)for(const[k,v]of Object.entries(r.led))inLed[k]=(inLed[k]||0)+v;
   const title=b=>b.type==='team'?`Vs ${TEAMS.find(x=>x.id===b.vs).name} · ${money(b.amt)} a man`:b.type==='skins'?`Skins · ${money(b.amt)} a skin · ${b.net?'net':'gross'}${b.carry?' · carryovers':''}`:
     b.type==='nassau'?`Nassau · ${b.a.map(p=>first(P[p].name)).join(' & ')} vs ${b.b.map(p=>first(P[p].name)).join(' & ')} · ${money(b.amt)} each way`:`${esc(b.label||'Bet')} · ${money(b.amt)} each`;
   $('#app').innerHTML=bar('Side bets',t.name,boardBtn())+`
-  ${RBOK?`<div class="seg" role="group" aria-label="Playing for" style="margin-top:4px"><button data-cur="rb" aria-pressed="${RB}">Raider Bucks</button><button data-cur="usd" aria-pressed="${!RB}">Cash</button></div>
-   ${RB?`<p class="note"><i class="ph-bold ph-coins"></i><span>You have ${RNGCBUCKS.fmt(RNGCBUCKS.balance())}. Your winnings or losses land in your wallet when you save the round.</span></p>`:''}`:''}
   ${res.length?res.map(({b,r},i)=>`<section class="card bet"><div class="bhead"><b>${title(b)}</b><button class="ib sm" data-del="${i}" aria-label="Remove this bet"><i class="ph-bold ph-x"></i></button></div>
     <div class="muted bline">${esc(r.line)}</div>
     ${b.type==='custom'&&!b.winner?`<div class="chips2" style="margin-top:8px">${b.who.map(pid=>`<button class="chip2" data-win="${i}|${pid}">${esc(first(P[pid].name))} won</button>`).join('')}</div>`:''}
@@ -900,12 +889,11 @@ function betsPage(){const t=myTeam(),P=PEOPLE(),list=field(),bets=myBets(),ps=id
   <button class="btn ghost block" style="margin-top:12px" id="addBet"><i class="ph-bold ph-plus"></i> Add a bet</button>
   ${Object.keys(inLed).length?`<div class="lbl">Where your group stands</div><section class="card tcard">${ps.map(pid=>{const v=inLed[pid]||0;return `<div class="trow"><b>${esc(P[pid].name)}</b><b class="${v>0?'under':v<0?'over':''}">${v>0?'+':''}${money(v)}</b></div>`}).join('')}</section>
    ${settleUp(inLed).length?`<div class="lbl">Settle up</div><section class="card tcard">${settleUp(inLed).map(x=>`<div class="trow"><span>${esc(x)}</span></div>`).join('')}</section>`:''}`:''}
-  <p class="note"><i class="ph-bold ph-hand-coins"></i><span>${RB?'Raider Bucks are club points for golf side games: they can\'t be bought or cashed out, only traded for club gear.':'A tally only. Pay each other directly; the club never holds money.'}</span></p>
+  <p class="note"><i class="ph-bold ph-hand-coins"></i><span>A tally only. Pay each other directly; the club never holds money.</span></p>
   <div class="stick"><a class="btn block" href="#/hole/${S.hole||order(t.start)[0]}">Back to scoring</a></div>`;
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('Remove this bet?')){bets.splice(+b.dataset.del,1);save();betsPage()}});
   document.querySelectorAll('[data-win]').forEach(b=>b.onclick=()=>{const[i,pid]=b.dataset.win.split('|');bets[+i].winner=pid;save();betsPage()});
-  $('#addBet').onclick=()=>openBet();
-  document.querySelectorAll('[data-cur]').forEach(b=>b.onclick=()=>{S.betCur=b.dataset.cur;save();betsPage()})}
+  $('#addBet').onclick=()=>openBet()}
 function openBet(type){const t=myTeam(),P=PEOPLE(),ps=ids(t),f=F();type=type||(TEAMS.length>1?'team':'skins');
   const needPlayers=f.entry==='team';const d={amt:type==='skins'?5:type==='team'?20:10,net:false,carry:true,a:[],b:[],who:ps.slice(),vs:'',label:''};
   const chips=(key,arr)=>`<div class="chips2">${ps.map(pid=>`<button class="chip2" data-${key}="${pid}" aria-pressed="${arr.includes(pid)}">${esc(first(P[pid].name))}</button>`).join('')}</div>`;
