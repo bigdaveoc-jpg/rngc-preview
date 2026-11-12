@@ -2473,7 +2473,9 @@ const CSETUP=[
 ];
 const CS={sent:null,busy:false,open:{}};
 const csSubj=it=>'Club setup: '+it.t;
-const csCan=()=>S.member&&S.realRole==='admin'&&!!authTok();
+/* Club setup is for David and Ross only (David, 2026-11-12), even if more admins are added later */
+const CS_WHO=[1366711762,3117876439],csH=e=>{let x=5381;for(const c of e)x=(Math.imul(x,33)^c.charCodeAt(0))>>>0;return x};
+const csCan=()=>S.member&&S.realRole==='admin'&&!!authTok()&&CS_WHO.includes(csH(((S.authMe&&S.authMe.email)||'').toLowerCase()));
 function csDraft(){try{return JSON.parse(localStorage.getItem('rngc-setup')||'{}')}catch(e){return {}}}
 function csKeep(id,vals){if(id==='dob')return;try{const d=csDraft();d[id]=vals;localStorage.setItem('rngc-setup',JSON.stringify(d))}catch(e){}}
 async function csLoad(){if(CS.busy||CS.sent||!authTok())return;CS.busy=true;
