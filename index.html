@@ -336,6 +336,7 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .nw b{font-family:var(--display);font-size:19px;text-transform:uppercase;line-height:1.05;display:block;margin:2px 0 4px}
 .nw p{color:var(--muted);font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .pill.out{border-color:#7a3b3b;color:#f0b4b4}
+.pill.hot,.card .pill.hot{background:#C8161F;color:#fff;border-color:#C8161F}
 .tixm{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .tixm .at{font-size:13px}
 .tixm .logo.s{width:26px;height:30px}
@@ -1057,6 +1058,8 @@ const EVENTS=[
  {id:'oct3',name:'RNGC vs The Red Kingdom Golf Club',date:'2026-10-03',where:'Chimera Golf Club, Henderson NV',chapter:'Nevada',price:'$160 per player',course:'chimera',
   note:'4-man scramble with playoffs, 8:00 am shotgun start. Raiders and Chiefs fans welcome.',
   url:SHOP+'saturday-october-3rd-2026-chimera-golf-club-in-henderson-nevada/',img:UP+'2026/08/10.3.26-CHIMERA-777x1024.png'},
+ {id:'rc27',name:'Raider Cup 2027',date:'2027-05-28',where:'Monterey Bay. Carmel Valley Ranch, Poppy Hills (Pebble Beach, CA), Bayonet Black Horse',chapter:'National',price:'$975 per hacker',course:'monterey',spots:'Only 2 of 24 spots left',
+  note:'May 28th-30th. Includes 4 rounds, 3 polos, hat and prizes.',url:'',img:'assets/flyers/raider-cup-2027.jpg'},
  {id:'rc26',name:'Raider Cup 2026',date:'2026-05-22',where:'St. George, UT. Copper Rock, Coral Canyon, Sand Hollow, Sky Mountain',chapter:'National',price:'May 22-24',course:'stgeorge',
   note:'The club\'s signature trip, powered by Woodson Bourbon Whiskey.',url:SITE+'/raider-cup/',img:UP+'2026/06/RC-2026-FLYER-3-819x1024.jpg'}
 ];
@@ -1067,6 +1070,7 @@ const FLYERS=[
 const SCORECARD_EVENTS=['nov14'];   /* events with the event-day scorecard (scorecard/ page) */
 const SPONSORS=['Woodson Bourbon Whiskey','Alpha Team Golf','Black Sunday Brand','Chimera Golf Club','Surf City Sound'];
 const NEWS=[
+ {id:'n0',tag:'Raider Cup 2027',title:'Raider Cup 2027 heads to Monterey Bay',meta:'May 28-30 - only 2 of 24 spots left',img:'assets/flyers/raider-cup-2027.jpg',body:'Carmel Valley Ranch, Poppy Hills in Pebble Beach and Bayonet Black Horse. $975 per hacker includes 4 rounds, 3 polos, a hat and prizes. Only 2 of 24 spots left.'},
  {id:'n1',tag:'Next event',title:'Chimera showdown vs the 12th Man',meta:'Nov 14 - Henderson NV',img:UP+'2026/09/CHIMERA-11.14.26-1-819x1024.jpg',body:'Raiders fans and Seahawks fans meet in a 4-man scramble with playoffs. 8:00 am shotgun start at Chimera Golf Club. $175 per player, $700 per foursome. Includes golf, cart, giveaways, prizes for the top 2 teams and a taco bar after party.'},
  {id:'n2',tag:'Membership',title:'Official handicap, laser bag tag',meta:'Every chapter',img:UP+'2026/06/ROSS-SC-BT-953x1024.png',body:'Chapter members get an official GHIN handicap, a custom laser bag tag, and exclusive access to events and tournaments. Chapter dues are $225 per year. National membership is $99.'},
  {id:'n3',tag:'Media',title:'Interviews with Raiders alumni',meta:'On YouTube',img:UP+'2026/06/YT-BANNER-1024x576.jpg',body:'Interviews with Raiders alumni, celebrities and fans, plus golf tips and breaking news. Find the channel from the links at the bottom of the home page.'}
@@ -1079,7 +1083,8 @@ const COURSES=[
  {id:'goosecreek',name:'Goose Creek Golf Club',city:'Mira Loma, CA',chapter:'SoCal',lat:33.9910,lng:-117.5400,note:'On the SoCal chapter rotation.'},
  {id:'aviara',name:'Aviara Golf Club',city:'Carlsbad, CA',chapter:'SoCal',lat:33.1030,lng:-117.2800,note:'On the SoCal chapter rotation.'},
  {id:'quivira',name:'Quivira Golf Club',city:'San Diego, CA',chapter:'SoCal',lat:32.7650,lng:-117.2300,note:'On the SoCal chapter rotation.'},
- {id:'stgeorge',name:'St. George, UT (Raider Cup)',city:'St. George, UT',chapter:'National',lat:37.0965,lng:-113.5684,note:'Raider Cup 2026 used four courses in the area.'}
+ {id:'stgeorge',name:'St. George, UT (Raider Cup)',city:'St. George, UT',chapter:'National',lat:37.0965,lng:-113.5684,note:'Raider Cup 2026 used four courses in the area.'},
+ {id:'monterey',name:'Monterey Bay, CA (Raider Cup 2027)',city:'Monterey Bay, CA',chapter:'National',lat:36.5830,lng:-121.8300,note:'Raider Cup 2027, May 28-30: Carmel Valley Ranch, Poppy Hills and Bayonet Black Horse.'}
 ];
 
 /* ---------- Raiders 2026 schedule (ESPN + NFL release, checked Nov 9 2026). Times are Pacific. ---------- */
@@ -1364,9 +1369,9 @@ function evCard(e){
   const f=fmtDate(e.date),past=isPast(e.date),going=!!S.rsvp[e.id];
   return `<article class="card ev ${past?'past':''}"><div class="date"><b>${f.d}</b><span>${f.m}</span></div>
    <div><h3>${esc(e.name)}</h3><div class="where">${esc(e.where)}</div><div class="note">${esc(e.note)}</div>
-   <div class="row"><span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
+   <div class="row"><span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${e.spots&&!past?`<span class="pill hot">${esc(e.spots)}</span>`:''}${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
    <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
-   <a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`}</div>
+   ${e.url?`<a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`:''}`}</div>
    ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>${typeof passBtn==='function'?passBtn(e):''}</div>`:''}
    </div></article>`;
 }
@@ -1376,14 +1381,16 @@ function renderEvents(){
   if(pg==='scores'){v.innerHTML=subChips('events')+scoresHTML();return}
   const list=EVENTS.filter(e=>!e.status&&(inChapter(e.chapter)||e.chapter==='National'));
   const up=list.filter(e=>!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1),past=list.filter(e=>isPast(e.date)).sort((a,b)=>a.date<b.date?1:-1);
-  if(pg==='cup'){const rc=EVENTS.find(e=>e.id==='rc26');
-    v.innerHTML=subChips('events')+pageHead('Raider Cup','The club\'s signature trip, powered by Woodson Bourbon Whiskey.')+`<div class="cupgrid rise">
-     <img class="cupflyer" src="${rc.img}" alt="Raider Cup 2026 flyer" loading="lazy">
+  if(pg==='cup'){const rc=EVENTS.find(e=>e.id==='rc27'),old=EVENTS.find(e=>e.id==='rc26'),going=!!S.rsvp.rc27;
+    v.innerHTML=subChips('events')+pageHead('Raider Cup','The club\'s signature trip. 2027 heads to Monterey Bay.')+`<div class="cupgrid rise">
+     <img class="cupflyer" src="${rc.img}" alt="Raider Cup 2027 flyer: May 28th to 30th, Monterey Bay, $975 per hacker, only 2 of 24 spots left" loading="lazy">
      <div class="stack">
-      <div class="card"><span class="pill">2027</span><h3 class="cardh">Dates not set yet</h3><p class="meta">Get on the list and you hear first when the dates and courses are picked.</p>
-       <button class="btn ${S.rc27?'ghost':''}" id="rc27" style="margin-top:12px">${S.rc27?'<i class="ph-bold ph-check"></i> On the 2027 list':'<i class="ph-bold ph-bell"></i> Get Raider Cup 2027 updates'}</button></div>
+      <div class="card"><div class="row"><span class="pill">2027</span><span class="pill hot">${esc(rc.spots)}</span></div><h3 class="cardh">May 28th-30th, Monterey Bay</h3>
+       <p class="meta">Carmel Valley Ranch, Poppy Hills (Pebble Beach, CA) and Bayonet Black Horse.</p>
+       <p class="meta">$975 per hacker. Includes 4 rounds, 3 polos, hat and prizes.</p>
+       <button class="btn ${going?'ghost':''}" data-rsvp="rc27" aria-pressed="${going}" style="margin-top:12px">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> I\'m interested'}</button></div>
       <div class="card"><span class="pill">2026 - Past event</span><h3 class="cardh">Raider Cup 2026</h3><p class="meta">May 22-24 - St. George, UT</p><p class="meta">Copper Rock, Coral Canyon, Sand Hollow and Sky Mountain.</p></div>
-      <a class="btn ghost" href="${rc.url}" ${ext}><i class="ph-bold ph-arrow-square-out"></i> Raider Cup page on the club site</a>
+      <a class="btn ghost" href="${old.url}" ${ext}><i class="ph-bold ph-arrow-square-out"></i> Raider Cup page on the club site</a>
      </div></div>`;return}
   if(pg==='past'){const live=new Set([...up.map(e=>e.img),EVENTS.find(e=>e.id==='rc26').img]);
     v.innerHTML=subChips('events')+pageHead('Past events')+`<div class="evgrid rise">${past.length?past.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No past events for this chapter yet.</div>'}</div>
@@ -1449,7 +1456,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{const sc=e.target.closest&&e.target.closest('[data-sc]');if(sc&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openScorecard(sc.dataset.sc)}});
 document.addEventListener('click',e=>{
   const r=e.target.closest('[data-rsvp]');
-  if(r){const id=r.dataset.rsvp;S.rsvp[id]=!S.rsvp[id];save();renderEvents();toast(S.rsvp[id]?'Marked interested. Your spot is held only after Register and pay.':'Removed')}
+  if(r){const id=r.dataset.rsvp;S.rsvp[id]=!S.rsvp[id];save();renderEvents();toast(S.rsvp[id]?((EVENTS.find(x=>x.id===id)||{}).url?'Marked interested. Your spot is held only after Register and pay.':'Marked interested.'):'Removed')}
   if(e.target.closest('#rc27')){S.rc27=!S.rc27;save();renderEvents();toast(S.rc27?'You will get Raider Cup 2027 updates.':'Taken off the list')}
 });
 
