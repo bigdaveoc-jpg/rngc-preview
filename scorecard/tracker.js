@@ -1013,7 +1013,10 @@ function trLibRefresh(){try{if(navigator.onLine===false)return}catch(e){}
   Object.keys(G.courses||{}).forEach(id=>{const co=G.courses[id];if(!co||!co.lib)return;
     fetch('courses/c/'+encodeURIComponent(id)+'.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(d=>{if(!d||!d.app)return;
       const nu=d.app.maps||null;if(JSON.stringify(co.maps||null)===JSON.stringify(nu))return;
-      if(nu)co.maps=nu;else delete co.maps;if(COURSES[id]&&COURSES[id]!==co)COURSES[id].maps=co.maps;gsave()   /* shows from the next hole screen */
+      if(nu)co.maps=nu;else delete co.maps;if(COURSES[id]&&COURSES[id]!==co)COURSES[id].maps=co.maps;gsave();
+      if(/^#\/hole\//.test(location.hash))route()   /* open hole screen redraws with the new map */
     }).catch(()=>{})})}
 setTimeout(trLibRefresh,1200);
+/* also check when the app comes back to the front (phones keep it open for days), at most every 5 minutes */
+{let _lr=Date.now();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-_lr>3e5){_lr=Date.now();trLibRefresh()}})}
 route();
