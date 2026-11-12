@@ -1879,21 +1879,25 @@ function alumniView(v,seg){
 }
 const canLink=m=>!!S.authMe&&(S.authMe.role==='admin'||(S.authMe.leads||[]).some(c=>(m.chapters||[]).includes(c)));
 const SETLINK={};
+/* a member who already has a sign-in gets the same one-time link, worded as a password reset */
+const hasSignIn=id=>{const m=(DIR.items||[]).find(x=>x.id===id);return !!(m&&m.signedUp)};
+const linkBtns=m=>{const w=m.signedUp?'reset':'setup';return `<button class="btn ghost" data-setlink="${esc(m.id)}"><i class="ph-bold ph-chat-text"></i> Text a ${w} link</button><button class="btn ghost" data-setqr="${esc(m.id)}"><i class="ph-bold ph-qr-code"></i> Show a ${w} code</button>`};
+const RESET_HELP='<p class="help" style="margin:0">A reset link lets them pick a new password. It works once, for 21 days. You never see their password.</p>';
 async function getSetLink(id){if(!SETLINK[id])SETLINK[id]=await authCall('/admin/link',{id},authTok());return SETLINK[id]}
 let qrLib=null;
 function loadQR(){return qrLib||(qrLib=new Promise((ok,no)=>{const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';sc.onload=()=>ok(window.qrcode);sc.onerror=()=>{qrLib=null;no(new Error('Could not load the code. Check the signal and try again.'))};document.head.appendChild(sc)}))}
-async function showSetQR(id){try{const [r,qr]=await Promise.all([getSetLink(id),loadQR()]),first=r.name.split(' ')[0],code=r.link.split('setup=')[1];
+async function showSetQR(id){try{const [r,qr]=await Promise.all([getSetLink(id),loadQR()]),first=r.name.split(' ')[0],code=r.link.split('setup=')[1],reset=hasSignIn(id);
   const q=qr(0,'M');q.addData(r.link);q.make();
-  openSheet(`<h3 style="margin:0;text-align:center">Scan to set up, ${esc(first)}</h3>
-   <p class="meta" style="text-align:center;margin:6px 0 12px">Point your phone camera at the code, tap the link, pick a password.</p>
+  openSheet(`<h3 style="margin:0;text-align:center">${reset?'Scan to reset your password':'Scan to set up'}, ${esc(first)}</h3>
+   <p class="meta" style="text-align:center;margin:6px 0 12px">Point your phone camera at the code, tap the link, pick a ${reset?'new ':''}password.</p>
    <div style="background:#fff;padding:14px;max-width:300px;margin:0 auto">${q.createSvgTag({cellSize:6,margin:0,scalable:true})}</div>
-   <p class="meta" style="text-align:center;margin:14px 0 4px">No camera? On the club site tap Sign in, First time, I have a setup code, and type:</p>
+   <p class="meta" style="text-align:center;margin:14px 0 4px">No camera? On the club site tap Sign in, First time${reset?' or forgot it':''}, I have a setup code, and type:</p>
    <p style="text-align:center;font:700 26px/1.2 ui-monospace,monospace;letter-spacing:.12em;margin:0">${esc(code.match(/.{1,4}/g).join('-'))}</p>
    <p class="meta" style="text-align:center;margin:10px 0 0">Works once, for 21 days.</p>`)}catch(err){toast(err.message)}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-setqr]');if(b)showSetQR(b.dataset.setqr)});
-async function sendSetLink(id){try{const r=await getSetLink(id),first=r.name.split(' ')[0];
-  const text=`Hey ${first}, our Raider Nation Golf Club app is ready. Tap your own link, pick a password and you're in: ${r.link} Then tap Share and Add to Home Screen so it's one tap on game day.`;
-  if(navigator.share){try{await navigator.share({text});toast('Setup link ready for '+first);return}catch(e){if(e&&e.name==='AbortError')return}}
+async function sendSetLink(id){try{const r=await getSetLink(id),first=r.name.split(' ')[0],reset=hasSignIn(id);
+  const text=reset?`Hey ${first}, here is your link to pick a new password for the Raider Nation Golf Club app: ${r.link} It works once, for 21 days.`:`Hey ${first}, our Raider Nation Golf Club app is ready. Tap your own link, pick a password and you're in: ${r.link} Then tap Share and Add to Home Screen so it's one tap on game day.`;
+  if(navigator.share){try{await navigator.share({text});toast((reset?'Reset':'Setup')+' link ready for '+first);return}catch(e){if(e&&e.name==='AbortError')return}}
   if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(text)}catch(e){fallbackCopy(text)}}else fallbackCopy(text);
   toast('Text for '+first+' copied. Paste it in a text. The link works once, for 21 days.')}catch(err){toast(err.message)}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-setlink]');if(b)sendSetLink(b.dataset.setlink)});
@@ -1928,7 +1932,7 @@ function openDirMember(id,keep){
         <b>${m.signedUp?'Signed in at least once':'Has not set up a sign-in'}</b>
         ${m.phone?`<p class="meta">Phone ${esc(m.phone)}</p>`:''}<p class="meta ${pfDues(m.dues_to).k}">Dues: ${esc(pfDues(m.dues_to).t)}</p></div>`:''}
      </div>
-     ${leadView&&canLink(m)&&!m.signedUp?`<div class="acts" style="margin:8px 0"><button class="btn ghost" data-setlink="${esc(m.id)}"><i class="ph-bold ph-chat-text"></i> Text a setup link</button><button class="btn ghost" data-setqr="${esc(m.id)}"><i class="ph-bold ph-qr-code"></i> Show a setup code</button></div>`:''}
+     ${leadView&&canLink(m)&&!(m.me&&m.signedUp)?`<div class="acts" style="margin:8px 0">${linkBtns(m)}</div>${m.signedUp?RESET_HELP:''}`:''}
      ${msgBtn}${mine}`);
     return}
   const du=pfDues(m.dues_to);
@@ -1936,7 +1940,7 @@ function openDirMember(id,keep){
    ${pfHeader(m)}
    ${m.status==='suspended'?'<p class="meta duesbad" style="font-weight:700">On hold. This person cannot sign in.</p>':''}
    <div class="stack" style="margin-top:12px">${msgBtn}
-    <div class="acts"><button class="btn ghost" data-setlink="${esc(m.id)}"><i class="ph-bold ph-chat-text"></i> Text a setup link</button><button class="btn ghost" data-setqr="${esc(m.id)}"><i class="ph-bold ph-qr-code"></i> Show a setup code</button></div>
+    <div class="acts">${linkBtns(m)}</div>${m.signedUp?RESET_HELP:''}
     <button class="btn full" data-aedit="${esc(m.id)}"><i class="ph-bold ph-pencil-simple"></i> Edit this member</button></div>
    <details class="fold" open><summary>Contact and sign-in <i class="ph-bold ph-caret-down"></i></summary><div class="fb">
      <p class="meta">Email</p><b style="word-break:break-all">${esc(m.email||'')}</b>
@@ -2555,6 +2559,13 @@ function realAccountHTML(){
      <label class="setrow"><span><b>Show my handicap index to members</b><small>${me.hi?'Your index is '+esc(me.hi)+'.':'No index on file yet.'}</small></span><input type="checkbox" class="sw" id="pfShowIdx" ${me.show_index?'checked':''}></label>
      <label for="pfPhone" style="margin-top:8px">Phone for event texts</label><input class="field" id="pfPhone" type="tel" maxlength="20" placeholder="Only your club leaders see this" value="${esc(me.phone||'')}">
      <button class="btn full" id="pfSave" style="margin-top:12px"><i class="ph-bold ph-check"></i> Save</button><p class="si-msg" id="pfMsg" role="status"></p>`)}
+   ${group('Password',`<form id="pwForm" novalidate>
+     <input type="text" autocomplete="username" value="${esc(me.email||'')}" hidden readonly tabindex="-1" aria-hidden="true">
+     <label for="pwCur">Current password</label><input class="field" id="pwCur" type="password" autocomplete="current-password">
+     <label for="pwNew">New password (8 or more characters)</label><input class="field" id="pwNew" type="password" autocomplete="new-password" minlength="8">
+     <label class="check" style="margin:12px 0 0"><input type="checkbox" id="pwShow"> Show passwords</label>
+     <button class="btn full" type="submit" style="margin-top:12px"><i class="ph-bold ph-key"></i> Change password</button><p class="si-msg" id="pwMsg" role="status"></p></form>
+     <p class="help">Forgot your current one? Sign out, then tap "First time or forgot it?" on the sign-in screen.</p>`)}
    ${group('Set by the club',`${lk('Name',esc(me.name||''))}${lk('Email',esc(me.email||''))}${lk('GHIN number',esc(me.ghin||'None'))}
      ${lk('Handicap index',me.hi?pfIdx(me):'None on file')}${lk('Chapters',esc((me.chapters||[]).join(' + ')||'National'))}
      ${lk('Club role',me.role==='admin'?'Club admin':((me.leads||[]).length?'Chapter president of '+esc(me.leads.join(' + ')):'Member'))}
@@ -2570,6 +2581,18 @@ document.addEventListener('click',async e=>{const b=e.target.closest('#pfSave');
   try{const r=await authCall('/me/update',{home:$('#pfHome').value,city:$('#pfCity').value,phone:$('#pfPhone').value,show_city:$('#pfShowCity').checked,show_index:$('#pfShowIdx').checked},authTok());
     S.authMe=r.me;msg.textContent='Saved';toast('Profile saved');DIR.items=null}
   catch(err){msg.textContent=err.message}b.disabled=false});
+/* change my own password: the server checks the current one; the page never keeps either */
+document.addEventListener('change',e=>{if(e.target.id!=='pwShow')return;const t=e.target.checked?'text':'password';$('#pwCur').type=t;$('#pwNew').type=t});
+document.addEventListener('submit',async e=>{if(e.target.id!=='pwForm')return;e.preventDefault();
+  const msg=$('#pwMsg'),b=e.target.querySelector('button[type=submit]'),current=$('#pwCur').value,password=$('#pwNew').value;
+  if(!current){msg.textContent='Type your current password first.';return}
+  if(password.length<8){msg.textContent='The new password needs 8 or more characters.';return}
+  if(password===current){msg.textContent='Pick a new password that is different from the current one.';return}
+  b.disabled=true;msg.textContent='Saving...';
+  try{const r=await authCall('/me/password',{current,password},authTok());if(r.token)setTok(r.token);
+    $('#pwCur').value='';$('#pwNew').value='';msg.textContent='Password changed. Use the new one next time you sign in.';toast('Password changed')}
+  catch(err){msg.textContent=err.status===404||err.status===405?'Changing your password here is not switched on yet. Tell your club admin.':err.message}
+  b.disabled=false});
 function notifyHTML(){
   const m=S.cfg.my,when=[['1w','1 week before'],['3d','3 days before'],['1d','1 day before']];
   return pageHead('Notifications')+`<div class="setcols rise">
