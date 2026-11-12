@@ -409,6 +409,14 @@ textarea.field{min-height:110px;resize:vertical}
 .field::placeholder{color:#7d8591}
 .sheet .btn.full{width:100%;margin-top:16px}
 .help{font-size:13px;color:var(--muted);margin-top:6px}
+.adminstrip{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px;padding:10px 12px;border:1px solid var(--line);border-left:3px solid #e8ecf1;background:var(--panel-2);font-size:13px;font-weight:700}
+.adminstrip button{font:inherit;font-weight:600;color:var(--silver-2);background:none;border:0;text-decoration:underline;min-height:36px;padding:0 4px;cursor:pointer}
+details.fold{border:1px solid var(--line);margin-top:8px}
+details.fold>summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;min-height:44px}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold[open]>summary{border-bottom:1px solid var(--line)}
+details.fold .fb{padding:4px 14px 12px}
+.duesbad{color:#ff8a80}.dueswarn{color:#ffd180}.duesok{color:#9be3a8}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
 /* tab bar */
@@ -1825,7 +1833,7 @@ function renderMembers(){
 var DIR={items:null,admin:false};
 async function loadDir(){
   const t=authTok();if(!t)return;
-  try{let r;try{r=await authCall('/admin/members',null,t);DIR.admin=true}catch(e){if(e.status!==403)throw e;r=await authCall('/club/members',null,t);DIR.admin=false}
+  try{const r=await authCall('/club/members',null,t);DIR.admin=r.tier==='admin';DIR.tier=r.tier||'member';
     DIR.items=r.members;if(S.tab==='members'&&S.mview!=='inbox')renderMembers();if(S.tab==='settings')renderSettings()}catch(e){DIR.items=null;toast('Could not load the member list. Try again.')}}
 const chapLine=m=>(m.chapters||[]).join(' + ')||'National';
 const roleTag=m=>m.leads&&m.leads.length?(m.role==='admin'?'Club admin':'Chapter president'):'';
@@ -1837,7 +1845,7 @@ function dirView(v,seg){
    <input class="field" id="dirQ" placeholder="Search by name" value="${esc(S.dirQ||'')}" autocomplete="off" style="margin-top:10px">
    <div class="stack" id="dirList" style="margin-top:12px">${dirRows(L)}</div>`;
 }
-const dirRows=L=>L.length?L.map(m=>`<button class="card mem ${m.hof?'hofcard':''}" data-dm="${esc(m.id)}">${avOf(m)}<span><b>${esc(m.name)}</b><small>${esc(chapLine(m))}${roleTag(m)?' - '+roleTag(m):''}${DIR.admin&&!m.signedUp?' - not set up yet':''}</small>${memBadges(m)?`<span style="display:block">${memBadges(m)}</span>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join(''):'<div class="empty"><i class="ph-bold ph-users-three"></i>No members match.</div>';
+const dirRows=L=>L.length?L.map(m=>`<button class="card mem ${m.hof?'hofcard':''}" data-dm="${esc(m.id)}">${avOf(m)}<span><b>${esc(m.name)}</b><small>${esc(chapLine(m))}${roleTag(m)?' - '+roleTag(m):''}${DIR.admin&&m.status==='suspended'?' - on hold':(DIR.admin&&!m.signedUp?' - not set up yet':'')}</small>${memBadges(m)?`<span style="display:block">${memBadges(m)}</span>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join(''):'<div class="empty"><i class="ph-bold ph-users-three"></i>No members match.</div>';
 function alumniView(v,seg){
   const af=S.af||'all',admin=MSG.perm?MSG.perm.role==='admin':DIR.admin;
   const L=DIR.items.filter(m=>m.alum||m.hof).filter(m=>af==='all'||(af==='hof'?m.hof:m.alum))
@@ -1869,20 +1877,113 @@ async function sendSetLink(id){try{const r=await getSetLink(id),first=r.name.spl
   if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(text)}catch(e){fallbackCopy(text)}}else fallbackCopy(text);
   toast('Text for '+first+' copied. Paste it in a text. The link works once, for 21 days.')}catch(err){toast(err.message)}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-setlink]');if(b)sendSetLink(b.dataset.setlink)});
-function openDirMember(id){
+/* ---- member profile: two views. Member view = what a member may see. Admin view = full control (every change is enforced on the server). ---- */
+let ASMEM=false;
+const pfD=d=>{try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}catch(e){return d}};
+function pfDues(d){if(!d)return{t:'Not recorded',k:''};const days=Math.floor((new Date(d+'T23:59:59')-Date.now())/864e5);
+  return days<0?{t:'Lapsed since '+pfD(d),k:'duesbad'}:days<=30?{t:'Due soon. Paid through '+pfD(d),k:'dueswarn'}:{t:'Paid through '+pfD(d),k:'duesok'}}
+const pfIdx=m=>m.hi?`${esc(m.hi)} <small style="color:var(--muted);font-weight:500">${m.hi_src==='manual'||!m.hi_src?'club record':esc(m.hi_src)}${m.hi_date?', as of '+esc(pfD(m.hi_date)):''}</small>`:'';
+const pfCard=(t,v,x)=>`<div class="card"><div class="meta" style="margin:0">${t}</div><b>${v}</b>${x||''}</div>`;
+function pfPublic(m){
+  return `${roleTag(m)?pfCard('Club role',esc(roleTag(m))):''}
+    ${m.home?pfCard('Home course',esc(m.home)):''}
+    ${m.city?pfCard('City',esc(m.city)):''}
+    ${m.hi?pfCard('Handicap index',pfIdx(m)):''}
+    ${m.alum?pfCard('Played for the team',esc([m.alum.pos,m.alum.yrs].filter(Boolean).join(', ')||'Alumni'),m.alum.note?`<p class="meta">${esc(m.alum.note)}</p>`:''):''}
+    ${m.hof?pfCard('Hall of Fame, class of '+m.hof.year,esc(m.hof.honor||'Hall of Fame'),m.hof.note?`<p class="meta">${esc(m.hof.note)}</p>`:''):''}`}
+function pfHeader(m){return `<div class="who" style="gap:14px">${avOf(m)}<div><h3 style="margin:0">${esc(m.name)}</h3><span class="pill">${esc(chapLine(m))}</span>${memBadges(m)?`<div>${memBadges(m)}</div>`:''}</div></div>`}
+function openDirMember(id,keep){
   const m=(DIR.items||[]).find(x=>x.id===id);if(!m)return;
+  if(!keep)ASMEM=false;
   const admin=DIR.admin,lead=MSG.perm&&(MSG.perm.role==='admin'||(MSG.perm.leads||[]).length>0);
-  openSheet(`<div class="who" style="gap:14px">${avOf(m)}<div><h3 style="margin:0">${esc(m.name)}</h3><span class="pill">${esc(chapLine(m))}</span>${memBadges(m)?`<div>${memBadges(m)}</div>`:''}</div></div>
-   <div class="stack" style="margin-top:14px">
-    ${roleTag(m)?`<div class="card"><div class="meta" style="margin:0">Club role</div><b>${esc(roleTag(m))}</b></div>`:''}
-    ${m.alum?`<div class="card"><div class="meta" style="margin:0">Played for the team</div><b>${esc([m.alum.pos,m.alum.yrs].filter(Boolean).join(', ')||'Alumni')}</b>${m.alum.note?`<p class="meta">${esc(m.alum.note)}</p>`:''}</div>`:''}
-    ${m.hof?`<div class="card"><div class="meta" style="margin:0">Hall of Fame, class of ${m.hof.year}</div><b>${esc(m.hof.honor||'Hall of Fame')}</b>${m.hof.note?`<p class="meta">${esc(m.hof.note)}</p>`:''}</div>`:''}
-    ${admin?`<div class="card"><div class="meta" style="margin:0">Email</div><b style="word-break:break-all">${esc(m.email||'')}</b><p class="meta">${m.signedUp?'Has set up a sign-in':'Has not set up a sign-in yet'} - GHIN ${esc(m.ghin||'')}${m.hi?', index '+esc(m.hi):''}</p></div>`:''}
-   </div>
-   ${canLink(m)?`<div class="acts" style="margin-bottom:8px"><button class="btn ghost" data-setlink="${esc(m.id)}"><i class="ph-bold ph-chat-text"></i> Text a setup link</button><button class="btn ghost" data-setqr="${esc(m.id)}"><i class="ph-bold ph-qr-code"></i> Show a setup code</button></div>${admin&&m.signedUp?'<p class="meta" style="margin:0 0 8px">Already set up. A new link lets them pick a new password.</p>':''}`:''}
-   ${lead?`<button class="btn full" data-msgto="${esc(m.id)}"><i class="ph-bold ph-paper-plane-tilt"></i> Message ${esc(m.name.split(' ')[0])}</button>`:''}
-   ${MSG.perm&&MSG.perm.role==='admin'?`<button class="btn ghost full" data-honor="${esc(m.id)}" style="margin-top:8px"><i class="ph-bold ph-trophy"></i> Alumni and Hall of Fame</button>`:''}`);
+  const msgBtn=lead&&!m.me&&(MSG.perm.role==='admin'||(m.chapters||[]).some(c=>(MSG.perm.leads||[]).includes(c)))?`<button class="btn full" data-msgto="${esc(m.id)}"><i class="ph-bold ph-paper-plane-tilt"></i> Message ${esc(m.name.split(' ')[0])}</button>`:'';
+  const mine=m.me?`<button class="btn ghost full" data-myprofile style="margin-top:8px"><i class="ph-bold ph-pencil-simple"></i> Edit my profile</button>`:'';
+  if(!admin||ASMEM){
+    const pub=admin?Object.assign({},m,{city:m.show_city?m.city:'',hi:m.show_index?m.hi:''}):m;
+    const leadView=!admin&&m.signedUp!==undefined;
+    openSheet(`${admin?`<div class="adminstrip"><span><i class="ph-bold ph-eye"></i> This is what members see</span><button data-asadmin="${esc(m.id)}">Back to admin view</button></div>`:''}
+     ${pfHeader(m)}
+     <div class="stack" style="margin-top:14px">${pfPublic(pub)}
+      ${leadView?`<div class="card"><div class="meta" style="margin:0">Chapter leader view (only you and the admins see this)</div>
+        <b>${m.signedUp?'Signed in at least once':'Has not set up a sign-in'}</b>
+        ${m.phone?`<p class="meta">Phone ${esc(m.phone)}</p>`:''}<p class="meta ${pfDues(m.dues_to).k}">Dues: ${esc(pfDues(m.dues_to).t)}</p></div>`:''}
+     </div>
+     ${leadView&&canLink(m)&&!m.signedUp?`<div class="acts" style="margin:8px 0"><button class="btn ghost" data-setlink="${esc(m.id)}"><i class="ph-bold ph-chat-text"></i> Text a setup link</button><button class="btn ghost" data-setqr="${esc(m.id)}"><i class="ph-bold ph-qr-code"></i> Show a setup code</button></div>`:''}
+     ${msgBtn}${mine}`);
+    return}
+  const du=pfDues(m.dues_to);
+  openSheet(`<div class="adminstrip"><span><i class="ph-fill ph-shield-check"></i> Admin view. Only leaders see this</span><button data-asmem="${esc(m.id)}">See what members see</button></div>
+   ${pfHeader(m)}
+   ${m.status==='suspended'?'<p class="meta duesbad" style="font-weight:700">On hold. This person cannot sign in.</p>':''}
+   <div class="stack" style="margin-top:12px">${msgBtn}
+    <div class="acts"><button class="btn ghost" data-setlink="${esc(m.id)}"><i class="ph-bold ph-chat-text"></i> Text a setup link</button><button class="btn ghost" data-setqr="${esc(m.id)}"><i class="ph-bold ph-qr-code"></i> Show a setup code</button></div>
+    <button class="btn full" data-aedit="${esc(m.id)}"><i class="ph-bold ph-pencil-simple"></i> Edit this member</button></div>
+   <details class="fold" open><summary>Contact and sign-in <i class="ph-bold ph-caret-down"></i></summary><div class="fb">
+     <p class="meta">Email</p><b style="word-break:break-all">${esc(m.email||'')}</b>
+     <p class="meta">Phone</p><b>${esc(m.phone||'Not given')}</b>
+     <p class="meta">GHIN number</p><b>${esc(m.ghin||'None')}</b>
+     <p class="meta">Handicap index</p><b>${m.hi?pfIdx(m):'None'}</b>
+     <p class="meta">Sign-in</p><b>${m.signedUp?'Set up':'Not set up yet'}</b></div></details>
+   <details class="fold" open><summary>Membership <i class="ph-bold ph-caret-down"></i></summary><div class="fb">
+     <p class="meta">Chapters</p><b>${esc(chapLine(m))}</b>
+     <p class="meta">Club role</p><b>${m.role==='admin'?'Club admin':(m.leads&&m.leads.length?'Chapter president of '+esc(m.leads.join(' + ')):'Member')}</b>
+     <p class="meta">Dues</p><b class="${du.k}">${esc(du.t)}</b></div></details>
+   <details class="fold"><summary>What they chose to show <i class="ph-bold ph-caret-down"></i></summary><div class="fb">
+     <p class="meta">Home course</p><b>${esc(m.home||'Not given')}</b>
+     <p class="meta">City</p><b>${esc(m.city||'Not given')} ${m.city?(m.show_city?'(shown to members)':'(hidden from members)'):''}</b>
+     <p class="meta">Index</p><b>${m.show_index?'Shown to members':'Hidden from members'}</b></div></details>
+   <details class="fold"><summary>Alumni and Hall of Fame <i class="ph-bold ph-caret-down"></i></summary><div class="fb">
+     ${m.alum||m.hof?pfPublic({alum:m.alum,hof:m.hof}):'<p class="meta">Not added yet.</p>'}
+     <button class="btn ghost full" data-honor="${esc(m.id)}" style="margin-top:8px"><i class="ph-bold ph-trophy"></i> Edit</button></div></details>
+   <details class="fold"><summary>Private note (leaders only) <i class="ph-bold ph-caret-down"></i></summary><div class="fb"><p>${m.note?esc(m.note):'<span class="meta">No note.</span>'}</p></div></details>
+   <details class="fold" id="pfHist" data-hist="${esc(m.id)}"><summary>Change history <i class="ph-bold ph-caret-down"></i></summary><div class="fb" id="pfHistBody"><p class="meta">Opens when you tap it.</p></div></details>`);
 }
+const PF_LABEL={role:'role',leads:'chapter president of',chapters:'chapters',status:'status',dues_to:'dues paid through',hi:'handicap index',ghin:'GHIN number',name:'name',phone:'phone',home:'home course',city:'city',show_city:'show city',show_index:'show index',note:'private note',alum:'alumni entry',hof:'Hall of Fame entry',setup_link:'setup link'};
+const pfVal=(f,v)=>f==='note'?'(updated)':Array.isArray(v)?(v.join(' + ')||'none'):(v===null||v===undefined||v==='')?'empty':typeof v==='object'?'updated':String(v).slice(0,40);
+document.addEventListener('toggle',async e=>{const d=e.target;if(!d||!d.matches||!d.matches('#pfHist')||!d.open||d.dataset.done)return;d.dataset.done='1';
+  try{const r=await authCall('/admin/audit?id='+encodeURIComponent(d.dataset.hist),null,authTok());
+    $('#pfHistBody').innerHTML=r.items.length?r.items.map(x=>`<p class="meta" style="margin:6px 0"><b>${esc(x.actor_name)}</b> ${x.field==='setup_link'?'made a setup link':'changed '+esc(PF_LABEL[x.field]||x.field)+' from '+esc(pfVal(x.field,x.old))+' to '+esc(pfVal(x.field,x.new))}<br>${esc(new Date(x.ts*1000).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}))}${x.via==='self'?' (they did it themselves)':''}</p>`).join(''):'<p class="meta">No changes yet.</p>'}
+  catch(err){$('#pfHistBody').innerHTML='<p class="meta">Could not load. '+esc(err.message)+'</p>'}},true);
+document.addEventListener('click',e=>{
+  const a=e.target.closest('[data-asmem]');if(a){ASMEM=true;openDirMember(a.dataset.asmem,true);return}
+  const b=e.target.closest('[data-asadmin]');if(b){ASMEM=false;openDirMember(b.dataset.asadmin,true);return}
+  const ed=e.target.closest('[data-aedit]');if(ed){const id=ed.dataset.aedit;closeSheet();setTimeout(()=>openAdminEdit(id),330);return}
+  if(e.target.closest('[data-myprofile]')){closeSheet();S.spage='account';setTimeout(()=>setTab('settings'),330)}});
+function openAdminEdit(id){
+  const m=(DIR.items||[]).find(x=>x.id===id);if(!m||!DIR.admin)return;
+  const ALL=['SoCal','NorCal','Nevada','National'],self=!!m.me;
+  const cb=(nm,list,on,dis)=>list.map(c=>`<label class="check" style="margin:6px 0"><input type="checkbox" data-${nm}="${c}" ${(on||[]).includes(c)?'checked':''} ${dis?'disabled':''}> ${c}</label>`).join('');
+  openSheet(`<h3 style="margin:0">Edit ${esc(m.name)}</h3>
+   <form id="aeForm" novalidate>
+    <label for="aeName">Name</label><input class="field" id="aeName" maxlength="60" value="${esc(m.name)}">
+    <label for="aePhone">Phone</label><input class="field" id="aePhone" type="tel" maxlength="20" value="${esc(m.phone||'')}">
+    <label for="aeGhin">GHIN number</label><input class="field" id="aeGhin" inputmode="numeric" maxlength="10" value="${esc(m.ghin||'')}">
+    <label for="aeHi">Handicap index (from GHIN, like 12.4)</label><input class="field" id="aeHi" inputmode="decimal" maxlength="6" value="${esc(m.hi||'')}">
+    <label for="aeDues">Dues paid through</label><input class="field" id="aeDues" type="date" value="${esc(m.dues_to||'')}">
+    <label for="aeNote">Private note (leaders only)</label><textarea class="field" id="aeNote" maxlength="400" rows="2">${esc(m.note||'')}</textarea>
+    <h4 style="margin:16px 0 4px">Chapters</h4>${cb('ch',ALL,m.chapters)}
+    <h4 style="margin:16px 0 4px">Chapter president of</h4>${cb('ld',ALL.slice(0,3),m.leads,self)}
+    <label for="aeRole">Club role</label><select class="field" id="aeRole" ${self?'disabled':''}><option value="member" ${m.role!=='admin'?'selected':''}>Member</option><option value="admin" ${m.role==='admin'?'selected':''}>Club admin (full control)</option></select>
+    <label for="aeStat">Status</label><select class="field" id="aeStat" ${self?'disabled':''}><option value="active" ${m.status!=='suspended'?'selected':''}>Active</option><option value="suspended" ${m.status==='suspended'?'selected':''}>On hold (cannot sign in)</option></select>
+    ${self?'<p class="help">You cannot change your own role, president spots or status. Another admin has to.</p>':''}
+    <div id="aePw" hidden><label for="aePwIn">Type your password to confirm</label><input class="field" id="aePwIn" type="password" autocomplete="current-password"></div>
+    <button class="btn full" type="submit" style="margin-top:14px"><i class="ph-bold ph-check"></i> Save</button><p class="si-msg" id="aeMsg" role="status"></p></form>`);
+  const sens=()=>{const ld=[...document.querySelectorAll('[data-ld]:checked')].map(x=>x.dataset.ld);
+    return $('#aeRole').value!==(m.role==='admin'?'admin':'member')||$('#aeStat').value!==(m.status==='suspended'?'suspended':'active')||ld.slice().sort().join()!==(m.leads||[]).slice().sort().join()};
+  $('#aeForm').addEventListener('change',()=>{$('#aePw').hidden=!sens()});
+  $('#aeForm').addEventListener('submit',async ev=>{ev.preventDefault();const msg=$('#aeMsg'),btn=ev.target.querySelector('button[type=submit]');
+    const ch=[...document.querySelectorAll('[data-ch]:checked')].map(x=>x.dataset.ch),ld=[...document.querySelectorAll('[data-ld]:checked')].map(x=>x.dataset.ld);
+    const want={name:$('#aeName').value,phone:$('#aePhone').value,ghin:$('#aeGhin').value,hi:$('#aeHi').value,dues_to:$('#aeDues').value,note:$('#aeNote').value,chapters:ch};
+    const patch={};for(const k in want){const cur=m[k]===undefined?'':m[k];if(JSON.stringify(want[k])!==JSON.stringify(cur))patch[k]=want[k]}
+    if(!self){if(JSON.stringify(ld.slice().sort())!==JSON.stringify((m.leads||[]).slice().sort()))patch.leads=ld;
+      if($('#aeRole').value!==(m.role==='admin'?'admin':'member'))patch.role=$('#aeRole').value;
+      if($('#aeStat').value!==(m.status==='suspended'?'suspended':'active'))patch.status=$('#aeStat').value}
+    if(!Object.keys(patch).length){msg.textContent='Nothing changed.';return}
+    if(patch.role==='admin'&&!confirm('Make '+m.name+' a club admin? They get full control, including over you.'))return;
+    if(patch.status==='suspended'&&!confirm('Put '+m.name+' on hold? They are signed out and cannot sign in.'))return;
+    btn.disabled=true;msg.textContent='Saving...';
+    try{await authCall('/admin/member',{id:m.id,patch,pw:$('#aePwIn').value},authTok());closeSheet();toast('Saved');DIR.items=null;loadDir()}
+    catch(err){msg.textContent=err.message;btn.disabled=false}})}
 function openHonor(id){
   const L=DIR.items||[];const m=L.find(x=>x.id===id)||null;const a=(m&&m.alum)||{},hf=(m&&m.hof)||{};
   openSheet(`<h3 style="margin:0">Alumni and Hall of Fame</h3>
@@ -2327,6 +2428,7 @@ function renderSettings(){
   if(pg==='users')fillUsers();
 }
 function accountHTML(){
+  if(authTok()&&S.authMe)return realAccountHTML();
   const cities=Object.entries(CITIES).sort((a,b)=>a[1].n<b[1].n?-1:1);
   return pageHead('My account')+`<div class="setcols rise">
    ${group('Profile',`<label for="acName">Name shown to members</label><div class="inrow"><input class="field" id="acName" maxlength="24" value="${esc(S.name||'')}"><button class="btn small" id="acSave">Save</button></div>
@@ -2341,6 +2443,33 @@ function accountHTML(){
      <div class="acts" style="margin-top:12px"><button class="btn ghost small" id="acOut"><i class="ph-bold ph-sign-out"></i> Sign out</button><button class="btn ghost small danger" id="acDel">Delete my account</button></div>`)}
   </div>`;
 }
+/* real account page: you edit only your own safe fields; everything the club controls is shown but locked (the server enforces it) */
+function realAccountHTML(){
+  const me=S.authMe||{},plan=PLANS.find(p=>p.chapter===me.chapter)||PLANS[0],du=pfDues(me.dues_to);
+  const lk=(t,v)=>`<div class="setrow"><span><b>${t}</b></span><span style="text-align:right">${v}</span></div>`;
+  return pageHead('My account')+`<div class="setcols rise">
+   ${group('My profile',`<p class="meta" style="margin:0 0 8px">This is what other members can see about you. Skip anything you want.</p>
+     <label for="pfHome">Home course</label><input class="field" id="pfHome" maxlength="60" placeholder="Where you play most" value="${esc(me.home||'')}">
+     <label for="pfCity">City</label><input class="field" id="pfCity" maxlength="40" placeholder="Like Henderson" value="${esc(me.city||'')}">
+     <label class="setrow"><span><b>Show my city to members</b></span><input type="checkbox" class="sw" id="pfShowCity" ${me.show_city?'checked':''}></label>
+     <label class="setrow"><span><b>Show my handicap index to members</b><small>${me.hi?'Your index is '+esc(me.hi)+'.':'No index on file yet.'}</small></span><input type="checkbox" class="sw" id="pfShowIdx" ${me.show_index?'checked':''}></label>
+     <label for="pfPhone" style="margin-top:8px">Phone for event texts</label><input class="field" id="pfPhone" type="tel" maxlength="20" placeholder="Only your club leaders see this" value="${esc(me.phone||'')}">
+     <button class="btn full" id="pfSave" style="margin-top:12px"><i class="ph-bold ph-check"></i> Save</button><p class="si-msg" id="pfMsg" role="status"></p>`)}
+   ${group('Set by the club',`${lk('Name',esc(me.name||''))}${lk('Email',esc(me.email||''))}${lk('GHIN number',esc(me.ghin||'None'))}
+     ${lk('Handicap index',me.hi?pfIdx(me):'None on file')}${lk('Chapters',esc((me.chapters||[]).join(' + ')||'National'))}
+     ${lk('Club role',me.role==='admin'?'Club admin':((me.leads||[]).length?'Chapter president of '+esc(me.leads.join(' + ')):'Member'))}
+     ${lk('Dues',`<span class="${du.k}">${esc(du.t)}</span>`)}
+     <p class="help"><i class="ph-bold ph-lock-simple"></i> Only club leaders can change these. If something is wrong, send your chapter leader a message.</p>
+     <div class="acts" style="margin-top:8px"><button class="btn ghost small" data-sub="members|inbox"><i class="ph-bold ph-envelope-simple"></i> Message my leader</button></div>`)}
+   ${group('Invite friends',`${setRow('My invite link','Friends land on a welcome page with your name','<button class="btn small" data-sub="home|invite"><i class="ph-bold ph-paper-plane-tilt"></i> Open</button>')}`)}
+   ${group('Membership',`${setRow('Plan',esc(plan.name)+' - $'+plan.price+' a year','<a class="btn small ghost" href="'+plan.url+'" '+ext+'>Renew</a>')}
+     <div class="acts" style="margin-top:12px"><button class="btn ghost small" id="acOut"><i class="ph-bold ph-sign-out"></i> Sign out</button></div>`)}
+  </div>`}
+document.addEventListener('click',async e=>{const b=e.target.closest('#pfSave');if(!b)return;
+  const msg=$('#pfMsg');b.disabled=true;msg.textContent='Saving...';
+  try{const r=await authCall('/me/update',{home:$('#pfHome').value,city:$('#pfCity').value,phone:$('#pfPhone').value,show_city:$('#pfShowCity').checked,show_index:$('#pfShowIdx').checked},authTok());
+    S.authMe=r.me;msg.textContent='Saved';toast('Profile saved');DIR.items=null}
+  catch(err){msg.textContent=err.message}b.disabled=false});
 function notifyHTML(){
   const m=S.cfg.my,when=[['1w','1 week before'],['3d','3 days before'],['1d','1 day before']];
   return pageHead('Notifications')+`<div class="setcols rise">
