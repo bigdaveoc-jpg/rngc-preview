@@ -12,7 +12,9 @@
 'use strict';
 const PASS_KEY='rngc-guest-pass',WANT_KEY='rngc-golf-upgrade-interest';
 const AFTER_MS=72*3600e3;
-const PREVIEW=true;              /* flip to false once the club server issues and checks passes */
+/* PREVIEW makes codes on the phone; it turns off on its own once bucks.js has the club server address (CLUB_API) */
+const PREVIEW=!(typeof window!=='undefined'&&window.RNGCBUCKS&&window.RNGCBUCKS.api());
+const club=(path,body)=>window.RNGCBUCKS.club(path,body);
 const TZ='America/Los_Angeles';   /* club events are in California and Nevada */
 
 /* ---------- time window (pure, tested) ---------- */
@@ -70,7 +72,7 @@ const savePass=p=>{try{localStorage.setItem(PASS_KEY,JSON.stringify(p))}catch(e)
 
 /* leaders: QR for an event */
 async function issue(ev){
-  try{if(!PREVIEW||authTok()){const r=await authCall('/admin/pass',{ev},authTok());if(r&&r.code)return r.code}}catch(e){if(!PREVIEW)throw e}
+  if(!PREVIEW){const r=await club('/admin/pass',{ev});return r.code}
   return previewCode(ev);
 }
 async function showPassQR(ev){
@@ -90,11 +92,11 @@ async function showPassQR(ev){
 window.passBtn=e=>isLeader()&&!isPast(e.date)?`<button class="btn small ghost" data-gpqr="${esc(e.id)}"><i class="ph-bold ph-qr-code"></i> Guest pass QR</button>`:'';
 
 /* guests: open the link */
-async function redeem(ev,code,name,club){
+async function redeem(ev,code,name,clubName){
   const e=evById(ev);if(!e)throw new Error('That pass is for an event we can\'t find.');
-  if(!PREVIEW||authTok()){try{const r=await authCall('/pass/redeem',{ev,code,name,club});if(r&&r.pass)return r.pass}catch(err){if(!PREVIEW)throw err}}
+  if(!PREVIEW){const r=await club('/pass/redeem',{ev,code,name,club:clubName});return r.pass}
   if(code!==previewCode(ev))throw new Error('That pass code doesn\'t match this event.');
-  return Object.assign({ev,name,club,ename:e.name,date:e.date,at:Date.now()},windowFor(e.date));
+  return Object.assign({ev,name,club:clubName,ename:e.name,date:e.date,at:Date.now()},windowFor(e.date));
 }
 function openRedeem(pp){
   const e=evById(pp.ev);
@@ -155,7 +157,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-gpup]')){showUpgrade(Object.assign({},P.get(),{exp:null,ename:null}));const h=$('#sheet h3');if(h)h.textContent='Keep golf after your pass';return}
   if(e.target.closest('[data-gpwant]')){try{localStorage.setItem(WANT_KEY,String(Date.now()))}catch(err){}
     /* the club server gets this list once it has the endpoint; nothing is charged */
-    try{if(!PREVIEW)authCall('/pass/interest',{ev:(P.get()||{}).ev})}catch(err){}
+    if(!PREVIEW){const gp=P.get()||{};club('/pass/interest',{pass:gp.token||'',ev:gp.ev||''}).catch(()=>{})}
     toast('You\'re on the list. We\'ll tell you the price first.');if($('#sheet').classList.contains('on'))closeSheet();if(gateOn&&S.tab==='golf')setTab('golf');return}
   if(e.target.closest('[data-gpjoin]')){closeSheet();S.joinSent=null;S.hpage='join';setTab('home');return}
 });
@@ -167,6 +169,9 @@ window.rngcTryPassCode=t=>{const pp=parsePass(t);if(pp&&evById(pp.ev)){openRedee
 const q=new URLSearchParams(location.search).get('pass');
 if(q){const pp=parsePass(q);history.replaceState(null,'',location.pathname+location.hash);
   if(pp)setTimeout(()=>openRedeem(pp),300);else toast('That pass link is not complete.')}
+/* server mode: a pass must carry the server's signature and still be good, or it is dropped */
+if(!PREVIEW){const gp=P.get();if(gp){const drop=()=>{try{localStorage.removeItem(PASS_KEY)}catch(e){}syncGolf();if(S.tab==='golf')setTab('golf')};
+  if(!gp.token)drop();else club('/pass/check',{pass:gp.token}).then(r=>{if(!r.ok||r.status==='invalid')drop()}).catch(()=>{})}}
 syncGolf();
 const _setTab=window.setTab;window.setTab=function(t){_setTab(t);syncGolf()};
 })();

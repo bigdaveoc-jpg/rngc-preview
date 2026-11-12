@@ -5,11 +5,39 @@
    - Bucks can't be bought, sold, transferred for cash or cashed out. They are earned by playing and showing up.
    - Bets in Bucks are golf side games among the players in the round (skill), never on NFL games.
    - A wallet can't go below zero.
-   The amounts below are demo numbers until David sets them. Until the club server keeps the ledger, the wallet lives on
-   this phone, so a member could edit it; the live version keeps balances on the server. */
+   The amounts below are demo numbers until David sets them.
+   Club server (rngc-club, see drafts/rngc/server in the BOSS repo): when CLUB_API is set and the member is signed in, the
+   wallet, rules and store come from the server and every earn, bet and trade is posted there (queued when there's no
+   signal on the course). With CLUB_API empty the wallet lives on this phone, as in the preview. */
 (function(){
 'use strict';
-const KEY='rngc-bucks';
+const KEY='rngc-bucks',CACHE='rngc-bucks-server',OUTBOX='rngc-bucks-outbox';
+const CLUB_API='';   /* e.g. 'https://rngc-club.137.184.15.101.sslip.io' once the server is deployed */
+const api=()=>{try{const o=localStorage.getItem('rngc-club-api');if(o)return o.replace(/\/$/,'')}catch(e){}return CLUB_API};
+const tok=()=>{try{return localStorage.getItem('rngc-auth-token')||''}catch(e){return ''}};
+const remote=()=>!!api()&&!!tok();
+async function club(path,body){
+  const t=tok(),r=await fetch(api()+path,{method:body?'POST':'GET',headers:Object.assign(body?{'Content-Type':'application/json'}:{},t?{Authorization:'Bearer '+t}:{}),body:body?JSON.stringify(body):undefined});
+  let j={};try{j=await r.json()}catch(e){}
+  if(!r.ok)throw Object.assign(new Error(j.error||'Could not reach the club server.'),{status:r.status});
+  return j}
+const jget=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v}catch(e){return d}};
+const jset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const changed=()=>{try{window.dispatchEvent(new Event('rngc-bucks'))}catch(e){}};
+/* server mode: the last wallet the server sent, plus posts waiting for signal */
+async function sync(){if(!remote())return null;
+  try{const [w,rules]=await Promise.all([club('/bucks/me'),RULES?Promise.resolve(null):club('/bucks/rules').catch(()=>null)]);
+    if(rules){RULES=rules;applyRules(rules)}
+    const before=JSON.stringify(jget(CACHE,{})&&[jget(CACHE,{}).tx,jget(CACHE,{}).orders,jget(CACHE,{}).bal]),now=[w.tx||[],w.orders||[],w.bal];
+    jset(CACHE,{tx:now[0],orders:now[1],bal:now[2],at:Date.now()});if(before!==JSON.stringify(now)||rules)changed();return w}   /* redraw only when something changed */
+  catch(e){return null}}
+let RULES=null,flushing=false,lastSync=0;
+async function flush(){if(!remote()||flushing)return;flushing=true;
+  try{let q=jget(OUTBOX,[]);while(q.length){const it=q[0];
+      try{await club(it.path,it.body)}catch(e){if(!e.status||e.status>=500||e.status===401)break}   /* keep it for later; a 4xx answer is final */
+      q=jget(OUTBOX,[]).filter(x=>x.id!==it.id);jset(OUTBOX,q)}}
+  finally{flushing=false}await sync()}
+function queue(path,body){const q=jget(OUTBOX,[]);q.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),path,body});jset(OUTBOX,q);flush()}
 const EARN={                                 /* demo amounts, David sets the real ones */
   welcome:{amt:250,label:'Welcome to Raider Bucks'},
   round:{amt:25,label:'Posted a round',perDay:2},
@@ -27,7 +55,7 @@ const STORE=[                                /* demo catalog: real items and Buc
 ];
 const fmtN=n=>Math.round(n).toLocaleString('en-US');
 const fmt=n=>(n<0?'-':'')+fmtN(Math.abs(n))+' RB';
-function load(){try{const w=JSON.parse(localStorage.getItem(KEY)||'null');if(w&&Array.isArray(w.tx))return w}catch(e){}return {tx:[],orders:[]}}
+function load(){if(remote()){const c=jget(CACHE,null);return c?{tx:c.tx,orders:c.orders}:{tx:[],orders:[]}}try{const w=JSON.parse(localStorage.getItem(KEY)||'null');if(w&&Array.isArray(w.tx))return w}catch(e){}return {tx:[],orders:[]}}
 function store(w){try{localStorage.setItem(KEY,JSON.stringify(w))}catch(e){}}
 const bal=w=>w.tx.reduce((s,t)=>s+t.amt,0);
 const sameDay=(a,b)=>new Date(a).toDateString()===new Date(b).toDateString();
@@ -40,8 +68,14 @@ function post(k,amt,why,kind,now){
   w.tx.unshift({k,amt:a,why:String(why||'').slice(0,80),kind:kind||'other',at:now});
   store(w);return {ok:true,amt:a,bal:b+a};
 }
-function earn(type,k,now){const e=EARN[type];if(!e)return {ok:false};return post(type+':'+k,e.amt,e.label,type,now)}
-function ensureWelcome(){const w=load();if(!w.tx.some(t=>t.kind==='welcome'))post('welcome',EARN.welcome.amt,EARN.welcome.label,'welcome')}
+function earn(type,k,now){const e=EARN[type];if(!e)return {ok:false};if(remote()){queue('/bucks/earn',{type,key:String(k)});return {ok:true,queued:true}}return post(type+':'+k,e.amt,e.label,type,now)}
+/* a round's side-bet result in Bucks: the server checks the caps; the phone wallet floors at zero */
+function bet(rid,amt,where){if(remote()){queue('/bucks/bet',{rid:String(rid),amt:Math.round(amt),where:String(where||'round').slice(0,40)});return {ok:true,queued:true}}
+  return post('bets:'+rid,amt,(amt>0?'Won':'Lost')+' side bets, '+(where||'round'),'bet')}
+function applyRules(r){if(r.earn)for(const [k,v] of Object.entries(r.earn))EARN[k]=Object.assign({},EARN[k]||{},v);if(r.welcome)EARN.welcome.amt=r.welcome;
+  if(Array.isArray(r.store)&&r.store.length){STORE.length=0;r.store.forEach(x=>STORE.push(x))}}
+function ensureWelcome(){if(remote()){if(Date.now()-lastSync>30e3){lastSync=Date.now();sync()}return}const w=load();if(!w.tx.some(t=>t.kind==='welcome'))post('welcome',EARN.welcome.amt,EARN.welcome.label,'welcome')}
+async function redeemAsync(id){if(!remote())return redeem(id);try{const r=await club('/bucks/redeem',{item:id});await sync();return r}catch(e){return {ok:false,why:e.message}}}
 function redeem(id,now){
   const it=STORE.find(x=>x.id===id),w=load();if(!it)return {ok:false,why:'No such item'};
   if(bal(w)<it.b)return {ok:false,why:'Not enough Raider Bucks yet'};
@@ -50,10 +84,11 @@ function redeem(id,now){
   (w.orders=w.orders||[]).unshift({id:oid,item:it.id,n:it.n,b:it.b,at:now,status:'requested'});
   store(w);return {ok:true,order:oid,bal:bal(w)};
 }
-window.RNGCBUCKS={KEY,EARN,STORE,fmt,fmtN,load,post,earn,redeem,ensureWelcome,
-  balance(){return bal(load())},
+window.RNGCBUCKS={KEY,EARN,STORE,fmt,fmtN,load,post,earn,bet,redeem,redeemAsync,ensureWelcome,sync,flush,club,api,remote,
+  balance(){if(remote()){const c=jget(CACHE,null);return c&&typeof c.bal==='number'?c.bal:0}return bal(load())},
   /* the scorecard's money() asks which currency a bet is in */
   cur(){return window.__cur||'usd'}};
+if(typeof document!=='undefined'&&remote()){flush();window.addEventListener('online',flush)}
 if(typeof document==='undefined'||!document.getElementById('v-home'))return;   /* tests and the scorecard stop here */
 
 /* ---------- club app: wallet card on Home and the wallet sheet ---------- */
@@ -96,15 +131,17 @@ function sheetHTML(){
   return `<div class="rbs"><div class="bal"><b>${B.fmtN(b)}</b><span>Raider Bucks</span></div>
    <div class="seg" style="margin-top:0;justify-content:center">${seg('wallet','Wallet')}${seg('earn','How to earn')}${seg('store','Club store')}</div>
    <div style="margin-top:12px">${body}</div>
-   <div class="card privacy"><i class="ph-bold ph-info"></i><span>Raider Bucks are club points, not money: they can't be bought, sold or cashed out, and bets in Bucks are golf side games among the players in your round. Demo amounts and demo store items; saved on this phone until the club database is built.</span></div></div>`;
+   <div class="card privacy"><i class="ph-bold ph-info"></i><span>Raider Bucks are club points, not money: they can't be bought, sold or cashed out, and bets in Bucks are golf side games among the players in your round. ${B.remote()?'Kept by the club server.':'Demo amounts and demo store items; saved on this phone until the club server is on.'}</span></div></div>`;
 }
 const draw=()=>openSheet(sheetHTML());
+/* server answers arrive after the sheet opened: redraw what's on screen */
+window.addEventListener('rngc-bucks',()=>{const sh=document.getElementById('sheet');if(sh&&sh.classList.contains('on')&&sh.querySelector('.rbs'))draw();else if(typeof S!=='undefined'&&S.tab==='home'&&typeof renderHome==='function'&&document.querySelector('[data-rbopen]'))renderHome()});
 document.addEventListener('click',e=>{
   if(e.target.closest('[data-rbopen]')){B.ensureWelcome();tab='wallet';draw();return}
   const t=e.target.closest('[data-rbtab]');if(t){tab=t.dataset.rbtab;draw();return}
   const by=e.target.closest('[data-rbbuy]');if(by){const it=B.STORE.find(x=>x.id===by.dataset.rbbuy);
     if(!confirm('Trade '+B.fmt(it.b)+' for the '+it.n.toLowerCase()+'? A club leader confirms and ships it.'))return;
-    const r=B.redeem(it.id);toast(r.ok?'Requested. '+B.fmtN(r.bal)+' RB left.':r.why);tab='wallet';draw();
-    if(S.tab==='home'&&typeof renderHome==='function')renderHome();return}
+    B.redeemAsync(it.id).then(r=>{toast(r.ok?'Requested. '+B.fmtN(B.balance())+' RB left.':r.why);tab='wallet';draw();
+      if(S.tab==='home'&&typeof renderHome==='function')renderHome()});return}
 });
 })();

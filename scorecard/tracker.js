@@ -902,7 +902,7 @@ function finishRound(){const t=myTeam(),miss=order(t.start).filter(h=>!holeDone(
   for(const b of myBets())if(b.type==='skins'){const r=settleBet(b,list);sm.skins={amt:b.amt,net:!!b.net,won:(r.won||[]).map(w=>({h:w.h,pid:w.pid,n:w.n,amt:w.amt})),carry:r.carry||0}}
   G.rounds.unshift(sm);delete G.live[RID];
   /* Raider Bucks: side-bet result and the round bonus go to the wallet once (keyed by round) */
-  if(window.RNGCBUCKS&&!live.follow){const v=Math.round(led.me||0);if(sm.cur==='rb'&&v)RNGCBUCKS.post('bets:'+sm.id,v,(v>0?'Won':'Lost')+' side bets, '+(sm.cname||'round'),'bet');RNGCBUCKS.earn('round',sm.id)}
+  if(window.RNGCBUCKS&&!live.follow){const v=Math.round(led.me||0);if(sm.cur==='rb'&&v)RNGCBUCKS.bet(sm.id,v,sm.cname||'round');RNGCBUCKS.earn('round',sm.id)}
   const me=sm.players.find(p=>p.id==='me');if(me&&me.hcp!==G.me.hcp&&!live.follow)trSetMe(G.me.name,me.hcp);const fin=S.share&&!live.follow?trLivePush(true):null;
   if(live.group){const g=G.groups.find(x=>x.id===live.group);if(g)for(const p of m.players){const gm=g.members.find(x=>x.id===p.id);if(gm)gm.hcp=p.hcp}}
   gsave();try{localStorage.removeItem(KEY)}catch(e){}
