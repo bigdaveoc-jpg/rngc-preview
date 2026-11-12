@@ -1008,4 +1008,12 @@ function trJoin(code){code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'
 /* history rows and round pages show each round in its own currency (dollars or Raider Bucks) */
 {const _row=trRow;trRow=function(r,p){const pc=window.__cur;window.__cur=r.cur||'usd';try{return _row(r,p)}finally{window.__cur=pc}};
  const _rd=trRound;trRound=function(id){const r=G.rounds.find(x=>x.id===id);window.__cur=(r&&r.cur)||'usd';return _rd(id)}}
+/* saved library courses pick up new hole maps quietly when there's signal (a course is kept on the phone when picked) */
+function trLibRefresh(){try{if(navigator.onLine===false)return}catch(e){}
+  Object.keys(G.courses||{}).forEach(id=>{const co=G.courses[id];if(!co||!co.lib)return;
+    fetch('courses/c/'+encodeURIComponent(id)+'.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(d=>{if(!d||!d.app)return;
+      const nu=d.app.maps||null;if(JSON.stringify(co.maps||null)===JSON.stringify(nu))return;
+      if(nu)co.maps=nu;else delete co.maps;if(COURSES[id]&&COURSES[id]!==co)COURSES[id].maps=co.maps;gsave()   /* shows from the next hole screen */
+    }).catch(()=>{})})}
+setTimeout(trLibRefresh,1200);
 route();

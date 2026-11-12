@@ -743,6 +743,7 @@ function holeNotes(n){const m=CO().maps&&CO().maps[n];if(!m)return null;const te
   const ws=[...new Set([...fw,...gs].filter(z=>z.k==='water').map(z=>z.side==='middle'?'front':z.side))];if(ws.length)sum.push('Water '+nice(ws));
   const gb=gs.filter(z=>z.k==='bunker'),gw=gs.filter(z=>z.k==='water');
   const sides=[...new Set(gb.map(z=>z.side==='middle'?(z.to<=1?'back':'front'):z.side))];
+  if(m.hand){items.push(['flag-pennant','Green placed from an aerial photo','Front and back yards are close estimates']);return{items,sum:sum.join(' · ')}}   /* hand-mapped hole: no bunker or depth claims */
   items.push(['flag-pennant',`Green ${m.depth} yds deep`,[gb.length?`${gb.length} bunker${gb.length>1?'s':''} ${nice(sides)}`:'No greenside bunkers',gw.length?'water '+nice([...new Set(gw.map(z=>z.side==='middle'?'front':z.side))]):''].filter(Boolean).join(', ')]);
   const nb=fw.filter(z=>z.k==='bunker').length+gb.length;sum.push(nb+' bunker'+(nb===1?'':'s'));
   return{items,sum:sum.join(' · ')}}
@@ -1028,6 +1029,6 @@ function tellClub(){try{if(window.parent!==window)window.parent.postMessage({gol
 addEventListener('hashchange',tellClub);tellClub();fitSoon();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
-<script src="tracker.js?v=34"></script>
+<script src="tracker.js?v=35"></script>
 </body>
 </html>
