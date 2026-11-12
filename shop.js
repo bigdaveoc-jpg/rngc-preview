@@ -81,7 +81,7 @@ function art(p,ck){
 (function(){const s=document.createElement('style');s.textContent=`
 .rgx .mock{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin-top:4px;font-size:14px;color:var(--muted);border-style:dashed}
 .rgx .mock i{font-size:20px;color:var(--silver-2)}.rgx .mock b{color:var(--text)}
-.rgx .cats{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:12px 0 4px}.rgx .cats::-webkit-scrollbar{display:none}
+.rgx .cats{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:12px 0}.rgx .cats::-webkit-scrollbar{display:none}
 .rgx .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 @media (min-width:700px){.rgx .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}}
 .rgx .it{display:flex;flex-direction:column;padding:0;overflow:hidden;text-align:left;width:100%;transition:transform .18s var(--ease),border-color .2s}

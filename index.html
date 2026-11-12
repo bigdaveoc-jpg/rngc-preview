@@ -912,6 +912,10 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .sheet .card+.acts{margin-top:10px}
 .hero{margin-bottom:12px}
 .view>.card+.card{margin-top:12px}
+/* 2026-11-12 spacing pass: no two boxes touch, one 12px gap */
+.rbcard+.card,.card+.rbcard,.rise>.card+.card.invcard{margin-top:12px}
+.card.next{margin-top:12px}
+#v-events .evgrid{display:grid;gap:12px}
 .stack,.shopgrid,.sponsgrid{gap:12px}
 .iconbtn,.tab{border-radius:10px}
 .ev .date{border-radius:4px}
@@ -3069,6 +3073,6 @@ syncTop();
 <script src="bucks.js?v=club1"></script>
 <script src="fantasy.js"></script>
 <script src="guestpass.js?v=club1"></script>
-<script src="shop.js?v=club1"></script>
+<script src="shop.js?v=club2"></script>
 </body>
 </html>
