@@ -951,7 +951,7 @@ function trLog(f){const all=G.rounds.slice().sort((a,b)=>b.date-a.date),rs=all.f
   trWire();document.querySelectorAll('[data-lf]').forEach(b=>b.onclick=()=>location.hash='#/log/'+b.dataset.lf);const lc=$('#lfCo');if(lc)lc.onchange=()=>{LOGCO=lc.value;trLog(f)}}
 
 /* ---------- live rounds: the scorekeeper shares, buddies follow on their own phones ---------- */
-const TR_RELAY=(()=>{try{const o=localStorage.getItem('rngc-relay');if(o)return o}catch(e){}return /^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'http://localhost:8795':'https://rngc-live.137.184.15.101.sslip.io'})();
+const TR_RELAY=(()=>{try{const o=localStorage.getItem('rngc-relay');if(o)return o}catch(e){}return /^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'http://localhost:8795':'https://rngc-live.137.184.188.41.sslip.io'})();
 /* no relay host yet on the public preview: hide sharing there rather than show a button that fails */
 const TR_LIVE_OK=!/example\.invalid/.test(TR_RELAY);
 const trCode=()=>{const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<5;i++)c+=A[Math.floor(Math.random()*A.length)];return c};

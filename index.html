@@ -3000,7 +3000,7 @@ const SI=$('#signin');
 function openSignIn(){SI.hidden=false;$('#siMsg').textContent='';requestAnimationFrame(()=>SI.classList.add('on'))}
 function closeSignIn(){SI.classList.remove('on');setTimeout(()=>{SI.hidden=true},360)}
 /* real sign-in: our own sign-in service on the cloud server holds the member list; the site only holds a sign-in token */
-var AUTH='https://rngc-auth.137.184.15.101.sslip.io',TOKK='rngc-auth-token';
+var AUTH='https://rngc-auth.137.184.188.41.sslip.io',TOKK='rngc-auth-token';
 function authTok(){try{return localStorage.getItem(TOKK)||''}catch(e){return ''}}
 function setTok(t){try{t?localStorage.setItem(TOKK,t):localStorage.removeItem(TOKK)}catch(e){}}
 async function authCall(path,body,tok){
