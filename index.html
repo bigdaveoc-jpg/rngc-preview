@@ -1487,7 +1487,7 @@ function evCard(e){
    <div class="row">${live?'<span class="rl-pill"><i></i>LIVE NOW</span>':''}<span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${e.spots&&!past?`<span class="pill hot">${esc(e.spots)}</span>`:''}${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
    <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
    ${e.url?`<a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`:''}`}</div>
-   ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>${S.authMe&&S.authMe.role==='admin'?'<a class="btn small ghost" href="scorecard/#/setup"><i class="ph-bold ph-pencil-simple"></i> Edit event</a>':''}${typeof passBtn==='function'?passBtn(e):''}</div>`:''}
+   ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canEdit(e.chapter)?'<a class="btn small ghost" href="scorecard/#/setup"><i class="ph-bold ph-pencil-simple"></i> Edit event</a>':''}${typeof passBtn==='function'?passBtn(e):''}</div>`:''}
    </div></article>`;
 }
 function renderEvents(){
@@ -2427,7 +2427,7 @@ $('#btnProfile').addEventListener('click',()=>{
 /* ---------- news + nav ---------- */
 document.addEventListener('click',e=>{
   const n=e.target.closest('[data-news]');
-  if(n){const a=NEWS.find(x=>x.id===n.dataset.news);openSheet(`<img src="${a.img}" alt="" style="width:100%;height:190px;object-fit:cover;object-position:top;border-radius:12px;margin-bottom:12px"><span class="pill">${a.tag}</span><h3 style="margin-top:8px">${esc(a.title)}</h3><p style="color:var(--muted)">${esc(a.body)}</p><button class="btn ghost full" id="closeN">Close</button>`);$('#closeN').addEventListener('click',closeSheet)}
+  if(n){const a=NEWS.find(x=>x.id===n.dataset.news);openSheet(`<img src="${a.img}" alt="" style="width:100%;height:190px;object-fit:cover;object-position:top;border-radius:12px;margin-bottom:12px"><span class="pill">${a.tag}</span><h3 style="margin-top:8px">${esc(a.title)}</h3><p style="color:var(--muted);white-space:pre-line">${esc(a.body)}</p><button class="btn ghost full" id="closeN">Close</button>`);$('#closeN').addEventListener('click',closeSheet)}
   const g=e.target.closest('[data-go]');if(g){closeSheet();setTab(g.dataset.go)}
   const sc=e.target.closest('[data-scroll]');if(sc){e.preventDefault();const t=document.getElementById(sc.dataset.scroll);t&&t.scrollIntoView({behavior:'smooth'})}
 });
@@ -2564,7 +2564,7 @@ const can=p=>S.member&&(S.role==='admin'||!!(S.cfg.perms[S.role]||{})[p]);
 const USERS=[];
 const userNow=u=>({...u,...(S.cfg.users[u.id]||{})});
 
-const SPAGES=[['setup','Club setup',()=>csCan()],['account','My account',()=>true],['users','Members',()=>S.member&&S.realRole==='admin'],['announce','Messages',()=>S.member&&!!authTok()]];
+const SPAGES=[['setup','Club setup',()=>csCan()],['account','My account',()=>true],['users','Members',()=>S.member&&S.realRole==='admin'],['lead','Chapter tools',()=>S.member&&!!window.RNGCCHAPTER&&RNGCCHAPTER.canLead()],['announce','Messages',()=>S.member&&!!authTok()]];
 Object.defineProperty(SUBNAV,'settings',{enumerable:true,configurable:true,get:()=>SPAGES.filter(p=>p[2]()).map(p=>[p[1],p[0]])});
 
 /* small building blocks */
@@ -2666,9 +2666,10 @@ function renderSettings(){
   const ok=SPAGES.find(p=>p[0]===S.spage&&p[2]());if(!ok)S.spage='account';
   const pg=S.spage||'account';
   const bar=true?'':`<div class="rolebar"><span><i class="ph-bold ph-eye"></i> Preview as</span><div class="seg2">${ROLES.map(r=>`<button class="chip" data-role="${r[0]}" aria-pressed="${S.role===r[0]}">${r[1]}</button>`).join('')}</div></div>`;
-  const body={setup:setupHTML,account:accountHTML,notify:notifyHTML,users:usersHTML,perms:permsHTML,events:evMgrHTML,chapters:chaptersHTML,tix:tixSetHTML,forum:forumSetHTML,sponsors:sponsSetHTML,announce:annHTML,club:clubHTML}[pg]();
+  const body={setup:setupHTML,account:accountHTML,notify:notifyHTML,users:usersHTML,perms:permsHTML,events:evMgrHTML,chapters:chaptersHTML,tix:tixSetHTML,forum:forumSetHTML,sponsors:sponsSetHTML,announce:annHTML,lead:()=>window.RNGCCHAPTER?RNGCCHAPTER.html():'',club:clubHTML}[pg]();
   v.innerHTML=subChips('settings')+bar+body;
   if(pg==='users')fillUsers();
+  if(pg==='lead'&&window.RNGCCHAPTER)RNGCCHAPTER.wire();
 }
 function accountHTML(){
   if(authTok()&&S.authMe)return realAccountHTML();
@@ -3207,6 +3208,7 @@ syncTop();
 <script src="terms.js?v=1"></script>
 <script src="menus.js?v=5"></script>
 <script src="live.js?v=3"></script>
+<script src="chapter.js?v=1"></script>
 <script src="fantasy.js"></script>
 <script src="guestpass.js?v=club1"></script>
 <script src="shop.js?v=club2"></script>
