@@ -1,10 +1,10 @@
 /* Live event day (David, Nov 13 2026). When a club event is on:
    - Home gets a red LIVE banner at the top: leaderboard, my scorecard and event details one tap away, plus the latest
-     big shots and trash talk. The Events tab gets a red dot and the event card a LIVE tag.
+     big shots and thrash talk. The Events tab gets a red dot and the event card a LIVE tag.
    - Phone alerts (club server /push/*): big shots (aces, eagles, new closest-to-pin and long-drive leaders), every
-     birdie if you want it, trash talk, and the "we're live" note. Chosen per phone. iPhone needs the club app on the
+     birdie if you want it, thrash talk, and the "we're live" note. Chosen per phone. iPhone needs the club app on the
      home screen for alerts (Apple's rule).
-   - Trash talk: signed-in members pick one of the club's lines and a group. No typing, so nothing to moderate.
+   - Thrash talk: signed-in members pick one of the club's lines and a group. No typing, so nothing to moderate.
      One line a minute. David or Ross can switch it off for everyone.
    Preview before the day: add ?livepreview to the address (this browser only, until the tab closes). */
 (function(){
@@ -93,7 +93,7 @@ function bannerInner(){if(!isLive())return '';const e=L.ev,signed=!!tok(),pr=pre
    <div class="rl-acts"><a class="main" href="${ROOT}scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>
     <a href="${ROOT}scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> My scorecard</a>
     <button type="button" data-rl="details"><i class="ph-bold ph-info"></i> Event details</button>
-    ${signed&&L.talkOn?'<button type="button" data-rl="talk"><i class="ph-bold ph-megaphone"></i> Talk trash</button>':''}
+    ${signed&&L.talkOn?'<button type="button" data-rl="talk"><i class="ph-bold ph-megaphone"></i> Thrash talk</button>':''}
     <button type="button" data-rl="alerts" class="${pr.on?'on':''}"><i class="ph-bold ph-bell${pr.on?'-ringing':''}"></i> ${pr.on?'Alerts on':'Get alerts'}</button></div>
    ${L.feed.length?`<ul class="rl-feed" aria-live="polite">${L.feed.slice(0,3).map(f=>`<li><b>${esc(f.title)}</b><span>${esc(f.body)}</span><small>${ago(f.at)}</small></li>`).join('')}</ul>`:''}</div>`}
 const banner=()=>`<div class="rl-banner" id="rlBanner">${bannerInner()}</div>`;
@@ -115,7 +115,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-rl]');if(!
 function details(){if(typeof setTab==='function'){setTab('events');setTimeout(()=>{const c=document.getElementById('ev-'+(L.ev&&L.ev.id));
   if(c){c.scrollIntoView({behavior:'smooth',block:'start'});c.classList.remove('rl-flash');void c.offsetWidth;c.classList.add('rl-flash')}},120)}else location.href=ROOT+'#events'}
 
-/* ---------- the sheet (alerts + trash talk share one) ---------- */
+/* ---------- the sheet (alerts + thrash talk share one) ---------- */
 let sheet=null;
 function open(html,wire){if(!sheet){sheet=document.createElement('div');sheet.id='rlSheet';sheet.hidden=true;sheet.setAttribute('role','dialog');sheet.setAttribute('aria-modal','true');
   sheet.addEventListener('click',e=>{if(e.target===sheet)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sheet&&!sheet.hidden)close()});document.body.appendChild(sheet)}
@@ -141,7 +141,7 @@ async function subscribe(p,hello){const perm=await Notification.requestPermissio
 async function unsubscribe(){try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
   if(sub){await call('/push/off',{endpoint:sub.endpoint}).catch(()=>{});await sub.unsubscribe()}}catch(e){}}
 function alertSheet(){const p=prefs();
-  if(!tok())return open(`<h2>Live alerts</h2><p>Sign in with your club account to get big shots and trash talk on your phone.</p>
+  if(!tok())return open(`<h2>Live alerts</h2><p>Sign in with your club account to get big shots and thrash talk on your phone.</p>
     <button class="go" type="button" data-signin-rl><i class="ph-bold ph-sign-in"></i> Sign in</button>`,s=>{s.querySelector('[data-signin-rl]').onclick=()=>{close();
       const b=document.querySelector('[data-signin]');if(b)b.click();else location.href=ROOT}});
   if(!canPush()||(ios()&&!standalone()))return open(`<h2>Live alerts</h2><p>${ios()?'On iPhone, alerts only work from the club app on your home screen. Add it first, open it from the RNGC icon, then turn alerts on there.':'This browser can\'t do phone alerts. Try Chrome, or add the club app to your home screen.'}</p>
@@ -153,7 +153,7 @@ function alertSheet(){const p=prefs();
    <label class="opt"><input type="radio" name="rlShots" value="all" ${p.shots==='all'?'checked':''}><span>Every birdie too<small>Busy. Every group, every birdie</small></span></label>
    <label class="opt"><input type="radio" name="rlShots" value="off" ${p.shots==='off'?'checked':''}><span>No shot alerts</span></label>
    <div class="lbl">Also</div>
-   <label class="opt"><input type="checkbox" id="rlTalk" ${p.talk?'checked':''}><span>Trash talk<small>Club lines members send during the round</small></span></label>
+   <label class="opt"><input type="checkbox" id="rlTalk" ${p.talk?'checked':''}><span>Thrash talk<small>Club lines members send during the round</small></span></label>
    <label class="opt"><input type="checkbox" id="rlLive" ${p.live?'checked':''}><span>We're live<small>One note when the event starts</small></span></label>
    <button class="go" type="button" id="rlGo" ${blocked?'disabled':''}><i class="ph-bold ph-bell-ringing"></i> ${p.on?'Save':'Turn on alerts'}</button>
    ${p.on?'<button class="ghost" type="button" id="rlOff">Turn off alerts on this phone</button>':''}
@@ -167,29 +167,29 @@ function alertSheet(){const p=prefs();
       if(typeof renderSettings==='function'&&typeof S!=='undefined'&&S.tab==='settings')renderSettings()}})}
 /* the Notifications page in Profile shows the same switch */
 function card(){const p=prefs();return `<div class="card rl-card rise" style="margin:0 0 14px"><i class="ph-fill ph-bell-ringing" style="font-size:28px;color:#C8161F"></i>
-  <div><b>Live event alerts</b><span>${p.on?{big:'On: big shots',all:'On: every birdie',off:'On: no shot alerts'}[p.shots]+(p.talk?', trash talk':'')+(p.live?', we\'re live':''):'Big shots and trash talk on event day, on this phone.'}</span></div>
+  <div><b>Live event alerts</b><span>${p.on?{big:'On: big shots',all:'On: every birdie',off:'On: no shot alerts'}[p.shots]+(p.talk?', thrash talk':'')+(p.live?', we\'re live':''):'Big shots and thrash talk on event day, on this phone.'}</span></div>
   <button class="btn small${p.on?' ghost':''}" type="button" data-rl="alerts">${p.on?'Change':'Turn on'}</button></div>`}
 
-/* ---------- trash talk ---------- */
+/* ---------- thrash talk ---------- */
 function talkSheet(){if(!tok())return alertSheet();
-  if(!L.lines.length)return open(`<h2>Talk trash</h2><p>Can't load the club's lines right now. Check your signal and try again.</p>`);
+  if(!L.lines.length)return open(`<h2>Thrash talk</h2><p>Can't load the club's lines right now. Check your signal and try again.</p>`);
   const gs=GROUPS[L.ev.id]||[],gname=g=>'Group '+g.slice(1);let to='all',line=-1;
-  open(`<h2>Talk trash</h2><p>Pick who it's for and a line. Everyone with trash talk on gets it, with your first name.</p>
+  open(`<h2>Thrash talk</h2><p>Pick who it's for and a line. Everyone with thrash talk on gets it, with your first name.</p>
    <div class="lbl">Who</div><div class="chips" id="rlTo"><button type="button" data-to="all" aria-pressed="true">Everybody</button>${gs.map(g=>`<button type="button" data-to="${g}" aria-pressed="false">${gname(g)}</button>`).join('')}</div>
    <div class="lbl">Line</div><div class="lines" id="rlLines">${L.lines.map((l,i)=>`<button type="button" data-line="${i}" aria-pressed="false">${esc(l)}</button>`).join('')}</div>
    <button class="go" type="button" id="rlSend" disabled><i class="ph-bold ph-megaphone"></i> Send it</button><div class="err" id="rlErr" role="alert"></div>
-   ${L.admin?`<label class="opt" style="margin-top:12px"><input type="checkbox" id="rlTalkOn" ${L.talkOn?'checked':''}><span>Trash talk on for everyone<small>Only David and Ross see this. Off stops it right away.</small></span></label>`:''}`,s=>{
+   ${L.admin?`<label class="opt" style="margin-top:12px"><input type="checkbox" id="rlTalkOn" ${L.talkOn?'checked':''}><span>Thrash talk on for everyone<small>Only David and Ross see this. Off stops it right away.</small></span></label>`:''}`,s=>{
     const send=s.querySelector('#rlSend'),err=s.querySelector('#rlErr');
     s.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{to=b.dataset.to;s.querySelectorAll('[data-to]').forEach(x=>x.setAttribute('aria-pressed',x===b))});
     s.querySelectorAll('[data-line]').forEach(b=>b.onclick=()=>{line=+b.dataset.line;s.querySelectorAll('[data-line]').forEach(x=>x.setAttribute('aria-pressed',x===b));send.disabled=false});
     send.onclick=()=>{if(line<0)return;send.disabled=true;err.textContent='';
       call('/talk/send',{ev:L.ev.id,to,line}).then(()=>{close();say('Sent. Let them hear it.');setTimeout(poll,800)})
        .catch(x=>{err.textContent=x.status===429?'One line a minute. Let that one land first.':x.status===401?'Your sign-in ran out. Sign in again.':x.message||'We can\'t reach the club server.';send.disabled=false})};
-    const sw=s.querySelector('#rlTalkOn');if(sw)sw.onchange=()=>call('/admin/talk',{ev:L.ev.id,on:sw.checked}).then(j=>{L.talkOn=j.talkOn;say(j.talkOn?'Trash talk is on.':'Trash talk is off for everyone.');paint()})
+    const sw=s.querySelector('#rlTalkOn');if(sw)sw.onchange=()=>call('/admin/talk',{ev:L.ev.id,on:sw.checked}).then(j=>{L.talkOn=j.talkOn;say(j.talkOn?'Thrash talk is on.':'Thrash talk is off for everyone.');paint()})
       .catch(()=>{sw.checked=!sw.checked;say('Couldn\'t change it. Check your signal.')})})}
 
-/* scorecard leaderboard: a round red button for trash talk (hole screens stay untouched: nothing scrolls there) */
-if(ROOT){const f=document.createElement('button');f.id='rlTalkFab';f.type='button';f.hidden=true;f.setAttribute('aria-label','Talk trash');f.innerHTML='<i class="ph-bold ph-megaphone"></i>';
+/* scorecard leaderboard: a round red button for thrash talk (hole screens stay untouched: nothing scrolls there) */
+if(ROOT){const f=document.createElement('button');f.id='rlTalkFab';f.type='button';f.hidden=true;f.setAttribute('aria-label','Thrash talk');f.innerHTML='<i class="ph-bold ph-megaphone"></i>';
   f.onclick=talkSheet;document.body.appendChild(f);addEventListener('hashchange',paint)}
 
 poll();setInterval(()=>{if(!document.hidden)poll()},30000);
