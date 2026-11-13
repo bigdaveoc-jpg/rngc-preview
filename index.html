@@ -1933,7 +1933,7 @@ function myPos(){const c=CITIES[S.myCity];return c?[c.lat,c.lng]:null}
 function renderMembers(){
   const v=$('#v-members');
   if(!['inbox','dir','alumni'].includes(S.mview))S.mview='inbox';
-  const seg=`<div class="seg" role="tablist" aria-label="Member area"><button class="chip" data-mv="inbox" aria-pressed="${S.mview==='inbox'}"><i class="ph-bold ph-envelope-simple"></i> Messages${MSG.unread?' ('+MSG.unread+')':''}</button><button class="chip" data-mv="dir" aria-pressed="${S.mview==='dir'}"><i class="ph-bold ph-users-three"></i> Members</button><button class="chip" data-mv="alumni" aria-pressed="${S.mview==='alumni'}"><i class="ph-bold ph-trophy"></i> Alumni &amp; Hall of Fame</button></div>`;
+  const seg=`<div class="seg" role="tablist" aria-label="Member area"><button class="chip" data-mv="inbox" aria-pressed="${S.mview==='inbox'}"><i class="ph-bold ph-envelope-simple"></i> Messages${MSG.unread?' ('+MSG.unread+')':''}</button><button class="chip" data-mv="dir" aria-pressed="${S.mview==='dir'}"><i class="ph-bold ph-users-three"></i> Members</button><button class="chip" data-mv="alumni" aria-pressed="${S.mview==='alumni'}"><i class="ph-bold ph-trophy"></i> Alumni<span class="pm-long"> &amp; Hall of Fame</span></button></div>`;
   if(!authTok()){
     v.innerHTML=`<div class="card gate rise"><i class="ph-fill ph-lock-key"></i><h3>Members only</h3><p>Messages, the member list and the Alumni and Hall of Fame page are for signed-in members. Sign in with the email on your membership.</p><div class="acts"><button class="btn" id="realIn"><i class="ph-bold ph-sign-in"></i> Sign in</button><a class="btn ghost" href="${SITE}/shop/" ${ext}>Become a member</a></div></div>`;
     renderCoach();return}
@@ -3197,6 +3197,7 @@ syncTop();
 </script>
 <script src="bucks.js?v=club2"></script>
 <script src="terms.js?v=1"></script>
+<script src="menus.js?v=1"></script>
 <script src="fantasy.js"></script>
 <script src="guestpass.js?v=club1"></script>
 <script src="shop.js?v=club2"></script>
