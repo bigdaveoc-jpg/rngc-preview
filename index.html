@@ -369,6 +369,8 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
   .subnav button[aria-current="true"]::before{background:var(--silver)}
 }
 .gwrap,.fwrap2{display:block}
+/* phone and tablet: no big map on top; tap a game and a small map opens under it, zoomed on the stadium (David, Nov 12) */
+@media (max-width:999px){.gwrap .gside{display:none}.gwrap .gside.inline{display:block;margin:-2px 0 8px}.gwrap .gside.inline .mapbox{height:230px;border-radius:14px}.gwrap .gside.inline .gsel{margin-top:8px}}
 @media (min-width:1000px){
   .gwrap{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start}
   .gwrap .gmain{grid-column:1;grid-row:1}
@@ -1757,7 +1759,7 @@ function selPanel(){
   box.innerHTML=`<div class="card gsel"><div class="mxtop"><span>Week ${g.wk} - ${g.home?'Home':'Away'}</span><span>${g.res?esc(g.res):''}</span></div>
    <h3 class="cardh">${esc(g.home?'Raiders vs '+TEAMS[g.o]:'Raiders at '+TEAMS[g.o])}</h3><div class="meta">${g.res?'Final':gWhen(g)}</div><div class="meta">${esc(V.n)}, ${esc(V.city)}</div>
    ${golf?`<p class="meta"><i class="ph-bold ph-flag-pennant"></i> ${esc(golf.c.name)}, about ${Math.round(golf.d)} miles away</p>`:''}
-   <div class="acts">${g.res?'':`<a class="btn small" href="${VENUES[g.v].tix}" ${ext}><i class="ph-bold ph-ticket"></i> Tickets</a>`}<button class="btn small ghost" data-game="${g.id}">Game info</button><button class="btn small ghost" data-allstad>All stadiums</button></div></div>`;
+   <div class="acts">${g.res?'':`<a class="btn small" href="${VENUES[g.v].tix}" ${ext}><i class="ph-bold ph-ticket"></i> Tickets</a>`}<button class="btn small ghost" data-game="${g.id}">Game info</button><button class="btn small ghost" data-allstad>${PHONE()?'Close map':'All stadiums'}</button></div></div>`;
 }
 function goingHTML(g){
   const list=gameGoing(g),me=S.gameGo&&S.gameGo[g.id],n=goingCount(g);
@@ -1766,11 +1768,19 @@ function goingHTML(g){
   return `<h4 class="minihead">Going to this game - ${n}</h4>${names}
    <button class="btn small ${me?'ghost':''}" data-gogame="${g.id}" style="margin-top:10px">${me?'<i class="ph-bold ph-check"></i> You\'re going':'<i class="ph-bold ph-hand-waving"></i> I\'m going'}</button>`;
 }
+const PHONE=()=>window.innerWidth<1000;
+/* phone: the map panel moves right under the tapped game; computer: it stays in the side column */
+function placeSide(){const side=$('#v-games .gside'),wrap=$('#v-games .gwrap');if(!side||!wrap)return;
+  const card=S.selGame&&PHONE()&&document.querySelector('#v-games .mx[data-selgame="'+S.selGame+'"]');
+  if(card){if(card.nextElementSibling!==side)card.after(side);side.classList.add('inline')}
+  else{side.classList.remove('inline');if(side.parentElement!==wrap)wrap.prepend(side)}}
+{const re=()=>{if(S.tab==='games'&&S.gview==='sched'){placeSide();selPanel()}};addEventListener('resize',re);
+ try{matchMedia('(max-width:999px)').addEventListener('change',re)}catch(e){}}   /* phone turned sideways, window resized */
 function selectGame(id,scroll){
   const g=GAMES.find(x=>x.id===id);if(!g)return;const V=VENUES[g.v];
   S.selGame=id;if(!g.res)loadSummary(g);
   document.querySelectorAll('#v-games .mx').forEach(b=>b.classList.toggle('sel',b.dataset.selgame===id));
-  selPanel();
+  selPanel();placeSide();
   const m=maps.games;
   if(m&&window.google&&google.maps){
     gExtra.forEach(x=>x.setMap(null));gExtra=[];
@@ -1779,13 +1789,17 @@ function selectGame(id,scroll){
     if(S.member)nearGame(g).forEach(x=>{gExtra.push(new google.maps.Marker({map:m,position:{lat:x.p[0],lng:x.p[1]},title:x.m.name+(x.trip?' - visiting':' - '+x.m.chapter),icon:memBadge(x.m.name),zIndex:40}));pts.push(x.p)});
     const golf=nearCourse(V);
     if(golf){gExtra.push(new google.maps.Marker({map:m,position:{lat:golf.c.lat,lng:golf.c.lng},title:golf.c.name,icon:pinIcon('flag','#d5dae1'),zIndex:25}));pts.push([golf.c.lat,golf.c.lng])}
-    if(pts.length>1){fit(m,pts,60);google.maps.event.addListenerOnce(m,'idle',()=>{if(m.getZoom()>12)m.setZoom(12)})}else{m.panTo({lat:V.lat,lng:V.lng});m.setZoom(11)}
+    if(PHONE())setTimeout(()=>{m.setCenter({lat:V.lat,lng:V.lng});m.setZoom(13)},80);
+    else if(pts.length>1){fit(m,pts,60);google.maps.event.addListenerOnce(m,'idle',()=>{if(m.getZoom()>12)m.setZoom(12)})}else{m.panTo({lat:V.lat,lng:V.lng});m.setZoom(11)}
   }
-  if(scroll&&window.innerWidth<1000){const el=$('#gmap');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
+  if(scroll&&PHONE())setTimeout(()=>{const el=$('#v-games .gside'),v=$('#v-games');if(!el||!v)return;   /* bring the whole map into view, clear of the bottom bar */
+    const r=el.getBoundingClientRect(),vb=v.getBoundingClientRect().bottom-((document.querySelector('nav.tabs')||{}).offsetHeight||0)-8,need=r.bottom-vb;
+    if(need>0){const go=Math.min(need,r.top-90),was=v.scrollTop;v.scrollBy({top:go,behavior:'smooth'});setTimeout(()=>{if(v.scrollTop===was)v.scrollTop=was+go},700)}},150)
 }
-function allStadiums(){S.selGame=null;gExtra.forEach(x=>x.setMap(null));gExtra=[];document.querySelectorAll('#v-games .mx').forEach(b=>b.classList.remove('sel'));selPanel();if(maps.games)fit(maps.games,Object.values(VENUES).map(V=>[V.lat,V.lng]),30)}
+function allStadiums(){S.selGame=null;gExtra.forEach(x=>x.setMap(null));gExtra=[];document.querySelectorAll('#v-games .mx').forEach(b=>b.classList.remove('sel'));selPanel();placeSide();if(maps.games)fit(maps.games,Object.values(VENUES).map(V=>[V.lat,V.lng]),30)}
 function fillGames(){
   const top=$('#gtop'),list=$('#glist');if(!top||!list)return;
+  {const side=$('#v-games .gside'),wrap=$('#v-games .gwrap');if(side&&wrap&&side.parentElement!==wrap)wrap.prepend(side)}   /* keep the map safe while the list redraws */
   const played=GAMES.filter(g=>g.res),up=GAMES.filter(g=>!g.res);
   const w=played.filter(g=>g.res[0]==='W').length,l=played.filter(g=>g.res[0]==='L').length;
   const bye=`<div class="card" style="padding:12px 14px;color:var(--muted);font-size:14px"><i class="ph-bold ph-pause-circle"></i> Week ${BYE_WEEK} bye</div>`;
@@ -1793,6 +1807,7 @@ function fillGames(){
   list.innerHTML=`<h2 class="sec">Up next</h2><p class="sub">Pacific time. Win chance from ESPN.</p>
    <div class="gstack">${up.map(g=>(g.wk===BYE_WEEK+1?bye:'')+matchup(g)).join('')}</div>
    <h2 class="sec">Results</h2><div class="gstack">${played.slice().reverse().map(matchup).join('')}</div>`;
+  placeSide();
 }
 const retryBtn='<div><button class="btn small ghost" data-retry style="margin-top:10px"><i class="ph-bold ph-arrow-clockwise"></i> Try again</button></div>';
 /* reload whatever failed: schedule, headlines, injury report */
@@ -1860,7 +1875,7 @@ function ffHTML(){
 }
 document.addEventListener('click',e=>{
   const gv=e.target.closest('[data-gv]');if(gv){S.gview=gv.dataset.gv;save();renderGames();return}
-  const sg=e.target.closest('[data-selgame]');if(sg){const id=sg.dataset.selgame;closeSheet();if(S.tab!=='games'||S.gview!=='sched'){S.selGame=id;S.gview='sched';save();setTab('games');return}selectGame(id,true);return}
+  const sg=e.target.closest('[data-selgame]');if(sg){const id=sg.dataset.selgame;closeSheet();if(S.tab!=='games'||S.gview!=='sched'){S.selGame=id;S.gview='sched';save();setTab('games');return}if(PHONE()&&S.selGame===id&&$('#v-games .gside.inline')){allStadiums();return}selectGame(id,true);return}
   if(e.target.closest('[data-allstad]')){allStadiums();return}
   const gg=e.target.closest('[data-gogame]');if(gg){if(!S.member){openSignIn();return}const id=gg.dataset.gogame;S.gameGo=S.gameGo||{};S.gameGo[id]=!S.gameGo[id];save();fillGames();selPanel();document.querySelectorAll('#v-games .mx').forEach(b=>b.classList.toggle('sel',b.dataset.selgame===S.selGame));toast(S.gameGo[id]?'Marked going. Members at this game can see you.':'Taken off the list');return}
   if(e.target.closest('[data-signin]')){openSignIn();return}
