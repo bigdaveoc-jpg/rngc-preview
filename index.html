@@ -916,6 +916,14 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .rbcard+.card,.card+.rbcard,.rise>.card+.card.invcard{margin-top:12px}
 .card.next{margin-top:12px}
 #v-events .evgrid{display:grid;gap:12px}
+/* 2026-11-12 old site photos + flyer wall */
+.photogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.flyerwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.zoomtile{display:block;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel);cursor:pointer}
+.zoomtile img{display:block;width:100%;height:auto;object-fit:cover}
+.photogrid .zoomtile img{aspect-ratio:4/3}
+.flyerwall .zoomtile img{aspect-ratio:4/5}
+.zoomimg{display:block;width:100%;max-height:72vh;object-fit:contain;border-radius:12px}
 .stack,.shopgrid,.sponsgrid{gap:12px}
 .iconbtn,.tab{border-radius:10px}
 .ev .date{border-radius:4px}
@@ -1067,7 +1075,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 
 <script>
 const SITE='https://raidernationgolfclub.com';
-const UP=SITE+'/wp-content/uploads/';
+const UP='assets/old-site/'   /* old site pictures copied into the app 2026-11-12, so the domain move can't break them */;
 const SHOP=SITE+'/product/';
 
 /* ---------- real club content (from raidernationgolfclub.com) ---------- */
@@ -1095,10 +1103,9 @@ const EVENTS=[
  {id:'rc26',name:'Raider Cup 2026',date:'2026-05-22',where:'St. George, UT. Copper Rock, Coral Canyon, Sand Hollow, Sky Mountain',chapter:'National',price:'May 22-24',course:'stgeorge',
   note:'The club\'s signature trip, powered by Woodson Bourbon Whiskey.',url:SITE+'/raider-cup/',img:UP+'2026/06/RC-2026-FLYER-3-819x1024.jpg'}
 ];
-const FLYERS=[
- UP+'2026/09/CHIMERA-11.14.26-1-819x1024.jpg',UP+'2026/08/10.3.26-CHIMERA-777x1024.png',UP+'2026/06/RC-2026-FLYER-3-819x1024.jpg',
- UP+'2026/06/LEGACY-9.12.26v3-819x1024.jpg',UP+'2026/06/MEADOWLARK-11.29.25-731x1024.jpg',UP+'2026/06/CHIMERA-10.11.2025-819x1024.jpg',UP+'2026/06/Preseason-Primer-731x1024.jpg'
-];
+const FLYERS=["chimera-11.14.26-1", "10.3.26-chimera", "legacy-9.12.26v3", "rngc-spring-v", "meadowlark-11.29.25", "chimera-11.15.2025", "chimera-10.11.2025", "preseason-primer", "rngc-spring-iv", "chimera-11.23", "spanish-trails-2024", "lark10.19.24", "legacy101224", "cn2", "chimera", "concord-1", "bulle-rock-2024", "b4la2", "bnb-62223", "rngc-spring-2024", "arroyo-flyer", "thorncreek", "rngc-spring-2023", "the-24", "legacy9.17-v2", "rngc-spring-2022-v2", "chimera-rngc", "img_0902", "img_0773", "revere-9.17-v1"];   /* every flyer from the old site's Tournaments page, newest first (assets/old-site/flyers) */
+const PHOTOS=["img_5442", "img_1626", "img_3120", "img_3402", "img_3410", "img_3681", "c863daca-3d64-4c46-94b9-ee24613e0eea", "f2a2535a-ae40-4d11-b293-db0b715d09c4", "img_0662", "img_4713", "img_2189", "img_3443"];   /* old site gallery + home photos (assets/old-site/photos) */
+const stemOf=u=>String(u||'').split('/').pop().replace(/-\d{2,4}x\d{2,4}(?=\.)/,'').replace(/\.\w+$/,'').toLowerCase();
 const SCORECARD_EVENTS=['nov14'];   /* events with the event-day scorecard (scorecard/ page) */
 const SPONSORS=['Woodson Bourbon Whiskey','Alpha Team Golf','Black Sunday Brand','Chimera Golf Club','Surf City Sound'];
 const NEWS=[
@@ -1262,6 +1269,7 @@ function renderHome(){
   else if(pg==='news')v.innerHTML=subChips('home')+newsHTML();
   else if(pg==='invite')v.innerHTML=subChips('home')+inviteHTML();
   else if(pg==='about')v.innerHTML=subChips('home')+aboutHTML();
+  else if(pg==='photos')v.innerHTML=subChips('home')+photosHTML();
   else v.innerHTML=subChips('home')+setupNudge()+overviewHTML();
   syncTop();
 }
@@ -1371,12 +1379,18 @@ function shopHTML(){
 const INTERVIEWS=[['Jzl6c1z3H9Y','Charles Woodson talks golf, Raiders legacy and Lake Tahoe'],['RSqMjjuzWA8','Derek Carr in Lake Tahoe: golf, the Raiders and life after football'],['lT_1-HuLAfo','Rich Eisen talks Raiders, Jets and golf at Edgewood Tahoe'],['XXqf9MVxXLM','Mervyn Fernandez on the Bay Area rivalry and Alumni Weekend'],['T6cvMTRLq0I','Matt Leinart talks Raiders, USC and golf at Lake Tahoe'],['PU1tMFodGiQ','Ray Romano talks golf and Raiders hopes at Edgewood Tahoe'],['9AuhZ22Fqt4','Carson Daly talks golf and his love for the Raiders'],['UJqjaeqE62w','Dylan Dreyer talks golf and weather at Edgewood'],['HkRwaS3zIoY','Big Sloan talks Raiders, Long Beach and golf at Cherry Park'],['y1_enhJEKeU','Mellow Man Ace on music, golf and Raider Nation']];
 function aboutHTML(){
   return pageHead('About the club','Raiders, travel and golf.')+`<div class="card rise" style="padding:18px"><p style="margin:0;font-size:16px;line-height:1.6">We are a national club for everything Raiders, travel and golf. We connect members with Raiders alumni, celebrities and one-of-a-kind experiences through our events and our videos. Join us as we follow our team around the country and tee it up everywhere we go.</p>
-   <div class="acts" style="margin-top:14px"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join a chapter</button><button class="btn ghost" data-sub="events|up">See events</button></div></div>
+   <div class="acts" style="margin-top:14px"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join a chapter</button><button class="btn ghost" data-sub="events|up">See events</button><button class="btn ghost" data-sub="home|photos"><i class="ph-bold ph-images"></i> Club photos</button></div></div>
    <h3 class="shophead" style="margin-top:22px">Interviews</h3><p class="sub" style="margin-top:0">Raiders legends and famous fans on the course. Opens on YouTube.</p>
    <div class="vidgrid rise">${INTERVIEWS.map(([id,t])=>`<a class="card vid" href="https://www.youtube.com/watch?v=${id}" ${ext}><span class="vthumb"><img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy"><i class="ph-fill ph-play-circle"></i></span><b>${esc(t)}</b></a>`).join('')}</div>
    <h3 class="shophead" style="margin-top:22px">Follow the club</h3>
    <div class="acts"><a class="btn ghost" href="https://www.instagram.com/raidernationgolfclub" ${ext}><i class="ph-bold ph-instagram-logo"></i> Instagram</a><a class="btn ghost" href="https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ" ${ext}><i class="ph-bold ph-youtube-logo"></i> YouTube</a></div>`;
 }
+function photosHTML(){
+  return pageHead('Club photos','Golf days with the club. Tap a photo to see it big.')+`<div class="photogrid rise">${PHOTOS.map(f=>`<button class="zoomtile" data-zoom="assets/old-site/photos/${f}.jpg" aria-label="Open photo"><img src="assets/old-site/photos/${f}-sm.jpg" alt="Club golf day" loading="lazy"></button>`).join('')}</div>
+   <div class="acts" style="margin-top:16px"><button class="btn ghost" data-sub="events|past"><i class="ph-bold ph-images"></i> Flyers from past events</button></div>`;
+}
+document.addEventListener('click',e=>{const z=e.target.closest('[data-zoom]');if(!z)return;openSheet(`<img class="zoomimg" src="${z.dataset.zoom}" alt=""><div class="acts" style="margin-top:10px"><button class="btn ghost" data-zoomclose>Close</button></div>`)});
+document.addEventListener('click',e=>{if(e.target.closest('[data-zoomclose]'))closeSheet()});
 function newsHTML(){
   return pageHead('Club news')+`<div class="stack newsgrid rise">${NEWS.map(n=>`<button class="card news" data-news="${n.id}"><img class="thumb" src="${n.img}" alt="" loading="lazy"><div><span class="pill">${n.tag}</span><h3 style="margin-top:6px">${esc(n.title)}</h3><div class="meta">${n.meta}</div></div></button>`).join('')}</div>`;
 }
@@ -1424,9 +1438,9 @@ function renderEvents(){
       <div class="card"><span class="pill">2026 - Past event</span><h3 class="cardh">Raider Cup 2026</h3><p class="meta">May 22-24 - St. George, UT</p><p class="meta">Copper Rock, Coral Canyon, Sand Hollow and Sky Mountain.</p></div>
       <a class="btn ghost" href="${old.url}" ${ext}><i class="ph-bold ph-arrow-square-out"></i> Raider Cup page on the club site</a>
      </div></div>`;return}
-  if(pg==='past'){const live=new Set([...up.map(e=>e.img),EVENTS.find(e=>e.id==='rc26').img]);
+  if(pg==='past'){const live=new Set([...up,...past].map(e=>stemOf(e.img)));
     v.innerHTML=subChips('events')+pageHead('Past events')+`<div class="evgrid rise">${past.length?past.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No past events for this chapter yet.</div>'}</div>
-     <h3 class="shophead">Flyers from past events</h3><div class="flyers">${FLYERS.filter(u=>!live.has(u)).map(u=>`<img src="${u}" alt="Event flyer" loading="lazy">`).join('')}</div>`;return}
+     <h3 class="shophead">Flyers from past events</h3><p class="sub" style="margin-top:0">Every club event back to 2022. Tap one to see it big.</p><div class="flyerwall">${FLYERS.filter(f=>!live.has(f)).map(f=>`<button class="zoomtile" data-zoom="assets/old-site/flyers/${f}.jpg" aria-label="Open event flyer"><img src="assets/old-site/flyers/${f}-sm.jpg" alt="Event flyer" loading="lazy"></button>`).join('')}</div>`;return}
   v.innerHTML=subChips('events')+pageHead('Upcoming events')+`<div class="evgrid rise">${up.length?up.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No dates for this chapter yet. More get posted here as they are set.</div>'}</div>
    ${up.length&&up.every(e=>e.chapter==='Nevada')&&S.chapter!=='Nevada'?'<p class="sub" style="margin-top:10px">Only Nevada has a date posted right now. SoCal and NorCal chapter events show up here as soon as they are set.</p>':''}`;
 }
@@ -2343,7 +2357,7 @@ window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&'go
 window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||!e.data.golf)return;const k=e.data.golf;if(['me','log','groups','events'].includes(k)&&S.golfv!==k){S.golfv=k;renderSubnav()}});
 /* side menu: the open page shows its sub-links underneath it */
 const SUBNAV={
- home:[['About and media','about'],['Join a chapter','join'],['Invite a friend','invite'],['Club leaders','leaders'],['Club news','news'],['Club shop','shop'],['Sponsors','sponsors']],
+ home:[['About and media','about'],['Photos','photos'],['Join a chapter','join'],['Invite a friend','invite'],['Club leaders','leaders'],['Club news','news'],['Club shop','shop'],['Sponsors','sponsors']],
  golf:[['My golf','me'],['Play log','log'],['Groups','groups'],['Club events','events']],
  events:[['Upcoming','up'],['Raider Cup','cup'],['Past events','past']],
  games:[['Raiders schedule','sched'],['Player news','news']],
