@@ -1095,7 +1095,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 <script>
 const SITE='https://raidernationgolfclub.com';
 const UP='assets/old-site/'   /* old site pictures copied into the app 2026-11-12, so the domain move can't break them */;
-const SHOP=SITE+'/product/';
+const SHOP='/pay/?i=product/';   /* store moving off the club domain (2026-11-12): pay links go to the moving page, which forwards once the store is back */
 
 /* ---------- real club content (from raidernationgolfclub.com) ---------- */
 const CHAPTERS=['All','SoCal','NorCal','Nevada'];
@@ -1120,7 +1120,7 @@ const EVENTS=[
  {id:'rc27',name:'Raider Cup 2027',date:'2027-05-28',where:'Monterey Bay. Carmel Valley Ranch, Poppy Hills (Pebble Beach, CA), Bayonet Black Horse',chapter:'National',price:'$975 per hacker',course:'monterey',spots:'Only 2 of 24 spots left',
   note:'May 28th-30th. Includes 4 rounds, 3 polos, hat and prizes.',url:'',img:'assets/flyers/raider-cup-2027.jpg'},
  {id:'rc26',name:'Raider Cup 2026',date:'2026-05-22',where:'St. George, UT. Copper Rock, Coral Canyon, Sand Hollow, Sky Mountain',chapter:'National',price:'May 22-24',course:'stgeorge',
-  note:'The club\'s signature trip, powered by Woodson Bourbon Whiskey.',url:SITE+'/raider-cup/',img:UP+'2026/06/RC-2026-FLYER-3-819x1024.jpg'}
+  note:'The club\'s signature trip, powered by Woodson Bourbon Whiskey.',url:'/pay/?i=raider-cup/',img:UP+'2026/06/RC-2026-FLYER-3-819x1024.jpg'}
 ];
 const FLYERS=["chimera-11.14.26-1", "10.3.26-chimera", "legacy-9.12.26v3", "rngc-spring-v", "meadowlark-11.29.25", "chimera-11.15.2025", "chimera-10.11.2025", "preseason-primer", "rngc-spring-iv", "chimera-11.23", "spanish-trails-2024", "lark10.19.24", "legacy101224", "cn2", "chimera", "concord-1", "bulle-rock-2024", "b4la2", "bnb-62223", "rngc-spring-2024", "arroyo-flyer", "thorncreek", "rngc-spring-2023", "the-24", "legacy9.17-v2", "rngc-spring-2022-v2", "chimera-rngc", "img_0902", "img_0773", "revere-9.17-v1"];   /* every flyer from the old site's Tournaments page, newest first (assets/old-site/flyers) */
 const PHOTOS=["img_5442", "img_1626", "img_3120", "img_3402", "img_3410", "img_3681", "c863daca-3d64-4c46-94b9-ee24613e0eea", "f2a2535a-ae40-4d11-b293-db0b715d09c4", "img_0662", "img_4713", "img_2189", "img_3443"];   /* old site gallery + home photos (assets/old-site/photos) */
@@ -2444,7 +2444,7 @@ const CFG_DEF={
  users:{},evEdit:{},events:[],chapters:{},spons:null,ann:[],
  tix:{cap:'pct',pct:25,approve:false,trades:true,clubSpots:true,expire:true},
  forum:{boards:{Tournaments:true,'Game Day':true,'Golf Tips':true,Travel:true,Gear:true},approveNew:false,guestsRead:true,filter:true,reports:3},
- club:{name:'Raider Nation Golf Club',site:'https://raidernationgolfclub.com',store:'https://raidernationgolfclub.com/shop/',ig:'https://www.instagram.com/raidernationgolfclub',yt:'https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ',mapDefault:'optin',hcp:'ghin',feed:'espn',tz:'America/Los_Angeles',invites:true,invWho:'all',invExpire:'30',invApprove:false},
+ club:{name:'Raider Nation Golf Club',site:'https://raidernationgolfclub.com',store:'/pay/?i=shop/',ig:'https://www.instagram.com/raidernationgolfclub',yt:'https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ',mapDefault:'optin',hcp:'ghin',feed:'espn',tz:'America/Los_Angeles',invites:true,invWho:'all',invExpire:'30',invApprove:false},
  my:{events:true,evWhen:'3d',games:true,gameWhen:'2h',tix:true,forum:true,ann:true,push:true,email:true,sms:false,ghin:'',chapter:'SoCal'}
 };
 const deepMerge=(a,b)=>{const o=Array.isArray(a)?a.slice():{...a};if(b&&typeof b==='object'&&!Array.isArray(b))Object.keys(b).forEach(k=>{o[k]=(a&&a[k]&&typeof a[k]==='object'&&!Array.isArray(a[k]))?deepMerge(a[k],b[k]):b[k]});return o};
@@ -2835,7 +2835,7 @@ document.addEventListener('submit',e=>{
     S.cfg.users[id]={role,chapter:$('#uCh').value,status:$('#uSt').value,areas:role==='sub'?[...document.querySelectorAll('input[name=ua]:checked')].map(x=>x.value):[]};
     cfgSave();closeSheet();fillUsers();toast('Saved. '+ROLE_N[role]+'.')}
   if(f.id==='evForm'){e.preventDefault();const id=f.dataset.id;
-    const st=$('#efSt').value,fields={name:$('#efN').value.trim(),date:$('#efD').value,chapter:$('#efC').value,course:$('#efCo').value||null,where:$('#efW').value.trim()||'Course to be set',price:$('#efP').value.trim()||'Price to be set',cap:+$('#efCap').value||'',fmt:$('#efF').value,url:$('#efU').value.trim()||SITE+'/shop/',note:$('#efNo').value.trim(),scores:$('#efS').checked,status:st==='pub'?'':st};
+    const st=$('#efSt').value,fields={name:$('#efN').value.trim(),date:$('#efD').value,chapter:$('#efC').value,course:$('#efCo').value||null,where:$('#efW').value.trim()||'Course to be set',price:$('#efP').value.trim()||'Price to be set',cap:+$('#efCap').value||'',fmt:$('#efF').value,url:$('#efU').value.trim()||'/pay/?i=shop/',note:$('#efNo').value.trim(),scores:$('#efS').checked,status:st==='pub'?'':st};
     if(!fields.name||!fields.date){toast('Add a name and date');return}
     if(id==='new'){const ev={id:'c'+Date.now(),img:UP+'2026/06/IMG_5442-1024x768.jpg',...fields};EVENTS.push(ev);S.cfg.events.push(ev)}
     else{const ev=EVENTS.find(x=>x.id===id);Object.assign(ev,fields);const ce=S.cfg.events.find(x=>x.id===id);if(ce)Object.assign(ce,fields);else S.cfg.evEdit[id]={...(S.cfg.evEdit[id]||{}),...fields}}
