@@ -1496,7 +1496,7 @@ function evCard(e){
    <div><h3>${esc(e.name)}</h3><div class="where">${esc(e.where)}</div><div class="note">${esc(e.note)}</div>
    <div class="row">${live?'<span class="rl-pill"><i></i>LIVE NOW</span>':''}<span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${e.spots&&!past?`<span class="pill hot">${esc(e.spots)}</span>`:''}${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
    <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
-   ${e.url?`<a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`:''}`}</div>
+   ${e.url?`<a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`:''}${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canInfo(e)?`<button class="btn small ghost" data-evinfo="${e.id}"><i class="ph-bold ph-pencil-simple"></i> Edit details</button>`:''}`}</div>
    ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canEdit(e.chapter)?'<a class="btn small ghost" href="scorecard/#/setup"><i class="ph-bold ph-pencil-simple"></i> Edit event</a>':''}${typeof passBtn==='function'?passBtn(e):''}</div>`:''}
    </div></article>`;
 }
@@ -1512,7 +1512,7 @@ function renderEvents(){
      <div class="stack">
       <div class="card"><div class="row"><span class="pill">2027</span><span class="pill hot">${esc(rc.spots)}</span></div><h3 class="cardh">May 28th-30th, Monterey Bay</h3>
        <p class="meta">Carmel Valley Ranch, Poppy Hills (Pebble Beach, CA) and Bayonet Black Horse.</p>
-       <p class="meta">$975 per hacker. Includes 4 rounds, 3 polos, hat and prizes.</p>
+       <p class="meta">${esc(rc.price)}. Includes 4 rounds, 3 polos, hat and prizes.</p>
        <button class="btn ${going?'ghost':''}" data-rsvp="rc27" aria-pressed="${going}" style="margin-top:12px">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> I\'m interested'}</button></div>
       <div class="card"><span class="pill">2026 - Past event</span><h3 class="cardh">Raider Cup 2026</h3><p class="meta">May 22-24 - St. George, UT</p><p class="meta">Copper Rock, Coral Canyon, Sand Hollow and Sky Mountain.</p></div>
       <a class="btn ghost" href="${old.url}" ${ext}><i class="ph-bold ph-arrow-square-out"></i> Raider Cup page on the club site</a>
@@ -2997,7 +2997,9 @@ document.addEventListener('submit',e=>{
     const st=$('#efSt').value,fields={name:$('#efN').value.trim(),date:$('#efD').value,chapter:$('#efC').value,course:$('#efCo').value||null,where:$('#efW').value.trim()||'Course to be set',price:$('#efP').value.trim()||'Price to be set',cap:+$('#efCap').value||'',fmt:$('#efF').value,url:$('#efU').value.trim()||'/pay/?i=shop/',note:$('#efNo').value.trim(),scores:$('#efS').checked,status:st==='pub'?'':st};
     if(!fields.name||!fields.date){toast('Add a name and date');return}
     if(id==='new'){const ev={id:'c'+Date.now(),img:UP+'2026/06/IMG_5442-1024x768.jpg',...fields};EVENTS.push(ev);S.cfg.events.push(ev)}
-    else{const ev=EVENTS.find(x=>x.id===id);Object.assign(ev,fields);const ce=S.cfg.events.find(x=>x.id===id);if(ce)Object.assign(ce,fields);else S.cfg.evEdit[id]={...(S.cfg.evEdit[id]||{}),...fields}}
+    else{const ev=EVENTS.find(x=>x.id===id);Object.assign(ev,fields);const ce=S.cfg.events.find(x=>x.id===id);if(ce)Object.assign(ce,fields);else S.cfg.evEdit[id]={...(S.cfg.evEdit[id]||{}),...fields};
+     /* events on the club server: save the details for everyone too */
+     if(window.RNGCCHAPTER&&RNGCCHAPTER.canInfo(ev))RNGCCHAPTER.saveInfo(id,{name:fields.name,date:fields.date,where:fields.where,price:fields.price,note:fields.note,cancelled:st==='cancelled'}).then(()=>toast('Saved for everyone')).catch(er=>toast(er.message))}
     cfgSave();closeSheet();renderSettings();renderEvents();renderHome();toast(st==='draft'?'Saved as a draft':'Saved and published')}
   if(f.id==='spEditForm'){e.preventDefault();const i=f.dataset.i,s={n:$('#seN').value.trim(),what:$('#seW').value.trim(),site:$('#seS').value.trim(),logo:$('#seL').value.trim(),hide:!$('#seH').checked};
     if(!s.n)return;if(i==='new')SPONS_X.push(s);else Object.assign(SPONS_X[+i],s);S.cfg.spons=SPONS_X.map(x=>({...x}));cfgSave();closeSheet();renderSettings();toast('Sponsor saved')}
@@ -3265,7 +3267,7 @@ syncTop();
 <script src="terms.js?v=1"></script>
 <script src="menus.js?v=5"></script>
 <script src="live.js?v=3"></script>
-<script src="chapter.js?v=1"></script>
+<script src="chapter.js?v=2"></script>
 <script src="fantasy.js"></script>
 <script src="guestpass.js?v=club1"></script>
 <script src="shop.js?v=club2"></script>
