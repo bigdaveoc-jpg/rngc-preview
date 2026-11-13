@@ -37,11 +37,15 @@ function rerender(){if(typeof S==='undefined')return;
 /* ---- event details from the club server win over what's built into the app ---- */
 const BASE={};
 const TEAM={1:'Singles',2:'Twosomes',3:'Threesomes',4:'Foursomes',5:'5-player teams',6:'6-player teams'};
-function applyInfo(items){Object.entries(items||{}).forEach(([id,f])=>{const e=evs().find(x=>x.id===id);if(!e)return;
+function applyInfo(items){Object.entries(items||{}).forEach(([id,f])=>{let e=evs().find(x=>x.id===id);
+  if(!e){if(!f.custom||typeof EVENTS==='undefined')return;   /* an event made in the app */
+    e={id,name:f.name,date:f.date,where:f.where||'',chapter:f.chapter,price:f.price||'',note:f.note||'',url:'',custom:true,
+       img:'assets/old-site/photos/'+(PHOTO[f.chapter]||PHOTO.Club)+'.jpg'};EVENTS.push(e)}
   if(!BASE[id])BASE[id]={status:e.status||'',spots:e.spots||''};
   ['name','date','where','price'].forEach(k=>{if(f[k])e[k]=f[k]});
   if(f.note!=null)e.note=f.note;
   if(f.rules!=null)e.rules=f.rules;
+  if(f.url)e.url=f.url;
   if('cap' in f||'team' in f){e.cap=f.cap||0;e.team=f.team||0;
     e.spots=[TEAM[e.team],e.cap?e.cap+' players max':''].filter(Boolean).join(' · ')||BASE[id].spots}
   if('cancelled' in f)e.status=f.cancelled?'cancelled':(BASE[id].status==='cancelled'?'':BASE[id].status)})}
@@ -64,6 +68,7 @@ function openInfo(id){const e=evs().find(x=>x.id===id);if(!e)return;
    <div class="two"><div><label for="eiD">Date</label><input class="field" id="eiD" type="date" required value="${esc(e.date)}"></div>
     <div><label for="eiP">Price</label><input class="field" id="eiP" maxlength="30" value="${esc(e.price)}" placeholder="$175 per player"></div></div>
    <label for="eiW">Where</label><input class="field" id="eiW" maxlength="90" value="${esc(e.where)}">
+   <label for="eiU">Sign-up and pay link</label><input class="field" id="eiU" type="url" maxlength="300" value="${esc(e.url&&/^(https:|\/)/.test(e.url)?e.url:'')}" placeholder="https://... from the club store">
    <label for="eiNo">Details</label><textarea class="field" id="eiNo" maxlength="600" rows="4">${esc(e.note||'')}</textarea>
    ${h4('2. Players and teams')}
    <div class="two"><div><label for="eiCap">Players max</label><input class="field" id="eiCap" type="number" inputmode="numeric" min="0" max="500" value="${e.cap||''}" placeholder="No limit"></div>
@@ -82,7 +87,7 @@ function openInfo(id){const e=evs().find(x=>x.id===id);if(!e)return;
    <p class="meta" style="margin-top:6px">Opens the club message box with the invite written. You pick who gets it and tap Send.</p>`);
   const f=document.getElementById('eiForm');
   f.onsubmit=ev=>{ev.preventDefault();const b=f.querySelector('button[type=submit]'),err=document.getElementById('eiErr');b.disabled=true;err.textContent='';
-    saveInfo(id,{name:f.eiN.value,date:f.eiD.value,price:f.eiP.value,where:f.eiW.value,note:f.eiNo.value,rules:f.eiR.value,
+    saveInfo(id,{name:f.eiN.value,date:f.eiD.value,price:f.eiP.value,where:f.eiW.value,url:f.eiU.value.trim(),note:f.eiNo.value,rules:f.eiR.value,
       cap:Math.max(0,Math.min(500,parseInt(f.eiCap.value,10)||0)),team:+f.eiTeam.value||0,cancelled:f.eiX.checked})
      .then(()=>{err.textContent='';say('Saved for everyone')})
      .catch(x=>{err.textContent=x.status===401?'Your sign-in ran out. Sign in again.':x.message}).finally(()=>{b.disabled=false})};
@@ -97,7 +102,32 @@ function invite(id){const e=evs().find(x=>x.id===id);if(!e)return;
   const to=e.chapter==='National'||!e.chapter?'club':'chapter:'+e.chapter;
   if(typeof closeSheet==='function')closeSheet();
   setTimeout(()=>openCompose({to,subject:`You're invited: ${e.name}`.slice(0,90),body}),330)}
-document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-evinfo]');if(b){ev.preventDefault();openInfo(b.dataset.evinfo)}});
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-evinfo]');if(b){ev.preventDefault();openInfo(b.dataset.evinfo)}
+  if(ev.target.closest&&ev.target.closest('[data-evnew]')){ev.preventDefault();openNew()}});
+
+/* New event (David, Nov 13 2026): club admins for any chapter, presidents for theirs. Saved on the club server,
+   then the Event setup opens for it (players, rules, invite). */
+function openNew(){if(!canLead()){say('Club admins and chapter presidents make events.');return}
+  const chs=mine().filter(c=>c!=='Club');
+  openSheet(`<h3 style="margin:0">New event</h3><p class="meta" style="margin:2px 0 8px">Members see it as soon as you save.</p><form id="enForm">
+   <label for="enC">Chapter</label><select class="field" id="enC">${chs.map(c=>`<option>${c}</option>`).join('')}</select>
+   <label for="enN">Event name</label><input class="field" id="enN" required minlength="3" maxlength="70" placeholder="RNGC vs ...">
+   <div class="two"><div><label for="enD">Date</label><input class="field" id="enD" type="date" required></div>
+    <div><label for="enP">Price</label><input class="field" id="enP" maxlength="30" placeholder="$175 per player"></div></div>
+   <label for="enW">Where</label><input class="field" id="enW" maxlength="90" placeholder="Course, city">
+   <div class="two"><div><label for="enCap">Players max</label><input class="field" id="enCap" type="number" inputmode="numeric" min="0" max="500" placeholder="No limit"></div>
+    <div><label for="enT">Team size</label><select class="field" id="enT"><option value="0">Not set</option>${[1,2,3,4,5,6].map(n=>`<option value="${n}" ${n===4?'selected':''}>${TEAM[n]}</option>`).join('')}</select></div></div>
+   <label for="enU">Sign-up and pay link</label><input class="field" id="enU" type="url" maxlength="300" placeholder="https://... from the club store">
+   <label for="enNo">Details</label><textarea class="field" id="enNo" maxlength="600" rows="3" placeholder="Format, check-in time, what's included"></textarea>
+   <button class="btn full" type="submit" style="width:100%;margin-top:12px"><i class="ph-bold ph-plus"></i> Make the event</button>
+   <p class="meta" id="enErr" role="alert" style="color:#ffb3b5;min-height:1.2em;margin-top:6px"></p></form>`);
+  const f=document.getElementById('enForm');
+  f.onsubmit=ev=>{ev.preventDefault();const b=f.querySelector('button[type=submit]'),err=document.getElementById('enErr');b.disabled=true;err.textContent='';
+    call('/admin/event-new',{chapter:f.enC.value,name:f.enN.value,date:f.enD.value,price:f.enP.value,where:f.enW.value,url:f.enU.value.trim(),note:f.enNo.value,
+      cap:Math.max(0,Math.min(500,parseInt(f.enCap.value,10)||0)),team:+f.enT.value||0})
+     .then(j=>{INFO.items[j.ev]=j.info;if(!INFO.events.includes(j.ev))INFO.events.push(j.ev);SRV_EVS=INFO.events;keep(INFO);applyInfo({[j.ev]:j.info});rerender();
+       say('Event made. Finish the setup here.');openInfo(j.ev)})
+     .catch(x=>{err.textContent=x.status===401?'Your sign-in ran out. Sign in again.':x.message;b.disabled=false})}}
 
 /* ---- a news photo: shrunk to a JPEG under about 550 KB before it leaves the phone ---- */
 function shrink(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();
@@ -130,13 +160,13 @@ function html(){if(!canLead())return pageHead('Chapter tools')+'<p class="meta">
    ${group('Posted',POSTS.length?`<div class="stack">${POSTS.map(p=>`<div class="card"><span class="pill">${esc(p.chapter==='Club'?'Whole club':p.chapter)}</span> <small class="meta">${day(p.at)} · ${esc(p.name)}</small>
      <b class="annt">${esc(p.title)}</b>${p.img?`<img src="${picOf(p)}" alt="" loading="lazy" style="display:block;width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin:6px 0">`:''}<p class="meta" style="white-space:pre-line">${esc(p.body)}</p>
      ${canEdit(p.chapter)?`<button class="btn small ghost" data-cndel="${p.id}"><i class="ph-bold ph-trash"></i> Take down</button>`:''}</div>`).join('')}</div>`:'<p class="meta">Nothing posted yet.</p>')}
-   ${group('Your events',mineEv.length?`<div class="stack">${mineEv.map(e=>`<div class="card"><b>${esc(e.name)}</b>${e.status==='cancelled'?' <span class="pill out">Cancelled</span>':''}
+   ${group('Your events',`<button class="btn" data-evnew style="width:100%;margin-bottom:10px"><i class="ph-bold ph-plus"></i> New event</button>`+(mineEv.length?`<div class="stack">${mineEv.map(e=>`<div class="card"><b>${esc(e.name)}</b>${e.status==='cancelled'?' <span class="pill out">Cancelled</span>':''}
      <p class="meta">${day(e.date+'T12:00')} · ${esc(e.where)} · ${esc(e.price)}</p><div class="row" style="flex-wrap:wrap;gap:6px;margin-top:6px">
      ${canInfo(e)?`<button class="btn small" data-evinfo="${e.id}"><i class="ph-bold ph-gear-six"></i> Event setup</button>`:''}
      
-     ${!canInfo(e)?'<p class="meta">Not on the club server yet. Ask David.</p>':''}</div></div>`).join('')}</div>`:'<p class="meta">No upcoming events for your chapter.</p>')}
+     ${!canInfo(e)?'<p class="meta">Not on the club server yet. Ask David.</p>':''}</div></div>`).join('')}</div>`:'<p class="meta">No upcoming events for your chapter.</p>'))}
    ${group('Your chapter',`<button class="btn full" data-sub="members|inbox"><i class="ph-bold ph-envelope-simple"></i> Message my chapter</button>`)}
-  </div><p class="meta" style="opacity:.55;margin-top:10px">App update: Nov 13, 10 AM</p>`}
+  </div><p class="meta" style="opacity:.55;margin-top:10px">App update: Nov 13, 11 AM</p>`}
 
 function showPic(){const p=document.getElementById('cnPicPrev'),a=document.getElementById('cnPicAdd'),i=document.getElementById('cnPicImg');if(!p)return;
   p.hidden=!PIC;a.hidden=!!PIC;if(PIC)i.src=PIC;else i.removeAttribute('src')}
@@ -159,5 +189,5 @@ function openFromLink(){let id='';try{id=new URLSearchParams(location.search).ge
     if(e&&canInfo(e)){clearInterval(t);openInfo(id)}
     else if(n>30){clearInterval(t);say(tok()?'Only club admins and the chapter president can edit this event.':'Sign in first, then try again.')}},500)}
 load();loadInfo().then(openFromLink);
-window.RNGCCHAPTER={html,wire,load,canLead,canEdit,canInfo,saveInfo,openInfo,invite};
+window.RNGCCHAPTER={html,wire,load,canLead,canEdit,canInfo,saveInfo,openInfo,invite,openNew,club:call};
 })();

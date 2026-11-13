@@ -2673,7 +2673,9 @@ const CSETUP=[
    ['pick','Do new members need your OK?',['Yes','No']],
    ['text','Who runs the forum?','Name']]}
 ];
-const CS={sent:null,busy:false,open:{}};
+const CS={sent:null,busy:false,open:{},marks:{}};
+const csClub=(p,b)=>window.RNGCCHAPTER&&RNGCCHAPTER.club?RNGCCHAPTER.club(p,b):Promise.reject(new Error('The club server is not set up.'));
+const csMe=()=>((S.authMe&&S.authMe.name)||'').toLowerCase(),csTo=()=>/^david\b/.test(csMe())?'Ross':'David';
 const csSubj=it=>'Club setup: '+it.t;
 /* Club setup is for David and Ross only (David, 2026-11-12), even if more admins are added later */
 const CS_WHO=[1366711762,3117876439],csH=e=>{let x=5381;for(const c of e)x=(Math.imul(x,33)^c.charCodeAt(0))>>>0;return x};
@@ -2682,8 +2684,12 @@ function csDraft(){try{return JSON.parse(localStorage.getItem('rngc-setup')||'{}
 function csKeep(id,vals){if(id==='dob')return;try{const d=csDraft();d[id]=vals;localStorage.setItem('rngc-setup',JSON.stringify(d))}catch(e){}}
 async function csLoad(){if(CS.busy||CS.sent||!authTok())return;CS.busy=true;
   try{const r=await authCall('/msg/sent',null,authTok());const m={};(r.items||[]).forEach(x=>{if(!m[x.subject])m[x.subject]=x.ts});CS.sent=m}catch(e){CS.sent={}}
+  try{CS.marks=(await csClub('/admin/setup')).done||{}}catch(e){CS.marks={}}
   CS.busy=false;if(S.tab==='settings'&&S.spage==='setup')renderSettings();if(S.tab==='home')renderHome()}
-const csDone=it=>!!(CS.sent&&CS.sent[csSubj(it)]);
+const csDone=it=>!!((CS.marks&&CS.marks[it.id])||(CS.sent&&CS.sent[csSubj(it)]));
+async function csMark(id,done,btn){if(btn)btn.disabled=true;
+  try{CS.marks=(await csClub('/admin/setup',{id,done})).done||{};CS.open[id]=false;renderSettings();toast(done?'Marked complete for you and '+(csTo()==='Ross'?'Ross':'David'):'Marked not done')}
+  catch(e){toast(e.message||'That did not save. Try again.');if(btn)btn.disabled=false}}
 const csLeft=()=>CSETUP.filter(it=>!csDone(it)).length;
 function setupNudge(){if(!csCan())return '';if(!CS.sent){csLoad();return ''}
   const n=csLeft();if(!n)return '';
@@ -2697,15 +2703,17 @@ function csField(it,f,i,val){const id=`cs-${it.id}-${i}`,[k,label,x]=f;
 function csVals(it,box){const v={};it.f.forEach((f,i)=>{const els=[...box.querySelectorAll(`[data-csf="${i}"]`)];
   v[i]=f[0]==='pick'||f[0]==='checks'?els.filter(e=>e.checked).map(e=>e.value).join(', '):((els[0]&&els[0].value)||'').trim()});return v}
 function csCard(it,n){const done=csDone(it),open=!done||CS.open[it.id],d=it.id==='dob'?{}:(csDraft()[it.id]||{});
-  const when=done?new Date(CS.sent[csSubj(it)]*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+  const mk=CS.marks&&CS.marks[it.id],ts=mk?mk.at:(done?CS.sent[csSubj(it)]*1000:0);
+  const when=done?new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric'})+(mk&&mk.by?' · '+esc(mk.by):''):'';
   return `<div class="card cscard ${done?'done':''}" id="cs-${it.id}"><div class="cshead"><span class="csnum" aria-hidden="true">${done?'<i class="ph-bold ph-check"></i>':n}</span><div><h3 class="cardh">${it.t}</h3><p class="meta">${it.why}</p></div></div>
-   ${done&&!open?`<div class="row"><span class="pill">Sent ${when}</span><span class="grow"></span><button class="btn small ghost" data-csedit="${it.id}">Change answer</button></div>`:
+   ${done&&!open?`<div class="row"><span class="pill"><i class="ph-bold ph-check"></i> Complete ${when}</span><span class="grow"></span><button class="btn small ghost" data-csedit="${it.id}"><i class="ph-bold ph-pencil-simple"></i> Update</button></div>`:
    `${it.steps?`<ol class="cssteps">${it.steps.map(st=>`<li><b>${st[0]}:</b> ${esc(st[2])}.<br><a class="btn small ghost" href="${st[1]}" target="_blank" rel="noopener"><i class="ph-bold ph-arrow-square-out"></i> Open ${st[0]}</a></li>`).join('')}</ol>`:''}
     <div class="stack">${it.f.map((f,i)=>csField(it,f,i,d[i])).join('')}</div>
-    <button class="btn cssend" data-cssend="${it.id}"><i class="ph-bold ph-paper-plane-tilt"></i> ${done?'Send update to David':'Send to David'}</button>`}</div>`}
+    <div class="row" style="flex-wrap:wrap;gap:8px"><button class="btn cssend" data-cssend="${it.id}"><i class="ph-bold ph-paper-plane-tilt"></i> ${done?'Send update to '+csTo():'Send to '+csTo()}</button>
+    ${mk?`<button class="btn ghost" data-csmark="${it.id}" data-on="0"><i class="ph-bold ph-arrow-counter-clockwise"></i> Mark not done</button>`:`<button class="btn ghost" data-csmark="${it.id}" data-on="1"><i class="ph-bold ph-check-circle"></i> Mark complete</button>`}</div>`}</div>`}
 function setupHTML(){if(!CS.sent){csLoad();return pageHead('Club setup')+'<div class="card empty">Loading your checklist...</div>'}
   const left=csLeft(),tot=CSETUP.length,first=(S.name||'').split(' ')[0];let n=0,sec='';
-  return pageHead('Club setup',left?`${tot-left} of ${tot} done. Fill one in, tap Send, and it goes straight to David. No passwords needed.`:`All done${first?', '+esc(first):''}. Thanks! You can still change any answer.`)+
+  return pageHead('Club setup',left?`${tot-left} of ${tot} done. Fill one in and tap Send, or tap Mark complete when it's handled. No passwords needed.`:`All done${first?', '+esc(first):''}. Thanks! You can still change any answer.`)+
    `<div class="csbar" role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${tot-left}"><i style="width:${Math.round((tot-left)/tot*100)}%"></i></div>
    <div class="stack rise">${CSETUP.map(it=>{n++;const h=it.sec!==sec?`<h3 class="shophead">${it.sec}</h3>`:'';sec=it.sec;return h+csCard(it,n)}).join('')}</div>`}
 async function csSend(id,btn){const it=CSETUP.find(x=>x.id===id),box=$('#cs-'+id);if(!it||!box)return;
@@ -2717,12 +2725,14 @@ async function csSend(id,btn){const it=CSETUP.find(x=>x.id===id),box=$('#cs-'+id
     if(!to)throw new Error('Could not find David in the member list. Try again later.');
     await authCall('/msg/send',{to:{type:'people',ids:[to.id]},subject:csSubj(it),body,email:false},authTok());
     csKeep(id,vals);CS.sent=Object.assign({},CS.sent,{[csSubj(it)]:Math.floor(Date.now()/1000)});CS.open[id]=false;MSG.sent=null;
+    try{CS.marks=(await csClub('/admin/setup',{id,done:true})).done||CS.marks}catch(e){}
     renderSettings();toast('Sent to '+to.name.split(' ')[0]+'. Thanks!')}
   catch(e){toast(e.message||'That did not send. Try again.');btn.disabled=false}}
 document.addEventListener('click',e=>{
   if(e.target.closest('[data-csgo]')){S.spage='setup';save();setTab('settings');return}
   const sb=e.target.closest('[data-cssend]');if(sb){csSend(sb.dataset.cssend,sb);return}
-  const ce=e.target.closest('[data-csedit]');if(ce){CS.open[ce.dataset.csedit]=true;renderSettings();return}});
+  const ce=e.target.closest('[data-csedit]');if(ce){CS.open[ce.dataset.csedit]=true;renderSettings();return}
+  const cm=e.target.closest('[data-csmark]');if(cm){csMark(cm.dataset.csmark,cm.dataset.on==='1',cm);return}});
 document.addEventListener('input',e=>{const box=e.target.closest('.cscard');if(!box)return;const it=CSETUP.find(x=>'cs-'+x.id===box.id);if(it)csKeep(it.id,csVals(it,box))});
 function renderSettings(){
   const v=$('#v-settings');
@@ -3010,7 +3020,9 @@ document.addEventListener('click',e=>{
   const r=t.closest('[data-role]');if(r){S.role=r.dataset.role;cfgSave();renderSettings();renderSubnav();toast('Previewing as '+ROLE_N[S.role]);return}
   const u=t.closest('[data-user]');if(u){openUser(u.dataset.user);return}
   const uf=t.closest('[data-uf]');if(uf){S.uf=uf.dataset.uf;renderSettings();return}
-  const ev=t.closest('[data-evedit]');if(ev){openEvEdit(ev.dataset.evedit);return}
+  const ev=t.closest('[data-evedit]');if(ev){const id=ev.dataset.evedit,R=window.RNGCCHAPTER;   /* the real (club server) forms when they apply */
+    if(R&&id==='new'&&R.canLead()){R.openNew();return}if(R&&id!=='new'&&R.canInfo(EVENTS.find(x=>x.id===id))){R.openInfo(id);return}
+    openEvEdit(id);return}
   const sp=t.closest('[data-spedit]');if(sp){openSpEdit(sp.dataset.spedit);return}
   if(t.closest('#userAdd')){toast('Members are added when they join and pay on the club store.');return}
   if(t.closest('#chAdd')){toast('New chapters: Ross sets these up with the golf association first.');return}
@@ -3268,7 +3280,7 @@ syncTop();
 <script src="terms.js?v=1"></script>
 <script src="menus.js?v=5"></script>
 <script src="live.js?v=3"></script>
-<script src="chapter.js?v=4"></script>
+<script src="chapter.js?v=5"></script>
 <script src="fantasy.js"></script>
 <script src="guestpass.js?v=club1"></script>
 <script src="shop.js?v=club2"></script>
