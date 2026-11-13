@@ -923,6 +923,13 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .zoomtile img{display:block;width:100%;height:auto;object-fit:cover}
 .photogrid .zoomtile img{aspect-ratio:4/3}
 .flyerwall .zoomtile img{aspect-ratio:4/5}
+/* 2026-11-12 compact Home: small cards share a row on wider screens (David: full panels for little content waste space) */
+.ovgrid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px;align-items:stretch}
+.ovgrid>.card{margin:0!important;min-width:0}
+.ovgrid>.guestcard{grid-column:1/-1}
+@media (min-width:760px){.ovgrid{grid-template-columns:1fr 1fr}.ovgrid>.card:last-child:nth-child(odd){grid-column:1/-1}}
+.ovgrid>.rbcard{height:100%}
+@media (min-width:760px){.newsgrid{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}#v-events .evgrid{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}}
 .zoomimg{display:block;width:100%;max-height:72vh;object-fit:contain;border-radius:12px}
 .stack,.shopgrid,.sponsgrid{gap:12px}
 .iconbtn,.tab{border-radius:10px}
@@ -1289,11 +1296,11 @@ function overviewHTML(){
      <p>A national golf club for Raiders fans, with chapters in Southern California, Northern California and Las Vegas.</p>
      <div class="acts"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button><button class="btn ghost" data-sub="events|up">See events</button></div>`}
    </div></div>
-   ${S.member&&window.bucksCard?bucksCard():''}${S.member?inviteCard():guestCard()}
+   <div class="ovgrid">${S.member&&window.bucksCard?bucksCard():''}${S.member?inviteCard():guestCard()}
    ${next?`<div class="card next"><div class="cd">${daysTo(next.date)}<small>days</small></div><div><span class="pill">Next event - ${esc(next.chapter)}</span><h3 style="margin-top:6px">${esc(next.name)}</h3><div class="meta">${f.dow}, ${f.m} ${f.d} - ${esc(next.where)}</div></div><a class="btn small" href="${next.url}" ${ext}>Register</a></div>`:''}
-   ${ng?`<div class="card next"><div class="cd">${daysTo(ng.date)}<small>days</small></div><div><span class="pill">Raiders - Week ${ng.wk}</span><h3 style="margin-top:6px">${esc(gTitle(ng))}</h3><div class="meta">${gWhen(ng)}</div></div><button class="btn small ghost" data-sub="games|sched">Schedule</button></div>`:''}
+   ${ng?`<div class="card next"><div class="cd">${daysTo(ng.date)}<small>days</small></div><div><span class="pill">Raiders - Week ${ng.wk}</span><h3 style="margin-top:6px">${esc(gTitle(ng))}</h3><div class="meta">${gWhen(ng)}</div></div><button class="btn small ghost" data-sub="games|sched">Schedule</button></div>`:''}</div>
    </div>
-   <div class="tiles">${S.member?tile('invite','paper-plane-tilt','Invite a friend','Your own link, your chapter'):tile('join','identification-badge','Join a chapter','Sign up, the chapter president gets it')}${tile('leaders','users','Club leaders','Bios and how to reach them')}${tile('shop','shopping-bag','Club shop','Polos, memberships, event entries')}${tile('news','newspaper','Club news','Events, membership, interviews')}${tile('sponsors','handshake','Sponsors','The brands behind the club')}</div>
+   <div class="tiles">${S.member?(canInvite()?tile('photos','images','Club photos','Golf days with the club'):tile('invite','paper-plane-tilt','Invite a friend','Your own link, your chapter')):tile('join','identification-badge','Join a chapter','Sign up, the chapter president gets it')}${tile('leaders','users','Club leaders','Bios and how to reach them')}${tile('shop','shopping-bag','Club shop','Polos, memberships, event entries')}${tile('news','newspaper','Club news','Events, membership, interviews')}${tile('sponsors','handshake','Sponsors','The brands behind the club')}</div>
    <div class="foot"><span>Follow the club</span>
     <a href="https://www.instagram.com/raidernationgolfclub" ${ext}><i class="ph-bold ph-instagram-logo"></i> Instagram</a>
     <a href="https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ" ${ext}><i class="ph-bold ph-youtube-logo"></i> YouTube</a>
