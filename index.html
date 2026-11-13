@@ -721,6 +721,9 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 @media (min-width:700px){.rolecards{grid-template-columns:repeat(4,1fr)}}
 @media (min-width:1100px){.setcols{grid-template-columns:1fr 1fr;align-items:start}}
 @media (min-width:1000px){.tab-settings-only{display:grid}}
+/* phone and tablet: the profile button lives in the bottom bar, filling the 6th spot (David, Nov 12) */
+@media (min-width:1000px){.tab-phone-only{display:none}}
+@media (max-width:999px){#btnProfile{display:none}}
 .hero2c .mxfoot{margin-top:12px}
 .hero2 .acts{margin-top:12px}
 
@@ -1079,6 +1082,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
     <div class="subnav" data-for="games"><div></div></div>
     <button class="tab" role="tab" data-tab="members" aria-selected="false"><i class="ph-fill ph-users-three"></i>Members<span class="bar"></span></button>
     <div class="subnav" data-for="members"><div></div></div>
+    <button class="tab tab-phone-only" id="tabProfile" type="button" aria-label="Your profile"><i class="ph-fill ph-user-circle"></i>Profile<span class="bar"></span></button>
     <button class="tab tab-settings-only" role="tab" data-tab="settings" aria-selected="false"><i class="ph-fill ph-gear-six"></i>Settings<span class="bar"></span></button>
     <div class="subnav" data-for="settings"><div></div></div>
   </nav>
@@ -2349,7 +2353,7 @@ function showGate(t){
 function setTab(t){
   S.tab=t;
   const lit=t==='courses'?'golf':t;   /* Courses lives under Golf (David, Nov 12) */
-  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===lit));
+  document.querySelectorAll('.tab[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===lit));
   if(t!=='golf')document.body.classList.remove('golffull');
   if(locked(t)){showGate(t);return}
   gateOn=false;
@@ -2419,7 +2423,8 @@ function goSub(t,k){
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-sub]');if(!b)return;const i=b.dataset.sub.indexOf('|');goSub(b.dataset.sub.slice(0,i),b.dataset.sub.slice(i+1))});
 document.addEventListener('click',e=>{if(e.target.closest('[data-ev],[data-gv],[data-mv],[data-board]'))setTimeout(renderSubnav,0)});
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.tab==='home')S.hpage='overview';setTab(b.dataset.tab)}));
+$('#tabProfile').addEventListener('click',()=>$('#btnProfile').click());
+document.querySelectorAll('.tab[data-tab]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.tab==='home')S.hpage='overview';setTab(b.dataset.tab)}));
 /* ---------- settings (preview: saved on this device; the live app saves for everyone) ---------- */
 /* user types: Member, Sub admin, Chapter admin, Admin. Sub admins get only the areas a leader hands them. */
 const ROLES=[['member','Member','Plays, posts, buys and sells tickets'],['sub','Sub admin','Helps run the areas a leader gives them'],['chapter','Chapter admin','Runs one chapter: members, events, scores'],['admin','Admin','Runs the whole club, every setting']];
