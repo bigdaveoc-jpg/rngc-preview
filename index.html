@@ -1879,7 +1879,7 @@ function openVenue(k){
   S.sheetGame=null;
   openSheet(`<span class="pill">Home stadium</span><h3 style="margin-top:8px">${esc(V.n)}</h3><p class="help" style="margin:0 0 10px;font-size:15px">${esc(V.city)} - ${gs.length} games in 2026</p>
    <div class="gstack">${gs.map(matchup).join('')}</div>
-   <button class="btn full" data-gotix><i class="ph-bold ph-ticket"></i> Tickets</button>`);
+   <a class="btn full" href="${V.tix}" ${ext}><i class="ph-bold ph-ticket"></i> Tickets</a>`);
 }
 function openGame(id,quiet){
   const g=GAMES.find(x=>x.id===id);if(!g)return;const V=VENUES[g.v],[a,h]=sides(g),p=g.eid?LIVE.pred[g.eid]:null;
@@ -1899,7 +1899,7 @@ function openGame(id,quiet){
     ${golf?row('Play a round first',esc(golf.c.name),'About '+Math.round(golf.d)+' miles from the stadium'):''}
     ${!g.home?row('Members near '+esc(V.city),near.length?near.length+' within 100 miles':'None yet. Post your trip in the Travel board.'):''}
    </div>
-   ${g.res?'':`<button class="btn full" data-tixgame="${g.id}"><i class="ph-bold ph-ticket"></i> Tickets</button>`}
+   ${g.res?'':`<a class="btn full" href="${V.tix}" ${ext}><i class="ph-bold ph-ticket"></i> Tickets</a>`}
    <a class="btn ghost full" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(V.n+' '+V.city)}" ${ext}><i class="ph-bold ph-navigation-arrow"></i> Directions</a>
    <button class="btn ghost full" data-gameday><i class="ph-bold ph-chats-circle"></i> Game Day board</button>`);
   S.sheetGame=id;
