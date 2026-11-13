@@ -887,6 +887,9 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .ovgrid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px;align-items:stretch}
 .ovgrid>.card{margin:0!important;min-width:0}
 .ovgrid>.guestcard{grid-column:1/-1}
+/* What members get grows with the screen (David, Nov 13: on iPad it stayed phone-size): club heading, 2 columns on tablets, 3 on wide screens */
+.guestcard h3{font-family:var(--display);font-size:24px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;line-height:1.05}
+@media (min-width:700px){.ovgrid>.guestcard{padding:22px 24px}.guestcard h3{font-size:30px}.guestcard .perks{grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:20px 28px;margin-top:18px}.guestcard .perks li{font-size:17px;gap:12px}.guestcard .perks li i{font-size:26px}.guestcard .perks li small{font-size:14.5px;margin-top:3px}.guestcard .acts{margin-top:22px!important}}
 @media (min-width:760px){.ovgrid{grid-template-columns:1fr 1fr}.ovgrid>.card:last-child:nth-child(odd){grid-column:1/-1}}
 .ovgrid>.rbcard{height:100%}
 /* 2026-11-12 countdown cards say what they are: golf event (green) vs Raiders game (silver) */
