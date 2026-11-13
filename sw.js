@@ -2,7 +2,7 @@
    the signal drops (golf courses). Always tries the network first, so updates show up right away; falls back to
    the last saved copy only when the network fails or takes over 5 seconds. Only this site's own files; sign-in,
    scores, store and maps calls go straight to the network and are never saved here. */
-const CACHE = 'rngc-v1';
+const CACHE = 'rngc-v2';
 self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/', '/assets/app/icon-192.png']).catch(() => {}))); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 /* live event alerts (Nov 13 2026): the club server sends big shots, trash talk and "we're live" */
@@ -26,7 +26,9 @@ self.addEventListener('fetch', e => {
   if (r.method !== 'GET' || u.origin !== location.origin || u.pathname === '/sw.js') return;
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const net = fetch(r).then(res => { if (res.ok && res.type === 'basic') cache.put(r, res.clone()).catch(() => {}); return res; });
+    /* the page and its scripts skip the phone's 10-minute web cache, so a new app version shows on the next open */
+    const fresh = r.mode === 'navigate' || /\.(html|js|webmanifest)$/.test(u.pathname) || u.pathname.endsWith('/');
+    const net = fetch(r, fresh ? { cache: 'no-cache' } : undefined).then(res => { if (res.ok && res.type === 'basic') cache.put(r, res.clone()).catch(() => {}); return res; });
     net.catch(() => {});
     const slow = new Promise(ok => setTimeout(ok, 5000)).then(() => cache.match(r, { ignoreSearch: r.mode === 'navigate' }));
     try {
