@@ -272,6 +272,7 @@ function trMe(){const my=trMine(),full=my.filter(x=>x.p.holes===18&&x.p.par>=66)
      <div class="row2"><a class="btn" href="./?r=${l.id}#/hole/${trNextHole(l.id)}">Keep scoring</a><button class="btn ghost" data-drop="${l.id}">Throw it out</button></div></section>`).join('')}
    ${G.groups.some(g=>!g.demo)?`<div class="row2" style="margin-top:14px"><a class="btn" href="#/new"><i class="ph-bold ph-flag"></i> Start a round</a><a class="btn ghost" href="#/groups"><i class="ph-bold ph-users-three"></i> Group round</a></div>`
      :`<a class="btn block" style="margin-top:14px" href="#/new"><i class="ph-bold ph-flag"></i> Start a round</a><p class="muted" style="text-align:center;margin:8px 0 0;font-size:15px">With friends? <a class="linkbtn" href="#/groups" style="margin:0;min-height:40px">Group round</a> · <button class="linkbtn joinlive" style="margin:0;min-height:40px">Join a live round</button></p>`}
+   ${TR_TOK()?'<button class="btn ghost block" data-bringguest style="margin-top:10px"><i class="ph-bold ph-ticket"></i> Bring a guest: 72 hours of golf, free</button>':''}
    ${grossA.length||best||mixR.length?`<div class="lbl">Scoring</div>
    <div class="tiles">
     ${tile(grossA.length?Math.round(trAvg(grossA)):'-','Avg score',grossA.length?'last '+grossA.length+' full 18s':'18 holes')}
@@ -534,6 +535,7 @@ function trNew(gid){const g=gid?G.groups.find(x=>x.id===gid):null;
    ${tg.length>1?`<details class="moretees" ${(pw?!selW:selW)?'open':''}><summary>${tg[1][0]} (${tg[1][1].length})</summary>${teeBtns(tg[1][1])}</details>`:''}
    <div class="lbl">Who's playing · ${count} of 4</div>
    <div class="chips2">${pool.map(p=>`<button class="chip2" data-pl="${p.id}" aria-pressed="${NR.who.includes(p.id)}">${esc(first(p.name))} <span style="font-weight:500;opacity:.7">${trHc(p.hcp)}</span></button>`).join('')}${NR.guests.map((p,i)=>`<button class="chip2" data-ug="${i}" aria-pressed="true" aria-label="Remove ${esc(p.name)}">${esc(first(p.name))} <span style="font-weight:500;opacity:.7">${trHc(p.hcp)}</span> <i class="ph-bold ph-x"></i></button>`).join('')}${count<4?`<button class="chip2" id="addG"><i class="ph-bold ph-plus"></i> Add a guest</button>`:''}</div>
+   ${NR.guests.length&&TR_TOK()?`<button class="linkbtn" data-bringguest style="display:block;margin:8px 0 0"><i class="ph-bold ph-ticket"></i> Give ${esc(first(NR.guests[0].name))}${NR.guests.length>1?' and the group':''} 72 hours of golf in the app</button>`:''}
    ${count===1?`<div class="lbl">Your game today</div>
    <div class="sggrid">${TR_SG.map(([k,l,,sh])=>`<button class="card fmtc" data-sg="${k}" aria-pressed="${(NR.sg||'course')===k}"><b>${l}</b><span>${sh}</span></button>`).join('')}</div>
    <details class="moretees"${NR.format!=='stroke'||!NR.hcp?' open':''}><summary>Scoring: ${NR.format==='stableford'?'points':'total strokes'}, ${NR.hcp?'handicap on':'handicap off'} · change</summary>`:''}
@@ -952,6 +954,29 @@ const TR_RELAY=(()=>{try{const o=TR_LOCAL&&localStorage.getItem('rngc-relay');if
 const TR_LIVE_OK=!/example\.invalid/.test(TR_RELAY);
 const trCode=()=>{const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<5;i++)c+=A[Math.floor(Math.random()*A.length)];return c};
 /* on a buddy's phone the scorekeeper becomes __host and the buddy becomes me, so the round reads as theirs */
+/* member guest pass (David, Nov 13 2026): a signed-in member hands a playing partner 72 hours of golf with one link or a
+   QR on this phone. The link opens the club app with golf only; from a live round it also drops them into the round. */
+const TR_TOK=()=>{try{return localStorage.getItem('rngc-auth-token')||''}catch(e){return ''}};
+const TR_CLUB=(()=>{try{const o=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&localStorage.getItem('rngc-club-api');if(o)return o.replace(/\/$/,'')}catch(e){}return 'https://rngc-club.137.184.188.41.sslip.io'})();
+function trClub(path,body){return fetch(TR_CLUB+path,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+TR_TOK()},body:JSON.stringify(body||{})})
+  .then(async r=>{const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Could not reach the club server.');return j})}
+const trSite=()=>location.origin+location.pathname.replace(/scorecard\/?[^/]*$/,'');
+let trGuestCode=null;
+function trGuestLink(join){const mk=trGuestCode&&trGuestCode.exp>Date.now()+86400e3?Promise.resolve(trGuestCode):trClub('/pass/invite').then(r=>trGuestCode=r);
+  return mk.then(r=>trSite()+'?guest='+r.code+(join?'&join='+join:''))}
+function trBringGuest(){
+  $('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">Bring a guest</h2>
+   <p class="muted" style="font-size:15px;margin-top:4px">Give a buddy who isn't a member 72 hours of golf in the club app: scorecard, side games, GPS and stats. No card, no sign-up. They get golf only.</p>
+   <div id="gqr" style="background:#fff;padding:12px;max-width:240px;margin:14px auto 0;min-height:60px;color:#111;text-align:center">Making the pass...</div>
+   <p class="muted" style="text-align:center;font-size:14px;margin:8px 0 0">They scan it with the phone camera, or you text them the link. One link works for your whole group.</p>
+   <button class="btn block" id="gqShare" style="margin-top:12px" disabled><i class="ph-bold ph-share-fat"></i> Text the link</button>
+   <button class="btn ghost block" style="margin-top:8px" id="closeSheet">Done</button>`;
+  $('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#closeSheet').onclick=()=>{closeSheet();route()};
+  trGuestLink().then(url=>{const sh=$('#gqShare');sh.disabled=false;sh.onclick=()=>trShare(sh,`I got you 72 hours of golf in the Raider Nation Golf Club app. Tap to start: ${url}`);
+    const lq=window.parent&&window.parent!==window&&window.parent.loadQR?window.parent.loadQR():null;
+    const box=$('#gqr');if(!lq){box.textContent=url;box.style.fontSize='13px';return}
+    lq.then(qr=>{const q=qr(0,'M');q.addData(url);q.make();box.innerHTML=q.createSvgTag({cellSize:5,margin:0,scalable:true})}).catch(()=>{box.textContent=url})})
+  .catch(e=>{const box=$('#gqr');if(box){box.textContent=e.message;box.style.fontSize='14px'}})}
 const trSwap=(o,pid)=>{let j=JSON.stringify(o).split('"me"').join('"\u0001"');if(pid)j=j.split('"'+pid+'"').join('"me"');return JSON.parse(j.split('"\u0001"').join('"__host"'))};
 let trPushT=null;
 function trLivePush(now){if(!CASUAL||!S.share||LIVE.follow)return;clearTimeout(trPushT);
@@ -965,7 +990,8 @@ function trLiveCard(i){if(!CASUAL)return'';
   if(!TR_LIVE_OK||i!==0||S.share||players(myTeam()).length<2||!canScore())return'';
   return `<button class="card solol" id="liveCard"><i class="ph-bold ph-broadcast"></i><span><b>Let your buddies follow live.</b> They see every score and the bet money on their own phones. Tap to share.</span></button>`}
 function trShareLive(){if(!S.share){S.share=trCode();save()}trLivePush('open');
-  const url=location.origin+location.pathname+'?join='+S.share;
+  let url=location.origin+location.pathname+'?join='+S.share,gtxt='';
+  if(TR_TOK())trGuestLink(S.share).then(u=>{url=u;gtxt=' Non-members get 72 hours of golf in the club app.'}).catch(()=>{});
   $('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">Your round is live</h2>
    <p class="muted" style="font-size:15px;margin-top:4px">Buddies open the link, tap their name, and see every score, the standings and the bet money as you enter them. You keep score; they follow. When you save the round, it lands in their play log too.</p>
    <div class="livecode" id="liveCode">${S.share}</div>
@@ -973,7 +999,7 @@ function trShareLive(){if(!S.share){S.share=trCode();save()}trLivePush('open');
    <button class="btn block" id="lvShare" style="margin-top:12px"><i class="ph-bold ph-share-fat"></i> Send the link</button>
    <button class="btn ghost block" style="margin-top:8px" id="closeSheet">Done</button>`;
   $('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#closeSheet').onclick=()=>{closeSheet();route()};
-  const sh=$('#lvShare');sh.onclick=()=>trShare(sh,`Follow our round live, code ${S.share}: ${url}`)}
+  const sh=$('#lvShare');sh.onclick=()=>trShare(sh,`Follow our round live, code ${S.share}.${gtxt} ${url}`)}
 /* buddy side: pull the round every few seconds */
 let trFollowV=0,trTouch=0;
 /* relay data comes from anyone with a round code: strip anything that could become page code (security review, Nov 13) */
@@ -1020,3 +1046,5 @@ setTimeout(trLibRefresh,1200);
 /* also check when the app comes back to the front (phones keep it open for days), at most every 5 minutes */
 {let _lr=Date.now();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-_lr>3e5){_lr=Date.now();trLibRefresh()}})}
 route();
+
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-bringguest]'))trBringGuest()});

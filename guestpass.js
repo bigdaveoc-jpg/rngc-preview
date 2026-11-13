@@ -162,6 +162,28 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-gpjoin]')){closeSheet();S.joinSent=null;S.hpage='join';setTab('home');return}
 });
 
+/* member guest links (David, Nov 13 2026): a member golfing with a non-member sends one link (?guest=CODE, plus &join=LIVE
+   when it comes from a live round). Each person who opens it gets 72 hours of golf from that moment: Golf tab only, every
+   other tab stays locked. No cap on passes, for the most exposure. */
+function openGuestClaim(code,join){
+  const goGolf=()=>{setTab('golf');if(join){const fr=$('#golfFrame');if(fr)fr.src='scorecard/?join='+encodeURIComponent(join)+'#/me'}};
+  if(authTok()){if(join)goGolf();else toast('You\'re a member, golf is already open.');return}
+  const p0=P.get();if(p0&&isOpen(status(p0,Date.now()))){goGolf();return}
+  club('/pass/look',{code}).then(r=>{
+    openSheet(`<h3 style="margin:0">${esc(r.by)} gave you 72 hours of golf</h3><p class="sub" style="margin:4px 0 10px">Raider Nation Golf Club guest pass. No card, no sign-up.</p>
+     <div class="card" style="padding:12px 14px;font-size:14px;color:var(--muted)">The live scorecard${join?' for today\'s round':''}, side games like skins and Nassau, GPS course info, your rounds and stats. Good for 72 hours from now.</div>
+     <label class="meta" for="gpName" style="display:block;margin:12px 0 6px">Your name</label><input class="field" id="gpName" maxlength="24" autocomplete="name">
+     <div class="acts" style="margin-top:14px"><button class="btn full" id="gpGo" style="width:100%"><i class="ph-bold ph-golf"></i> Start golfing</button></div>
+     <p class="meta" style="text-align:center;margin:10px 0 0">Already a member? <button class="linkbtn" data-signin style="margin:0">Sign in</button></p>`);
+    $('#gpGo').addEventListener('click',async()=>{const name=$('#gpName').value.trim();if(name.length<2){toast('Add your name for the scorecard');return}
+      const b=$('#gpGo');b.disabled=true;
+      try{const r2=await club('/pass/claim',{code,name});savePass(r2.pass);closeSheet();syncGolf();toast('Welcome, '+name.split(' ')[0]+'. Golf is open for 72 hours.');goGolf()}
+      catch(err){b.disabled=false;toast(err.message)}});
+  }).catch(err=>toast(err.message));
+}
+{const gq=new URLSearchParams(location.search),gc=gq.get('guest'),gj=(gq.get('join')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,5);
+  if(gc){history.replaceState(null,'',location.pathname+location.hash);setTimeout(()=>openGuestClaim(gc,gj),400)}}
+
 /* a typed pass code works from the sign-in "setup code" path too: EVENT-CODE */
 window.rngcTryPassCode=t=>{const pp=parsePass(t);if(pp&&evById(pp.ev)){openRedeem(pp);return true}return false};
 
