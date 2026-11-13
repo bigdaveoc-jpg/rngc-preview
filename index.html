@@ -1487,7 +1487,7 @@ function evCard(e){
    <div class="row">${live?'<span class="rl-pill"><i></i>LIVE NOW</span>':''}<span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${e.spots&&!past?`<span class="pill hot">${esc(e.spots)}</span>`:''}${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
    <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
    ${e.url?`<a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`:''}`}</div>
-   ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>${typeof passBtn==='function'?passBtn(e):''}</div>`:''}
+   ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>${S.authMe&&S.authMe.role==='admin'?'<a class="btn small ghost" href="scorecard/#/setup"><i class="ph-bold ph-pencil-simple"></i> Edit event</a>':''}${typeof passBtn==='function'?passBtn(e):''}</div>`:''}
    </div></article>`;
 }
 function renderEvents(){

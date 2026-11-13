@@ -257,6 +257,11 @@ body.sun{--rough:#dfe8dc}
 .chip2{min-height:42px;min-width:44px;padding:0 12px;border-radius:8px;border:1px solid var(--line);font-weight:600;font-size:15px;background:var(--panel-2)}
 .chip2.p3{border-color:var(--silver-2)}
 .chip2[aria-pressed="true"]{background:var(--silver);color:var(--on-silver);border-color:var(--silver)}
+.fg{margin-top:12px;padding:12px 14px}.fgh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+.fgh b{font-size:17px}.fgl{display:grid}
+.fgp{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;padding:0 4px;border-top:1px solid var(--line);font-size:16px;text-align:left;background:none;color:inherit;width:100%}
+.fgp i{color:var(--silver-2)}.fgp.add{color:var(--silver-2);font-weight:600}.fgp.del{color:#ffb3b5;font-weight:600}
+.chip2:disabled{opacity:.4}
 .chip2[disabled]{opacity:.4}
 .fmt{display:grid;gap:8px}
 .fmtc{padding:12px 14px;text-align:left;width:100%}
@@ -403,6 +408,21 @@ const S=Object.assign(DEF(),load());
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}}}
 let bc=null;try{bc=new BroadcastChannel('rngc-scorecard')}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(bc)try{bc.postMessage('u')}catch(e){};flashSaved();if(window.__scReady)scPush()}
+
+/* ===================== EVENT SETUP FROM THE CLUB SERVER (David, Nov 13 2026) =====================
+   David and Ross edit the groups, the game and the start line in the app (Set up the day, Groups). It's saved on the
+   club server and every phone picks it up with the next leaderboard pull. Scores stay put. A copy stays on the phone
+   for no signal. The club's groups win over swaps made on one phone. */
+const BASE_TEAMS=TEAMS,BASE_CFG=EVENTS[S.event]?JSON.parse(JSON.stringify(EVENTS[S.event].cfg||{})):{},BASE_START=EVENTS[S.event]?EVENTS[S.event].start:'';
+const FKEY='rngc-field:'+S.event;let FIELD_AT=0;
+function applyField(f){if(CASUAL||!EVENTS[S.event])return false;const at=f?f.at:0;if(at===FIELD_AT)return false;FIELD_AT=at;const e=EVENTS[S.event];
+  if(f&&f.teams){TEAMS=f.teams.map(t=>({id:t.id,club:'',start:t.start,name:'Group '+t.id.slice(1),str:0,pace:1,off:0,players:t.players.map(p=>({id:p.id,name:p.name,hcp:0}))}));
+    if(Object.keys(S.roster||{}).length){S.roster={};try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}}}
+  else TEAMS=BASE_TEAMS;
+  e.cfg=Object.assign({},BASE_CFG,f&&f.cfg||{});e.start=(f&&f.start)||BASE_START;
+  try{f?localStorage.setItem(FKEY,JSON.stringify(f)):localStorage.removeItem(FKEY)}catch(x){}
+  return true}
+if(!CASUAL)try{const c=JSON.parse(localStorage.getItem(FKEY)||'null');if(c)applyField(c)}catch(e){}
 const EV=()=>EVENTS[S.event],CO=()=>COURSES[EV().course];
 const CFG=()=>Object.assign({},EV().cfg,S.cfg);
 const FMT=()=>CFG().format,F=()=>FORMATS[FMT()];
@@ -445,7 +465,7 @@ const SCR_W={4:[.25,.2,.15,.1],3:[.3,.2,.1],2:[.35,.15],1:[1]};
 const teamHcp=t=>{if(!CFG().hcp)return 0;const ch=players(t).map(p=>courseHcp(idx(p.id))).sort((a,b)=>a-b),w=SCR_W[ch.length]||SCR_W[4];return Math.round(ch.reduce((a,c,i)=>a+c*(w[i]||0),0))};
 const mk=(s,par)=>{const d=s-par;const c=d<=-2?'e':d===-1?'b':d===1?'bo':d>=2?'d':'';return `<span class="mk ${c}">${s}</span>`};
 const tagFor=c=>!c?'':`<span class="tag ${c==='RNGC'?'rngc':'tm'}">${esc(c)}</span>`;
-const ADMIN=new URLSearchParams(location.search).has('admin');
+let ADMIN=new URLSearchParams(location.search).has('admin');
 const stbl=(net,par)=>Math.max(0,2-(net-par));
 
 /* my scores: scramble = one team score per hole, the rest = each player per hole */
@@ -488,7 +508,7 @@ function scFillMine(){if(!S.team||SC_BUSY||scT&&scDiff().n)return;const c=REMOTE
   for(const w in rs)for(const h in rs[w]){SC_SENT[w+':'+h]=rs[w][h];if(!(m[w]&&m[w][h]!=null)){(m[w]||(m[w]={}))[h]=rs[w][h];ch=true}}
   for(const[kind,unit]of[['ctp','ft'],['ld','yd']]){const seen=SC_SIDE[kind]||(SC_SIDE[kind]={});for(const h in c[kind]||{}){const v=c[kind][h];seen[h]=JSON.stringify({pid:v.pid,[unit]:v[unit]});if(!(S[kind]&&S[kind][h])){(S[kind]||(S[kind]={}))[h]=v;ch=true}}}
   if(ch){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}
-function scPull(){if(!SYNC)return;scCall('/event/board').then(j=>{REMOTE=j.cards||{};REMOTE_AT=Date.now();SC_ERR=0;scFillMine();scSend()}).catch(()=>{SC_ERR++})}
+function scPull(){if(!SYNC)return;scCall('/event/board').then(j=>{const na=j.admin&&!ADMIN;if(j.admin)ADMIN=true;const fch=applyField(j.field||null);REMOTE=j.cards||{};REMOTE_AT=Date.now();SC_ERR=0;scFillMine();scSend();const h=location.hash;if((fch&&!/^#\/(hole|setup|field|card|team|bets)/.test(h))||(na&&!/^#\/hole/.test(h))||(!ADMIN&&/^#\/(setup|field)/.test(h)))route()}).catch(()=>{SC_ERR++;if(!ADMIN&&/^#\/(setup|field)/.test(location.hash))route()})}
 const remoteOf=t=>REMOTE[t.id]||{};
 function scNote(){if(!SYNC)return'';if(SC_ERR&&!REMOTE_AT)return' Can\'t reach the club server right now. Your scores are safe on this phone and send when signal is back.';
   if(SC_ERR)return' No signal right now. Showing scores from '+Math.round((Date.now()-REMOTE_AT)/60000)+' min ago; yours send when signal is back.';
@@ -578,6 +598,7 @@ function route(){const h=location.hash.replace(/^#\/?/,'');window.__cur=/^(me|ev
   if(h.startsWith('board'))return board(false);
   if(h.startsWith('tv'))return board(true);
   if(h.startsWith('setup'))return setup();
+  if(h.startsWith('field'))return fieldPage();
   if(h.startsWith('card')&&S.team)return review();
   if(h.startsWith('team')&&S.team)return teamPage();
   if(h.startsWith('bets')&&S.team)return betsPage();
@@ -595,7 +616,7 @@ function start(){const e=EV(),c=CO(),t=TEE(),cfg=CFG(),me=myTeam();$('#app').cla
    <div class="facts"><div><b>${esc(F().name)}</b><span>${esc(hcpLine())}</span></div><div><b>${esc(t.name)}</b><span>${t.y.reduce((a,b)=>a+b,0)?t.y.reduce((a,b)=>a+b,0).toLocaleString()+' yds':'No yardages yet'}</span></div><div><b>Par ${c.par.reduce((a,b)=>a+b,0)}</b><span>Rating ${t.rating} · slope ${t.slope}</span></div></div>
    ${!CASUAL?`<p class="note" style="margin-top:10px"><i class="ph-bold ph-info"></i><span>${esc(F().desc||'')}${/shotgun/i.test(e.start||'')?' Shotgun start: every group tees off at the same time, each on its own hole.':''}</span></p>`:''}
    ${contestLine()?`<p class="note" style="margin-top:10px"><i class="ph-bold ph-trophy"></i><span>${esc(contestLine())}</span></p>`:''}
-   ${ADMIN||CASUAL?`<a class="btn ghost block" style="margin-top:12px" href="#/setup"><i class="ph-bold ph-sliders-horizontal"></i> ${CASUAL?'Change the game':'Set up the day · admin'}</a>`:''}</section>
+   ${ADMIN||CASUAL?`<a class="btn ghost block" style="margin-top:12px" href="#/setup"><i class="ph-bold ph-sliders-horizontal"></i> ${CASUAL?'Change the game':'Edit the event · groups, game, start'}</a>`:''}</section>
   ${!pick?teamCard(me):`
   <div class="lbl">Which group are you in?</div>
   <div class="teams">${TEAMS.map(x=>`<button class="card team" data-team="${x.id}" aria-pressed="${x.id===S.team}"><div class="hn"><small>START</small>${REAL_FIELD&&!CASUAL?esc(x.name.replace('Group ','')):x.start}</div><div class="nm"><b>${esc(players(x).map(p=>p.name).join(', '))}</b></div>${tagFor(x.club)}</button>`).join('')}</div>
@@ -857,9 +878,11 @@ function review(){const t=myTeam(),f=F();$('#app').className='wrap';
   wireSun()}
 
 /* ---------- event setup (admin): pick the game, tees, handicaps and contests ---------- */
-function setup(){if(!ADMIN&&!CASUAL){location.hash=HOME;return}const c=CO(),cfg=CFG();$('#app').className='wrap';
+function setup(){if(!ADMIN&&!CASUAL){if(SYNC&&!REMOTE_AT&&!SC_ERR){$('#app').innerHTML=bar('Edit the event',EV().name)+'<p class="note"><i class="ph-bold ph-hourglass"></i><span>Checking your sign-in.</span></p>';return}location.hash=HOME;return}const c=CO(),cfg=CFG();$('#app').className='wrap';
   const par3=c.par.map((p,i)=>p===3?i+1:0).filter(Boolean);
-  $('#app').innerHTML=bar(CASUAL?'Round setup':'Set up the day',EV().name)+`
+  $('#app').innerHTML=bar(CASUAL?'Round setup':'Edit the event',EV().name)+`
+  ${CASUAL?'':`<a class="btn block" href="#/field" style="margin-top:4px"><i class="ph-bold ph-users-three"></i> Groups: move players</a>
+  <div class="lbl">Start</div><div style="display:flex;gap:8px"><input class="field" id="evStart" maxlength="40" value="${esc(EV().start||'')}" autocomplete="off"><button class="btn" id="evStartSave">Save</button></div>`}
   <div class="lbl">Game</div>
   <div class="fmt">${Object.entries(FORMATS).filter(([k,v])=>!CASUAL||!v.team).map(([k,v])=>`<button class="card fmtc" data-f="${k}" aria-pressed="${cfg.format===k}"><b>${v.name}${v.team?' <span class="tag">Team</span>':' <span class="tag">Each player</span>'}</b><span>${v.desc}</span></button>`).join('')}</div>
   <div class="lbl">Tees</div>
@@ -880,7 +903,8 @@ function setup(){if(!ADMIN&&!CASUAL){location.hash=HOME;return}const c=CO(),cfg=
    <p class="note"><i class="ph-bold ph-info"></i><span>The pot splits evenly across every skin won. The app only keeps the tally. Players settle the pot among themselves; the club never collects, holds or takes a cut of side money.</span></p>`:''}
   <p class="note" style="margin-top:18px"><i class="ph-bold ph-floppy-disk"></i><span>Changes apply to every phone right away. Scores already entered stay put.</span></p>
   <div class="stick"><div class="navrow"><button class="btn ghost" id="reset" aria-label="Back to the event's defaults"><i class="ph-bold ph-arrow-counter-clockwise"></i></button><a class="btn" href="${HOME}">Done</a></div></div>`;
-  const put=o=>{Object.assign(S.cfg,o);save();setup()};
+  const put=o=>{Object.assign(S.cfg,o);save();setup();if(!CASUAL)fieldSave({cfg:CFG()}).catch(()=>{}).finally(()=>{if(location.hash.startsWith('#/setup'))setup()})};
+  const es=$('#evStartSave');if(es)es.onclick=()=>{const v=$('#evStart').value.trim();fieldSave({start:v},'Start saved').catch(()=>{})};
   document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>put({format:b.dataset.f,allow:FORMATS[b.dataset.f].allow}));
   document.querySelectorAll('[data-tee]').forEach(b=>b.onclick=()=>put({tee:b.dataset.tee}));
   document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>put({hcp:b.dataset.h==='1'}));
@@ -889,7 +913,53 @@ function setup(){if(!ADMIN&&!CASUAL){location.hash=HOME;return}const c=CO(),cfg=
   document.querySelectorAll('.chips2 [data-ld]').forEach(b=>b.onclick=()=>put({ld:+b.dataset.ld||0}));
   document.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>put({skins:b.dataset.sk}));
   document.querySelectorAll('[data-bi]').forEach(b=>b.onclick=()=>put({buyin:Math.max(0,cfg.buyin+ +b.dataset.bi)}));
-  $('#reset').onclick=()=>{if(confirm('Go back to the event\'s original setup?')){S.cfg={};save();setup()}}}
+  $('#reset').onclick=()=>{if(!confirm('Go back to the event\'s original game setup? Groups stay as they are.'))return;S.cfg={};save();setup();if(!CASUAL)fieldSave({cfg:BASE_CFG},'Game setup reset').catch(()=>{}).finally(()=>{if(location.hash.startsWith('#/setup'))setup()})}}
+
+/* ---------- Groups editor for David and Ross: tap a player to move, rename or remove; add players and groups ---------- */
+function note(msg){let d=document.getElementById('advt');if(d)d.remove();d=document.createElement('div');d.id='advt';d.className='advt';d.setAttribute('role','status');
+  d.innerHTML=`<span>${esc(msg)}</span>`;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
+const plainTeams=ts=>ts.map(t=>({id:t.id,start:t.start,players:t.players.map(p=>({id:p.id,name:p.name}))}));
+function fieldSave(body,okMsg){return scCall('/admin/field',body).then(j=>{applyField(j.field);if(body.cfg){S.cfg={};save()}note(okMsg||'Saved for every phone');return j})
+  .catch(st=>{note(st===403?'Only David and Ross can change the event.':st===401?'Sign in again first.':'Not saved. Check your signal and try again.');throw st})}
+function saveTeams(ts,msg){closeSheet();return fieldSave({teams:plainTeams(ts)},msg).catch(()=>{}).finally(()=>{if(location.hash.startsWith('#/field'))fieldPage()})}
+const cloneTeams=()=>TEAMS.map(t=>({...t,players:t.players.map(p=>({...p}))}));
+const hasScores=id=>{const c=REMOTE[id];return !!(c&&Object.values(c.scores||{}).some(e=>Object.values(e).some(h=>Object.keys(h).length)))};
+function fieldPage(){if(!ADMIN||CASUAL){if(!CASUAL){if(SYNC&&!REMOTE_AT&&!SC_ERR){$('#app').innerHTML=bar('Edit the event',EV().name)+'<p class="note"><i class="ph-bold ph-hourglass"></i><span>Checking your sign-in.</span></p>';return}}location.hash=HOME;return}$('#app').className='wrap';
+  $('#app').innerHTML=bar('Groups',EV().name)+`
+  <p class="note"><i class="ph-bold ph-info"></i><span>Tap a player to move, rename or remove. Every change saves for every phone.</span></p>
+  ${TEAMS.map(t=>`<section class="card fg"><div class="fgh"><b>${esc(t.name)}</b><span class="muted">Hole ${t.start} · ${t.players.length} player${t.players.length===1?'':'s'}</span></div>
+   <div class="fgl">${t.players.map(p=>`<button type="button" class="fgp" data-p="${p.id}"><span>${esc(p.name)}</span><i class="ph-bold ph-caret-right"></i></button>`).join('')}
+   ${t.players.length<6?`<button type="button" class="fgp add" data-addp="${t.id}"><span><i class="ph-bold ph-user-plus"></i> Add player</span></button>`:''}
+   ${t.players.length?'':`<button type="button" class="fgp del" data-delg="${t.id}"><span><i class="ph-bold ph-trash"></i> Remove this group</span></button>`}</div></section>`).join('')}
+  <button type="button" class="btn ghost block" id="addg" style="margin-top:12px"><i class="ph-bold ph-plus"></i> Add a group</button>
+  <div class="stick"><div class="navrow"><a class="btn ghost" href="#/setup" aria-label="Game setup"><i class="ph-bold ph-sliders-horizontal"></i></a><a class="btn" href="${HOME}">Done</a></div></div>`;
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>playerSheet(b.dataset.p));
+  document.querySelectorAll('[data-addp]').forEach(b=>b.onclick=()=>addSheet(b.dataset.addp));
+  document.querySelectorAll('[data-delg]').forEach(b=>b.onclick=()=>{const id=b.dataset.delg;
+    if(hasScores(id)&&!confirm('This group has scores. Remove it anyway? Its scores leave the leaderboard.'))return;
+    saveTeams(cloneTeams().filter(t=>t.id!==id),'Group removed')});
+  $('#addg').onclick=groupSheet}
+function sheetOpen(html){$('#sheet').innerHTML=`<div class="grab"></div>${html}<button class="btn ghost block" style="margin-top:12px" id="closeSheet">Cancel</button>`;
+  $('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#closeSheet').onclick=closeSheet}
+function playerSheet(pid){const from=TEAMS.find(t=>t.players.some(p=>p.id===pid));if(!from)return;const p=from.players.find(x=>x.id===pid);
+  sheetOpen(`<b style="font-size:18px">${esc(p.name)}</b><div class="muted">${esc(from.name)}</div>
+   <div class="lbl">Move to</div><div class="chips2">${TEAMS.filter(t=>t.id!==from.id).map(t=>`<button class="chip2" data-to="${t.id}" ${t.players.length>=6?'disabled':''}>${esc(t.name.replace('Group ',''))} <span class="muted" style="font-weight:500">${t.players.length}</span></button>`).join('')}</div>
+   <div class="lbl">Name</div><div style="display:flex;gap:8px"><input class="field" id="fgName" maxlength="40" value="${esc(p.name)}" autocomplete="off"><button class="btn" id="fgRen">Save</button></div>
+   <button class="btn ghost block" style="margin-top:16px;color:#ffb3b5" id="fgDel"><i class="ph-bold ph-user-minus"></i> Remove from the event</button>`);
+  document.querySelectorAll('#sheet [data-to]').forEach(b=>b.onclick=()=>{const ts=cloneTeams(),a=ts.find(t=>t.id===from.id),z=ts.find(t=>t.id===b.dataset.to);
+    a.players=a.players.filter(x=>x.id!==pid);z.players.push({...p});saveTeams(ts,first(p.name)+' moved to '+z.name)});
+  $('#fgRen').onclick=()=>{const n=$('#fgName').value.trim();if(!n||n===p.name)return closeSheet();const ts=cloneTeams();ts.find(t=>t.id===from.id).players.find(x=>x.id===pid).name=n;saveTeams(ts,'Name saved')};
+  $('#fgDel').onclick=()=>{if(!confirm('Take '+p.name+' out of the event?'))return;const ts=cloneTeams();const a=ts.find(t=>t.id===from.id);a.players=a.players.filter(x=>x.id!==pid);saveTeams(ts,p.name+' removed')}}
+function addSheet(tid){const t=TEAMS.find(x=>x.id===tid);
+  sheetOpen(`<b style="font-size:18px">Add a player to ${esc(t.name)}</b><div class="lbl">Name</div>
+   <div style="display:flex;gap:8px"><input class="field" id="fgNew" maxlength="40" placeholder="First and last name" autocomplete="off"><button class="btn" id="fgAdd">Add</button></div>`);
+  const go=()=>{const n=$('#fgNew').value.trim();if(!n)return;const ts=cloneTeams();ts.find(x=>x.id===tid).players.push({id:'p'+Date.now().toString(36)+Math.floor(Math.random()*1e4),name:n,hcp:0});saveTeams(ts,n+' added')};
+  $('#fgAdd').onclick=go;$('#fgNew').onkeydown=e=>{if(e.key==='Enter')go()};setTimeout(()=>$('#fgNew').focus(),250)}
+function groupSheet(){sheetOpen(`<b style="font-size:18px">Add a group</b><div class="muted">Pick the hole it starts on.</div>
+   <div class="chips2" style="margin-top:12px">${Array.from({length:18},(_,i)=>i+1).map(h=>`<button class="chip2" data-h="${h}">${h}</button>`).join('')}</div>`);
+  document.querySelectorAll('#sheet [data-h]').forEach(b=>b.onclick=()=>{const h=+b.dataset.h;
+    const L='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').find(l=>!TEAMS.some(t=>t.id==='g'+h+l));if(!L)return;
+    const ts=cloneTeams();ts.push({id:'g'+h+L,start:h,players:[]});saveTeams(ts,'Group '+h+L+' added')})}
 
 /* ---------- side bets: a tally for the group, money never goes through the app ---------- */
 const BET_TYPES={team:'Team vs team',skins:'Skins in our group',nassau:'Nassau',custom:'Anything else'};
