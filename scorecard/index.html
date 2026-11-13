@@ -401,7 +401,7 @@ const DEF=()=>({event:CASUAL?RID:'nov14',team:CASUAL?'g':null,cfg:{},scores:{},s
 const S=Object.assign(DEF(),load());
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}}}
 let bc=null;try{bc=new BroadcastChannel('rngc-scorecard')}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(bc)try{bc.postMessage('u')}catch(e){};flashSaved()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(bc)try{bc.postMessage('u')}catch(e){};flashSaved();if(window.__scReady)scPush()}
 const EV=()=>EVENTS[S.event],CO=()=>COURSES[EV().course];
 const CFG=()=>Object.assign({},EV().cfg,S.cfg);
 const FMT=()=>CFG().format,F=()=>FORMATS[FMT()];
@@ -455,6 +455,46 @@ function advToast(h,v){let d=document.getElementById('advt');if(d)d.remove();d=d
   d.innerHTML=`<span>Hole ${h} saved: <b>${v}</b></span><button type="button">Back to ${h}</button>`;d.querySelector('button').onclick=()=>{d.remove();location.hash='#/hole/'+h};document.body.appendChild(d);setTimeout(()=>d.remove(),3200)}
 function setSc(who,h,v){const m=myScores();(m[who]||(m[who]={}))[h]=v;if(S.au)delete S.au[who+':'+h];save()}
 
+/* ===================== SHARED EVENT SCORES (club server, Nov 12 2026) =====================
+   Each phone that keeps score sends only the holes that changed; every phone pulls the whole board every 10 seconds.
+   Scores always save on the phone first, so no signal on the course loses nothing: they send when signal comes back. */
+const SC_API=(()=>{try{const o=localStorage.getItem('rngc-club-api');if(o)return o}catch(e){}return 'https://rngc-club.137.184.188.41.sslip.io'})();
+const SYNC=REAL_FIELD&&!CASUAL;
+let REMOTE={},REMOTE_AT=0,SC_ERR=0,SC_SENT={},SC_SIDE={},scT=null,SC_BUSY=false;
+function scAuth(){const h={'Content-Type':'application/json'},b={ev:S.event};
+  try{const t=localStorage.getItem('rngc-auth-token');if(t)h.Authorization='Bearer '+t;const gp=JSON.parse(localStorage.getItem('rngc-guest-pass')||'null');if(gp&&gp.token)b.pass=gp.token}catch(e){}
+  return{h,b}}
+function scCall(path,extra){const a=scAuth();
+  return fetch(SC_API+path,{method:'POST',headers:a.h,body:JSON.stringify(Object.assign(a.b,extra||{})),cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject(r.status))}
+function scDiff(){const e=F().entry,cur=S.scores[scoreKey(S.team)]||{},out={},side={};let n=0;
+  for(const w in cur)for(const h in cur[w]){const v=cur[w][h];if(v!=null&&SC_SENT[w+':'+h]!==v){(out[w]||(out[w]={}))[h]=v;n++}}
+  for(const k in SC_SENT){const i=k.lastIndexOf(':'),w=k.slice(0,i),h=k.slice(i+1);if(!(cur[w]&&cur[w][h]!=null)){(out[w]||(out[w]={}))[h]=null;n++}}
+  for(const[kind,unit]of[['ctp','ft'],['ld','yd']]){const src=S[kind]||{},seen=SC_SIDE[kind]||{};
+    for(const h in src){const v=src[h];const ok=v&&v.pid&&v[unit]>0;const j=ok?JSON.stringify({pid:v.pid,[unit]:v[unit]}):null;
+      if(ok&&seen[h]!==j){(side[kind]||(side[kind]={}))[h]={pid:v.pid,[unit]:v[unit]};n++}
+      else if(!ok&&seen[h]){(side[kind]||(side[kind]={}))[h]=null;n++}}
+    for(const h in seen)if(seen[h]&&!(src[h]&&src[h].pid&&src[h][unit]>0)&&!(side[kind]&&h in side[kind])){(side[kind]||(side[kind]={}))[h]=null;n++}}
+  return{n,body:{team:S.team,scores:{[e]:out},ctp:side.ctp||{},ld:side.ld||{}}}}
+function scPush(){if(!SYNC||!S.team)return;clearTimeout(scT);scT=setTimeout(scSend,1200)}
+function scSend(){if(!SYNC||!S.team||SC_BUSY)return;const d=scDiff();if(!d.n)return;SC_BUSY=true;
+  scCall('/event/card',d.body).then(()=>{const sc=d.body.scores[F().entry];
+    for(const w in sc)for(const h in sc[w]){if(sc[w][h]==null)delete SC_SENT[w+':'+h];else SC_SENT[w+':'+h]=sc[w][h]}
+    for(const[kind,unit]of[['ctp','ft'],['ld','yd']]){const seen=SC_SIDE[kind]||(SC_SIDE[kind]={});for(const h in d.body[kind]){const v=d.body[kind][h];if(v)seen[h]=JSON.stringify({pid:v.pid,[unit]:v[unit]});else delete seen[h]}}
+    SC_ERR=0;SC_BUSY=false;if(scDiff().n)scPush()}).catch(()=>{SC_ERR++;SC_BUSY=false})}
+/* a phone that joins a group late (or a new phone) picks up the holes already sent for its group */
+function scFillMine(){if(!S.team||SC_BUSY||scT&&scDiff().n)return;const c=REMOTE[S.team];if(!c)return;const e=F().entry,rs=(c.scores||{})[e]||{};let ch=false;
+  const m=S.scores[scoreKey(S.team)]||(S.scores[scoreKey(S.team)]={});
+  for(const w in rs)for(const h in rs[w]){SC_SENT[w+':'+h]=rs[w][h];if(!(m[w]&&m[w][h]!=null)){(m[w]||(m[w]={}))[h]=rs[w][h];ch=true}}
+  for(const[kind,unit]of[['ctp','ft'],['ld','yd']]){const seen=SC_SIDE[kind]||(SC_SIDE[kind]={});for(const h in c[kind]||{}){const v=c[kind][h];seen[h]=JSON.stringify({pid:v.pid,[unit]:v[unit]});if(!(S[kind]&&S[kind][h])){(S[kind]||(S[kind]={}))[h]=v;ch=true}}}
+  if(ch){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}
+function scPull(){if(!SYNC)return;scCall('/event/board').then(j=>{REMOTE=j.cards||{};REMOTE_AT=Date.now();SC_ERR=0;scFillMine();scSend()}).catch(()=>{SC_ERR++})}
+const remoteOf=t=>REMOTE[t.id]||{};
+function scNote(){if(!SYNC)return'';if(SC_ERR&&!REMOTE_AT)return' Can\'t reach the club server right now. Your scores are safe on this phone and send when signal is back.';
+  if(SC_ERR)return' No signal right now. Showing scores from '+Math.round((Date.now()-REMOTE_AT)/60000)+' min ago; yours send when signal is back.';
+  if(!REMOTE_AT)return' Loading the other groups.';return' Every group\'s scores, updated '+Math.max(1,Math.round((Date.now()-REMOTE_AT)/1000))+' sec ago.'}
+if(SYNC){window.__scReady=true;scPull();setInterval(()=>{if(!document.hidden)scPull()},10000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)scPull()});window.addEventListener('online',()=>{scPull();scSend()})}
+
 /* demo field scores, seeded so every screen agrees */
 function simHole(team,who,hole,hcp){const r=rng(hash(team.id+who+hole+F().entry));const par=CO().par[hole-1];let x=r();
   if(who==='team'){const s=team.str;
@@ -470,8 +510,10 @@ function rawScores(t){const f=F(),mine=t.id===S.team,ord=order(t.start),ps=playe
   const whos=f.entry==='team'?['team']:ps.map(p=>p.id),raw={};
   for(const w of whos){raw[w]={};
     if(mine){const m=(S.scores[scoreKey(t.id)]||{})[w]||{};for(const h of ord)if(m[h]!=null)raw[w][h]=m[h]}
+    else if(SYNC){const m=(((remoteOf(t).scores||{})[f.entry])||{})[w]||{};for(const h of ord)if(m[h]!=null)raw[w][h]=m[h]}
     else ord.slice(0,n).forEach(h=>raw[w][h]=simHole(t,w,h,w==='team'?0:idx(w)))}
-  return{raw,whos,ps,ord,last:mine?null:ord[n-1]}}
+  const lastR=SYNC&&!mine?ord.filter(h=>whos.every(w=>raw[w][h]!=null)).pop():null;
+  return{raw,whos,ps,ord,last:mine?null:SYNC?lastR:ord[n-1]}}
 
 function mkUnit(t,who,name,sub,played,gross,net,k,last,rows){const c=CO();let g=0,nn=0,par=0,pts=0;
   for(const h of played){const p=c.par[h-1]*k;g+=gross(h);nn+=net(h);par+=p;pts+=stbl(net(h),p)}
@@ -505,11 +547,13 @@ function ranked(list){const f=list||field();
 /* contests: closest to the pin, long drive, skins */
 function ctpResults(h){const out=[];
   for(const t of TEAMS){if(t.id===S.team){const v=S.ctp[h];if(v&&v.pid&&v.ft>0)out.push({t,pid:v.pid,ft:v.ft});continue}
+    if(SYNC){const v=(remoteOf(t).ctp||{})[h];if(v&&v.pid&&v.ft>0)out.push({t,pid:v.pid,ft:v.ft});continue}
     const ord=order(t.start),n=simThru(t);if(!ord.slice(0,n).includes(h))continue;const r=rng(hash(t.id+'ctp'+h));
     if(r()<.45){const ps=players(t);out.push({t,pid:ps[Math.floor(r()*ps.length)].id,ft:Math.round((2+r()*38)*10)/10})}}
   return out.sort((a,b)=>a.ft-b.ft)}
 function ldResults(h){const out=[];
   for(const t of TEAMS){if(t.id===S.team){const v=S.ld[h];if(v&&v.pid&&v.yd>0)out.push({t,pid:v.pid,yd:v.yd});continue}
+    if(SYNC){const v=(remoteOf(t).ld||{})[h];if(v&&v.pid&&v.yd>0)out.push({t,pid:v.pid,yd:v.yd});continue}
     const ord=order(t.start),n=simThru(t);if(!ord.slice(0,n).includes(h))continue;const r=rng(hash(t.id+'ld'+h));
     if(r()<.5){const ps=players(t);out.push({t,pid:ps[Math.floor(r()*ps.length)].id,yd:Math.round(245+r()*75)})}}
   return out.sort((a,b)=>b.yd-a.yd)}
@@ -977,7 +1021,7 @@ function board(tv){const e=EV(),c=CO(),list=field(),f=ranked(list.slice()),fm=F(
     :bar('Live leaderboard',e.name+' · '+fm.name,`<span class="live" style="margin-right:4px"><i></i>LIVE</span><a class="ib" href="#/tv" aria-label="Big screen view"><i class="ph-bold ph-television-simple"></i></a>${S.team?`<a class="ib" href="#/hole/${S.hole||order(myTeam().start)[0]}" aria-label="Back to my card"><i class="ph-bold ph-pencil-simple-line"></i></a>`:`<a class="ib" href="${HOME}" aria-label="Scorecard"><i class="ph-bold ph-pencil-simple-line"></i></a>`}`))+
    (!tv&&hasCt?`<div class="seg" role="group" aria-label="Board view" style="margin-bottom:10px"><button data-bt2="lb" aria-pressed="${BTAB==='lb'}">Leaderboard</button><button data-bt2="ct" aria-pressed="${BTAB==='ct'}">Contests</button></div>`:'')+
    (!tv&&BTAB==='ct'&&hasCt?contests():`<div class="${tv?'':'boardgrid'}">${tv?side:`<div class="side">${side}</div>`}<div>${lbHtml}</div></div>`)+
-   (CASUAL?'':`<p class="note" style="margin:14px 0 24px"><i class="ph-bold ph-info"></i><span>Real groups for Saturday. Scores from your group show here as you tap.</span></p>`);
+   (CASUAL?'':`<p class="note" style="margin:14px 0 24px"><i class="ph-bold ph-info"></i><span>Real groups for Saturday.${scNote()}</span></p>`);
   lastPos={};f.forEach(x=>lastPos[x.id]=x.pos);
   document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openCard(b.dataset.open));
   document.querySelectorAll('[data-net]').forEach(b=>b.onclick=()=>{VIEWNET=b.dataset.net==='1';board(tv)});
