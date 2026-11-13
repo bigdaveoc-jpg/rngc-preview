@@ -881,7 +881,8 @@ function review(){const t=myTeam(),f=F();$('#app').className='wrap';
 function setup(){if(!ADMIN&&!CASUAL){if(SYNC&&!REMOTE_AT&&!SC_ERR){$('#app').innerHTML=bar('Edit the event',EV().name)+'<p class="note"><i class="ph-bold ph-hourglass"></i><span>Checking your sign-in.</span></p>';return}location.hash=HOME;return}const c=CO(),cfg=CFG();$('#app').className='wrap';
   const par3=c.par.map((p,i)=>p===3?i+1:0).filter(Boolean);
   $('#app').innerHTML=bar(CASUAL?'Round setup':'Edit the event',EV().name)+`
-  ${CASUAL?'':`<a class="btn block" href="#/field" style="margin-top:4px"><i class="ph-bold ph-users-three"></i> Groups: move players</a>
+  ${CASUAL?'':`<a class="btn block" href="../?evinfo=${encodeURIComponent(S.event)}" style="margin-top:4px"><i class="ph-bold ph-pencil-simple"></i> Name, date, price, details</a>
+  <a class="btn block" href="#/field" style="margin-top:8px"><i class="ph-bold ph-users-three"></i> Groups: move players</a>
   <div class="lbl">Start</div><div style="display:flex;gap:8px"><input class="field" id="evStart" maxlength="40" value="${esc(EV().start||'')}" autocomplete="off"><button class="btn" id="evStartSave">Save</button></div>`}
   <div class="lbl">Game</div>
   <div class="fmt">${Object.entries(FORMATS).filter(([k,v])=>!CASUAL||!v.team).map(([k,v])=>`<button class="card fmtc" data-f="${k}" aria-pressed="${cfg.format===k}"><b>${v.name}${v.team?' <span class="tag">Team</span>':' <span class="tag">Each player</span>'}</b><span>${v.desc}</span></button>`).join('')}</div>

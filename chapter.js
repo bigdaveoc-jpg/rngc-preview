@@ -102,7 +102,7 @@ function html(){if(!canLead())return pageHead('Chapter tools')+'<p class="meta">
      ${typeof SCORECARD_EVENTS!=='undefined'&&SCORECARD_EVENTS.includes(e.id)?`<a class="btn small ghost" href="scorecard/#/setup"><i class="ph-bold ph-users-three"></i> Groups, game, start</a>`:''}
      ${!canInfo(e)&&!(typeof SCORECARD_EVENTS!=='undefined'&&SCORECARD_EVENTS.includes(e.id))?'<p class="meta">Not on the club server yet. Ask David.</p>':''}</div></div>`).join('')}</div>`:'<p class="meta">No upcoming events for your chapter.</p>')}
    ${group('Your chapter',`<button class="btn full" data-sub="members|inbox"><i class="ph-bold ph-envelope-simple"></i> Message my chapter</button>`)}
-  </div>`}
+  </div><p class="meta" style="opacity:.55;margin-top:10px">App update: Nov 13, 9 AM</p>`}
 
 function showPic(){const p=document.getElementById('cnPicPrev'),a=document.getElementById('cnPicAdd'),i=document.getElementById('cnPicImg');if(!p)return;
   p.hidden=!PIC;a.hidden=!!PIC;if(PIC)i.src=PIC;else i.removeAttribute('src')}
@@ -118,6 +118,12 @@ function wire(){const f=document.getElementById('cnForm');if(f){
   document.querySelectorAll('[data-cndel]').forEach(b=>b.onclick=()=>{if(!confirm('Take this post down? It leaves Club news for everyone.'))return;
     call('/news/delete',{id:+b.dataset.cndel}).then(()=>{say('Taken down');return load()}).catch(x=>say(x.message))})}
 
-load();loadInfo();
+/* the scorecard's Edit the event page links here: /?evinfo=nov14 opens the details form once sign-in is checked */
+function openFromLink(){let id='';try{id=new URLSearchParams(location.search).get('evinfo')||''}catch(e){}if(!id)return;
+  try{history.replaceState(null,'',location.pathname+location.hash)}catch(e){}
+  let n=0;const t=setInterval(()=>{const e=evs().find(x=>x.id===id);n++;
+    if(e&&canInfo(e)){clearInterval(t);openInfo(id)}
+    else if(n>30){clearInterval(t);say(tok()?'Only club admins and the chapter president can edit this event.':'Sign in first, then try again.')}},500)}
+load();loadInfo().then(openFromLink);
 window.RNGCCHAPTER={html,wire,load,canLead,canEdit,canInfo,saveInfo,openInfo};
 })();
