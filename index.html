@@ -1493,10 +1493,10 @@ function evCard(e){
   const f=fmtDate(e.date),past=isPast(e.date),going=!!S.rsvp[e.id];
   const live=!past&&window.RNGCLIVE&&RNGCLIVE.isLive(e.id);
   return `<article class="card ev ${past?'past':''}" id="ev-${e.id}"><div class="date"><b>${f.d}</b><span>${f.m}</span></div>
-   <div><h3>${esc(e.name)}</h3><div class="where">${esc(e.where)}</div><div class="note">${esc(e.note)}</div>
+   <div><h3>${esc(e.name)}</h3><div class="where">${esc(e.where)}</div><div class="note">${esc(e.note)}</div>${e.rules?`<details class="evrules" style="margin-top:8px"><summary style="cursor:pointer;font-weight:700">Event rules</summary><p class="meta" style="white-space:pre-line;margin-top:6px">${esc(e.rules)}</p></details>`:''}
    <div class="row">${live?'<span class="rl-pill"><i></i>LIVE NOW</span>':''}<span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${e.spots&&!past?`<span class="pill hot">${esc(e.spots)}</span>`:''}${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
    <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
-   ${e.url?`<a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`:''}${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canInfo(e)?`<button class="btn small ghost" data-evinfo="${e.id}"><i class="ph-bold ph-pencil-simple"></i> Edit details</button>`:''}`}</div>
+   ${e.url?`<a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`:''}${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canInfo(e)?`<button class="btn small ghost" data-evinfo="${e.id}"><i class="ph-bold ph-gear-six"></i> Event setup</button>`:''}`}</div>
    ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canEdit(e.chapter)?'<a class="btn small ghost" href="scorecard/#/setup"><i class="ph-bold ph-pencil-simple"></i> Edit event</a>':''}${typeof passBtn==='function'?passBtn(e):''}</div>`:''}
    </div></article>`;
 }
@@ -3166,8 +3166,8 @@ async function openCompose(o){
     <label for="cpTo">Send to</label><select class="field" id="cpTo" ${o.reply?'disabled':''}>${opts.map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>
     <div id="cpPick" hidden><input class="field" id="cpFind" placeholder="Search names" style="margin-top:8px"><div class="pickbox" id="cpList">${(P.people||[]).map(x=>`<label data-n="${esc(x.name.toLowerCase())}"><input type="checkbox" value="${esc(x.id)}"> ${esc(x.name)} <small class="meta">${esc(x.chapter)}</small></label>`).join('')}</div></div>
     <p class="help" id="cpCount" style="margin:6px 0 0"></p>
-    <label for="cpSub">Subject</label><input class="field" id="cpSub" maxlength="90" value="${o.reply?esc(/^re:/i.test(o.reply.subject)?o.reply.subject:'Re: '+o.reply.subject):''}" required>
-    <label for="cpBody">Message</label><textarea class="field" id="cpBody" maxlength="3000" rows="6" required></textarea>
+    <label for="cpSub">Subject</label><input class="field" id="cpSub" maxlength="90" value="${o.reply?esc(/^re:/i.test(o.reply.subject)?o.reply.subject:'Re: '+o.reply.subject):esc(o.subject||'')}" required>
+    <label for="cpBody">Message</label><textarea class="field" id="cpBody" maxlength="3000" rows="6" required>${esc(o.body||'')}</textarea>
     <label class="check"><input type="checkbox" id="cpMail" checked> Also email it</label>
     ${P.emailHold?'<p class="help" style="margin:4px 0 0">Email is in test mode until launch. Messages reach inboxes now.</p>':''}
     <button class="btn full" type="submit" style="margin-top:12px"><i class="ph-bold ph-paper-plane-tilt"></i> Send</button>
@@ -3181,6 +3181,7 @@ async function openCompose(o){
     try{const r=await authCall('/msg/count',{to:tg},t);cnt.textContent='Goes to '+r.n+' member'+(r.n===1?'':'s')+' ('+r.label+').'}catch(e){cnt.textContent=e.message}},150)};
   sel.addEventListener('change',recount);$('#cpList')&&$('#cpList').addEventListener('change',recount);
   $('#cpFind').addEventListener('input',e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('#cpList label').forEach(l=>l.hidden=!l.dataset.n.includes(q))});
+  if(o.to&&[...sel.options].some(x=>x.value===o.to))sel.value=o.to;
   if(o.person&&[...sel.options].some(x=>x.value==='people')){sel.value='people';const cb=document.querySelector('#cpList input[value="'+o.person+'"]');if(cb)cb.checked=true}
   recount();
   $('#cpForm').addEventListener('submit',async ev=>{ev.preventDefault();const m=$('#cpMsg'),b=ev.target.querySelector('button[type=submit]');
@@ -3267,7 +3268,7 @@ syncTop();
 <script src="terms.js?v=1"></script>
 <script src="menus.js?v=5"></script>
 <script src="live.js?v=3"></script>
-<script src="chapter.js?v=3"></script>
+<script src="chapter.js?v=4"></script>
 <script src="fantasy.js"></script>
 <script src="guestpass.js?v=club1"></script>
 <script src="shop.js?v=club2"></script>
