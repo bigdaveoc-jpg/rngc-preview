@@ -1030,13 +1030,21 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 <div class="intro" id="intro" role="img" aria-label="Raider Nation Golf Club"><img src="assets/logo/rngc-ball-animated.svg" alt=""><button class="skip" type="button">Skip intro</button></div>
 <script>
 (function(){
-  var el=document.getElementById('intro'),seen=null;
-  var day=new Date().toDateString();   /* once a day, not every time the app opens on the course */
-  try{seen=localStorage.getItem('rngcIntroDay')===day}catch(e){}
+  var el=document.getElementById('intro'),img=el.querySelector('img'),seen=null;
+  /* in the browser: once a day, not every time the app opens on the course.
+     opened from the home-screen icon: every fresh launch (coming back from the background doesn't replay it).
+     Android shares the browser's storage, so the once-a-day rule hid it on the icon's first launch (Nov 12 fix). */
+  var app=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  var day=new Date().toDateString();
+  try{seen=app?sessionStorage.getItem('rngcIntroRun')==='1':localStorage.getItem('rngcIntroDay')===day}catch(e){}
   if(seen||matchMedia('(prefers-reduced-motion: reduce)').matches){el.remove();return}
-  try{localStorage.setItem('rngcIntroDay',day)}catch(e){}
+  try{if(app)sessionStorage.setItem('rngcIntroRun','1');else localStorage.setItem('rngcIntroDay',day)}catch(e){}
   var done=function(){if(!el.isConnected)return;el.classList.add('out');setTimeout(function(){el.remove()},600)};
-  setTimeout(done,5400);el.addEventListener('click',done);
+  /* the logo's animation starts when the picture finishes loading, so the 5.4 s clock starts then too
+     (it used to start right away and cut the animation short on a slow phone signal); no picture in 4 s: skip */
+  var started=false,start=function(){if(started)return;started=true;setTimeout(done,5400)};
+  if(img.complete&&img.naturalWidth)start();else{img.addEventListener('load',start);img.addEventListener('error',done);setTimeout(function(){if(!started)done()},4000)}
+  el.addEventListener('click',done);
 })();
 </script>
 
