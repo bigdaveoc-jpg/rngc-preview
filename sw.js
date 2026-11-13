@@ -23,7 +23,7 @@ self.addEventListener('notificationclick', e => {
 });
 self.addEventListener('fetch', e => {
   const r = e.request, u = new URL(r.url);
-  if (r.method !== 'GET' || u.origin !== location.origin || u.pathname === '/sw.js') return;
+  if (r.method !== 'GET' || u.origin !== location.origin || u.pathname === '/sw.js' || u.pathname.endsWith('.mobileconfig')) return;
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
     /* the page and its scripts skip the phone's 10-minute web cache, so a new app version shows on the next open */

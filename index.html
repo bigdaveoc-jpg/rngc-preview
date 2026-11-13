@@ -2467,6 +2467,17 @@ function openGetApp(){
   const iosSteps=iosOther?[`Tap the <b>Share</b> button <i class="ph-bold ph-export"></i> at the top right, next to the address bar`,`Scroll down and tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>. Don't see it? Tap <b>More</b>.`,`Tap <b>Add</b>. The RNGC icon shows up on your home screen.`]
     :iosVer>=26?[`Tap the <b>three dots</b> <i class="ph-bold ph-dots-three"></i> at the bottom, next to the address bar`,`Tap <b>Share</b> <i class="ph-bold ph-export"></i>`,`In the row of buttons, tap <b>More</b> <i class="ph-bold ph-dots-three"></i>. On some phones it says <b>View More</b>.`,`Tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>, leave <b>Open as Web App</b> on, then tap <b>Add</b>`]
     :[`Tap the <b>Share</b> button <i class="ph-bold ph-export"></i> at the bottom of Safari. Don't see it? Tap the page once to bring the bar back.`,`Scroll down and tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>`,`Tap <b>Add</b>. The RNGC icon shows up on your home screen.`];
+  /* iPhone one-tap install (David, Nov 13: "need it to be easier than trying to find the add to home button"): Safari downloads a small
+     install file that puts the RNGC icon on the home screen; iPhone itself walks through Allow > Settings > Install. Trial: shows only after
+     opening the site once with ?iphonetest, until David OKs it for everyone. */
+  let ipTest=false;try{if(/iphonetest/.test(location.search))localStorage.setItem('rngc-iptest','1');ipTest=localStorage.getItem('rngc-iptest')==='1'}catch(e){}
+  const oneTap=ipTest&&isIOS()&&!inApp&&!iosOther;
+  if(oneTap){openSheet(`<div class="apphead"><img src="assets/app/icon-192.png" alt="" width="56" height="56"><div><h3 style="margin:0">Get the club app</h3><p class="help" style="margin:2px 0 0">Free. No app store.</p></div></div>
+   <a class="btn full" href="/rngc-app.mobileconfig" id="ipInstall"><i class="ph-bold ph-download-simple"></i> Install the app</a>
+   <ol class="appsteps" style="margin-top:14px"><li><span>Tap <b>Allow</b>, then <b>Close</b></span></li><li><span>Open the <b>Settings</b> app and tap <b>Profile Downloaded</b> at the top</span></li><li><span>Tap <b>Install</b>, type your phone passcode, tap <b>Install</b> again. The RNGC icon is on your home screen.</span></li></ol>
+   <details class="help" style="margin:0 0 12px"><summary>Rather do it by hand?</summary><ol class="appsteps" style="margin-top:10px">${iosSteps.map(s=>`<li><span>${s}</span></li>`).join('')}</ol></details>
+   <button class="btn ghost full" type="button" id="closeApp">Close</button>`);
+   $('#closeApp').addEventListener('click',closeSheet);return}
   const steps=inApp?[`Tap the <i class="ph-bold ph-dots-three"></i> menu at the top`,`Tap <b>Open in browser</b>${isIOS()?' or <b>Open in Safari</b>. No menu? Tap <b>Copy link</b> below and paste it into the Safari app.':''}`,`Tap <b>Get the app</b> again from there`]
     :isIOS()?iosSteps
     :/android/i.test(ua)?[`Tap the menu <i class="ph-bold ph-dots-three-vertical"></i> at the top right of the browser`,`Tap <b>Install app</b> or <b>Add to Home screen</b>`,`Tap <b>Install</b>. The RNGC icon shows up with your apps.`]
