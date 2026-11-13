@@ -331,7 +331,7 @@ document.write('<div style="min-height:100vh;display:flex;align-items:center;jus
 <div class="wrap" id="app"></div>
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Team card"></div>
-<script src="../bucks.js?v=club1"></script>
+<script src="../bucks.js?v=club2"></script>
 <script src="holes-chimera.js?v=27"></script>
 <script>
 /* ===================== DATA ===================== */
@@ -877,7 +877,7 @@ function setup(){if(!ADMIN&&!CASUAL){location.hash=HOME;return}const c=CO(),cfg=
   <div class="lbl">Skins</div>
   <div class="seg" role="group" aria-label="Skins">${[['off','Off'],['gross','Gross'],['net','Net']].map(([k,l])=>`<button data-sk="${k}" aria-pressed="${cfg.skins===k}">${l}</button>`).join('')}</div>
   ${cfg.skins!=='off'?`<div class="steprow"><span>Buy-in per ${FORMATS[cfg.format].team?'team':'player'}</span><button class="pm2" data-bi="-5" aria-label="Lower buy-in"><i class="ph-bold ph-minus"></i></button><b>${money(cfg.buyin)}</b><button class="pm2" data-bi="5" aria-label="Raise buy-in"><i class="ph-bold ph-plus"></i></button></div>
-   <p class="note"><i class="ph-bold ph-info"></i><span>The pot splits evenly across every skin won. The app tracks it; the money is collected at check-in, not through the app.</span></p>`:''}
+   <p class="note"><i class="ph-bold ph-info"></i><span>The pot splits evenly across every skin won. The app only keeps the tally. Players settle the pot among themselves; the club never collects, holds or takes a cut of side money.</span></p>`:''}
   <p class="note" style="margin-top:18px"><i class="ph-bold ph-floppy-disk"></i><span>Changes apply to every phone right away. Scores already entered stay put.</span></p>
   <div class="stick"><div class="navrow"><button class="btn ghost" id="reset" aria-label="Back to the event's defaults"><i class="ph-bold ph-arrow-counter-clockwise"></i></button><a class="btn" href="${HOME}">Done</a></div></div>`;
   const put=o=>{Object.assign(S.cfg,o);save();setup()};

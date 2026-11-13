@@ -131,7 +131,7 @@ function sheetHTML(){
   return `<div class="rbs"><div class="bal"><b>${B.fmtN(b)}</b><span>Raider Bucks</span></div>
    <div class="seg" style="margin-top:0;justify-content:center">${seg('wallet','Wallet')}${seg('earn','How to earn')}${seg('store','Club store')}</div>
    <div style="margin-top:12px">${body}</div>
-   <div class="card privacy"><i class="ph-bold ph-info"></i><span>Raider Bucks are club points, not money: they can't be bought, sold or cashed out, and bets in Bucks are golf side games among the players in your round. ${B.remote()?'Kept by the club server.':'Demo amounts and demo store items; saved on this phone until the club server is on.'}</span></div></div>`;
+   <div class="card privacy"><i class="ph-bold ph-info"></i><span>Raider Bucks are club points, not money: they can't be bought, sold or cashed out, and bets in Bucks are golf side games among the players in your round. ${B.remote()?'Kept by the club server.':'Demo amounts and demo store items; saved on this phone until the club server is on.'} <a href="/bucks-rules/">Full rules</a></span></div></div>`;
 }
 const draw=()=>openSheet(sheetHTML());
 /* server answers arrive after the sheet opened: redraw what's on screen */

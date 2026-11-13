@@ -1421,7 +1421,7 @@ function shopHTML(){
 const INTERVIEWS=[['Jzl6c1z3H9Y','Charles Woodson talks golf, Raiders legacy and Lake Tahoe'],['RSqMjjuzWA8','Derek Carr in Lake Tahoe: golf, the Raiders and life after football'],['lT_1-HuLAfo','Rich Eisen talks Raiders, Jets and golf at Edgewood Tahoe'],['XXqf9MVxXLM','Mervyn Fernandez on the Bay Area rivalry and Alumni Weekend'],['T6cvMTRLq0I','Matt Leinart talks Raiders, USC and golf at Lake Tahoe'],['PU1tMFodGiQ','Ray Romano talks golf and Raiders hopes at Edgewood Tahoe'],['9AuhZ22Fqt4','Carson Daly talks golf and his love for the Raiders'],['UJqjaeqE62w','Dylan Dreyer talks golf and weather at Edgewood'],['HkRwaS3zIoY','Big Sloan talks Raiders, Long Beach and golf at Cherry Park'],['y1_enhJEKeU','Mellow Man Ace on music, golf and Raider Nation']];
 function aboutHTML(){
   return pageHead('About the club','Raiders, travel and golf.')+`<div class="card rise" style="padding:18px"><p style="margin:0;font-size:16px;line-height:1.6">We are a national club for everything Raiders, travel and golf. We connect members with Raiders alumni, celebrities and one-of-a-kind experiences through our events and our videos. Join us as we follow our team around the country and tee it up everywhere we go.</p>
-   <div class="acts" style="margin-top:14px"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join a chapter</button><button class="btn ghost" data-sub="events|up">See events</button><button class="btn ghost" data-sub="home|photos"><i class="ph-bold ph-images"></i> Club photos</button></div></div>
+   <div class="acts" style="margin-top:14px"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join a chapter</button><button class="btn ghost" data-sub="events|up">See events</button><button class="btn ghost" data-sub="home|photos"><i class="ph-bold ph-images"></i> Club photos</button></div><p class="sub" style="margin:14px 0 0;font-size:14px">Club policies: <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a> · <a href="/bucks-rules/">Raider Bucks rules</a> · <a href="/store-policy/">Store policy</a></p></div>
    <h3 class="shophead" style="margin-top:22px">Interviews</h3><p class="sub" style="margin-top:0">Raiders legends and famous fans on the course. Opens on YouTube.</p>
    <div class="vidgrid rise">${INTERVIEWS.map(([id,t])=>`<a class="card vid" href="https://www.youtube.com/watch?v=${id}" ${ext}><span class="vthumb"><img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy"><i class="ph-fill ph-play-circle"></i></span><b>${esc(t)}</b></a>`).join('')}</div>
    <h3 class="shophead" style="margin-top:22px">Follow the club</h3>
@@ -3176,7 +3176,7 @@ $('#siJoin').addEventListener('click',()=>{try{sessionStorage.setItem('rngcGuest
   })();
 syncTop();
 </script>
-<script src="bucks.js?v=club1"></script>
+<script src="bucks.js?v=club2"></script>
 <script src="fantasy.js"></script>
 <script src="guestpass.js?v=club1"></script>
 <script src="shop.js?v=club2"></script>

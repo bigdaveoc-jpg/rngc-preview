@@ -57,11 +57,14 @@ input:focus,select:focus{outline:2px solid var(--silver);outline-offset:1px}
 .st-paid{background:#173322;color:var(--ok)}.st-waiting{background:#332b10;color:var(--warn)}.st-declined{background:#3a1718;color:#ffb3b5}
 .center{max-width:520px;margin:20px auto 0}
 .back{display:inline-block;margin:4px 0 12px;font-size:15px}
+.agree{font-size:14px;margin:10px 0 0}
+footer.pol{display:flex;flex-wrap:wrap;gap:8px 16px;border-top:1px solid var(--line);margin-top:36px;padding-top:16px;font-size:15px}
 </style></head>
 <body><div class="wrap">
 <header><img src="/assets/logo/rngc-ball-static.svg" alt=""><div class="t"><b>Club store</b><span>Raider Nation Golf Club</span></div><a class="home" href="/">Club app</a></header>
 <div id="testbar"></div>
 <main id="app"><p class="muted">Loading the store.</p></main>
+<footer class="pol"><a href="/store-policy/">Store policy</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></footer>
 </div>
 <script>
 const API=(()=>{try{const o=localStorage.getItem('rngc-club-api');if(o)return o}catch(e){}return 'https://rngc-club.137.184.188.41.sslip.io'})();
@@ -102,6 +105,7 @@ function product(id){const p=CAT.find(x=>x.id===id);if(!p){$('#app').innerHTML='
        <div><label for="zp">Zip</label><input id="zp" inputmode="numeric" autocomplete="postal-code"></div></div>`:''}
      ${p.ship?`<p class="muted" style="font-size:14px;margin:10px 0 0">${esc(NOTE)}</p>`:''}
      <div class="sum" id="sum"></div>
+     <p class="muted agree">Paying means you agree to the <a href="/store-policy/">store policy</a>: shipping, refunds and exchanges.</p>
      <button class="btn" id="go" type="submit">Pay</button><div class="err" id="err" role="alert"></div>
     </form></div></div>`;
   const total=()=>{const v=p.variants?p.variants.find(x=>x.id===PICK.variant):null;const each=v?v.price:(p.variants?null:p.price);return each==null?null:each*PICK.qty};
