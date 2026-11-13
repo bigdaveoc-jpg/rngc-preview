@@ -2709,6 +2709,7 @@ function realAccountHTML(){
      <label class="setrow"><span><b>Show my city to members</b></span><input type="checkbox" class="sw" id="pfShowCity" ${me.show_city?'checked':''}></label>
      <label class="setrow"><span><b>Show my handicap index to members</b><small>${me.hi?'Your index is '+esc(me.hi)+'.':'No index on file yet.'}</small></span><input type="checkbox" class="sw" id="pfShowIdx" ${me.show_index?'checked':''}></label>
      <label for="pfPhone" style="margin-top:8px">Phone for event texts</label><input class="field" id="pfPhone" type="tel" maxlength="20" placeholder="Only your club leaders see this" value="${esc(me.phone||'')}">
+     <label class="setrow"><span><b>Text me club news</b><small>Short texts from club leaders to this phone. Reply STOP anytime. Msg and data rates may apply.</small></span><input type="checkbox" class="sw" id="pfText" ${me.text_ok?'checked':''}></label>
      <button class="btn full" id="pfSave" style="margin-top:12px"><i class="ph-bold ph-check"></i> Save</button><p class="si-msg" id="pfMsg" role="status"></p>`)}
    ${group('Password',`<form id="pwForm" novalidate>
      <input type="text" autocomplete="username" value="${esc(me.email||'')}" hidden readonly tabindex="-1" aria-hidden="true">
@@ -2729,7 +2730,7 @@ function realAccountHTML(){
   </div>`}
 document.addEventListener('click',async e=>{const b=e.target.closest('#pfSave');if(!b)return;
   const msg=$('#pfMsg');b.disabled=true;msg.textContent='Saving...';
-  try{const r=await authCall('/me/update',{home:$('#pfHome').value,city:$('#pfCity').value,phone:$('#pfPhone').value,show_city:$('#pfShowCity').checked,show_index:$('#pfShowIdx').checked},authTok());
+  try{const r=await authCall('/me/update',{home:$('#pfHome').value,city:$('#pfCity').value,phone:$('#pfPhone').value,show_city:$('#pfShowCity').checked,show_index:$('#pfShowIdx').checked,text_ok:$('#pfText').checked},authTok());
     S.authMe=r.me;msg.textContent='Saved';toast('Profile saved');DIR.items=null}
   catch(err){msg.textContent=err.message}b.disabled=false});
 /* change my own password: the server checks the current one; the page never keeps either */
@@ -3096,6 +3097,8 @@ async function openCompose(o){
     <label for="cpBody">Message</label><textarea class="field" id="cpBody" maxlength="3000" rows="6" required>${esc(o.body||'')}</textarea>
     <label class="check"><input type="checkbox" id="cpMail" checked> Also email it</label>
     ${P.emailHold?'<p class="help" style="margin:4px 0 0">Email is in test mode until launch. Messages reach inboxes now.</p>':''}
+    ${lead||admin?`<label class="check"><input type="checkbox" id="cpText"> Also text it</label>
+    <p class="help" style="margin:4px 0 0">${P.textReady?'Only members who turned on texts get one'+(P.textOn!=null?' ('+P.textOn+' so far)':'')+'.':'Texting is being set up. Texts are held for now.'}</p>`:''}
     <button class="btn full" type="submit" style="margin-top:12px"><i class="ph-bold ph-paper-plane-tilt"></i> Send</button>
     <p class="si-msg" id="cpMsg" role="status"></p></form>`);
   const sel=$('#cpTo'),pick=$('#cpPick'),cnt=$('#cpCount');
@@ -3113,8 +3116,8 @@ async function openCompose(o){
   $('#cpForm').addEventListener('submit',async ev=>{ev.preventDefault();const m=$('#cpMsg'),b=ev.target.querySelector('button[type=submit]');
     const subject=$('#cpSub').value.trim(),body=$('#cpBody').value.trim();if(!subject||!body){m.textContent='Add a subject and a message.';return}
     b.disabled=true;m.textContent='Sending...';
-    try{const r=await authCall('/msg/send',{to:target(),subject,body,email:$('#cpMail').checked},t);closeSheet();
-      toast('Sent to '+r.delivered+' member'+(r.delivered===1?'':'s')+(r.emailed?', '+r.emailed+' emailed':''));
+    try{const r=await authCall('/msg/send',{to:target(),subject,body,email:$('#cpMail').checked,text:!!($('#cpText')&&$('#cpText').checked)},t);closeSheet();
+      toast('Sent to '+r.delivered+' member'+(r.delivered===1?'':'s')+(r.emailed?', '+r.emailed+' emailed':'')+(r.texted?', '+r.texted+' texted':''));
       if(r.note)setTimeout(()=>toast(r.note),2400);MSG.items=null;MSG.sent=null;loadInbox()}catch(err){m.textContent=err.message;b.disabled=false}})}
 document.addEventListener('click',e=>{
   const mr=e.target.closest('[data-msg]');if(mr){openMsg(mr.dataset.msg);return}
@@ -3194,7 +3197,7 @@ syncTop();
 <script src="bucks.js?v=club2"></script>
 <script src="terms.js?v=1"></script>
 <script src="menus.js?v=5"></script>
-<script src="live.js?v=3"></script>
+<script src="live.js?v=4"></script>
 <script src="chapter.js?v=6"></script>
 <script src="photos.js?v=1"></script>
 <script src="fantasy.js"></script>

@@ -125,7 +125,7 @@ function close(){if(sheet)sheet.hidden=true}
 
 /* ---------- phone alerts ---------- */
 const PK='rngc-alerts';
-function prefs(){try{return Object.assign({on:false,shots:'big',talk:true,live:true},JSON.parse(localStorage.getItem(PK)||'{}'))}catch(e){return{on:false,shots:'big',talk:true,live:true}}}
+function prefs(){try{return Object.assign({on:false,shots:'big',talk:true,live:true,msgs:true},JSON.parse(localStorage.getItem(PK)||'{}'))}catch(e){return{on:false,shots:'big',talk:true,live:true,msgs:true}}}
 function savePrefs(p){try{localStorage.setItem(PK,JSON.stringify(p))}catch(e){}}
 const ios=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
@@ -137,7 +137,7 @@ async function subscribe(p,hello){const perm=await Notification.requestPermissio
   let sub=await reg.pushManager.getSubscription();
   if(sub&&sub.options&&sub.options.applicationServerKey){const a=new Uint8Array(sub.options.applicationServerKey),b=keyBytes(key);if(a.length!==b.length||a.some((x,i)=>x!==b[i])){await sub.unsubscribe();sub=null}}
   if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:keyBytes(key)});
-  await call('/push/sub',{sub:sub.toJSON(),shots:p.shots,talk:p.talk,live:p.live,hello:!!hello});return sub}
+  await call('/push/sub',{sub:sub.toJSON(),shots:p.shots,talk:p.talk,live:p.live,msgs:p.msgs!==false,hello:!!hello});return sub}
 async function unsubscribe(){try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
   if(sub){await call('/push/off',{endpoint:sub.endpoint}).catch(()=>{});await sub.unsubscribe()}}catch(e){}}
 function alertSheet(){const p=prefs();
@@ -155,10 +155,11 @@ function alertSheet(){const p=prefs();
    <div class="lbl">Also</div>
    <label class="opt"><input type="checkbox" id="rlTalk" ${p.talk?'checked':''}><span>Trash Talk<small>Club lines members send during the round</small></span></label>
    <label class="opt"><input type="checkbox" id="rlLive" ${p.live?'checked':''}><span>We're live<small>One note when the event starts</small></span></label>
+   <label class="opt"><input type="checkbox" id="rlMsgs" ${p.msgs!==false?'checked':''}><span>Club messages<small>Any day, when a message lands in your club inbox</small></span></label>
    <button class="go" type="button" id="rlGo" ${blocked?'disabled':''}><i class="ph-bold ph-bell-ringing"></i> ${p.on?'Save':'Turn on alerts'}</button>
    ${p.on?'<button class="ghost" type="button" id="rlOff">Turn off alerts on this phone</button>':''}
    <div class="err" id="rlErr" role="alert"></div>`,s=>{const go=s.querySelector('#rlGo'),err=s.querySelector('#rlErr');
-    go.onclick=async()=>{const n={on:true,shots:(s.querySelector('[name=rlShots]:checked')||{}).value||'big',talk:s.querySelector('#rlTalk').checked,live:s.querySelector('#rlLive').checked};
+    go.onclick=async()=>{const n={on:true,shots:(s.querySelector('[name=rlShots]:checked')||{}).value||'big',talk:s.querySelector('#rlTalk').checked,live:s.querySelector('#rlLive').checked,msgs:s.querySelector('#rlMsgs').checked};
       go.disabled=true;err.textContent='';const first=!p.on;
       try{await subscribe(n,first);savePrefs(n);close();say(first?'Alerts are on. Watch for a test ping.':'Saved.');paint();if(typeof renderSettings==='function'&&typeof S!=='undefined'&&S.tab==='settings')renderSettings()}
       catch(x){err.textContent=x.blocked?'You said no to notifications. Allow them in your browser\'s site settings to turn alerts on.':x.status===401?'Your sign-in ran out. Sign in again.':(x.message&&!/fetch/i.test(x.message)?x.message:'We can\'t reach the club server. Check your signal and try again.')}
@@ -167,7 +168,7 @@ function alertSheet(){const p=prefs();
       if(typeof renderSettings==='function'&&typeof S!=='undefined'&&S.tab==='settings')renderSettings()}})}
 /* the Notifications page in Profile shows the same switch */
 function card(){const p=prefs();return `<div class="card rl-card rise" style="margin:0 0 14px"><i class="ph-fill ph-bell-ringing" style="font-size:28px;color:#C8161F"></i>
-  <div><b>Live event alerts</b><span>${p.on?{big:'On: big shots',all:'On: every birdie',off:'On: no shot alerts'}[p.shots]+(p.talk?', trash talk':'')+(p.live?', we\'re live':''):'Big shots and trash talk on event day, on this phone.'}</span></div>
+  <div><b>Live event alerts</b><span>${p.on?{big:'On: big shots',all:'On: every birdie',off:'On: no shot alerts'}[p.shots]+(p.talk?', trash talk':'')+(p.live?', we\'re live':'')+(p.msgs!==false?', club messages':''):'Big shots, trash talk and club messages, on this phone.'}</span></div>
   <button class="btn small${p.on?' ghost':''}" type="button" data-rl="alerts">${p.on?'Change':'Turn on'}</button></div>`}
 
 /* ---------- trash talk ---------- */
