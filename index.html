@@ -2474,7 +2474,7 @@ function openGetApp(){
   const oneTap=ipTest&&isIOS()&&!inApp&&!iosOther;
   if(oneTap){openSheet(`<div class="apphead"><img src="assets/app/icon-192.png" alt="" width="56" height="56"><div><h3 style="margin:0">Get the club app</h3><p class="help" style="margin:2px 0 0">Free. No app store.</p></div></div>
    <a class="btn full" href="https://rngc-club.137.184.188.41.sslip.io/rngc-app.mobileconfig" id="ipInstall"><i class="ph-bold ph-download-simple"></i> Install the app</a>
-   <ol class="appsteps" style="margin-top:14px"><li><span>Tap <b>Allow</b>, then <b>Close</b></span></li><li><span>Open the <b>Settings</b> app and tap <b>Profile Downloaded</b> at the top</span></li><li><span>Tap <b>Install</b>, type your phone passcode, tap <b>Install</b> again. The RNGC icon is on your home screen.</span></li></ol>
+   <ol class="appsteps" style="margin-top:14px"><li><span>Tap <b>Allow</b>, then <b>Close</b></span></li><li><span>Within 8 minutes, open the <b>Settings</b> app and tap <b>Profile Downloaded</b> at the top. Not there? Tap <b>General</b>, then <b>VPN &amp; Device Management</b>.</span></li><li><span>Tap <b>Install</b>, type your phone passcode, tap <b>Install</b> again. The RNGC icon is on your home screen.</span></li></ol>
    <details class="help" style="margin:0 0 12px"><summary>Rather do it by hand?</summary><ol class="appsteps" style="margin-top:10px">${iosSteps.map(s=>`<li><span>${s}</span></li>`).join('')}</ol></details>
    <button class="btn ghost full" type="button" id="closeApp">Close</button>`);
    $('#closeApp').addEventListener('click',closeSheet);return}
