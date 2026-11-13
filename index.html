@@ -1298,7 +1298,8 @@ function renderHome(){
 }
 const cdNum=d=>{const n=daysTo(d);return n<=0?'<span class="now">Today</span>':`${n}<small>${n===1?'day':'days'}</small>`};
 function overviewHTML(){
-  const next=EVENTS.filter(e=>!e.status&&!isPast(e.date)&&inChapter(e.chapter)).sort((a,b)=>a.date<b.date?-1:1)[0];
+  const up=EVENTS.filter(e=>!e.status&&!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1);
+  const next=up.find(e=>inChapter(e.chapter))||up[0];   /* chapter has nothing coming up: Home still shows the club's next event (David, Nov 13) */
   const f=next&&fmtDate(next.date),ng=GAMES.find(g=>!g.res);
   const tile=(k,ic,t,s)=>`<button class="card tile" data-sub="home|${k}"><i class="ph-bold ph-${ic}"></i><b>${t}</b><small>${s}</small></button>`;
   return `<div class="rise">
