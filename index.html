@@ -1330,7 +1330,7 @@ function renderHome(){
   else if(pg==='invite')v.innerHTML=subChips('home')+inviteHTML();
   else if(pg==='about')v.innerHTML=subChips('home')+aboutHTML();
   else if(pg==='photos')v.innerHTML=subChips('home')+photosHTML();
-  else v.innerHTML=subChips('home')+setupNudge()+appNudge()+overviewHTML();
+  else v.innerHTML=subChips('home')+(window.RNGCLIVE?RNGCLIVE.banner():'')+setupNudge()+appNudge()+overviewHTML();
   syncTop();
 }
 const cdNum=d=>{const n=daysTo(d);return n<=0?'<span class="now">Today</span>':`${n}<small>${n===1?'day':'days'}</small>`};
@@ -1474,9 +1474,10 @@ document.addEventListener('click',e=>{if(e.target.closest('#sponBtn'))openSheet(
 /* ---------- events ---------- */
 function evCard(e){
   const f=fmtDate(e.date),past=isPast(e.date),going=!!S.rsvp[e.id];
-  return `<article class="card ev ${past?'past':''}"><div class="date"><b>${f.d}</b><span>${f.m}</span></div>
+  const live=!past&&window.RNGCLIVE&&RNGCLIVE.isLive(e.id);
+  return `<article class="card ev ${past?'past':''}" id="ev-${e.id}"><div class="date"><b>${f.d}</b><span>${f.m}</span></div>
    <div><h3>${esc(e.name)}</h3><div class="where">${esc(e.where)}</div><div class="note">${esc(e.note)}</div>
-   <div class="row"><span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${e.spots&&!past?`<span class="pill hot">${esc(e.spots)}</span>`:''}${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
+   <div class="row">${live?'<span class="rl-pill"><i></i>LIVE NOW</span>':''}<span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${e.spots&&!past?`<span class="pill hot">${esc(e.spots)}</span>`:''}${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
    <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
    ${e.url?`<a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`:''}`}</div>
    ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>${typeof passBtn==='function'?passBtn(e):''}</div>`:''}
@@ -2726,7 +2727,7 @@ document.addEventListener('submit',async e=>{if(e.target.id!=='pwForm')return;e.
   b.disabled=false});
 function notifyHTML(){
   const m=S.cfg.my,when=[['1w','1 week before'],['3d','3 days before'],['1d','1 day before']];
-  return pageHead('Notifications')+`<div class="setcols rise">
+  return pageHead('Notifications')+(window.RNGCLIVE?RNGCLIVE.card():'')+`<div class="setcols rise">
    ${group('What you hear about',`${setRow('Event reminders','Before events you marked Interested or paid for',sw('my.events',m.events))}
      ${setRow('Reminder timing','',selCfg('my.evWhen',m.evWhen,when))}
      ${setRow('Raiders game day','Kickoff alert and who is going',sw('my.games',m.games))}
@@ -3198,6 +3199,7 @@ syncTop();
 <script src="bucks.js?v=club2"></script>
 <script src="terms.js?v=1"></script>
 <script src="menus.js?v=1"></script>
+<script src="live.js?v=1"></script>
 <script src="fantasy.js"></script>
 <script src="guestpass.js?v=club1"></script>
 <script src="shop.js?v=club2"></script>
