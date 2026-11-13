@@ -1043,18 +1043,23 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
   /* The animation must start from frame one while the screen is showing. Phones keep one clock per logo file, so a
      logo the phone already loaded (earlier visit, or behind the launch splash of the home-screen app) can show up
      already finished. So: download the logo, wait until the page is on screen, then show it from a brand-new copy
-     (same trick as the header logo replay). The 7 s clock starts when it shows; no logo in 4 s: skip. */
+     (same trick as the header logo replay). The 7 s clock starts when it shows. */
   var started=false,start=function(){if(started)return;started=true;setTimeout(done,7000)};   /* the logo's story ends at 5.2 s; 7 s lets it finish and settle on a slow phone (David, Nov 13: it was cut off) */
-  var put=function(t){if(started||!el.isConnected)return;
+  /* Wait until the app has finished building the page (it's heavy on a phone): while the phone is busy the logo's
+     animation skips ahead, so it looked cut off (David, Nov 13). The dark intro screen covers the page meanwhile. */
+  var svg,got=false,ready=false;
+  var put=function(){if(!got||!ready||started||!el.isConnected)return;
     var go=function(){if(document.visibilityState!=='visible')return;document.removeEventListener('visibilitychange',go);
       setTimeout(function(){
         img.onload=start;img.onerror=done;
-        img.src=t?URL.createObjectURL(new Blob([t],{type:'image/svg+xml'})):'assets/logo/rngc-ball-animated.svg?r='+Date.now()},60)};
+        img.src=svg?URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'})):'assets/logo/rngc-ball-animated.svg?r='+Date.now()},60)};
     document.addEventListener('visibilitychange',go);go()};
-  fetch('assets/logo/rngc-ball-animated.svg').then(function(r){return r.ok?r.text():null}).then(put,function(){put(null)});
-  var skip=function(){if(document.visibilityState!=='visible')return;document.removeEventListener('visibilitychange',skip);
-    setTimeout(function(){if(!started)done()},4000)};   /* 4 s counts only while the screen is showing */
-  document.addEventListener('visibilitychange',skip);skip();
+  fetch('assets/logo/rngc-ball-animated.svg').then(function(r){return r.ok?r.text():null}).then(function(t){svg=t;got=true;put()},function(){got=true;put()});
+  var onReady=function(){setTimeout(function(){ready=true;put();
+    var skip=function(){if(document.visibilityState!=='visible')return;document.removeEventListener('visibilitychange',skip);
+      setTimeout(function(){if(!started)done()},4000)};   /* no logo 4 s after the page is ready and showing: skip */
+    document.addEventListener('visibilitychange',skip);skip()},350)};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',onReady);else onReady();
   el.addEventListener('click',done);
 })();
 </script>
