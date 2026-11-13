@@ -19,7 +19,7 @@ const PHOTO={Club:'img_5442',National:'img_3410',SoCal:'img_3120',NorCal:'img_34
 const CHS=['Club','National','SoCal','NorCal','Nevada'];
 const day=t=>new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric'});
 const picOf=p=>p.img?api()+'/news/img?id='+p.id:'assets/old-site/photos/'+(PHOTO[p.chapter]||PHOTO.Club)+'.jpg';
-let POSTS=[],PIC=null,SRV_EVS=[];
+let POSTS=[],PICS={},SRV_EVS=[];
 
 function me(){return (typeof S!=='undefined'&&S.authMe)||null}
 const isAdmin=()=>!!(me()&&me().role==='admin');
@@ -148,15 +148,7 @@ function load(){return call('/news').then(j=>{POSTS=j.items||[];
 function html(){if(!canLead())return pageHead('Chapter tools')+'<p class="meta">For club admins and chapter presidents.</p>';
   const mineEv=evs().filter(e=>!isPast(e.date)&&(isAdmin()||leads().includes(e.chapter))).sort((a,b)=>a.date<b.date?-1:1);
   return pageHead('Chapter tools',isAdmin()?'Club admin: every chapter.':'President: '+leads().join(', ')+'.')+`<div class="setcols rise">
-   ${group('Post club news',`<form id="cnForm"><label for="cnCh">For</label><select class="field" id="cnCh">${mine().map(c=>`<option value="${c}">${c==='Club'?'Whole club':c}</option>`).join('')}</select>
-     <label for="cnT">Title</label><input class="field" id="cnT" required minlength="3" maxlength="80" placeholder="Nov 14 groups are out">
-     <label for="cnB">Message</label><textarea class="field" id="cnB" required minlength="3" maxlength="1500" placeholder="What members need to know"></textarea>
-     <div id="cnPicPrev" ${PIC?'':'hidden'} style="margin-top:10px"><img id="cnPicImg" ${PIC?`src="${PIC}"`:''} alt="Photo for this post" style="display:block;width:100%;max-height:240px;object-fit:cover;border-radius:12px">
-      <button type="button" class="btn small ghost" id="cnPicX" style="margin-top:6px"><i class="ph-bold ph-x"></i> Remove photo</button></div>
-     <label class="btn ghost" id="cnPicAdd" for="cnImg" style="width:100%;margin-top:10px;cursor:pointer" ${PIC?'hidden':''}><i class="ph-bold ph-image"></i> Add a photo</label>
-     <input type="file" id="cnImg" accept="image/*" hidden>
-     <button class="btn full" type="submit" style="width:100%;margin-top:12px"><i class="ph-bold ph-newspaper"></i> Post to Club news</button>
-     <p class="meta" id="cnErr" role="alert" style="color:#ffb3b5;min-height:1.2em;margin-top:6px"></p></form>`,'Shows in Club news for everyone, right away.')}
+   ${group('Post club news',newsForm('cn'),'Shows in Club news for everyone, right away.')}
    ${group('Posted',POSTS.length?`<div class="stack">${POSTS.map(p=>`<div class="card"><span class="pill">${esc(p.chapter==='Club'?'Whole club':p.chapter)}</span> <small class="meta">${day(p.at)} · ${esc(p.name)}</small>
      <b class="annt">${esc(p.title)}</b>${p.img?`<img src="${picOf(p)}" alt="" loading="lazy" style="display:block;width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin:6px 0">`:''}<p class="meta" style="white-space:pre-line">${esc(p.body)}</p>
      ${canEdit(p.chapter)?`<button class="btn small ghost" data-cndel="${p.id}"><i class="ph-bold ph-trash"></i> Take down</button>`:''}</div>`).join('')}</div>`:'<p class="meta">Nothing posted yet.</p>')}
@@ -166,19 +158,41 @@ function html(){if(!canLead())return pageHead('Chapter tools')+'<p class="meta">
      
      ${!canInfo(e)?'<p class="meta">Not on the club server yet. Ask David.</p>':''}</div></div>`).join('')}</div>`:'<p class="meta">No upcoming events for your chapter.</p>'))}
    ${group('Your chapter',`<button class="btn full" data-sub="members|inbox"><i class="ph-bold ph-envelope-simple"></i> Message my chapter</button>`)}
-  </div><p class="meta" style="opacity:.55;margin-top:10px">App update: Nov 13, 11 AM</p>`}
+  </div><p class="meta" style="opacity:.55;margin-top:10px">App update: Nov 13, 1 PM</p>`}
 
-function showPic(){const p=document.getElementById('cnPicPrev'),a=document.getElementById('cnPicAdd'),i=document.getElementById('cnPicImg');if(!p)return;
-  p.hidden=!PIC;a.hidden=!!PIC;if(PIC)i.src=PIC;else i.removeAttribute('src')}
-function wire(){const f=document.getElementById('cnForm');if(f){
-    const inp=document.getElementById('cnImg'),err=document.getElementById('cnErr');
-    inp.onchange=()=>{const file=inp.files&&inp.files[0];inp.value='';if(!file)return;err.textContent='Getting the photo ready...';
-      shrink(file).then(d=>{PIC=d;err.textContent='';showPic()}).catch(x=>{err.textContent=x.message})};
-    document.getElementById('cnPicX').onclick=()=>{PIC=null;showPic()};
-    f.onsubmit=e=>{e.preventDefault();const b=f.querySelector('button[type=submit]');b.disabled=true;err.textContent=PIC?'Sending the photo...':'';
-    call('/news/post',Object.assign({chapter:f.cnCh.value,title:f.cnT.value,body:f.cnB.value},PIC?{img:PIC}:{})).then(()=>{say('Posted to Club news');f.reset();PIC=null;err.textContent='';return load()})
+function newsForm(p){return `<form id="${p}Form"><label for="${p}Ch">For</label><select class="field" id="${p}Ch">${mine().map(c=>`<option value="${c}">${c==='Club'?'Whole club':c}</option>`).join('')}</select>
+     <label for="${p}T">Title</label><input class="field" id="${p}T" required minlength="3" maxlength="80" placeholder="Nov 14 groups are out">
+     <label for="${p}B">Message</label><textarea class="field" id="${p}B" required minlength="3" maxlength="1500" placeholder="What members need to know"></textarea>
+     <div id="${p}PicPrev" ${PICS[p]?'':'hidden'} style="margin-top:10px"><img id="${p}PicImg" ${PICS[p]?`src="${PICS[p]}"`:''} alt="Photo for this post" style="display:block;width:100%;max-height:240px;object-fit:cover;border-radius:12px">
+      <button type="button" class="btn small ghost" id="${p}PicX" style="margin-top:6px"><i class="ph-bold ph-x"></i> Remove photo</button></div>
+     <label class="btn ghost" id="${p}PicAdd" for="${p}Img" style="width:100%;margin-top:10px;cursor:pointer" ${PICS[p]?'hidden':''}><i class="ph-bold ph-image"></i> Add a photo</label>
+     <input type="file" id="${p}Img" accept="image/*" hidden>
+     <button class="btn full" type="submit" style="width:100%;margin-top:12px"><i class="ph-bold ph-newspaper"></i> Post to Club news</button>
+     <p class="meta" id="${p}Err" role="alert" style="color:#ffb3b5;min-height:1.2em;margin-top:6px"></p></form>`}
+
+function showPic(k){const g=x=>document.getElementById(k+x),p=g('PicPrev'),a=g('PicAdd'),i=g('PicImg');if(!p)return;
+  p.hidden=!PICS[k];a.hidden=!!PICS[k];if(PICS[k])i.src=PICS[k];else i.removeAttribute('src')}
+function wireForm(k,done){const g=x=>document.getElementById(k+x),f=g('Form');if(!f)return;
+  const inp=g('Img'),err=g('Err');
+  inp.onchange=()=>{const file=inp.files&&inp.files[0];inp.value='';if(!file)return;err.textContent='Getting the photo ready...';
+    shrink(file).then(d=>{PICS[k]=d;err.textContent='';showPic(k)}).catch(x=>{err.textContent=x.message})};
+  g('PicX').onclick=()=>{PICS[k]=null;showPic(k)};
+  f.onsubmit=e=>{e.preventDefault();const b=f.querySelector('button[type=submit]'),pic=PICS[k];b.disabled=true;err.textContent=pic?'Sending the photo...':'';
+    call('/news/post',Object.assign({chapter:g('Ch').value,title:g('T').value,body:g('B').value},pic?{img:pic}:{})).then(()=>{say('Posted to Club news');f.reset();PICS[k]=null;err.textContent='';if(done)done();return load()})
      .catch(x=>{err.textContent=x.status===401?'Your sign-in ran out. Sign in again.':x.status===413?'That photo is too big. Try another one.':x.message})
      .finally(()=>{b.disabled=false})}}
+/* Post news straight from the Club news page (David, Nov 13 2026: "on the news, Club News, you should be able to create one") */
+function openPost(){if(!canLead()){say('Club admins and chapter presidents post club news.');return}
+  PICS.cs=null;openSheet(`<h3 style="margin:0 0 4px">Post club news</h3><p class="meta" style="margin:0 0 6px">Shows in Club news for everyone, right away.</p>${newsForm('cs')}`);
+  wireForm('cs',()=>{if(typeof closeSheet==='function')closeSheet()})}
+/* a server post opened from Club news gets Take down for the people allowed to */
+function postTools(nid){const p=POSTS.find(x=>'s'+x.id===String(nid));
+  return p&&tok()&&canEdit(p.chapter)?`<button class="btn ghost full" data-cntake="${p.id}" style="margin-bottom:8px"><i class="ph-bold ph-trash"></i> Take this post down</button>`:''}
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-cntake]');if(b){ev.preventDefault();
+    if(!confirm('Take this post down? It leaves Club news for everyone.'))return;
+    call('/news/delete',{id:+b.dataset.cntake}).then(()=>{if(typeof closeSheet==='function')closeSheet();say('Taken down');return load()}).catch(x=>say(x.message))}
+  if(ev.target.closest&&ev.target.closest('[data-cnpost]')){ev.preventDefault();openPost()}});
+function wire(){wireForm('cn');
   document.querySelectorAll('[data-cndel]').forEach(b=>b.onclick=()=>{if(!confirm('Take this post down? It leaves Club news for everyone.'))return;
     call('/news/delete',{id:+b.dataset.cndel}).then(()=>{say('Taken down');return load()}).catch(x=>say(x.message))})}
 
@@ -189,5 +203,5 @@ function openFromLink(){let id='';try{id=new URLSearchParams(location.search).ge
     if(e&&canInfo(e)){clearInterval(t);openInfo(id)}
     else if(n>30){clearInterval(t);say(tok()?'Only club admins and the chapter president can edit this event.':'Sign in first, then try again.')}},500)}
 load();loadInfo().then(openFromLink);
-window.RNGCCHAPTER={html,wire,load,canLead,canEdit,canInfo,saveInfo,openInfo,invite,openNew,club:call};
+window.RNGCCHAPTER={html,wire,load,canLead,canEdit,canInfo,saveInfo,openInfo,invite,openNew,openPost,postTools,shrink,club:call,api};
 })();

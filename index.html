@@ -1464,13 +1464,14 @@ function aboutHTML(){
    <div class="acts"><a class="btn ghost" href="https://www.instagram.com/raidernationgolfclub" ${ext}><i class="ph-bold ph-instagram-logo"></i> Instagram</a><a class="btn ghost" href="https://www.youtube.com/channel/UCyuXLkzVfgOfWT8elXYeeyQ" ${ext}><i class="ph-bold ph-youtube-logo"></i> YouTube</a></div>`;
 }
 function photosHTML(){
+  if(window.RNGCPHOTOS)return RNGCPHOTOS.html();
   return pageHead('Club photos','Golf days with the club. Tap a photo to see it big.')+`<div class="photogrid rise">${PHOTOS.map(f=>`<button class="zoomtile" data-zoom="assets/old-site/photos/${f}.jpg" aria-label="Open photo"><img src="assets/old-site/photos/${f}-sm.jpg" alt="Club golf day" loading="lazy"></button>`).join('')}</div>
    <div class="acts" style="margin-top:16px"><button class="btn ghost" data-sub="events|past"><i class="ph-bold ph-images"></i> Flyers from past events</button></div>`;
 }
 document.addEventListener('click',e=>{const z=e.target.closest('[data-zoom]');if(!z)return;openSheet(`<img class="zoomimg" src="${z.dataset.zoom}" alt=""><div class="acts" style="margin-top:10px"><button class="btn ghost" data-zoomclose>Close</button></div>`)});
 document.addEventListener('click',e=>{if(e.target.closest('[data-zoomclose]'))closeSheet()});
 function newsHTML(){
-  return pageHead('Club news')+`<div class="stack newsgrid rise">${NEWS.map(n=>`<button class="card news" data-news="${n.id}"><img class="thumb" src="${n.img}" alt="" loading="lazy"><div><span class="pill">${n.tag}</span><h3 style="margin-top:6px">${esc(n.title)}</h3><div class="meta">${n.meta}</div></div></button>`).join('')}</div>`;
+  return pageHead('Club news')+(window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canLead()?'<div class="acts" style="margin:0 0 12px"><button class="btn" data-cnpost><i class="ph-bold ph-plus"></i> Post news</button></div>':'')+`<div class="stack newsgrid rise">${NEWS.map(n=>`<button class="card news" data-news="${n.id}"><img class="thumb" src="${n.img}" alt="" loading="lazy"><div><span class="pill">${n.tag}</span><h3 style="margin-top:6px">${esc(n.title)}</h3><div class="meta">${n.meta}</div></div></button>`).join('')}</div>`;
 }
 /* sponsors: own page with logos */
 function sponsorsHTML(){
@@ -1498,6 +1499,7 @@ function evCard(e){
    <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
    ${e.url?`<a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`:''}${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canInfo(e)?`<button class="btn small ghost" data-evinfo="${e.id}"><i class="ph-bold ph-gear-six"></i> Event setup</button>`:''}`}</div>
    ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canEdit(e.chapter)?'<a class="btn small ghost" href="scorecard/#/setup"><i class="ph-bold ph-pencil-simple"></i> Edit event</a>':''}${typeof passBtn==='function'?passBtn(e):''}</div>`:''}
+   ${window.RNGCPHOTOS?RNGCPHOTOS.evRow(e):''}
    </div></article>`;
 }
 function renderEvents(){
@@ -1520,7 +1522,7 @@ function renderEvents(){
   if(pg==='past'){const live=new Set([...up,...past].map(e=>stemOf(e.img)));
     v.innerHTML=subChips('events')+pageHead('Past events')+`<div class="evgrid rise">${past.length?past.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No past events for this chapter yet.</div>'}</div>
      <h3 class="shophead">Flyers from past events</h3><p class="sub" style="margin-top:0">Every club event back to 2022. Tap one to see it big.</p><div class="flyerwall">${FLYERS.filter(f=>!live.has(f)).map(f=>`<button class="zoomtile" data-zoom="assets/old-site/flyers/${f}.jpg" aria-label="Open event flyer"><img src="assets/old-site/flyers/${f}-sm.jpg" alt="Event flyer" loading="lazy"></button>`).join('')}</div>`;return}
-  v.innerHTML=subChips('events')+pageHead('Upcoming events')+`<div class="evgrid rise">${up.length?up.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No dates for this chapter yet. More get posted here as they are set.</div>'}</div>
+  v.innerHTML=subChips('events')+pageHead('Upcoming events')+(window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canLead()?'<div class="acts" style="margin:0 0 12px"><button class="btn" data-evnew><i class="ph-bold ph-plus"></i> New event</button></div>':'')+`<div class="evgrid rise">${up.length?up.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No dates for this chapter yet. More get posted here as they are set.</div>'}</div>
    ${up.length&&up.every(e=>e.chapter==='Nevada')&&S.chapter!=='Nevada'?'<p class="sub" style="margin-top:10px">Only Nevada has a date posted right now. SoCal and NorCal chapter events show up here as soon as they are set.</p>':''}`;
 }
 /* ---------- club scorecards view ---------- */
@@ -2492,7 +2494,7 @@ $('#btnProfile').addEventListener('click',()=>{
 /* ---------- news + nav ---------- */
 document.addEventListener('click',e=>{
   const n=e.target.closest('[data-news]');
-  if(n){const a=NEWS.find(x=>x.id===n.dataset.news);openSheet(`<img src="${a.img}" alt="" style="width:100%;height:190px;object-fit:cover;object-position:top;border-radius:12px;margin-bottom:12px"><span class="pill">${a.tag}</span><h3 style="margin-top:8px">${esc(a.title)}</h3><p style="color:var(--muted);white-space:pre-line">${esc(a.body)}</p><button class="btn ghost full" id="closeN">Close</button>`);$('#closeN').addEventListener('click',closeSheet)}
+  if(n){const a=NEWS.find(x=>x.id===n.dataset.news);openSheet(`<img src="${a.img}" alt="" style="width:100%;height:190px;object-fit:cover;object-position:top;border-radius:12px;margin-bottom:12px"><span class="pill">${a.tag}</span><h3 style="margin-top:8px">${esc(a.title)}</h3><p style="color:var(--muted);white-space:pre-line">${esc(a.body)}</p>${window.RNGCCHAPTER?RNGCCHAPTER.postTools(a.id):''}<button class="btn ghost full" id="closeN">Close</button>`);$('#closeN').addEventListener('click',closeSheet)}
   const g=e.target.closest('[data-go]');if(g){closeSheet();setTab(g.dataset.go)}
   const sc=e.target.closest('[data-scroll]');if(sc){e.preventDefault();const t=document.getElementById(sc.dataset.scroll);t&&t.scrollIntoView({behavior:'smooth'})}
 });
@@ -3280,7 +3282,8 @@ syncTop();
 <script src="terms.js?v=1"></script>
 <script src="menus.js?v=5"></script>
 <script src="live.js?v=3"></script>
-<script src="chapter.js?v=5"></script>
+<script src="chapter.js?v=6"></script>
+<script src="photos.js?v=1"></script>
 <script src="fantasy.js"></script>
 <script src="guestpass.js?v=club1"></script>
 <script src="shop.js?v=club2"></script>
