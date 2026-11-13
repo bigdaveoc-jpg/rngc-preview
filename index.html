@@ -2345,12 +2345,11 @@ function openGetApp(){
    <button class="btn ghost full" type="button" id="closeApp">Close</button>`);
    $('#closeApp').addEventListener('click',closeSheet);
    /* step 2 (David, Nov 13: take them right to where they accept it): after the download, swap to one big Open Settings button.
-      Apple doesn't officially let a website open Settings; the button tries, and the words say where to tap if it doesn't open. */
+      Apple blocks websites from opening Settings (David's iPad: address is invalid), so no button, just where to tap. */
    $('#ipInstall').addEventListener('click',()=>setTimeout(()=>{if(!$('#ipInstall'))return;
      $('#sheet').innerHTML=`<div class="grab"></div><div class="apphead"><img src="assets/app/icon-192.png" alt="" width="56" height="56"><div><h3 style="margin:0">Almost there</h3><p class="help" style="margin:2px 0 0">One more stop to finish.</p></div></div>
-     <a class="btn full" href="App-prefs:" id="ipSettings"><i class="ph-bold ph-gear-six"></i> Open Settings</a>
-     <ol class="appsteps" style="margin-top:14px"><li><span>In Settings, tap <b>Profile Downloaded</b>. It sits right under your name at the very top.</span></li><li><span>Tap <b>Install</b>, type your passcode, tap <b>Install</b> again, then <b>Done</b>.</span></li><li><span>The RNGC icon is on your home screen. Tap it to open the club app.</span></li></ol>
-     <p class="help" style="margin:-4px 0 12px">Settings didn't open? Go to your home screen and open the gray <b>Settings</b> app. Not under your name? Tap <b>General</b>, then <b>VPN &amp; Device Management</b>. Do it within 8 minutes, or tap Install the app again.</p>
+     <ol class="appsteps" style="margin-top:4px"><li><span>Go to your home screen and open the gray <b>Settings</b> app <i class="ph-bold ph-gear-six"></i></span></li><li><span>Tap <b>Profile Downloaded</b>. It sits right under your name at the very top.</span></li><li><span>Tap <b>Install</b>, type your passcode, tap <b>Install</b> again, then <b>Done</b>.</span></li><li><span>The RNGC icon is on your home screen. Tap it to open the club app.</span></li></ol>
+     <p class="help" style="margin:-4px 0 12px">Not under your name? Tap <b>General</b>, then <b>VPN &amp; Device Management</b>. Do it within 8 minutes, or tap Install the app again.</p>
      <button class="btn ghost full" type="button" id="ipAgain">Download it again</button><button class="btn ghost full" type="button" id="closeApp">Close</button>`;
      $('#closeApp').addEventListener('click',closeSheet);$('#ipAgain').addEventListener('click',()=>{closeSheet();setTimeout(openGetApp,330)})},1500));
    return}
