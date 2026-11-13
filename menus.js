@@ -40,6 +40,14 @@ const css=`.pm-hide{display:none!important}
 .pm-panel button[aria-current="true"] .pm-ok{opacity:1}
 .pm-panel button:hover{background:rgba(255,255,255,.04);color:var(--text,#eef0f3)}
 .pm-panel button:active{background:rgba(255,255,255,.1)}
+/* jersey nameplate look (David, Nov 13): tall block letters, wide spacing, silver with a white edge, name arched like the back of a jersey */
+.pm-switch b,.pm-panel button span{font-family:'Big Shoulders Display',var(--display,'Barlow Condensed'),sans-serif;text-transform:uppercase}
+.pm-switch b{display:flex;align-items:flex-start;font-weight:900;font-size:24px;line-height:1.05;letter-spacing:.12em;padding:4px 0 2px;color:#e3e7ec;
+  -webkit-text-stroke:.6px rgba(255,255,255,.85);paint-order:stroke fill;text-shadow:0 2px 0 rgba(0,0,0,.55),0 0 1px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden}
+.pm-switch b em{font-style:normal;display:inline-block;transform:translateY(var(--y,0))}
+.pm-switch b em.sp{width:.32em}
+.pm-panel button span{font-weight:800;font-size:19px;letter-spacing:.1em}
+.pm-panel button[aria-current="true"] span{color:#e3e7ec;-webkit-text-stroke:.4px rgba(255,255,255,.7);paint-order:stroke fill}
 @media(prefers-reduced-motion:reduce){.pm-panel,.pm-panel button,.pm-switch i{transition:none!important;transform:none!important}}
 `;
 const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
@@ -49,6 +57,10 @@ const isMenu=r=>r.classList.contains('subchips')||(r.classList.contains('seg')&&
 const btns=r=>[...r.children].filter(c=>c.tagName==='BUTTON'||c.tagName==='A');
 const label=b=>(b.textContent||'').replace(/\s+/g,' ').trim();
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* lay the name out like a jersey nameplate: letters stay upright, the line curves up in the middle */
+function arch(el,txt){const ch=[...String(txt).toUpperCase()],n=ch.length,h=n>12?4:6;
+  el.innerHTML=ch.map((c,i)=>{const t=n>1?i/(n-1)*2-1:0;const y=(h*t*t-h).toFixed(1);return c===' '?'<em class="sp"></em>':`<em style="--y:${y}px">${esc(c)}</em>`}).join('');
+  el.setAttribute('aria-label',txt);el.style.paddingTop=h+'px'}
 const PAGE={home:'Home',events:'Events',golf:'Golf',games:'Games',members:'Members',settings:'Settings',courses:'Courses',forum:'Forum'};
 
 function fix(r){
@@ -60,7 +72,7 @@ function fix(r){
   const cur=bs.find(b=>b.getAttribute('aria-pressed')==='true'||b.getAttribute('aria-selected')==='true')||bs[0];
   const v=r.closest('.view'),area=v?PAGE[v.id.replace('v-','')]||'':'';
   const sw=document.createElement('button');sw.type='button';sw.className='pm-switch';sw.setAttribute('aria-haspopup','menu');
-  sw.innerHTML=`<span><small>${esc(area?area+' sections':'Sections')}</small><b>${esc(label(cur))}</b></span><i class="ph-bold ph-caret-down"></i>`;
+  sw.innerHTML=`<span><small>${esc(area?area+' sections':'Sections')}</small><b></b></span><i class="ph-bold ph-caret-down"></i>`;arch(sw.querySelector('b'),label(cur));
   const dd=document.createElement('div');dd.className='pm-dd';
   const pn=document.createElement('div');pn.className='pm-panel';pn.setAttribute('role','menu');pn.id='pm-'+(++uid);sw.setAttribute('aria-controls',pn.id);sw.setAttribute('aria-expanded','false');
   dd.append(sw,pn);
@@ -76,7 +88,7 @@ function open(r,dd){
     const on=b.getAttribute('aria-pressed')==='true'||b.getAttribute('aria-selected')==='true';const ic=b.querySelector('i');
     return `<button type="button" role="menuitem" data-pmi="${i}" style="--n:${i}" aria-current="${on}">${ic?ic.outerHTML:''}<span>${esc(label(b))}</span><i class="ph-bold ph-check pm-ok"></i></button>`}).join('');
   pn.querySelectorAll('[data-pmi]').forEach(x=>x.addEventListener('click',e=>{e.stopPropagation();const b=bs[+x.dataset.pmi];
-    const lb=sw.querySelector('b');if(lb&&b)lb.textContent=label(b);shut(dd);if(b&&b.isConnected)b.click()}));
+    const lb=sw.querySelector('b');if(lb&&b)arch(lb,label(b));shut(dd);if(b&&b.isConnected)b.click()}));
   void pn.offsetWidth;dd.classList.add('open');sw.setAttribute('aria-expanded','true');cur=dd;
   /* keep the whole list on screen: nudge the page down if the list runs past the bottom */
   requestAnimationFrame(()=>{const v=dd.closest('.view');if(!v)return;const pr=pn.getBoundingClientRect(),vr=v.getBoundingClientRect();
