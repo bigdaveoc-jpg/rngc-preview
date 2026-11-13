@@ -40,7 +40,7 @@ const css=`.pm-hide{display:none!important}
 .pm-panel button[aria-current="true"] .pm-ok{opacity:1}
 .pm-panel button:hover{background:rgba(255,255,255,.04);color:var(--text,#eef0f3)}
 .pm-panel button:active{background:rgba(255,255,255,.1)}
-/* jersey nameplate look (David, Nov 13): tall block letters, wide spacing, silver with a white edge, name arched like the back of a jersey */
+/* jersey nameplate look (David, Nov 13): tall block letters, wide spacing, silver with a white edge */
 .pm-switch b,.pm-panel button span{font-family:'Big Shoulders Display',var(--display,'Barlow Condensed'),sans-serif;text-transform:uppercase}
 .pm-switch b{display:flex;align-items:flex-start;font-weight:900;font-size:24px;line-height:1.05;letter-spacing:.12em;padding:4px 0 2px;color:#e3e7ec;
   -webkit-text-stroke:.6px rgba(255,255,255,.85);paint-order:stroke fill;text-shadow:0 2px 0 rgba(0,0,0,.55),0 0 1px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden}
@@ -57,10 +57,8 @@ const isMenu=r=>r.classList.contains('subchips')||(r.classList.contains('seg')&&
 const btns=r=>[...r.children].filter(c=>c.tagName==='BUTTON'||c.tagName==='A');
 const label=b=>(b.textContent||'').replace(/\s+/g,' ').trim();
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-/* lay the name out like a jersey nameplate: letters stay upright, the line curves up in the middle */
-function arch(el,txt){const ch=[...String(txt).toUpperCase()],n=ch.length,h=n>12?4:6;
-  el.innerHTML=ch.map((c,i)=>{const t=n>1?i/(n-1)*2-1:0;const y=(h*t*t-h).toFixed(1);return c===' '?'<em class="sp"></em>':`<em style="--y:${y}px">${esc(c)}</em>`}).join('');
-  el.setAttribute('aria-label',txt);el.style.paddingTop=h+'px'}
+/* section name in jersey lettering, kept straight (David, Nov 13: no wave) */
+function arch(el,txt){el.textContent=txt}
 const PAGE={home:'Home',events:'Events',golf:'Golf',games:'Games',members:'Members',settings:'Settings',courses:'Courses',forum:'Forum'};
 
 function fix(r){
