@@ -5,12 +5,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
 <script>
-/* Pay links land here while the club store moves to its new address.
-   When the store is back online, set STORE to its address (e.g. 'https://shop.raidernationgolfclub.com')
-   and every old pay button and bookmark forwards straight to the right product page. */
-var STORE='';
+/* Pay links (old store addresses) forward to the club's own store (/store/, Nov 12 2026). */
+var MAP={'membership-national-annual':'mem-national','membership-so-cal-chapter-annual':'mem-socal',
+ 'northern-california-chapter-membership-annual':'mem-norcal','membership-nevada-chapter-annual':'mem-nevada',
+ 'saturday-november-14th-2026-chimera-golf-club-in-henderson-nevada':'ev-nov14','rngc-golf-polo-the-og-classic':'polo-og'};
 var i=(new URLSearchParams(location.search).get('i')||'').replace(/[^a-z0-9\/_-]/gi,'');
-if(STORE)location.replace(STORE.replace(/\/$/,'')+'/'+i);
+var m=i.match(/^product\/([a-z0-9_-]+)/i);
+location.replace('/store/'+(m&&MAP[m[1]]?'#/p/'+MAP[m[1]]:''));
 </script>
 <style>
 :root{--bg:#0a0b0d;--panel:#16191e;--line:#2a2f37;--text:#eef0f3;--muted:#9aa2ae;--silver:#d5dae1}

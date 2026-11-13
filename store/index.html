@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Club store | Raider Nation Golf Club</title>
+<meta name="description" content="Memberships, event entries and club gear for the Raider Nation Golf Club.">
+<link rel="icon" href="/assets/logo/rngc-ball-static.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Club store (Nov 12 2026): our own store on the club server. Prices come from the server; the page never sets a price. */
+:root{--bg:#0a0b0d;--panel:#16191e;--panel2:#1d2127;--line:#2a2f37;--text:#eef0f3;--muted:#9aa2ae;--silver:#d5dae1;--ok:#62c184;--bad:#e5484d;--warn:#f5c451}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 Barlow,system-ui,sans-serif}
+a{color:var(--silver)}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px 48px}
+header{display:flex;align-items:center;gap:12px;padding:16px 0}
+header img{width:42px;height:42px}
+header .t b{display:block;font:800 22px/1.05 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.03em}
+header .t span{color:var(--muted);font-size:14px}
+header .home{margin-left:auto;font-size:15px;white-space:nowrap;padding:12px 4px}
+.test{background:repeating-linear-gradient(135deg,#3a2f0b 0 12px,#2b2309 12px 24px);border:1px solid #6b5716;color:var(--warn);border-radius:12px;padding:10px 14px;margin:0 0 16px;font-weight:600;font-size:15px}
+h2{font:800 24px/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.03em;margin:26px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.prod{display:flex;flex-direction:column;text-decoration:none;color:inherit}
+.prod .ph{aspect-ratio:1/1;background:#0f1114;display:grid;place-items:center}
+.prod .ph img{width:100%;height:100%;object-fit:contain}
+.prod .ph img.top{object-fit:cover;object-position:top}
+.prod .in{padding:12px 14px 14px}
+.prod b{display:block;font-size:16px;line-height:1.25}
+.prod .pr{margin-top:6px;font:700 20px 'Barlow Condensed',sans-serif;color:var(--silver)}
+.muted{color:var(--muted)}
+.detail{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.detail{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:start}}
+.detail .ph{background:#0f1114;border-radius:14px;overflow:hidden;aspect-ratio:1/1;display:grid;place-items:center}
+.detail .ph img{width:100%;height:100%;object-fit:contain}
+.pane{padding:18px}
+.pane h1{font:800 28px/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase;margin:0 0 6px}
+.big{font:800 30px 'Barlow Condensed',sans-serif;color:var(--silver);margin:4px 0 10px}
+label{display:block;font-size:14px;color:var(--muted);margin:12px 0 5px}
+input,select{width:100%;min-height:46px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:inherit;padding:10px 12px}
+input:focus,select:focus{outline:2px solid var(--silver);outline-offset:1px}
+.sizes{display:flex;flex-wrap:wrap;gap:8px}
+.sizes button{min-width:56px;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:600 15px Barlow,sans-serif;cursor:pointer}
+.sizes button[aria-pressed="true"]{background:var(--silver);color:#0a0b0d;border-color:var(--silver)}
+.sizes button:disabled{opacity:.35;text-decoration:line-through;cursor:not-allowed}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1.4fr .7fr .9fr;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;margin-top:16px;border:0;border-radius:999px;background:var(--silver);color:#0a0b0d;font:700 17px Barlow,sans-serif;cursor:pointer;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--silver);border:1px solid var(--line)}
+.btn.bad{background:transparent;color:#ffb3b5;border:1px solid #5a2a2c}
+.btn:disabled{opacity:.6;cursor:wait}
+.err{color:#ffb3b5;margin-top:10px;min-height:1.5em}
+.sum{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.sum div{display:flex;justify-content:space-between;gap:12px;padding:3px 0}
+.sum .tot{font-weight:700;font-size:18px}
+.status{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:700;font-size:14px}
+.st-paid{background:#173322;color:var(--ok)}.st-waiting{background:#332b10;color:var(--warn)}.st-declined{background:#3a1718;color:#ffb3b5}
+.center{max-width:520px;margin:20px auto 0}
+.back{display:inline-block;margin:4px 0 12px;font-size:15px}
+</style></head>
+<body><div class="wrap">
+<header><img src="/assets/logo/rngc-ball-static.svg" alt=""><div class="t"><b>Club store</b><span>Raider Nation Golf Club</span></div><a class="home" href="/">Club app</a></header>
+<div id="testbar"></div>
+<main id="app"><p class="muted">Loading the store.</p></main>
+</div>
+<script>
+const API=(()=>{try{const o=localStorage.getItem('rngc-club-api');if(o)return o}catch(e){}return 'https://rngc-club.137.184.188.41.sslip.io'})();
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=c=>'$'+(c/100).toLocaleString(undefined,{minimumFractionDigits:c%100?2:0,maximumFractionDigits:2});
+const STATES='AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' ');
+let CAT=null,MODE='test',NOTE='';
+const api=(path,body)=>fetch(API+path,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{cache:'no-store'})
+  .then(async r=>{const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'The club server had a problem. Try again.');return j});
+const priceOf=p=>{if(!p.variants)return money(p.price);const v=p.variants.filter(x=>!x.soldOut).map(x=>x.price);if(!v.length)return 'Sold out';const lo=Math.min(...v),hi=Math.max(...v);return lo===hi?money(lo):money(lo)+' to '+money(hi)};
+function testBar(){$('#testbar').innerHTML=MODE==='live'?'':`<div class="test" role="note">TEST STORE: ${MODE==='test'?'no card is asked for and no money moves.':'Stripe test mode, use card 4242 4242 4242 4242. No real money moves.'}</div>`}
+function load(){return CAT?Promise.resolve():api('/store/products').then(j=>{CAT=j.products||[];MODE=j.mode;NOTE=j.shippingNote||'';testBar()})}
+
+function home(){const groups=[...new Set(CAT.map(p=>p.group))];
+  $('#app').innerHTML=groups.map(g=>`<h2>${esc(g)}</h2><div class="grid">${CAT.filter(p=>p.group===g).map(p=>`<a class="card prod" href="#/p/${esc(p.id)}">
+    <div class="ph"><img class="${p.group==='Events'?'top':''}" src="${esc(p.img)}" alt="" loading="lazy"></div>
+    <div class="in"><b>${esc(p.name)}</b><div class="pr">${priceOf(p)}</div></div></a>`).join('')}</div>`).join('')}
+
+let PICK={};
+function product(id){const p=CAT.find(x=>x.id===id);if(!p){$('#app').innerHTML='<p>That item isn\'t in the store. <a href="#/">See everything</a></p>';return}
+  PICK={id:p.id,variant:null,qty:1};
+  const shipForm=p.ship&&MODE==='test';
+  let saved={};try{saved=JSON.parse(localStorage.getItem('rngc-store-buyer')||'{}')}catch(e){}
+  $('#app').innerHTML=`<a class="back" href="#/">&larr; All items</a><div class="detail">
+   <div class="ph"><img src="${esc(p.img)}" alt=""></div>
+   <div class="card pane"><h1>${esc(p.name)}</h1><div class="big" id="pr">${priceOf(p)}</div><p class="muted" style="margin:0">${esc(p.blurb||'')}</p>
+    ${p.variants?`<label>Size</label><div class="sizes" role="group" aria-label="Size">${p.variants.map(v=>`<button type="button" data-v="${esc(v.id)}" aria-pressed="false" ${v.soldOut?'disabled aria-label="'+esc(v.name)+', sold out"':''}>${esc(v.name)}</button>`).join('')}</div>`:''}
+    ${(p.maxQty||1)>1?`<label for="qty">How many</label><select id="qty">${Array.from({length:p.maxQty},(_,i)=>`<option>${i+1}</option>`).join('')}</select>`:''}
+    <form id="f" novalidate>
+     <label for="nm">Your name</label><input id="nm" autocomplete="name" value="${esc(saved.name||'')}" required>
+     <label for="em">Email for your receipt</label><input id="em" type="email" autocomplete="email" inputmode="email" value="${esc(saved.email||'')}" required>
+     <label for="phn">Phone, optional</label><input id="phn" type="tel" autocomplete="tel" value="${esc(saved.phone||'')}">
+     ${shipForm?`<label for="a1">Ship to: street</label><input id="a1" autocomplete="address-line1">
+      <label for="a2">Apt or suite, optional</label><input id="a2" autocomplete="address-line2">
+      <div class="row3"><div><label for="ci">City</label><input id="ci" autocomplete="address-level2"></div>
+       <div><label for="stt">State</label><select id="stt" autocomplete="address-level1"><option value="">-</option>${STATES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+       <div><label for="zp">Zip</label><input id="zp" inputmode="numeric" autocomplete="postal-code"></div></div>`:''}
+     ${p.ship?`<p class="muted" style="font-size:14px;margin:10px 0 0">${esc(NOTE)}</p>`:''}
+     <div class="sum" id="sum"></div>
+     <button class="btn" id="go" type="submit">Pay</button><div class="err" id="err" role="alert"></div>
+    </form></div></div>`;
+  const total=()=>{const v=p.variants?p.variants.find(x=>x.id===PICK.variant):null;const each=v?v.price:(p.variants?null:p.price);return each==null?null:each*PICK.qty};
+  const sum=()=>{const t=total();$('#sum').innerHTML=t==null?'<div class="muted">Pick a size to see your total.</div>':`<div class="tot"><span>Total</span><span>${money(t)}</span></div>`;$('#go').textContent=t==null?'Pick a size':'Pay '+money(t)};
+  document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{PICK.variant=b.dataset.v;document.querySelectorAll('[data-v]').forEach(x=>x.setAttribute('aria-pressed',x===b));sum()});
+  const q=$('#qty');if(q)q.onchange=()=>{PICK.qty=+q.value;sum()};
+  sum();
+  $('#f').onsubmit=e=>{e.preventDefault();const err=$('#err');err.textContent='';
+    if(p.variants&&!PICK.variant){err.textContent='Pick a size first.';return}
+    const buyer={name:$('#nm').value.trim(),email:$('#em').value.trim(),phone:$('#phn').value.trim(),chapter:p.chapter||''};
+    if(buyer.name.length<2){err.textContent='Add your name.';$('#nm').focus();return}
+    if(!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(buyer.email)){err.textContent='Add a good email so we can send your receipt.';$('#em').focus();return}
+    const body={items:[{id:p.id,variant:PICK.variant,qty:PICK.qty}],buyer};
+    if(shipForm)body.ship={name:buyer.name,address1:$('#a1').value,address2:$('#a2').value,city:$('#ci').value,state_code:$('#stt').value,zip:$('#zp').value,phone:buyer.phone};
+    try{localStorage.setItem('rngc-store-buyer',JSON.stringify({name:buyer.name,email:buyer.email,phone:buyer.phone}))}catch(e){}
+    const go=$('#go');go.disabled=true;go.textContent='Opening checkout';
+    api('/store/checkout',body).then(j=>{location.href=j.url}).catch(x=>{err.textContent=x.message;go.disabled=false;sum()})}}
+
+function orderView(o,k,extra){const st={paid:'Paid',waiting:'Waiting for payment',declined:'Not paid'}[o.status]||o.status;
+  return `<div class="card pane center"><div class="muted" style="font-size:14px">Order ${esc(o.id)}</div>
+   <h1 style="margin-top:4px">${o.status==='paid'?'Thank you, '+esc((o.name||'').split(' ')[0]):o.status==='declined'?'Payment didn\'t go through':'Almost done'}</h1>
+   <span class="status st-${esc(o.status)}">${esc(st)}${o.mode!=='live'?' · test':''}</span>
+   <div class="sum">${o.items.map(i=>`<div><span>${esc(i.name)}${i.qty>1?' x '+i.qty:''}</span><span>${money(i.price*i.qty)}</span></div>`).join('')}<div class="tot"><span>Total</span><span>${money(o.total)}</span></div></div>
+   ${extra||''}</div>`}
+function testpay(id,k){api('/store/order',{order:id,k}).then(j=>{const o=j.order;
+  if(o.status!=='waiting'){location.hash='#/done/'+id+'/'+k;return}
+  $('#app').innerHTML=orderView(o,k,`<p class="muted" style="margin-top:14px">This is the test checkout. No card is asked for and no money moves. Pick what the card company would say.</p>
+   <button class="btn" id="yes">Approve test payment</button><button class="btn bad" id="no">Decline test payment</button><div class="err" id="err" role="alert"></div>`);
+  const act=approve=>{$('#yes').disabled=$('#no').disabled=true;api('/store/testpay',{order:id,k,approve}).then(()=>{location.hash='#/done/'+id+'/'+k}).catch(x=>{$('#err').textContent=x.message;$('#yes').disabled=$('#no').disabled=false})};
+  $('#yes').onclick=()=>act(true);$('#no').onclick=()=>act(false)}).catch(x=>{$('#app').innerHTML='<p>'+esc(x.message)+' <a href="#/">Back to the store</a></p>'})}
+function done(id,k,tries){api('/store/order',{order:id,k}).then(j=>{const o=j.order;
+  if(o.status==='waiting'&&(tries||0)<5){$('#app').innerHTML=orderView(o,k,'<p class="muted" style="margin-top:12px">Checking with the card company.</p>');setTimeout(()=>done(id,k,(tries||0)+1),2000);return}
+  $('#app').innerHTML=orderView(o,k,o.status==='paid'?`<p class="muted" style="margin-top:12px">Save this page or take a screenshot of it as your receipt. ${o.items.some(i=>/^mem-/.test(i.id))?'Your chapter president will be in touch about your membership.':''}${o.items.some(i=>/^ev-/.test(i.id))?' Your spot is held.':''}</p><a class="btn ghost" href="/">Back to the club app</a>`
+    :o.status==='declined'?`<a class="btn" href="#/">Try again</a>`:`<p class="muted" style="margin-top:12px">We haven't seen the payment yet. If you paid, refresh this page in a minute.</p><a class="btn ghost" href="#/">Back to the store</a>`)}).catch(x=>{$('#app').innerHTML='<p>'+esc(x.message)+' <a href="#/">Back to the store</a></p>'})}
+function cancel(id,k){$('#app').innerHTML=`<div class="card pane center"><h1>Checkout canceled</h1><p class="muted">Nothing was charged.</p><a class="btn" href="#/">Back to the store</a></div>`}
+
+function route(){const h=location.hash.replace(/^#\/?/,'').split('/');window.scrollTo(0,0);
+  load().then(()=>{if(h[0]==='p')product(h[1]);else if(h[0]==='testpay')testpay(h[1],h[2]);else if(h[0]==='done')done(h[1],h[2]);else if(h[0]==='cancel')cancel(h[1],h[2]);else home()})
+   .catch(x=>{$('#app').innerHTML='<div class="card pane center"><h1>Store is offline</h1><p class="muted">We can\'t reach the club server right now. Try again in a few minutes.</p><a class="btn ghost" href="/">Back to the club app</a></div>'})}
+addEventListener('hashchange',route);route();
+</script>
+</body></html>
