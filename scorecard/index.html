@@ -6,9 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0a0b0d">
 <title>RNGC Golf</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
 <link rel="stylesheet" href="../assets/icons/icons.css?v=1">
 <style>
 :root{
@@ -475,7 +473,7 @@ function setSc(who,h,v){const m=myScores();(m[who]||(m[who]={}))[h]=v;if(S.au)de
 /* ===================== SHARED EVENT SCORES (club server, Nov 12 2026) =====================
    Each phone that keeps score sends only the holes that changed; every phone pulls the whole board every 10 seconds.
    Scores always save on the phone first, so no signal on the course loses nothing: they send when signal comes back. */
-const SC_API=(()=>{try{const o=localStorage.getItem('rngc-club-api');if(o)return o}catch(e){}return 'https://rngc-club.137.184.188.41.sslip.io'})();
+const SC_API=(()=>{try{const o=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&localStorage.getItem('rngc-club-api');if(o)return o}catch(e){}return 'https://rngc-club.137.184.188.41.sslip.io'})();
 const SYNC=REAL_FIELD&&!CASUAL;
 /* each group names itself (David, Nov 13 2026); the name rides on the group's card from the club server */
 function gNames(){if(CASUAL)return;TEAMS.forEach(t=>{if(t.dflt==null)t.dflt=t.name;const c=REMOTE&&REMOTE[t.id];t.name=(c&&c.name)||t.dflt})}

@@ -3,8 +3,7 @@
 <title>Club store | Raider Nation Golf Club</title>
 <meta name="description" content="Memberships, event entries and club gear for the Raider Nation Golf Club.">
 <link rel="icon" href="/assets/logo/rngc-ball-static.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
 <style>
 /* Club store (Nov 12 2026): our own store on the club server. Prices come from the server; the page never sets a price. */
 :root{--bg:#0a0b0d;--panel:#16191e;--panel2:#1d2127;--line:#2a2f37;--text:#eef0f3;--muted:#9aa2ae;--silver:#d5dae1;--ok:#62c184;--bad:#e5484d;--warn:#f5c451}
@@ -67,7 +66,7 @@ footer.pol{display:flex;flex-wrap:wrap;gap:8px 16px;border-top:1px solid var(--l
 <footer class="pol"><a href="/store-policy/">Store policy</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></footer>
 </div>
 <script>
-const API=(()=>{try{const o=localStorage.getItem('rngc-club-api');if(o)return o}catch(e){}return 'https://rngc-club.137.184.188.41.sslip.io'})();
+const API=(()=>{try{const o=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&localStorage.getItem('rngc-club-api');if(o)return o}catch(e){}return 'https://rngc-club.137.184.188.41.sslip.io'})();
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=c=>'$'+(c/100).toLocaleString(undefined,{minimumFractionDigits:c%100?2:0,maximumFractionDigits:2});

@@ -22,10 +22,19 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="RNGC">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=Big+Shoulders+Display:wght@800;900&display=swap" rel="stylesheet">
-<script src="maps-key.js"></script>
+<link rel="preload" href="assets/old-site/2026/06/IMG_5442-hero.webp" as="image" fetchpriority="high">
+<style>
+/* club fonts, self-hosted Nov 13 2026 (Google Fonts, OFL), latin only: no outside font server on page load */
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/fonts/barlow-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/fonts/barlow-500.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(/assets/fonts/barlow-600.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(/assets/fonts/barlow-condensed-600.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/fonts/barlow-condensed-700.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:800;font-display:swap;src:url(/assets/fonts/barlow-condensed-800.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Big Shoulders Display';font-style:normal;font-weight:800;font-display:swap;src:url(/assets/fonts/big-shoulders-display.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Big Shoulders Display';font-style:normal;font-weight:900;font-display:swap;src:url(/assets/fonts/big-shoulders-display.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+</style>
+<script src="maps-key.js" defer></script>
 <link rel="stylesheet" href="assets/icons/icons.css?v=1">
 <style>
 :root{
@@ -1235,7 +1244,9 @@ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({chapter:S.chapter,r
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const initials=n=>n.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const initials=n=>esc(String(n||'').split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase());
+/* links from the club server: only web, mail and phone links, never script links (security review, Nov 13) */
+const safeUrl=u=>{u=String(u||'').trim();return (/^[a-z][a-z0-9+.-]*:/i.test(u)&&!/^(https?|mailto|tel):/i.test(u))||/^\/\//.test(u)?'#':esc(u)};
 const fmtDate=d=>{const x=new Date(d+'T12:00:00');return{m:x.toLocaleString('en',{month:'short'}),d:x.getDate(),dow:x.toLocaleString('en',{weekday:'short'}),mon:x.toLocaleString('en',{month:'long',year:'numeric'})}};
 const daysTo=d=>Math.max(0,Math.ceil((new Date(d+'T12:00:00')-new Date())/864e5));
 const isPast=d=>new Date(d+'T23:59:59')<new Date();
@@ -1292,7 +1303,7 @@ function overviewHTML(){
   const tile=(k,ic,t,s)=>`<button class="card tile" data-sub="home|${k}"><i class="ph-bold ph-${ic}"></i><b>${t}</b><small>${s}</small></button>`;
   return `<div class="rise">
    
-   <div class="hero"><div class="bg" style="background-image:url('${UP}2026/06/IMG_5442-1024x768.jpg')"></div><div class="in">
+   <div class="hero"><div class="bg" style="background-image:url('${UP}2026/06/IMG_5442-hero.webp')"></div><div class="in">
      ${S.member?`<span class="tag">Member - ${esc(chName(S.cfg.my.chapter))}</span>
      <h1>Welcome back, ${esc(firstName())}</h1>
      <p>Your events, tee times and game-day seats in one place.</p>
@@ -1303,7 +1314,7 @@ function overviewHTML(){
      <div class="acts"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button><button class="btn ghost" data-sub="events|up">See events</button></div>`}
    </div></div>
    <div class="ovgrid">${S.member&&window.bucksCard?bucksCard():''}${S.member?inviteCard():guestCard()}</div>
-   <div class="ovgrid">${next?`<div class="card next nx nx-golf"><i class="ph-fill ph-golf nxbg" aria-hidden="true"></i><div class="nxhead"><i class="ph-fill ph-golf"></i> Golf event<span>&middot; ${esc(next.chapter)}</span></div><div class="cd">${cdNum(next.date)}</div><div><h3>${esc(next.name)}</h3><div class="meta">${f.dow}, ${f.m} ${f.d} - ${esc(next.where)}</div></div><a class="btn small" href="${next.url}" ${ext}>Register</a></div>`:''}
+   <div class="ovgrid">${next?`<div class="card next nx nx-golf"><i class="ph-fill ph-golf nxbg" aria-hidden="true"></i><div class="nxhead"><i class="ph-fill ph-golf"></i> Golf event<span>&middot; ${esc(next.chapter)}</span></div><div class="cd">${cdNum(next.date)}</div><div><h3>${esc(next.name)}</h3><div class="meta">${f.dow}, ${f.m} ${f.d} - ${esc(next.where)}</div></div><a class="btn small" href="${safeUrl(next.url)}" ${ext}>Register</a></div>`:''}
    ${ng?`<div class="card next nx nx-game"><i class="ph-fill ph-football nxbg" aria-hidden="true"></i><div class="nxhead"><i class="ph-fill ph-football"></i> Raiders game<span>&middot; Week ${ng.wk}</span></div><div class="cd">${cdNum(ng.date)}</div><div><h3>${esc(gTitle(ng))}</h3><div class="meta">${gWhen(ng)}</div></div><button class="btn small ghost" data-sub="games|sched">Schedule</button></div>`:''}</div>
    </div>
    <div class="tiles">${S.member?(canInvite()?tile('photos','images','Club photos','Golf days with the club'):tile('invite','paper-plane-tilt','Invite a friend','Your own link, your chapter')):tile('join','identification-badge','Join a chapter','Sign up, the chapter president gets it')}${authTok()?'<button class="card tile" data-gotix><i class="ph-bold ph-ticket"></i><b>Ticket exchange</b><small>Buy, sell and trade seats with members</small></button>':''}${tile('leaders','users','Club leaders','Bios and how to reach them')}${tile('shop','shopping-bag','Club shop','Polos, memberships, event entries')}${tile('news','newspaper','Club news','Events, membership, interviews')}${tile('sponsors','handshake','Sponsors','The brands behind the club')}</div>
@@ -1318,7 +1329,7 @@ function joinHTML(){
   if(S.joinSent){const j=S.joinSent,L=LEAD_X[PRES[j.chapter]],p=PLANS.find(x=>x.chapter===j.chapter);
     return pageHead('Join a chapter')+`<div class="card sent rise"><i class="ph-fill ph-check-circle"></i><h3>Thanks, ${esc(j.first)}</h3>
      <p>Your request went to <b>${esc(L.name)}</b>, ${esc(L.chapters)}${L.id!=='ross'?', with Ross Ricks copied as club president':''}. Expect a reply by email.${j.by?` We'll let ${esc(j.by)} know you joined.`:''}</p>
-     <div class="acts">${p?`<a class="btn" href="${p.url}" ${ext}><i class="ph-bold ph-credit-card"></i> Pay ${esc(p.name)} dues, $${p.price}</a>`:''}<button class="btn ghost" id="joinAgain">Send another</button></div></div>`}
+     <div class="acts">${p?`<a class="btn" href="${safeUrl(p.url)}" ${ext}><i class="ph-bold ph-credit-card"></i> Pay ${esc(p.name)} dues, $${p.price}</a>`:''}<button class="btn ghost" id="joinAgain">Send another</button></div></div>`}
   const ch=S.joinCh||(S.chapter!=='All'?S.chapter:'SoCal');
   const opt=p=>`<label class="radio plan2"><input type="radio" name="jc" value="${p.chapter}" ${ch===p.chapter?'checked':''}><span><b>${p.name} <em>$${p.price}/yr</em></b>${p.blurb}<small>Goes to ${LEAD_X[PRES[p.chapter]].name}</small></span></label>`;
   const inv=S.invite;
@@ -1381,7 +1392,7 @@ document.addEventListener('click',e=>{
 /* club shop: only the store */
 function shopHTML(){
   const evs=EVENTS.filter(e=>!e.status&&!isPast(e.date));
-  const item=(img,t,price,meta,url,fit)=>`<a class="card shopitem" href="${url}" ${ext}><div class="simg ${fit||''}"><img src="${img}" alt="" loading="lazy"></div><div class="sbody"><b>${t}</b><div class="meta">${meta}</div><div class="sprice">${price}</div><span class="btn small">Buy on club store</span></div></a>`;
+  const item=(img,t,price,meta,url,fit)=>`<a class="card shopitem" href="${safeUrl(url)}" ${ext}><div class="simg ${fit||''}"><img src="${img}" alt="" loading="lazy"></div><div class="sbody"><b>${t}</b><div class="meta">${meta}</div><div class="sprice">${price}</div><span class="btn small">Buy on club store</span></div></a>`;
   return pageHead('Club shop','Checkout is on the club store.')+`
    <h3 class="shophead">Club gear</h3><div class="shopgrid rise">${item(UP+'2026/06/RNGC-POLO-26-1-324x324.webp','RNGC Golf Polo, The OG Classic','$60 - $65','Sizes S to 4XL',SHOP+'rngc-golf-polo-the-og-classic/')}</div>
    <h3 class="shophead">Memberships</h3><div class="shopgrid">${PLANS.map(p=>item(p.chapter==='National'?UP+'2026/06/ROSS-PREZ-NATIONAL-324x324.webp':LEAD_X[PRES[p.chapter]].img,p.name+' membership','$'+p.price+' per year',p.chapter==='National'?'For fans anywhere':'GHIN handicap, laser bag tag',p.url,'contain')).join('')}</div>
@@ -1406,7 +1417,7 @@ function photosHTML(){
 document.addEventListener('click',e=>{const z=e.target.closest('[data-zoom]');if(!z)return;openSheet(`<img class="zoomimg" src="${z.dataset.zoom}" alt=""><div class="acts" style="margin-top:10px"><button class="btn ghost" data-zoomclose>Close</button></div>`)});
 document.addEventListener('click',e=>{if(e.target.closest('[data-zoomclose]'))closeSheet()});
 function newsHTML(){
-  return pageHead('Club news')+(window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canLead()?'<div class="acts" style="margin:0 0 12px"><button class="btn" data-cnpost><i class="ph-bold ph-plus"></i> Post news</button></div>':'')+`<div class="stack newsgrid rise">${NEWS.map(n=>`<button class="card news" data-news="${n.id}"><img class="thumb" src="${n.img}" alt="" loading="lazy"><div><span class="pill">${n.tag}</span><h3 style="margin-top:6px">${esc(n.title)}</h3><div class="meta">${n.meta}</div></div></button>`).join('')}</div>`;
+  return pageHead('Club news')+(window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canLead()?'<div class="acts" style="margin:0 0 12px"><button class="btn" data-cnpost><i class="ph-bold ph-plus"></i> Post news</button></div>':'')+`<div class="stack newsgrid rise">${NEWS.map(n=>`<button class="card news" data-news="${n.id}"><img class="thumb" src="${n.img}" alt="" loading="lazy"><div><span class="pill">${esc(n.tag)}</span><h3 style="margin-top:6px">${esc(n.title)}</h3><div class="meta">${esc(n.meta)}</div></div></button>`).join('')}</div>`;
 }
 /* sponsors: own page with logos */
 function sponsorsHTML(){
@@ -1428,11 +1439,11 @@ document.addEventListener('click',e=>{if(e.target.closest('#sponBtn'))openSheet(
 function evCard(e){
   const f=fmtDate(e.date),past=isPast(e.date),going=!!S.rsvp[e.id];
   const live=!past&&window.RNGCLIVE&&RNGCLIVE.isLive(e.id);
-  return `<article class="card ev ${past?'past':''}" id="ev-${e.id}"><div class="date"><b>${f.d}</b><span>${f.m}</span></div>
+  return `<article class="card ev ${past?'past':''}" id="ev-${esc(e.id)}"><div class="date"><b>${f.d}</b><span>${f.m}</span></div>
    <div><h3>${esc(e.name)}</h3><div class="where">${esc(e.where)}</div><div class="note">${esc(e.note)}</div>${e.rules?`<details class="evrules" style="margin-top:8px"><summary style="cursor:pointer;font-weight:700">Event rules</summary><p class="meta" style="white-space:pre-line;margin-top:6px">${esc(e.rules)}</p></details>`:''}
    <div class="row">${live?'<span class="rl-pill"><i></i>LIVE NOW</span>':''}<span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${e.spots&&!past?`<span class="pill hot">${esc(e.spots)}</span>`:''}${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
-   <button class="btn small ghost ${going?'on':''}" data-rsvp="${e.id}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
-   ${e.url?`<a class="btn small" href="${e.url}" ${ext}>Register and pay</a>`:''}${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canInfo(e)?`<button class="btn small ghost" data-evinfo="${e.id}"><i class="ph-bold ph-gear-six"></i> Event setup</button>`:''}`}</div>
+   <button class="btn small ghost ${going?'on':''}" data-rsvp="${esc(e.id)}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
+   ${e.url?`<a class="btn small" href="${safeUrl(e.url)}" ${ext}>Register and pay</a>`:''}${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canInfo(e)?`<button class="btn small ghost" data-evinfo="${esc(e.id)}"><i class="ph-bold ph-gear-six"></i> Event setup</button>`:''}`}</div>
    ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canEdit(e.chapter)?'<a class="btn small ghost" href="scorecard/#/setup"><i class="ph-bold ph-pencil-simple"></i> Edit event</a>':''}${typeof passBtn==='function'?passBtn(e):''}</div>`:''}
    ${window.RNGCPHOTOS?RNGCPHOTOS.evRow(e):''}
    </div></article>`;
@@ -1452,7 +1463,7 @@ function renderEvents(){
        <p class="meta">${esc(rc.price)}. Includes 4 rounds, 3 polos, hat and prizes.</p>
        <button class="btn ${going?'ghost':''}" data-rsvp="rc27" aria-pressed="${going}" style="margin-top:12px">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> I\'m interested'}</button></div>
       <div class="card"><span class="pill">2026 - Past event</span><h3 class="cardh">Raider Cup 2026</h3><p class="meta">May 22-24 - St. George, UT</p><p class="meta">Copper Rock, Coral Canyon, Sand Hollow and Sky Mountain.</p></div>
-      <a class="btn ghost" href="${old.url}" ${ext}><i class="ph-bold ph-arrow-square-out"></i> Raider Cup page on the club site</a>
+      <a class="btn ghost" href="${safeUrl(old.url)}" ${ext}><i class="ph-bold ph-arrow-square-out"></i> Raider Cup page on the club site</a>
      </div></div>`;return}
   if(pg==='past'){const live=new Set([...up,...past].map(e=>stemOf(e.img)));
     v.innerHTML=subChips('events')+pageHead('Past events')+`<div class="evgrid rise">${past.length?past.map(evCard).join(''):'<div class="card empty"><i class="ph-bold ph-calendar-x"></i>No past events for this chapter yet.</div>'}</div>
@@ -1912,7 +1923,7 @@ const linkBtns=m=>{const w=m.signedUp?'reset':'setup';return `<button class="btn
 const RESET_HELP='<p class="help" style="margin:0">A reset link lets them pick a new password. It works once, for 21 days. You never see their password.</p>';
 async function getSetLink(id){if(!SETLINK[id])SETLINK[id]=await authCall('/admin/link',{id},authTok());return SETLINK[id]}
 let qrLib=null;
-function loadQR(){return qrLib||(qrLib=new Promise((ok,no)=>{const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';sc.onload=()=>ok(window.qrcode);sc.onerror=()=>{qrLib=null;no(new Error('Could not load the code. Check the signal and try again.'))};document.head.appendChild(sc)}))}
+function loadQR(){return qrLib||(qrLib=new Promise((ok,no)=>{const sc=document.createElement('script');sc.src='assets/vendor/qrcode-1.4.4.js';sc.onload=()=>ok(window.qrcode);sc.onerror=()=>{qrLib=null;no(new Error('Could not load the code. Check the signal and try again.'))};document.head.appendChild(sc)}))}
 async function showSetQR(id){try{const [r,qr]=await Promise.all([getSetLink(id),loadQR()]),first=r.name.split(' ')[0],code=r.link.split('setup=')[1],reset=hasSignIn(id);
   const q=qr(0,'M');q.addData(r.link);q.make();
   openSheet(`<h3 style="margin:0;text-align:center">${reset?'Scan to reset your password':'Scan to set up'}, ${esc(first)}</h3>
@@ -2795,12 +2806,12 @@ function evMgrHTML(){
    <div class="stack rise">${L.map(e=>{const f=fmtDate(e.date),past=isPast(e.date),st=e.status==='draft'?'Draft':e.status==='cancelled'?'Cancelled':past?'Done':'Published';
      return `<div class="card evrow"><div class="date"><b>${f.d}</b><span>${f.m}</span></div><div><b>${esc(e.name)}</b><small>${esc(e.chapter)} - ${esc(e.where)}</small>
       <div class="row"><span class="pill ${st==='Draft'||st==='Cancelled'?'out':''}">${st}</span><span class="pill">${esc(e.price)}</span>${past?'':`<span class="pill">${evRegs(e)}${e.cap?' / '+e.cap:''} signed up</span>`}</div></div>
-      ${can('events')?`<button class="btn small ghost" data-evedit="${e.id}">Edit</button>`:''}</div>`}).join('')}</div>${prevNote}`;
+      ${can('events')?`<button class="btn small ghost" data-evedit="${esc(e.id)}">Edit</button>`:''}</div>`}).join('')}</div>${prevNote}`;
 }
 function openEvEdit(id){
   const e=id==='new'?{id:'new',name:'',date:'',chapter:S.role==='chapter'?S.cfg.my.chapter:'SoCal',where:'',course:'',price:'',cap:'',url:'',note:'',status:'draft',fmt:'Scramble',scores:true}:EVENTS.find(x=>x.id===id);if(!e)return;
   const chs=['National',...PLANS.filter(p=>p.chapter!=='National').map(p=>p.chapter)];
-  openSheet(`<h3>${id==='new'?'New event':'Edit event'}</h3><form id="evForm" data-id="${e.id}">
+  openSheet(`<h3>${id==='new'?'New event':'Edit event'}</h3><form id="evForm" data-id="${esc(e.id)}">
    <label for="efN">Event name</label><input class="field" id="efN" required maxlength="70" value="${esc(e.name)}" placeholder="RNGC vs ...">
    <div class="two"><div><label for="efD">Date</label><input class="field" id="efD" type="date" required value="${esc(e.date)}"></div><div><label for="efC">Chapter</label><select class="field" id="efC">${chs.map(c=>`<option ${e.chapter===c?'selected':''}>${c}</option>`).join('')}</select></div></div>
    <label for="efCo">Course</label><select class="field" id="efCo"><option value="">Other, type it below</option>${COURSES.map(c=>`<option value="${c.id}" ${e.course===c.id?'selected':''}>${esc(c.name)}, ${esc(c.city)}</option>`).join('')}</select>
@@ -3127,7 +3138,8 @@ function applyMe(me){
   S.cfg.my.chapter=PLANS.some(p=>p.chapter===me.chapter)?me.chapter:'National';if(me.ghin)S.cfg.my.ghin=me.ghin;
   cfgSave();save()}
 function signedIn(res){setTok(res.token);MSG.items=null;MSG.perm=null;MSG.sent=null;DIR.items=null;applyMe(res.me);closeSignIn();renderAll();syncTop();toast('Signed in as '+res.me.name.split(' ')[0]);loadInbox(true)}
-async function signOutReal(){const t=authTok();setTok('');MSG.items=null;MSG.perm=null;MSG.sent=null;MSG.unread=0;DIR.items=null;S.authMe=null;S.realRole=null;CS.sent=null;CS.open={};if(t){try{await authCall('/auth/logout',{},t)}catch(e){}}}
+async function signOutReal(){const t=authTok();setTok('');try{['rngc-store-buyer','rngc-evinfo','rngc-shop-want'].forEach(k=>localStorage.removeItem(k))}catch(e){}   /* shared phones: drop saved buyer and event details on sign-out */
+  MSG.items=null;MSG.perm=null;MSG.sent=null;MSG.unread=0;DIR.items=null;S.authMe=null;S.realRole=null;CS.sent=null;CS.open={};if(t){try{await authCall('/auth/logout',{},t)}catch(e){}}}
 $('#siForm').addEventListener('submit',async e=>{e.preventDefault();const m=$('#siMsg'),b=e.target.querySelector('button[type=submit]');
   const email=$('#siEmail').value.trim(),password=$('#siPass').value;if(!email||!password){m.textContent='Enter your email and password.';return}
   b.disabled=true;m.textContent='Signing in...';

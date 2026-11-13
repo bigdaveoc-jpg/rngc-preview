@@ -946,7 +946,8 @@ function trLog(f){const all=G.rounds.slice().sort((a,b)=>b.date-a.date),rs=all.f
   trWire();document.querySelectorAll('[data-lf]').forEach(b=>b.onclick=()=>location.hash='#/log/'+b.dataset.lf);const lc=$('#lfCo');if(lc)lc.onchange=()=>{LOGCO=lc.value;trLog(f)}}
 
 /* ---------- live rounds: the scorekeeper shares, buddies follow on their own phones ---------- */
-const TR_RELAY=(()=>{try{const o=localStorage.getItem('rngc-relay');if(o)return o}catch(e){}return /^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'http://localhost:8795':'https://rngc-live.137.184.188.41.sslip.io'})();
+const TR_LOCAL=/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+const TR_RELAY=(()=>{try{const o=TR_LOCAL&&localStorage.getItem('rngc-relay');if(o)return o}catch(e){}return /^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'http://localhost:8795':'https://rngc-live.137.184.188.41.sslip.io'})();
 /* no relay host yet on the public preview: hide sharing there rather than show a button that fails */
 const TR_LIVE_OK=!/example\.invalid/.test(TR_RELAY);
 const trCode=()=>{const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<5;i++)c+=A[Math.floor(Math.random()*A.length)];return c};
@@ -975,7 +976,11 @@ function trShareLive(){if(!S.share){S.share=trCode();save()}trLivePush('open');
   const sh=$('#lvShare');sh.onclick=()=>trShare(sh,`Follow our round live, code ${S.share}: ${url}`)}
 /* buddy side: pull the round every few seconds */
 let trFollowV=0,trTouch=0;
-function trFollowTick(){fetch(TR_RELAY+'/live/'+LIVE.follow,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(!j||j.v<=trFollowV)return;trFollowV=j.v;
+/* relay data comes from anyone with a round code: strip anything that could become page code (security review, Nov 13) */
+function trClean(x,d){d=d||0;if(d>12)return null;if(typeof x==='string')return x.replace(/[<>"`]/g,'').replace(/'/g,'’').replace(/javascript:/gi,'');
+  if(typeof x==='number')return isFinite(x)?x:0;if(typeof x==='boolean'||x==null)return x;if(Array.isArray(x))return x.map(v=>trClean(v,d+1));
+  if(typeof x==='object'){const o={};for(const k of Object.keys(x)){if(k==='__proto__'||k==='constructor'||k==='prototype')continue;o[trClean(k,d+1)]=trClean(x[k],d+1)}return o}return null}
+function trFollowTick(){fetch(TR_RELAY+'/live/'+LIVE.follow,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{j=trClean(j);if(!j||j.v<=trFollowV)return;trFollowV=j.v;
   const d=trSwap({s:j.s,players:j.live.players},LIVE.followMe);
   Object.assign(S,d.s,{me:LIVE.followMe?'me':'__watch',team:'g'});LIVE.players=d.players;TEAMS[0].players=d.players;if(G.live[RID])G.live[RID].players=d.players;gsave();
   try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
@@ -985,7 +990,7 @@ function trFollowTick(){fetch(TR_RELAY+'/live/'+LIVE.follow,{cache:'no-store'}).
   route()}).catch(()=>{})}
 if(CASUAL&&LIVE.follow){trFollowTick();setInterval(trFollowTick,3000);document.addEventListener('pointerdown',()=>trTouch=Date.now(),true)}
 function trJoin(code){code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length!==5){alert('Live round codes are 5 letters and numbers.');return}
-  fetch(TR_RELAY+'/live/'+code,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.live){alert('No live round with code '+code+'. Check the code with your scorekeeper.');return}
+  fetch(TR_RELAY+'/live/'+code,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{j=trClean(j);if(!j||!j.live){alert('No live round with code '+code+'. Check the code with your scorekeeper.');return}
    const ps=j.live.players;
    $('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">Join ${esc(first(j.host||'your buddy'))}'s round</h2>
     <p class="muted" style="font-size:15px;margin-top:4px">${esc(j.course?j.course.name:'')} · ${ps.length} players · ${esc(first(j.host||''))} keeps score. Who are you?</p>
@@ -993,7 +998,7 @@ function trJoin(code){code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'
     <button class="linkbtn" data-joinme="" style="display:block;margin:12px auto 0">I'm just watching</button>`;
    $('#scrim').classList.add('on');$('#sheet').classList.add('on');
    document.querySelectorAll('[data-joinme]').forEach(b=>b.onclick=()=>{const pid=b.dataset.joinme,rid='f'+code.toLowerCase();
-     if(j.course){COURSES[j.live.course]=j.course;(G.courses||(G.courses={}))[j.live.course]=j.course}
+     if(j.course&&/^[\w-]{1,80}$/.test(j.live.course||'')&&!COURSES[j.live.course]){COURSES[j.live.course]=j.course;(G.courses||(G.courses={}))[j.live.course]=j.course}
      const d=trSwap({players:ps,s:j.s},pid);
      G.live[rid]={...j.live,id:rid,kind:'group',group:null,players:d.players,bench:[],follow:code,followMe:pid||null,host:j.host||''};gsave();
      try{localStorage.setItem('rngc-scorecard-v2:'+rid,JSON.stringify({...d.s,me:pid?'me':'__watch',team:'g'}))}catch(e){}

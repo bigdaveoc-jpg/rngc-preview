@@ -17,7 +17,7 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth
 const started=e=>!!e&&e.status!=='cancelled'&&e.date<=today();
 const day=t=>new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 const evDay=d=>new Date(d+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-const thumb=id=>api()+'/photos/img?id='+id+'&t=1',big=id=>api()+'/photos/img?id='+id;
+const thumb=id=>api()+'/photos/img?id='+encodeURIComponent(id)+'&t=1',big=id=>api()+'/photos/img?id='+encodeURIComponent(id);
 let ITEMS=[],LOADED=false,ALB=null,PICKS=[],LAST=0;
 
 const nameOf=ev=>{if(!ev)return 'Club album';const e=evs().find(x=>x.id===ev);return e?e.name:'Club event'};
@@ -28,7 +28,7 @@ const addable=()=>[{id:'',name:'Club album'}].concat(evs().filter(started).sort(
 function rerender(){try{if(typeof S==='undefined')return;if(typeof renderHome==='function'&&S.hpage==='photos')renderHome();if(typeof renderEvents==='function')renderEvents()}catch(e){}}
 function load(){LAST=Date.now();return call('/photos').then(j=>{ITEMS=j.items||[];LOADED=true;rerender()}).catch(()=>{})}
 
-const tile=p=>`<button class="zoomtile" data-ph="${p.id}" aria-label="Open photo${p.cap?': '+esc(p.cap):''}"><img src="${thumb(p.id)}" alt="${esc(p.cap||'Club photo')}" loading="lazy"></button>`;
+const tile=p=>`<button class="zoomtile" data-ph="${esc(p.id)}" aria-label="Open photo${p.cap?': '+esc(p.cap):''}"><img src="${thumb(p.id)}" alt="${esc(p.cap||'Club photo')}" loading="lazy"></button>`;
 const addBtn=ev=>tok()?`<button class="btn" data-phadd="${esc(ev||'')}"><i class="ph-bold ph-camera-plus"></i> Add photos</button>`
   :'<p class="meta">Sign in to add your photos.</p>';
 
@@ -53,7 +53,7 @@ function html(){if(Date.now()-LAST>60000)setTimeout(load,0);   /* fresh list whe
 
 /* on an Events card, from event day on */
 function evRow(e){if(!started(e))return '';const n=of(e.id).length;
-  return `<div class="row" style="margin-top:8px"><button class="btn small ghost" data-phev="${e.id}"><i class="ph-bold ph-images"></i> Photos${n?' ('+n+')':''}</button>${tok()?`<button class="btn small ghost" data-phadd="${e.id}"><i class="ph-bold ph-camera-plus"></i> Add photos</button>`:''}</div>`}
+  return `<div class="row" style="margin-top:8px"><button class="btn small ghost" data-phev="${esc(e.id)}"><i class="ph-bold ph-images"></i> Photos${n?' ('+n+')':''}</button>${tok()?`<button class="btn small ghost" data-phadd="${esc(e.id)}"><i class="ph-bold ph-camera-plus"></i> Add photos</button>`:''}</div>`}
 
 function openAlbum(ev){const e=evs().find(x=>x.id===ev),list=of(ev);
   openSheet(`<h3 style="margin:0">${esc(nameOf(ev))}</h3><p class="meta" style="margin:2px 0 10px">${e?evDay(e.date)+' · ':''}${list.length} photo${list.length===1?'':'s'}</p>

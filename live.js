@@ -9,7 +9,7 @@
    Preview before the day: add ?livepreview to the address (this browser only, until the tab closes). */
 (function(){
 const CLUB_API='https://rngc-club.137.184.188.41.sslip.io';
-const api=()=>{try{const o=localStorage.getItem('rngc-club-api');if(o)return o.replace(/\/$/,'')}catch(e){}return CLUB_API};
+const api=()=>{try{const o=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&localStorage.getItem('rngc-club-api');if(o)return o.replace(/\/$/,'')}catch(e){}return CLUB_API};
 const tok=()=>{try{return localStorage.getItem('rngc-auth-token')||''}catch(e){return ''}};
 const call=(path,body)=>fetch(api()+path,{method:body?'POST':'GET',cache:'no-store',
   headers:Object.assign(tok()?{Authorization:'Bearer '+tok()}:{},body?{'Content-Type':'application/json'}:{}),body:body?JSON.stringify(body):undefined})
