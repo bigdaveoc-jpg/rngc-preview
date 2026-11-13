@@ -15,7 +15,13 @@
 <meta property="og:url" content="https://bigdaveoc-jpg.github.io/rngc-preview/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="assets/logo/rngc-ball-static.svg">
-<link rel="apple-touch-icon" href="assets/original/cropped-footer-logo-270x270.png">
+<link rel="icon" type="image/png" sizes="48x48" href="assets/app/favicon-48.png">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="RNGC">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -369,6 +375,18 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
   .subnav button[aria-current="true"]::before{background:var(--silver)}
 }
 .gwrap,.fwrap2{display:block}
+/* get the app (Nov 12) */
+.appnudge{display:grid;grid-template-columns:52px 1fr 32px;column-gap:12px;row-gap:8px;align-items:center;padding:12px 10px 12px 14px;margin-top:14px}
+.appnudge img{grid-row:1/3;border-radius:12px;display:block}
+.appnudge b{display:block;font-weight:700;font-size:16px}
+.appnudge span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.appnudge .btn{grid-column:2;justify-self:start}
+.appnudge .x{grid-column:3;grid-row:1;width:32px;height:32px;display:grid;place-items:center;color:var(--muted);border-radius:50%}
+.appsteps{margin:4px 0 14px;padding:0;list-style:none;display:grid;gap:10px;counter-reset:st}
+.appsteps li{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;font-size:16px;line-height:1.4;counter-increment:st}
+.appsteps li::before{content:counter(st);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--silver);color:var(--on-silver);font-weight:700}
+.appsteps i{font-size:19px;vertical-align:-3px}
+.apphead{display:flex;gap:12px;align-items:center;margin-bottom:10px}.apphead img{border-radius:14px}
 /* phone and tablet: no big map on top; tap a game and a small map opens under it, zoomed on the stadium (David, Nov 12) */
 @media (max-width:999px){.gwrap .gside{display:none}.gwrap .gside.inline{display:block;margin:-2px 0 8px}.gwrap .gside.inline .mapbox{height:230px;border-radius:14px}.gwrap .gside.inline .gsel{margin-top:8px}}
 @media (min-width:1000px){
@@ -1293,7 +1311,7 @@ function renderHome(){
   else if(pg==='invite')v.innerHTML=subChips('home')+inviteHTML();
   else if(pg==='about')v.innerHTML=subChips('home')+aboutHTML();
   else if(pg==='photos')v.innerHTML=subChips('home')+photosHTML();
-  else v.innerHTML=subChips('home')+setupNudge()+overviewHTML();
+  else v.innerHTML=subChips('home')+setupNudge()+appNudge()+overviewHTML();
   syncTop();
 }
 const cdNum=d=>{const n=daysTo(d);return n<=0?'<span class="now">Today</span>':`${n}<small>${n===1?'day':'days'}</small>`};
@@ -2331,12 +2349,45 @@ $('#fab').addEventListener('click',()=>ensureName(()=>{
     S.threads.unshift({id:'u'+Date.now(),board:$('#pb').value,title:$('#pt').value.trim(),body:$('#pbody').value.trim(),author:S.name,when:'now',likes:0,replies:[]});
     save();closeSheet();S.board='All';renderForum();toast('Posted')});
 }));
+/* ---------- put the club app on your phone (David, Nov 12): Android and computer Chrome get the install box; iPhone gets Share > Add to Home Screen steps ---------- */
+let installEvt=null;
+const isStandalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}};
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const isPhoneUA=()=>isIOS()||/android/i.test(navigator.userAgent);
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;if(S.tab==='home'&&(S.hpage||'overview')==='overview')renderHome()});
+addEventListener('appinstalled',()=>{installEvt=null;try{localStorage.setItem('rngc-app-installed','1')}catch(e){}toast('The club app is on your home screen.');if(S.tab==='home')renderHome()});
+if('serviceWorker' in navigator&&location.protocol==='https:')addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+function appNudge(){
+  if(isStandalone())return '';
+  let off=false;try{off=localStorage.getItem('rngc-app-nudge-off')==='1'||localStorage.getItem('rngc-app-installed')==='1'}catch(e){}
+  if(off||!(isPhoneUA()||installEvt))return '';
+  return `<div class="card appnudge rise"><img src="assets/app/icon-192.png" alt="" width="52" height="52"><div><b>Put the club app on your phone</b><span>One tap from your home screen. Free, no app store.</span></div><button class="x" type="button" data-appnudge-off aria-label="Hide this"><i class="ph-bold ph-x"></i></button><button class="btn small" type="button" data-getapp><i class="ph-bold ph-download-simple"></i> Get the app</button></div>`;
+}
+function openGetApp(){
+  if(isStandalone()){toast('You already have the club app open.');return}
+  if(installEvt){const e=installEvt;installEvt=null;e.prompt();e.userChoice.then(c=>{if(c.outcome==='accepted')toast('Adding the club app to your phone.')}).catch(()=>{});return}
+  const ua=navigator.userAgent,inApp=/FBAN|FBAV|Instagram|Line\/|Snapchat|TikTok/i.test(ua);
+  const steps=inApp?[`Tap the <i class="ph-bold ph-dots-three"></i> menu at the top`,`Tap <b>Open in browser</b>${isIOS()?' or <b>Open in Safari</b>':''}`,`Tap <b>Get the app</b> again from there`]
+    :isIOS()?[`Tap the <b>Share</b> button <i class="ph-bold ph-export"></i>. In Safari it's at the bottom; in Chrome it's at the top right.`,`Scroll down and tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>`,`Tap <b>Add</b>. The RNGC icon shows up on your home screen.`]
+    :/android/i.test(ua)?[`Tap the menu <i class="ph-bold ph-dots-three-vertical"></i> at the top right of the browser`,`Tap <b>Install app</b> or <b>Add to Home screen</b>`,`Tap <b>Install</b>. The RNGC icon shows up with your apps.`]
+    :[`Open <b>raidernationgolfclub.com</b> on your phone`,`iPhone: tap Share <i class="ph-bold ph-export"></i>, then <b>Add to Home Screen</b>`,`Android: tap the menu <i class="ph-bold ph-dots-three-vertical"></i>, then <b>Install app</b>`];
+  openSheet(`<div class="apphead"><img src="assets/app/icon-192.png" alt="" width="56" height="56"><div><h3 style="margin:0">Get the club app</h3><p class="help" style="margin:2px 0 0">Free. No app store, no download wait.</p></div></div>
+   <ol class="appsteps">${steps.map(s=>`<li><span>${s}</span></li>`).join('')}</ol>
+   ${navigator.share?'<button class="btn ghost full" type="button" id="shareApp"><i class="ph-bold ph-share-network"></i> Send it to a friend</button>':''}
+   <button class="btn ghost full" type="button" id="closeApp">Close</button>`);
+  $('#closeApp').addEventListener('click',closeSheet);
+  const sh=$('#shareApp');if(sh)sh.addEventListener('click',()=>navigator.share({title:'Raider Nation Golf Club',text:'Our club app: events, golf scorecard and Raiders games.',url:'https://raidernationgolfclub.com/'}).catch(()=>{}));
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-getapp]')){e.preventDefault();openGetApp();return}
+  if(e.target.closest('[data-appnudge-off]')){try{localStorage.setItem('rngc-app-nudge-off','1')}catch(x){}const n=e.target.closest('.appnudge');if(n)n.remove();toast('Hidden. Get the app any time from Profile.')}});
 $('#btnProfile').addEventListener('click',()=>{
   const going=EVENTS.filter(e=>S.rsvp[e.id]);
   openSheet(`<h3>${S.name?esc(S.name):'Your profile'}</h3>
    <p class="help" style="margin:0 0 10px">${S.name?'Your RSVPs and posts are saved on this device.':'Post once and your name saves here.'}</p>
    <div class="stack">${going.length?going.map(e=>`<div class="card"><b style="font-family:var(--display);font-size:20px;text-transform:uppercase">${esc(e.name)}</b><div class="meta">${fmtDate(e.date).dow}, ${fmtDate(e.date).m} ${fmtDate(e.date).d} - ${esc(e.where)}</div></div>`).join(''):'<div class="empty"><i class="ph-bold ph-calendar-blank"></i>No RSVPs yet.</div>'}</div>
    ${S.member?'<button class="btn full" data-sub="home|invite"><i class="ph-bold ph-paper-plane-tilt"></i> Invite a friend</button>':''}
+   ${isStandalone()?'':'<button class="btn full" data-getapp><i class="ph-bold ph-device-mobile"></i> Put the app on your phone</button>'}
    <button class="btn full" data-sub="settings|account"><i class="ph-bold ph-gear-six"></i> Settings</button>
    ${S.member?'<button class="btn ghost full" id="vis2">My map visibility</button><button class="btn ghost full" id="so2">Sign out</button>':'<button class="btn full" id="si2">Sign in</button>'}
    <button class="btn ghost full" id="closeP">Close</button>`);
