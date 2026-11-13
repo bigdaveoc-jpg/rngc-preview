@@ -929,6 +929,18 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .ovgrid>.guestcard{grid-column:1/-1}
 @media (min-width:760px){.ovgrid{grid-template-columns:1fr 1fr}.ovgrid>.card:last-child:nth-child(odd){grid-column:1/-1}}
 .ovgrid>.rbcard{height:100%}
+/* 2026-11-12 countdown cards say what they are: golf event (green) vs Raiders game (silver) */
+.card.nx{position:relative;overflow:hidden;border-left:4px solid var(--nxc);row-gap:8px}
+.card.nx-golf{--nxc:#62c184;background:linear-gradient(135deg,rgba(98,193,132,.18),rgba(98,193,132,.04) 55%,rgba(255,255,255,.03))}
+.card.nx-game{--nxc:var(--silver);background:linear-gradient(135deg,rgba(213,218,225,.16),rgba(213,218,225,.03) 55%,rgba(255,255,255,.03))}
+.nx .nxhead{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:800;font-size:18px;letter-spacing:.08em;text-transform:uppercase;color:var(--nxc)}
+.nx .nxhead i{font-size:26px}
+.nx .nxhead span{color:var(--muted);font-weight:600;letter-spacing:.04em}
+.nx .cd{color:var(--nxc)}
+.nx .cd .now{font-size:26px}
+.nx .nxbg{position:absolute;right:-14px;bottom:-26px;font-size:130px;color:var(--nxc);opacity:.07;pointer-events:none}
+.nx>*:not(.nxbg){position:relative}
+.chips+.csnudge{margin-top:18px}
 @media (min-width:760px){.newsgrid{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}#v-events .evgrid{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}}
 .zoomimg{display:block;width:100%;max-height:72vh;object-fit:contain;border-radius:12px}
 .stack,.shopgrid,.sponsgrid{gap:12px}
@@ -1280,6 +1292,7 @@ function renderHome(){
   else v.innerHTML=subChips('home')+setupNudge()+overviewHTML();
   syncTop();
 }
+const cdNum=d=>{const n=daysTo(d);return n<=0?'<span class="now">Today</span>':`${n}<small>${n===1?'day':'days'}</small>`};
 function overviewHTML(){
   const next=EVENTS.filter(e=>!e.status&&!isPast(e.date)&&inChapter(e.chapter)).sort((a,b)=>a.date<b.date?-1:1)[0];
   const f=next&&fmtDate(next.date),ng=GAMES.find(g=>!g.res);
@@ -1297,8 +1310,8 @@ function overviewHTML(){
      <div class="acts"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button><button class="btn ghost" data-sub="events|up">See events</button></div>`}
    </div></div>
    <div class="ovgrid">${S.member&&window.bucksCard?bucksCard():''}${S.member?inviteCard():guestCard()}
-   ${next?`<div class="card next"><div class="cd">${daysTo(next.date)}<small>days</small></div><div><span class="pill">Next event - ${esc(next.chapter)}</span><h3 style="margin-top:6px">${esc(next.name)}</h3><div class="meta">${f.dow}, ${f.m} ${f.d} - ${esc(next.where)}</div></div><a class="btn small" href="${next.url}" ${ext}>Register</a></div>`:''}
-   ${ng?`<div class="card next"><div class="cd">${daysTo(ng.date)}<small>days</small></div><div><span class="pill">Raiders - Week ${ng.wk}</span><h3 style="margin-top:6px">${esc(gTitle(ng))}</h3><div class="meta">${gWhen(ng)}</div></div><button class="btn small ghost" data-sub="games|sched">Schedule</button></div>`:''}</div>
+   ${next?`<div class="card next nx nx-golf"><i class="ph-fill ph-golf nxbg" aria-hidden="true"></i><div class="nxhead"><i class="ph-fill ph-golf"></i> Golf event<span>&middot; ${esc(next.chapter)}</span></div><div class="cd">${cdNum(next.date)}</div><div><h3>${esc(next.name)}</h3><div class="meta">${f.dow}, ${f.m} ${f.d} - ${esc(next.where)}</div></div><a class="btn small" href="${next.url}" ${ext}>Register</a></div>`:''}
+   ${ng?`<div class="card next nx nx-game"><i class="ph-fill ph-football nxbg" aria-hidden="true"></i><div class="nxhead"><i class="ph-fill ph-football"></i> Raiders game<span>&middot; Week ${ng.wk}</span></div><div class="cd">${cdNum(ng.date)}</div><div><h3>${esc(gTitle(ng))}</h3><div class="meta">${gWhen(ng)}</div></div><button class="btn small ghost" data-sub="games|sched">Schedule</button></div>`:''}</div>
    </div>
    <div class="tiles">${S.member?(canInvite()?tile('photos','images','Club photos','Golf days with the club'):tile('invite','paper-plane-tilt','Invite a friend','Your own link, your chapter')):tile('join','identification-badge','Join a chapter','Sign up, the chapter president gets it')}${tile('leaders','users','Club leaders','Bios and how to reach them')}${tile('shop','shopping-bag','Club shop','Polos, memberships, event entries')}${tile('news','newspaper','Club news','Events, membership, interviews')}${tile('sponsors','handshake','Sponsors','The brands behind the club')}</div>
    <div class="foot"><span>Follow the club</span>
