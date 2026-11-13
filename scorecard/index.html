@@ -365,22 +365,18 @@ const FORMATS={
  stableford:{name:'Stableford',team:false,entry:'players',points:true,allow:95,desc:'Points off your score each hole: bogey 1, par 2, birdie 3, eagle 4. Most points wins.'}
 };
 const EVENTS={
- nov14:{id:'nov14',name:'RNGC vs The 12th Man',date:'Sat Nov 14, 2026',start:'8:00 am shotgun',course:'chimera',clubs:['RNGC','12th Man'],
+ nov14:{id:'nov14',name:'RNGC vs The 12th Man',date:'Sat Nov 14, 2026',start:'8:00 am shotgun',course:'chimera',clubs:[],
   cfg:{format:'scramble',tee:'serpent',hcp:false,allow:100,ctp:[4,6,12,17],ld:11,skins:'off',buyin:20}}
 };
 const FIRST=['Marcus','Dana','Omar','Lena','Jason','Rick','Tony','Chris','Ken','Rob','Vince','Mike','Sam','Dre','Hector','Andre','Gabe','Tina','Luis','Derek','Pat','Nina','Carlos','Bobby','Steph','Ray','Manny','Kyle','Jo','Ross','Eddie','Trey','Ben','Cole','Jamal','Will','Grant','Nate','Paul','Ivan','Drew','Russ','Matt','Seth','Ty','Kurt','Lou','Gus','Owen','Zach','Brent','Dale','Hank','Joel','Aaron','Leo','Mo','Rex','Abe','Cal','Don','Earl','Fred','Glen','Hal','Jim','Lars','Ned','Oscar','Pete','Quinn','Reggie'];
 const LAST='ABCDEFGHJKLMNOPRSTVW';
 function rng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const hash=s=>{let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0};
-/* demo field: 18 foursomes, one per starting hole (shotgun). 10 RNGC, 8 12th Man. Same every load. hcp = handicap. */
-let TEAMS=(()=>{const r=rng(hash('nov14-field')),used=new Set(),out=[];
-  const pick=()=>{let f,k=0;do{f=FIRST[Math.floor(r()*FIRST.length)];k++}while(used.has(f)&&k<400);used.add(f);return f+' '+LAST[Math.floor(r()*LAST.length)]+'.'};
-  for(let i=0;i<18;i++){const club=i%9<5?'RNGC':'12th Man';const players=[0,1,2,3].map(k=>({id:'t'+(i+1)+'p'+k,name:pick(),hcp:Math.round(3+r()*22)}));
-    out.push({id:'t'+(i+1),club,start:i+1,players,name:players[0].name.split(' ')[0]+"'s team",str:(r()-.5)*.24,pace:.85+r()*.3,off:r()})}
-  return out})();
+/* REAL field for Sat Nov 14 (Ross's sheet 2026-11-12): two groups per starting hole, A and B. Names only, no phones or pay. */
+const REAL_FIELD=true;
+let TEAMS=[{"id":"g1A","club":"","start":1,"players":[{"id":"g1A_0","name":"Neal Allen","hcp":0},{"id":"g1A_1","name":"Jason Garrison","hcp":0},{"id":"g1A_2","name":"Derrick Stewart","hcp":0},{"id":"g1A_3","name":"Andy Trader","hcp":0}],"name":"Group 1A","str":0,"pace":1,"off":0},{"id":"g1B","club":"","start":1,"players":[{"id":"g1B_0","name":"Ross Ricks","hcp":0},{"id":"g1B_1","name":"Arabian Prince","hcp":0},{"id":"g1B_2","name":"Mike Casper","hcp":0},{"id":"g1B_3","name":"J. Arthur Martinez","hcp":0}],"name":"Group 1B","str":0,"pace":1,"off":0},{"id":"g18A","club":"","start":18,"players":[{"id":"g18A_0","name":"Ron Maurice","hcp":0},{"id":"g18A_1","name":"Brad Parpan","hcp":0},{"id":"g18A_2","name":"Michael Marshall","hcp":0},{"id":"g18A_3","name":"Ray Balough","hcp":0}],"name":"Group 18A","str":0,"pace":1,"off":0},{"id":"g18B","club":"","start":18,"players":[{"id":"g18B_0","name":"Jay Schroeder","hcp":0},{"id":"g18B_1","name":"Shannon Bray","hcp":0},{"id":"g18B_2","name":"Jeremy Johnson","hcp":0},{"id":"g18B_3","name":"Jeremy Johnson Jr.","hcp":0}],"name":"Group 18B","str":0,"pace":1,"off":0},{"id":"g17A","club":"","start":17,"players":[{"id":"g17A_0","name":"Eric Trett","hcp":0},{"id":"g17A_1","name":"Mike Resler","hcp":0},{"id":"g17A_2","name":"Will Teng","hcp":0},{"id":"g17A_3","name":"Ronnie Marx","hcp":0}],"name":"Group 17A","str":0,"pace":1,"off":0},{"id":"g17B","club":"","start":17,"players":[{"id":"g17B_0","name":"Robert Gonzalez","hcp":0},{"id":"g17B_1","name":"Paul Miranda","hcp":0},{"id":"g17B_2","name":"Mike Tappero","hcp":0},{"id":"g17B_3","name":"Mike Peterson","hcp":0}],"name":"Group 17B","str":0,"pace":1,"off":0},{"id":"g16A","club":"","start":16,"players":[{"id":"g16A_0","name":"Cortland Meinart","hcp":0},{"id":"g16A_1","name":"Chris Overstreet","hcp":0},{"id":"g16A_2","name":"Steve Frommel","hcp":0},{"id":"g16A_3","name":"James Parker","hcp":0}],"name":"Group 16A","str":0,"pace":1,"off":0},{"id":"g16B","club":"","start":16,"players":[{"id":"g16B_0","name":"Rick Castillo","hcp":0},{"id":"g16B_1","name":"Percy Tolentino","hcp":0},{"id":"g16B_2","name":"Ramiro Rios","hcp":0},{"id":"g16B_3","name":"Emilio Rios","hcp":0}],"name":"Group 16B","str":0,"pace":1,"off":0},{"id":"g15A","club":"","start":15,"players":[{"id":"g15A_0","name":"Brendon Fail","hcp":0}],"name":"Group 15A","str":0,"pace":1,"off":0}];
 /* registered but not in a group yet (demo) - the scorekeeper can pull them in */
-let SPARE=[{id:'x1',name:'Tyler B.',hcp:14,club:'RNGC'},{id:'x2',name:'Marco V.',hcp:9,club:'RNGC'},{id:'x3',name:'Deon W.',hcp:21,club:'12th Man'},
- {id:'x4',name:'Kristen L.',hcp:18,club:'RNGC'},{id:'x5',name:'Shawn P.',hcp:6,club:'12th Man'},{id:'x6',name:'Rudy G.',hcp:25,club:'RNGC'}];
+let SPARE=[];
 
 /* ===================== TRACKER CONTEXT ===================== */
 /* One page runs three kinds of golf: your own rounds, rounds with your group, and club events.
@@ -399,7 +395,7 @@ if(CASUAL){EVENTS[RID]={id:RID,name:LIVE.name,date:LIVE.dateTxt,start:'',course:
 const HOME=CASUAL?'#/':'#/event';
 
 /* ===================== STATE ===================== */
-const KEY='rngc-scorecard-v2'+(CASUAL?':'+RID:'');
+const KEY=CASUAL?'rngc-scorecard-v2:'+RID:'rngc-scorecard-ev3';
 const DEF=()=>({event:CASUAL?RID:'nov14',team:CASUAL?'g':null,cfg:{},scores:{},submitted:{},simStart:0,sun:false,hole:null,
   roster:{},keeper:CASUAL?{g:'me'}:{},me:CASUAL?'me':null,hcp:{},guests:[],ctp:{},ld:{},bets:{},st:{}});
 const S=Object.assign(DEF(),load());
@@ -467,7 +463,7 @@ function simHole(team,who,hole,hcp){const r=rng(hash(team.id+who+hole+F().entry)
     if(x<.36+s)return par-1;if(x<.95)return par;return par+1}
   const ch=courseHcp(hcp),rec=strokesOn(Math.max(0,ch),hole);const pB=Math.max(.02,.13-hcp*.005),pP=Math.max(.12,.56-hcp*.017);
   if(x<pB)return par-1;if(x<pB+pP)return par;if(x<pB+pP+.3)return par+1;if(x<pB+pP+.3+.18+rec*.05)return par+2;return par+3}
-function simThru(team){const el=(Date.now()-S.simStart)/SIM_MS();return Math.max(0,Math.min(18,Math.floor(el*team.pace+team.off)))}
+function simThru(team){if(REAL_FIELD&&!CASUAL)return 0;const el=(Date.now()-S.simStart)/SIM_MS();return Math.max(0,Math.min(18,Math.floor(el*team.pace+team.off)))}
 
 /* raw hole scores for one group: {who:{hole:score}} */
 function rawScores(t){const f=F(),mine=t.id===S.team,ord=order(t.start),ps=players(t),n=mine?18:simThru(t);
@@ -557,7 +553,7 @@ function start(){const e=EV(),c=CO(),t=TEE(),cfg=CFG(),me=myTeam();$('#app').cla
    ${ADMIN||CASUAL?`<a class="btn ghost block" style="margin-top:12px" href="#/setup"><i class="ph-bold ph-sliders-horizontal"></i> ${CASUAL?'Change the game':'Set up the day · admin'}</a>`:''}</section>
   ${!pick?teamCard(me):`
   <div class="lbl">Which group are you in?</div>
-  <div class="teams">${TEAMS.map(x=>`<button class="card team" data-team="${x.id}" aria-pressed="${x.id===S.team}"><div class="hn"><small>START</small>${x.start}</div><div class="nm"><b>${esc(players(x).map(p=>p.name).join(', '))}</b></div>${tagFor(x.club)}</button>`).join('')}</div>
+  <div class="teams">${TEAMS.map(x=>`<button class="card team" data-team="${x.id}" aria-pressed="${x.id===S.team}"><div class="hn"><small>START</small>${REAL_FIELD&&!CASUAL?esc(x.name.replace('Group ','')):x.start}</div><div class="nm"><b>${esc(players(x).map(p=>p.name).join(', '))}</b></div>${tagFor(x.club)}</button>`).join('')}</div>
   <p class="note"><i class="ph-bold ph-info"></i><span>One person per group keeps score, like the paper card. Every tap saves right away, so a dead spot on the course loses nothing.</span></p>`}
   <div class="stick">${me&&!pick?`<button class="btn block" id="go">${Object.keys(myScores()).length?'Keep scoring':'Start on hole '+me.start} <i class="ph-bold ph-arrow-right"></i></button>`:'<button class="btn block" disabled>Pick your group</button>'}</div>`;
   document.querySelectorAll('[data-team]').forEach(b=>b.onclick=()=>{const t=TEAMS.find(x=>x.id===b.dataset.team);S.team=t.id;if(!ids(t).includes(S.me))S.me=keeperOf(t);save();buzz();if(location.hash===HOME||(CASUAL&&location.hash===''))start();else location.hash=HOME});
@@ -568,7 +564,7 @@ function start(){const e=EV(),c=CO(),t=TEE(),cfg=CFG(),me=myTeam();$('#app').cla
 function teamCard(t){const k=keeperOf(t);
   return `<div class="lbl">Your group · starts on hole ${t.start}</div>
   <section class="card tcard">${players(t).map(p=>`<div class="trow"><div><b>${esc(p.name)}${p.id===k?' <span class="tag rngc">Scorekeeper</span>':''}${p.id===S.me?' <span class="tag">This phone</span>':''}</b>
-    <span class="muted">Index ${idx(p.id)} · course ${courseHcp(idx(p.id))}${CFG().hcp&&F().entry!=='team'?' · plays '+playHcp(idx(p.id)):''}</span></div></div>`).join('')}
+    ${REAL_FIELD&&!CASUAL&&!CFG().hcp?'':`<span class="muted">Index ${idx(p.id)} · course ${courseHcp(idx(p.id))}${CFG().hcp&&F().entry!=='team'?' · plays '+playHcp(idx(p.id)):''}</span>`}</div></div>`).join('')}
    ${F().entry==='team'&&CFG().hcp?`<p class="note" style="margin-top:6px"><i class="ph-bold ph-users-three"></i><span>Team handicap ${teamHcp(t)}</span></p>`:''}
    <div class="row2"><a class="btn ghost" href="#/team"><i class="ph-bold ph-users"></i> Team and handicaps</a><a class="btn ghost" href="#/bets"><i class="ph-bold ph-coins"></i> Side bets</a></div>
    ${CASUAL?'':'<button class="linkbtn" id="changeGroup">Not your group? Pick another</button>'}</section>`}
@@ -981,7 +977,7 @@ function board(tv){const e=EV(),c=CO(),list=field(),f=ranked(list.slice()),fm=F(
     :bar('Live leaderboard',e.name+' · '+fm.name,`<span class="live" style="margin-right:4px"><i></i>LIVE</span><a class="ib" href="#/tv" aria-label="Big screen view"><i class="ph-bold ph-television-simple"></i></a>${S.team?`<a class="ib" href="#/hole/${S.hole||order(myTeam().start)[0]}" aria-label="Back to my card"><i class="ph-bold ph-pencil-simple-line"></i></a>`:`<a class="ib" href="${HOME}" aria-label="Scorecard"><i class="ph-bold ph-pencil-simple-line"></i></a>`}`))+
    (!tv&&hasCt?`<div class="seg" role="group" aria-label="Board view" style="margin-bottom:10px"><button data-bt2="lb" aria-pressed="${BTAB==='lb'}">Leaderboard</button><button data-bt2="ct" aria-pressed="${BTAB==='ct'}">Contests</button></div>`:'')+
    (!tv&&BTAB==='ct'&&hasCt?contests():`<div class="${tv?'':'boardgrid'}">${tv?side:`<div class="side">${side}</div>`}<div>${lbHtml}</div></div>`)+
-   (CASUAL?'':`<p class="note" style="margin:14px 0 24px"><i class="ph-bold ph-info"></i><span>Preview: the other groups are demo scores that move every 30 seconds. Your own card updates this board as you tap, on this phone.${tv?'':' <button id="resetDemo" style="text-decoration:underline;color:var(--silver)">Restart demo</button>'}</span></p>`);
+   (CASUAL?'':`<p class="note" style="margin:14px 0 24px"><i class="ph-bold ph-info"></i><span>Real groups for Saturday. Scores from your group show here as you tap.</span></p>`);
   lastPos={};f.forEach(x=>lastPos[x.id]=x.pos);
   document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openCard(b.dataset.open));
   document.querySelectorAll('[data-net]').forEach(b=>b.onclick=()=>{VIEWNET=b.dataset.net==='1';board(tv)});
