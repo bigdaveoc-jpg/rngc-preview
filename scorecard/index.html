@@ -481,6 +481,8 @@ function setSc(who,h,v){const m=myScores();(m[who]||(m[who]={}))[h]=v;if(S.au)de
    Scores always save on the phone first, so no signal on the course loses nothing: they send when signal comes back. */
 const SC_API=(()=>{try{const o=localStorage.getItem('rngc-club-api');if(o)return o}catch(e){}return 'https://rngc-club.137.184.188.41.sslip.io'})();
 const SYNC=REAL_FIELD&&!CASUAL;
+/* each group names itself (David, Nov 13 2026); the name rides on the group's card from the club server */
+function gNames(){if(CASUAL)return;TEAMS.forEach(t=>{if(t.dflt==null)t.dflt=t.name;const c=REMOTE&&REMOTE[t.id];t.name=(c&&c.name)||t.dflt})}
 let REMOTE={},REMOTE_AT=0,SC_ERR=0,SC_SENT={},SC_SIDE={},scT=null,SC_BUSY=false;
 function scAuth(){const h={'Content-Type':'application/json'},b={ev:S.event};
   try{const t=localStorage.getItem('rngc-auth-token');if(t)h.Authorization='Bearer '+t;const gp=JSON.parse(localStorage.getItem('rngc-guest-pass')||'null');if(gp&&gp.token)b.pass=gp.token}catch(e){}
@@ -508,7 +510,7 @@ function scFillMine(){if(!S.team||SC_BUSY||scT&&scDiff().n)return;const c=REMOTE
   for(const w in rs)for(const h in rs[w]){SC_SENT[w+':'+h]=rs[w][h];if(!(m[w]&&m[w][h]!=null)){(m[w]||(m[w]={}))[h]=rs[w][h];ch=true}}
   for(const[kind,unit]of[['ctp','ft'],['ld','yd']]){const seen=SC_SIDE[kind]||(SC_SIDE[kind]={});for(const h in c[kind]||{}){const v=c[kind][h];seen[h]=JSON.stringify({pid:v.pid,[unit]:v[unit]});if(!(S[kind]&&S[kind][h])){(S[kind]||(S[kind]={}))[h]=v;ch=true}}}
   if(ch){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}
-function scPull(){if(!SYNC)return;scCall('/event/board').then(j=>{const na=j.admin&&!ADMIN;if(j.admin)ADMIN=true;const fch=applyField(j.field||null);REMOTE=j.cards||{};REMOTE_AT=Date.now();SC_ERR=0;scFillMine();scSend();const h=location.hash;if((fch&&!/^#\/(hole|setup|field|card|team|bets)/.test(h))||(na&&!/^#\/hole/.test(h))||(!ADMIN&&/^#\/(setup|field)/.test(h)))route()}).catch(()=>{SC_ERR++;if(!ADMIN&&/^#\/(setup|field)/.test(location.hash))route()})}
+function scPull(){if(!SYNC)return;scCall('/event/board').then(j=>{const na=j.admin&&!ADMIN;if(j.admin)ADMIN=true;const fch=applyField(j.field||null);REMOTE=j.cards||{};gNames();REMOTE_AT=Date.now();SC_ERR=0;scFillMine();scSend();const h=location.hash;if((fch&&!/^#\/(hole|setup|field|card|team|bets)/.test(h))||(na&&!/^#\/hole/.test(h))||(!ADMIN&&/^#\/(setup|field)/.test(h)))route()}).catch(()=>{SC_ERR++;if(!ADMIN&&/^#\/(setup|field)/.test(location.hash))route()})}
 const remoteOf=t=>REMOTE[t.id]||{};
 function scNote(){if(!SYNC)return'';if(SC_ERR&&!REMOTE_AT)return' Can\'t reach the club server right now. Your scores are safe on this phone and send when signal is back.';
   if(SC_ERR)return' No signal right now. Showing scores from '+Math.round((Date.now()-REMOTE_AT)/60000)+' min ago; yours send when signal is back.';
@@ -619,7 +621,7 @@ function start(){const e=EV(),c=CO(),t=TEE(),cfg=CFG(),me=myTeam();$('#app').cla
    ${ADMIN||CASUAL?`<a class="btn ghost block" style="margin-top:12px" href="#/setup"><i class="ph-bold ph-sliders-horizontal"></i> ${CASUAL?'Change the game':'Edit the event · groups, game, start'}</a>`:''}</section>
   ${!pick?teamCard(me):`
   <div class="lbl">Which group are you in?</div>
-  <div class="teams">${TEAMS.map(x=>`<button class="card team" data-team="${x.id}" aria-pressed="${x.id===S.team}"><div class="hn"><small>START</small>${REAL_FIELD&&!CASUAL?esc(x.name.replace('Group ','')):x.start}</div><div class="nm"><b>${esc(players(x).map(p=>p.name).join(', '))}</b></div>${tagFor(x.club)}</button>`).join('')}</div>
+  <div class="teams">${TEAMS.map(x=>`<button class="card team" data-team="${x.id}" aria-pressed="${x.id===S.team}"><div class="hn"><small>START</small>${REAL_FIELD&&!CASUAL?esc(/^g\d/.test(x.id)?x.id.slice(1):x.name.replace('Group ','')):x.start}</div><div class="nm"><b>${x.dflt&&x.name!==x.dflt?esc(x.name)+': ':''}${esc(players(x).map(p=>p.name).join(', '))}</b></div>${tagFor(x.club)}</button>`).join('')}</div>
   <p class="note"><i class="ph-bold ph-info"></i><span>One person per group keeps score, like the paper card. Every tap saves right away, so a dead spot on the course loses nothing.</span></p>`}
   <div class="stick">${me&&!pick?`<button class="btn block" id="go">${Object.keys(myScores()).length?'Keep scoring':'Start on hole '+me.start} <i class="ph-bold ph-arrow-right"></i></button>`:'<button class="btn block" disabled>Pick your group</button>'}</div>`;
   document.querySelectorAll('[data-team]').forEach(b=>b.onclick=()=>{const t=TEAMS.find(x=>x.id===b.dataset.team);S.team=t.id;if(!ids(t).includes(S.me))S.me=keeperOf(t);save();buzz();if(location.hash===HOME||(CASUAL&&location.hash===''))start();else location.hash=HOME});
@@ -639,7 +641,10 @@ function wireTeamCard(){const c=$('#changeGroup');if(c)c.onclick=()=>{location.h
 /* ---------- team page: scorekeeper, players, handicaps ---------- */
 function teamPage(){const t=myTeam(),k=keeperOf(t),ps=players(t);$('#app').className='wrap';
   const edit=canTeam();
+  const dn=t.dflt||t.name;
   $('#app').innerHTML=bar('Team and handicaps',t.name+' · hole '+t.start,boardBtn())+`
+  ${SYNC&&/^g\d/.test(t.id)?`<div class="lbl">Group name</div><div style="display:flex;gap:8px"><input class="field" id="gName" maxlength="24" value="${esc(t.name!==dn?t.name:'')}" placeholder="${esc(dn)}" autocomplete="off" aria-label="Group name"><button class="btn" id="gNameSave">Save</button></div>
+  <p class="muted" id="gNameMsg" role="status" style="margin:6px 0 0;font-size:13px">Everyone sees it on the leaderboard. Leave it blank for ${esc(dn)}.</p>`:''}
   <div class="lbl">Who's holding this phone?</div>
   <div class="chips2" role="group" aria-label="This phone belongs to">${ps.map(p=>`<button class="chip2" data-me="${p.id}" aria-pressed="${p.id===S.me}">${esc(first(p.name))}</button>`).join('')}</div>
   <p class="note"><i class="ph-bold ph-info"></i><span>Preview only. In the real app each player signs in, so this is automatic.</span></p>
@@ -657,7 +662,11 @@ function teamPage(){const t=myTeam(),k=keeperOf(t),ps=players(t);$('#app').class
   document.querySelectorAll('[data-keeper]').forEach(b=>b.onclick=()=>{if(confirm('Make '+first(PEOPLE()[b.dataset.keeper].name)+' the scorekeeper? Only they can enter scores after this.')){S.keeper[t.id]=b.dataset.keeper;save();teamPage()}});
   document.querySelectorAll('[data-hcp]').forEach(inp=>inp.onchange=()=>{let v=parseFloat(inp.value);if(isNaN(v))return;v=Math.max(-5,Math.min(54,Math.round(v*10)/10));S.hcp[inp.dataset.hcp]=v;save();teamPage()});
   document.querySelectorAll('[data-swap]').forEach(b=>b.onclick=()=>openPicker(b.dataset.swap));
-  const ap=$('#addP');if(ap)ap.onclick=()=>openPicker(null)}
+  const ap=$('#addP');if(ap)ap.onclick=()=>openPicker(null);
+  const gs=$('#gNameSave');if(gs)gs.onclick=()=>{const n=$('#gName').value.trim(),m=$('#gNameMsg');gs.disabled=true;m.textContent='Saving...';
+    scCall('/event/name',{team:t.id,name:n}).then(j=>{const c=REMOTE[t.id]||(REMOTE[t.id]={});if(j.name)c.name=j.name;else delete c.name;gNames();teamPage();
+      const m2=$('#gNameMsg');if(m2)m2.textContent=j.name?'Saved. Everyone sees '+j.name+' on the leaderboard.':'Back to '+dn+'.'})
+     .catch(st=>{gs.disabled=false;m.textContent=st===401?'Sign in, or open your guest pass link, to name the group.':st===400?'Use 2 to 24 letters.':st===429?'Too many changes. Try again later.':'No signal. Try again in a minute.'})}}
 
 function openPicker(out){const t=myTeam(),P=PEOPLE();
   const pool=[...SPARE,...S.guests].filter(p=>!teamOf(p.id));
