@@ -316,7 +316,6 @@ function trMe(){const my=trMine(),full=my.filter(x=>x.p.holes===18&&x.p.par>=66)
   const cd=$('#clearDemo');if(cd)cd.onclick=()=>{if(confirm('Clear the sample rounds and the sample group? Your own rounds stay.')){G.rounds=G.rounds.filter(r=>!r.demo);G.groups=G.groups.filter(g=>!g.demo);gsave();trMe()}}}
 
 /* plain verdicts: an average of rounds normally runs about 3 over the handicap, a single round anywhere from -2 to +6 */
-const trForm=g=>g<=1?'You are playing better than your handicap right now.':g<=4?'You are right where your handicap says.':`That is a rough patch, about ${Math.round(g-3)} strokes over your normal.`;
 const trDayVs=g=>g<0?'better than':g<=4?'a normal day for':'a tough day for';
 /* one line: which number to trust */
 function trPlay(){const d=trMine().filter(x=>x.p.diff!=null&&!x.r.est&&x.p.holes===18&&x.p.par>=66).slice(0,5);return{n:d.length,rows:d,v:d.length?Math.round(trAvg(d.map(x=>x.p.diff))*10)/10:null}}
@@ -325,8 +324,6 @@ function trHcLine(est){const h=G.me.hcp,g=h!=null&&est.v!=null?Math.round((est.v
 function trVs(sc,par,si,ph){let up=0,t=0;for(let h=1;h<=18;h++){if(sc[h]==null)continue;const n=sc[h]-trSt(ph,si[h-1]);up+=n<par[h-1]?1:n>par[h-1]?-1:0;t++}return{up,t}}
 const trVsTxt=up=>up===0?'tied':Math.abs(up)+(up>0?' up':' down');
 const trVsEnd=up=>up>0?`You beat the course, ${up} up`:up<0?`The course won, ${-up} down`:`You tied the course`;
-function trPlayWhy(){const pl=trPlay();return `<section class="card whyest">Each round gets a rating: your score with blow-up holes capped at double bogey plus your strokes, minus the course rating, times 113 over the slope. Recent form is the average of your last ${pl.n}. It moves every round; your handicap counts your best 8 of 20, so it moves slowly and sits about 3 lower.
-   <table class="stbl" style="margin-top:6px"><thead><tr><th>Round</th><th>Score</th><th>Course</th><th>Rating</th></tr></thead><tbody>${pl.rows.map(x=>`<tr><td>${trDay(x.r.date)}<br><span class="muted" style="font-size:12px">${esc(x.r.cname)}</span></td><td>${x.p.gross}</td><td>${x.r.rating}/${x.r.slope}</td><td><b>${x.p.diff}</b></td></tr>`).join('')}</tbody></table></section>`}
 /* why the estimate is what it is, in plain words, with the rounds that count */
 function trWhy(est){const rows=trMine().filter(x=>x.p.diff!=null&&!x.r.est&&x.p.par>=(x.p.holes===9?33:66)).slice(0,20),used=rows.slice().sort((a,b)=>a.p.diff-b.p.diff).slice(0,est.k);
   const gap=G.me.hcp!=null?Math.round((est.v-G.me.hcp)*10)/10:null;
@@ -843,7 +840,6 @@ window.addEventListener('hashchange',()=>{if(!/^#\/hole\//.test(location.hash))t
 function holeTop(n){const m=CO().maps&&CO().maps[n];if(!m)return holeInfoBtn(n);const c=TEE().y[n-1]||m.yd,h=Math.round(m.depth/2),nt=holeNotes(n);
   return `<section class="card htop" aria-live="polite"><button class="hmapb" id="hinfo" aria-label="Hole ${n} map and details"><span class="mini">${holeSvg(n,false)}</span><span>${nt?esc(nt.sum):'Hole map'}<em>Map <i class="ph-bold ph-caret-right"></i></em></span></button><div class="yn"><div><b id="yF">${c-h}</b><span>Front</span></div><div><b id="yC">${c}</b><span>Center</span></div><div><b id="yB">${c+h}</b><span>Back</span></div></div>
    <div class="ysub"><span id="ySrc">${G.gps!==false?'Finding you...':'Yards to the green, from the tee'}</span>${G.gps!==false?'':'<button class="linkbtn" id="yGo" style="margin:0;min-height:36px"><i class="ph-bold ph-crosshair"></i> Live yards</button>'}</div></section>`}
-const holeYards=n=>'';
 function holeYardsWire(n){trGpsStop();const m=CO().maps&&CO().maps[n];if(!m)return;
   const go=$('#yGo');if(go)go.onclick=()=>{G.gps=true;gsave();hole(n)};
   if(G.gps===false||!('geolocation'in navigator))return;
@@ -930,7 +926,6 @@ function trLog(f){const all=G.rounds.slice().sort((a,b)=>b.date-a.date),rs=all.f
   const dows=[0,0,0,0,0,0,0];for(const r of rs)dows[new Date(r.date).getDay()]++;
   const fav=rs.length?new Date(2026,0,4+dows.indexOf(Math.max(...dows))).toLocaleDateString(undefined,{weekday:'long'}):'-';
   const byMonth={};for(const r of rs){const d=new Date(r.date),k=d.toLocaleDateString(undefined,{month:'long',year:'numeric'});(byMonth[k]||(byMonth[k]=[])).push(r)}
-  const withWho=r=>r.kind==='event'?esc(r.team||'Club event'):r.players.filter(p=>p.id!=='me').map(p=>esc(first(p.name))).join(', ')||'Solo';
   const score=r=>{const p=meP(r);return p?`${p.gross}<small>${toPar(p.gross-p.par)}${p.holes<18?' · '+p.holes+' holes':''}</small>`:`${esc(r.result||'-')}<small>${r.pos?'place '+r.pos:'event'}</small>`};
   $('#app').innerHTML=trBar('Play log',G.me.name+' · every round, where and when',trBack('#/me'))+`
    ${new Set(all.map(r=>r.kind)).size>1||f!=='all'?`<div class="seg" role="group" aria-label="Which rounds">${[['all','All'],['solo','Solo'],['group','Group'],['event','Events']].map(([k,l])=>`<button data-lf="${k}" aria-pressed="${k===f}">${l}</button>`).join('')}</div>`:''}

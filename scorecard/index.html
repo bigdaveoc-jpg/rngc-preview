@@ -9,8 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="../assets/icons/icons.css?v=1">
 <style>
 :root{
   --bg:#0a0b0d;--panel:#16191e;--panel-2:#1d2127;--line:rgba(255,255,255,.11);--text:#eef0f3;--muted:#c9ced6;
@@ -294,8 +293,7 @@ select.field{appearance:none;-webkit-appearance:none}
 .ib.sm{width:36px;height:36px;font-size:16px}
 #sunBtn{width:auto;padding:0 10px;gap:6px;display:flex;align-items:center;font-size:18px}#sunBtn span{font-size:13px;font-weight:700}
 .moretees{margin-top:6px}.moretees summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700;color:var(--muted);font-size:14px}
-.allpar{width:100%;min-height:48px;margin-top:8px;font-weight:700}
-.strip10{grid-template-columns:repeat(9,1fr) 1.3fr;margin-bottom:8px}button.hpick{background:none;border:0;padding:0;color:inherit;text-align:left;cursor:pointer;min-height:44px}button.hpick small i{font-size:12px;vertical-align:1px}.strip.hgrid{grid-template-columns:repeat(6,1fr);gap:8px;margin-top:0}.strip.hgrid button{height:56px;font-size:15px;color:var(--text)}.strip.hgrid button b{font-size:13px}.flip9{height:40px;border-radius:6px;border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--text)}
+.allpar{width:100%;min-height:48px;margin-top:8px;font-weight:700}button.hpick{background:none;border:0;padding:0;color:inherit;text-align:left;cursor:pointer;min-height:44px}button.hpick small i{font-size:12px;vertical-align:1px}.strip.hgrid{grid-template-columns:repeat(6,1fr);gap:8px;margin-top:0}.strip.hgrid button{height:56px;font-size:15px;color:var(--text)}.strip.hgrid button b{font-size:13px}
 .bline{font-size:14px;margin-top:4px}
 .prow3{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:10px;background:var(--panel-2)}
 .prow3 b{display:block}
@@ -374,8 +372,6 @@ const EVENTS={
  nov14:{id:'nov14',name:'RNGC vs The 12th Man',date:'Sat Nov 14, 2026',start:'8:00 am shotgun',course:'chimera',clubs:[],
   cfg:{format:'scramble',tee:'serpent',hcp:false,allow:100,ctp:[4,6,12,17],ld:11,skins:'off',buyin:20}}
 };
-const FIRST=['Marcus','Dana','Omar','Lena','Jason','Rick','Tony','Chris','Ken','Rob','Vince','Mike','Sam','Dre','Hector','Andre','Gabe','Tina','Luis','Derek','Pat','Nina','Carlos','Bobby','Steph','Ray','Manny','Kyle','Jo','Ross','Eddie','Trey','Ben','Cole','Jamal','Will','Grant','Nate','Paul','Ivan','Drew','Russ','Matt','Seth','Ty','Kurt','Lou','Gus','Owen','Zach','Brent','Dale','Hank','Joel','Aaron','Leo','Mo','Rex','Abe','Cal','Don','Earl','Fred','Glen','Hal','Jim','Lars','Ned','Oscar','Pete','Quinn','Reggie'];
-const LAST='ABCDEFGHJKLMNOPRSTVW';
 function rng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const hash=s=>{let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0};
 /* REAL field for Sat Nov 14 (Ross's sheet 2026-11-12): two groups per starting hole, A and B. Names only, no phones or pay. */

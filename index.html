@@ -26,8 +26,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=Big+Shoulders+Display:wght@800;900&display=swap" rel="stylesheet">
 <script src="maps-key.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="assets/icons/icons.css?v=1">
 <style>
 :root{
   --bg:#0a0b0d; --bg-2:#111317; --panel:#16191e; --panel-2:#1d2127;
@@ -71,9 +70,6 @@ select option{background:#16191e;color:#eef0f3}
 .chsel{appearance:none;-webkit-appearance:none;width:100%;min-height:44px;padding:0 44px 0 16px;border-radius:var(--pill);background:var(--panel);border:1px solid var(--line);color:var(--text);font-weight:600;font-size:15px;cursor:pointer}
 .chsel:hover{border-color:var(--silver-2)}
 .selwrap i{position:absolute;right:16px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--silver-2)}
-
-.banner{margin:12px 16px 0;padding:10px 12px;border-radius:var(--r-sm);background:var(--panel);border:1px dashed var(--line);font-size:13px;color:var(--muted);display:flex;gap:10px;align-items:flex-start}
-.banner i{font-size:18px;color:var(--silver-2);margin-top:1px}
 
 /* views */
 .views{flex:1;position:relative;min-height:0}
@@ -143,10 +139,6 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 
 /* sponsors / shop */
 .spons{display:flex;flex-wrap:wrap;gap:10px}
-.spon{padding:12px 16px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.04em;text-transform:uppercase;color:var(--silver)}
-.shopcard{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center;padding:12px}
-.shopcard img{width:96px;height:96px;object-fit:cover;border-radius:12px;background:#000}
-.shopcard b{font-family:var(--display);font-size:22px;text-transform:uppercase;line-height:1.05;display:block}
 .foot{margin-top:34px;padding-top:20px;border-top:1px solid var(--line);display:flex;gap:14px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:14px}
 .foot a{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--silver)}
 
@@ -167,7 +159,6 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 
 /* map + courses */
 .mapbox{height:250px;border-radius:var(--r);border:1px solid var(--line);margin-top:16px;background:var(--bg-2);overflow:hidden}
-.leaflet-container{background:#0d0f12;font-family:var(--body)}
 .pin{width:30px;height:30px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:var(--silver);border:2px solid #0a0b0d;display:grid;place-items:center;box-shadow:0 4px 14px rgba(0,0,0,.6)}
 .pin i{transform:rotate(45deg);color:#0a0b0d;font-size:14px}
 .pin.sel{background:#fff;transform:rotate(-45deg) scale(1.25)}
@@ -192,8 +183,6 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .gate h3{font-family:var(--display);font-size:30px;text-transform:uppercase;margin:8px 0}
 .gate p{color:var(--muted);max-width:46ch;margin:0 auto 16px}
 .gate .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.mtools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
-.mtools select{min-height:44px;padding:0 12px;border-radius:var(--pill);background:var(--panel);border:1px solid var(--line);flex:1;min-width:170px}
 .msgrow{display:block;width:100%;text-align:left;padding:12px 14px}
 .msgrow b{font-family:var(--display);font-size:19px;text-transform:uppercase;letter-spacing:.02em;line-height:1.1;display:block}
 .msgrow small{color:var(--muted);font-size:13px;display:block}
@@ -208,8 +197,6 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .mem.alumcard,.card.hofcard{border-color:var(--silver-2)}
 .av.hofav{background:none;border:0;width:44px;height:44px}
 .card.hofcard{background:linear-gradient(135deg,rgba(213,218,225,.16),rgba(213,218,225,.03) 60%),var(--panel)}
-.hofyear{font-family:var(--display);font-weight:800;font-size:30px;color:var(--silver);line-height:1}
-.hofhead{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
 .mem{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;padding:12px 14px;transition:transform .18s var(--ease),border-color .2s}
 .mem:active{transform:scale(.985)}
 .mem b{font-family:var(--display);font-size:20px;text-transform:uppercase;letter-spacing:.02em;line-height:1.05;display:block}
@@ -225,19 +212,9 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .radio:has(input:checked){border-color:var(--silver-2);background:var(--panel)}
 
 /* demo tour */
-.coach{position:absolute;left:12px;right:12px;bottom:80px;z-index:35;background:#e9ecf1;color:#0a0b0d;border-radius:18px;padding:14px 16px;box-shadow:0 18px 50px rgba(0,0,0,.65);display:none}
-.coach.on{display:block;animation:rise .4s var(--ease) both}
-.coach .st{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a525d}
-.coach h4{font-family:var(--display);font-size:25px;text-transform:uppercase;line-height:1.02;margin:3px 0 4px;font-weight:800}
-.coach p{font-size:15px;color:#2b3139}
-.coach .cr{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
-.coach .btn{min-height:44px;background:#0a0b0d;color:#f1f3f6}
-.coach .btn.ghost{background:transparent;color:#0a0b0d;border:1px solid #9aa2ae}
-.coach .x{margin-left:auto;min-height:44px;padding:0 6px;color:#4a525d;font-weight:600;font-size:14px}
+
 .pill.demo{background:var(--silver);color:var(--on-silver);border-color:var(--silver)}
-.spot{position:relative;animation:spot 1.5s ease-in-out infinite}
 @keyframes spot{0%,100%{box-shadow:0 0 0 0 rgba(213,218,225,.0)}50%{box-shadow:0 0 0 5px rgba(213,218,225,.55)}}
-@media (min-width:1000px){.coach{left:auto;right:56px;bottom:40px;width:390px}}
 /* tickets */
 .seg{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
 .seg .chip{display:inline-flex;align-items:center;gap:6px;min-height:44px}
@@ -363,7 +340,7 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
   .app{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
   .views{position:sticky;top:0;height:100dvh;align-self:start}
   .tabs{align-content:start}
-  .app .fab,.app .toast,.app .coach,.app .sheet{position:fixed}
+  .app .fab,.app .toast,.app .sheet{position:fixed}
   .subnav{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s var(--ease)}
   .subnav > div{overflow:hidden;display:grid;gap:2px}
   .subnav.open{grid-template-rows:1fr}
@@ -472,7 +449,7 @@ details.fold .fb{padding:4px 14px 12px}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 /* wrappers */
-.split,.cwrap,.fwrap,.mwrap,.homegrid{display:block}
+.split,.fwrap{display:block}
 .fdetail{display:none}
 body.thread-open .flist{display:none}
 body.thread-open .fdetail{display:block}
@@ -482,7 +459,6 @@ body.thread-open .fab{display:none!important}
 @media (min-width:700px) and (max-width:999px){
   .view{padding:0 32px 32px}
   .top{padding-left:32px;padding-right:32px}
-  .banner{margin-left:32px;margin-right:32px}
 }
 
 /* ===== COMPUTER LAYOUT ===== */
@@ -491,7 +467,6 @@ body.thread-open .fab{display:none!important}
   .app::before{content:"";grid-column:1;grid-row:4;background:var(--bg-2);border-right:1px solid var(--line)}
   .top{grid-column:1;grid-row:1;background:var(--bg-2);border-bottom:0;border-right:1px solid var(--line);padding:26px 22px 12px}
   .tabs{grid-column:1;grid-row:2;grid-template-columns:1fr;background:var(--bg-2);backdrop-filter:none;border-top:0;border-right:1px solid var(--line);padding:8px 14px 14px;gap:4px}
-  .banner{grid-column:1;grid-row:3;margin:0;border-radius:0;border:0;border-right:1px solid var(--line);border-top:1px solid var(--line);background:var(--bg-2);padding:16px 22px}
   .views{grid-column:2;grid-row:1/5}
   .logo{width:48px;height:56px}
   .top{position:relative}
@@ -515,15 +490,8 @@ body.thread-open .fab{display:none!important}
   .hero .in{padding:10px 40px 34px}
   .hero h1{font-size:76px}
   .hero p{font-size:18px}
-  .homegrid{display:grid;grid-template-columns:1fr 1fr;gap:20px 36px;align-items:start}
-  .homegrid .full{grid-column:1/-1}
   .split{display:grid;grid-template-columns:1.1fr 1fr;gap:32px;align-items:start}
   #v-events .evgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:14px;align-items:start}
-  .cwrap{display:grid;grid-template-columns:400px 1fr;gap:32px;align-items:start}
-  .cwrap .mapbox{grid-column:2;grid-row:1/6;position:sticky;top:16px;height:calc(100dvh - 110px);margin-top:20px}
-  .mwrap{display:grid;grid-template-columns:1fr 400px;gap:28px;align-items:start}
-  .mwrap .mapbox{grid-column:1;grid-row:1/4;position:sticky;top:16px;height:calc(100dvh - 190px);margin-top:14px}
-  .mwrap > *:not(.mapbox){grid-column:2}
   .fwrap{display:grid;grid-template-columns:430px 1fr;gap:28px;align-items:start}
   .fdetail{display:block}
   body.thread-open .flist{display:block}
@@ -564,8 +532,6 @@ body.thread-open .fab{display:none!important}
 .si-full{width:100%;margin-top:12px}
 .si-msg{min-height:0;margin:10px 0 0;color:var(--silver-2);font-size:14px;line-height:1.4}
 .si-msg:empty{margin:0}
-.si-or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin:16px 0 4px}
-.si-or::before,.si-or::after{content:"";flex:1;height:1px;background:var(--line)}
 .si-links{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:10px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.si-mark{animation:none}}
 
@@ -664,17 +630,11 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .gkey .k.k-star{background:#0a0b0d;border-color:#d5dae1}.gkey .k.k-ball{background:#d5dae1;border-color:#0a0b0d}.gkey .k.k-mem{background:#0a0b0d;border-color:#fff}.gkey .k.k-flag{background:#d5dae1;border-radius:2px}
 .gsel{margin-top:10px}
 .gsel .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.gsel.empty2{color:var(--muted);font-size:14px;display:flex;gap:8px;align-items:center}
 .memchips{display:flex;flex-wrap:wrap;gap:6px}
 .memchip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border:1px solid var(--line);border-radius:var(--pill);font-size:13px;font-weight:600}
 .memchip i{font-style:normal;width:24px;height:24px;border-radius:50%;background:#0a0b0d;border:2px solid #fff;display:grid;place-items:center;font-size:10px;font-weight:800}
 .memchip small{color:var(--muted);font-weight:500}
 .linkbtn{color:var(--silver);text-decoration:underline;font-weight:600}
-.mxfoot{display:flex;gap:16px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
-.mxfoot span{display:inline-flex;align-items:center;gap:6px}
-.mxfoot b{font-family:var(--display);font-size:18px;color:var(--text);line-height:1}
-.mxfoot i{font-size:16px;color:var(--silver-2)}
-.mxfoot .me b,.mxfoot .me i{color:#fff}
 .memchip.you{border-color:var(--silver-2)}
 .tixgame{margin:4px 0 4px}
 .tixopts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
@@ -685,8 +645,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .tixopt small{color:var(--muted);font-size:12px}
 @media (min-width:700px){.tixopts{grid-template-columns:repeat(4,1fr)}}
 /* ---------- settings ---------- */
-.rolebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r-sm);font-size:13px;color:var(--muted)}
-.rolebar > span{display:inline-flex;gap:6px;align-items:center;font-weight:600}
+
 .seg2{display:flex;gap:6px;flex-wrap:wrap}
 .seg2 .chip{min-height:32px;font-size:13px}
 .seg2 .chip[aria-pressed="true"],.chips .chip[aria-pressed="true"][data-uf]{background:var(--silver);color:var(--on-silver);border-color:var(--silver)}
@@ -707,11 +666,6 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .sw:checked::after{transform:translateX(18px);background:#0a0b0d}
 .sw:disabled{opacity:.5;cursor:default}
 .btn.danger{color:#f0b4b4;border-color:#7a3b3b}
-.userrow{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;text-align:left;padding:10px 14px;transition:border-color .2s}
-.userrow:hover{border-color:var(--silver-2)}
-.userrow b{font-family:var(--display);font-size:19px;text-transform:uppercase;display:block;line-height:1.05}
-.userrow small{color:var(--muted);font-size:12px}
-.userrow .ur{display:grid;gap:4px;justify-items:end}
 .pill.role-admin{background:var(--silver);color:var(--on-silver);border-color:var(--silver)}
 .pill.role-chapter{border-color:var(--silver);color:var(--text)}
 .pill.role-sub{border-style:dashed;color:var(--text)}
@@ -744,14 +698,10 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 /* phone and tablet: the profile button lives in the bottom bar, filling the 6th spot (David, Nov 12) */
 @media (min-width:1000px){.tab-phone-only{display:none}}
 @media (max-width:999px){#btnProfile{display:none}}
-.hero2c .mxfoot{margin-top:12px}
 .hero2 .acts{margin-top:12px}
 
 /* guest vs member view switch, invite link */
-.viewbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:8px 12px;border:1px dashed var(--line);border-radius:var(--r-sm);font-size:13px;color:var(--muted)}
-.viewbar > span{display:inline-flex;gap:6px;align-items:center;font-weight:600}
-.viewbar .seg2{display:flex;gap:6px}
-.viewbar small{flex-basis:100%;font-size:12px}
+
 .perks{display:grid;gap:10px;margin:12px 0 0;padding:0;list-style:none}
 .perks li{display:flex;gap:10px;align-items:flex-start;font-size:15px}
 .perks li i{font-size:20px;color:var(--silver);flex:none;margin-top:1px}
@@ -791,18 +741,9 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
   .chsel{width:auto;max-width:132px;min-height:36px;padding:0 28px 0 12px;font-size:13px;text-overflow:ellipsis}
   #chapterChips .selwrap i{right:10px;font-size:12px}
   .top .iconbtn{order:3;width:38px;height:38px;font-size:18px}
-  .banner{margin:8px 16px 0;padding:0;border:0;background:none;font-size:12px;line-height:1.35;gap:6px}
-  .banner i{font-size:14px;margin-top:0}
   /* fewer boxes: cards sit on a soft fill with no outline */
-  .card,.hero,.mapbox,.date,.spon{border-color:transparent}
+  .card,.hero,.mapbox,.date{border-color:transparent}
   .card{border-radius:16px}
-  .viewbar,.rolebar{border:0;padding:0;margin:14px 0 2px;gap:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
-  .viewbar::-webkit-scrollbar,.rolebar::-webkit-scrollbar{display:none}
-  .viewbar > span,.rolebar > span{flex:none;font-size:12px}
-  .viewbar small{display:none}
-  .rolebar .seg2,.viewbar .seg2{flex-wrap:nowrap}
-  .rolebar .chip,.viewbar .chip{flex:none}
-  .gsel.empty2{background:none;padding:4px 2px}
   /* type: a bit smaller headlines, roomier body */
   h2.sec{font-size:24px;margin:22px 0 6px}
   .sub{font-size:14px;line-height:1.5}
@@ -835,16 +776,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 }
 
 /* view switch + preview-as: plain text tabs with an underline, no bubbles */
-.viewbar,.rolebar{display:flex;align-items:flex-end;flex-wrap:nowrap;gap:20px;margin:14px 0 6px;padding:0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;overflow-x:auto;scrollbar-width:none}
-.viewbar::-webkit-scrollbar,.rolebar::-webkit-scrollbar{display:none}
-.viewbar > span,.rolebar > span{flex:none;padding-bottom:11px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.viewbar > span i,.rolebar > span i{display:none}
-.viewbar small{display:none}
-.viewbar .seg2,.rolebar .seg2{display:flex;flex-wrap:nowrap;gap:20px}
-.viewbar .seg2 .chip,.rolebar .seg2 .chip{flex:none;position:relative;min-height:0;padding:0 1px 10px;border:0;border-radius:0;background:none;color:var(--muted);font-size:15px;font-weight:600}
-.viewbar .seg2 .chip[aria-pressed="true"],.rolebar .seg2 .chip[aria-pressed="true"]{background:none;color:var(--text)}
-.viewbar .seg2 .chip[aria-pressed="true"]::after,.rolebar .seg2 .chip[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:var(--silver)}
-.viewbar .seg2 .chip:active,.rolebar .seg2 .chip:active{transform:none;opacity:.7}
+
 
 /* ===== NO BUBBLES (David, 2026-11-09): filters are underline tab rows, buttons and tags have soft square corners ===== */
 .chips:has(> .chip),.seg,.seg2{display:flex;flex-wrap:nowrap;align-items:flex-end;gap:22px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);padding-top:14px}
@@ -857,9 +789,6 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .chips .chip.chip[aria-pressed="true"]::after,.seg .chip.chip[aria-pressed="true"]::after,.seg2 .chip.chip[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:2px 2px 0 0;background:var(--silver)}
 .seg2 .chip.chip[aria-pressed="true"]::after{bottom:0;height:2px}
 .chips .chip.chip:active,.seg .chip.chip:active,.seg2 .chip.chip:active{transform:none;opacity:.7}
-.viewbar .seg2,.rolebar .seg2{gap:20px}
-.viewbar .seg2 .chip.chip,.rolebar .seg2 .chip.chip{font-family:var(--body);font-size:15px;font-weight:600;letter-spacing:0;text-transform:none;padding-bottom:10px}
-.viewbar .seg2 .chip.chip[aria-pressed="true"]::after,.rolebar .seg2 .chip.chip[aria-pressed="true"]::after{bottom:-1px}
 /* buttons: soft square corners in place of round pills */
 .btn,.btn.small,.chsel,.topjoin{border-radius:10px}
 .fab{border-radius:14px}
@@ -868,13 +797,11 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .card .pill{background:#232830}
 
 /* ===== GLASS (Apple materials): header and tab bar float over the content; tighter spacing ===== */
-.footnote{display:none}
+
 @media (max-width:999px){
   .top{position:absolute;top:0;left:0;right:0;z-index:35;border-bottom:0;background:rgba(10,11,13,.58);-webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);box-shadow:0 1px 0 rgba(255,255,255,.06),0 10px 24px -18px rgba(0,0,0,.9)}
   .tabs{position:absolute;left:0;right:0;bottom:0;border-top:0;background:rgba(10,11,13,.6);-webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);box-shadow:0 -1px 0 rgba(255,255,255,.07)}
   .view{padding-top:calc(66px + env(safe-area-inset-top));padding-bottom:calc(92px + env(safe-area-inset-bottom))}
-  #banner.banner{display:none!important}
-  .footnote{display:block;flex-basis:100%;font-size:12px;color:var(--muted)}
   .fab{bottom:calc(84px + env(safe-area-inset-bottom))}
   .sheet{background:rgba(22,25,30,.86);-webkit-backdrop-filter:blur(26px) saturate(160%);backdrop-filter:blur(26px) saturate(160%);border-top:1px solid rgba(255,255,255,.08)}
   .scrim{background:rgba(0,0,0,.5)}
@@ -916,12 +843,11 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 }
 @media (min-width:1000px){
   .app::before{background:rgba(14,16,20,.5);-webkit-backdrop-filter:blur(24px) saturate(150%);backdrop-filter:blur(24px) saturate(150%);border-right:1px solid var(--glass-edge)}
-  .top,.tabs,.banner{background:rgba(14,16,20,.5);-webkit-backdrop-filter:blur(24px) saturate(150%);backdrop-filter:blur(24px) saturate(150%);border-right:1px solid var(--glass-edge)}
-  .banner{border-top-color:var(--glass-edge)}
+  .top,.tabs{background:rgba(14,16,20,.5);-webkit-backdrop-filter:blur(24px) saturate(150%);backdrop-filter:blur(24px) saturate(150%);border-right:1px solid var(--glass-edge)}
 }
 @media (prefers-reduced-transparency:reduce){.card{background:var(--panel);-webkit-backdrop-filter:none;backdrop-filter:none}}
 
-@media (max-width:999px){body.golffull .top,body.golffull .tabs,body.golffull .banner{display:none}body.golffull #v-golf.view{padding:0!important;inset:0}}
+@media (max-width:999px){body.golffull .top,body.golffull .tabs{display:none}body.golffull #v-golf.view{padding:0!important;inset:0}}
 /* faint club shield behind the glass (club's own mark, not the NFL Raiders logo) */
 .views::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:url("assets/logo/rngc-ball-static.svg") center 58%/min(78%,560px) auto no-repeat;opacity:.06;filter:grayscale(1) brightness(1.4)}
 .views > .view{z-index:1}
@@ -966,7 +892,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .chips+.csnudge{margin-top:18px}
 @media (min-width:760px){.newsgrid{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}#v-events .evgrid{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}}
 .zoomimg{display:block;width:100%;max-height:72vh;object-fit:contain;border-radius:12px}
-.stack,.shopgrid,.sponsgrid{gap:12px}
+.stack,.shopgrid{gap:12px}
 .iconbtn,.tab{border-radius:10px}
 .ev .date{border-radius:4px}
 .card,.hero,.mapbox,.sheet{border-radius:16px}
@@ -1041,6 +967,8 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 <div class="signin" id="inviteIn" hidden role="dialog" aria-modal="true" aria-labelledby="invTitle"><div class="si-box" id="inviteBox"></div></div>
 <div class="intro" id="intro" role="img" aria-label="Raider Nation Golf Club"><img alt=""><button class="skip" type="button">Skip intro</button></div>
 <script>
+/* the animated logo, downloaded once and shared by the intro and the header logo */
+var rngcLogoP=null;function rngcLogo(){return rngcLogoP||(rngcLogoP=fetch('assets/logo/rngc-ball-animated.svg').then(function(r){return r.ok?r.text():null}).catch(function(){return null}))}
 (function(){
   var el=document.getElementById('intro'),img=el.querySelector('img'),seen=null;
   /* in the browser: once a day, not every time the app opens on the course.
@@ -1066,7 +994,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
         img.onload=start;img.onerror=done;
         img.src=svg?URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'})):'assets/logo/rngc-ball-animated.svg?r='+Date.now()},60)};
     document.addEventListener('visibilitychange',go);go()};
-  fetch('assets/logo/rngc-ball-animated.svg').then(function(r){return r.ok?r.text():null}).then(function(t){svg=t;got=true;put()},function(){got=true;put()});
+  rngcLogo().then(function(t){svg=t;got=true;put()});
   var onReady=function(){setTimeout(function(){ready=true;put();
     var skip=function(){if(document.visibilityState!=='visible')return;document.removeEventListener('visibilitychange',skip);
       setTimeout(function(){if(!started)done()},4000)};   /* no logo 4 s after the page is ready and showing: skip */
@@ -1111,8 +1039,6 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
     <button type="button" class="btn topjoin" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button>
   </header>
 
-  <div class="banner" id="banner"><i class="ph-bold ph-info"></i><span>Preview: events, prices and the Raiders schedule are real. Members, posts and tickets are demo.</span></div>
-
   <main class="views">
     <section class="view on" id="v-home" aria-label="Home"></section>
     <section class="view" id="v-events" aria-label="Events"></section>
@@ -1143,7 +1069,6 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
     <div class="subnav" data-for="settings"><div></div></div>
   </nav>
 
-  <div class="coach" id="coach" role="region" aria-label="Demo tour"></div>
   <div class="scrim" id="scrim"></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
   <div class="toast" id="toast" role="status"></div>
@@ -1163,18 +1088,13 @@ const PLANS=[
  {id:'norcal',name:'Northern California',price:225,chapter:'NorCal',url:SHOP+'northern-california-chapter-membership-annual/',blurb:'Official GHIN handicap, custom laser bag tag, exclusive events and team play in sanctioned NCGA events.'},
  {id:'nevada',name:'Nevada',price:225,chapter:'Nevada',url:SHOP+'membership-nevada-chapter-annual/',blurb:'Official GHIN handicap, custom laser bag tag, exclusive events and team play in sanctioned NGA events.'}
 ];
-const LEADERS=[
- {name:'Ross Ricks',role:'Club President, National and Southern California',img:UP+'2026/06/ROSS-PREZ-NATIONAL-324x324.png'},
- {name:'Jason Duran',role:'Club President, Northern California',img:UP+'2026/06/JASON-BT2-324x324.png'},
- {name:'Jason Garrison',role:'Club President, Las Vegas',img:UP+'2026/06/JG-VEGAS-BT-324x324.png'}
-];
 const EVENTS=[
  {id:'nov14',name:'RNGC vs The 12th Man Golf Club',date:'2026-11-14',where:'Chimera Golf Club, Henderson NV',chapter:'Nevada',price:'$175 per player',course:'chimera',
   note:'4-man scramble with playoffs. 7:00 am check-in, 8:00 am shotgun start. Golf, cart, giveaways, prizes for the top 2 teams and a taco bar after party. A full foursome is $700, the same $175 each. Raiders and Seahawks fans welcome.',
   url:SHOP+'saturday-november-14th-2026-chimera-golf-club-in-henderson-nevada/',img:UP+'2026/09/CHIMERA-11.14.26-1-819x1024.jpg'},
  {id:'oct3',name:'RNGC vs The Red Kingdom Golf Club',date:'2026-10-03',where:'Chimera Golf Club, Henderson NV',chapter:'Nevada',price:'$160 per player',course:'chimera',
   note:'4-man scramble with playoffs, 8:00 am shotgun start. Raiders and Chiefs fans welcome.',
-  url:SHOP+'saturday-october-3rd-2026-chimera-golf-club-in-henderson-nevada/',img:UP+'2026/08/10.3.26-CHIMERA-777x1024.png'},
+  url:SHOP+'saturday-october-3rd-2026-chimera-golf-club-in-henderson-nevada/',img:UP+'2026/08/10.3.26-CHIMERA-777x1024.jpg'},
  {id:'rc27',name:'Raider Cup 2027',date:'2027-05-28',where:'Monterey Bay. Carmel Valley Ranch, Poppy Hills (Pebble Beach, CA), Bayonet Black Horse',chapter:'National',price:'$975 per hacker',course:'monterey',spots:'Only 2 of 24 spots left',
   note:'May 28th-30th. Includes 4 rounds, 3 polos, hat and prizes.',url:'',img:'assets/flyers/raider-cup-2027.jpg'},
  {id:'rc26',name:'Raider Cup 2026',date:'2026-05-22',where:'St. George, UT. Copper Rock, Coral Canyon, Sand Hollow, Sky Mountain',chapter:'National',price:'May 22-24',course:'stgeorge',
@@ -1184,11 +1104,10 @@ const FLYERS=["chimera-11.14.26-1", "10.3.26-chimera", "legacy-9.12.26v3", "rngc
 const PHOTOS=["img_5442", "img_1626", "img_3120", "img_3402", "img_3410", "img_3681", "c863daca-3d64-4c46-94b9-ee24613e0eea", "f2a2535a-ae40-4d11-b293-db0b715d09c4", "img_0662", "img_4713", "img_2189", "img_3443"];   /* old site gallery + home photos (assets/old-site/photos) */
 const stemOf=u=>String(u||'').split('/').pop().replace(/-\d{2,4}x\d{2,4}(?=\.)/,'').replace(/\.\w+$/,'').toLowerCase();
 const SCORECARD_EVENTS=['nov14'];   /* events with the event-day scorecard (scorecard/ page) */
-const SPONSORS=['Woodson Bourbon Whiskey','Alpha Team Golf','Black Sunday Brand','Chimera Golf Club','Surf City Sound'];
 const NEWS=[
  {id:'n0',tag:'Raider Cup 2027',title:'Raider Cup 2027 heads to Monterey Bay',meta:'May 28-30 - only 2 of 24 spots left',img:'assets/flyers/raider-cup-2027.jpg',body:'Carmel Valley Ranch, Poppy Hills in Pebble Beach and Bayonet Black Horse. $975 per hacker includes 4 rounds, 3 polos, a hat and prizes. Only 2 of 24 spots left.'},
  {id:'n1',tag:'Next event',title:'Chimera showdown vs the 12th Man',meta:'Nov 14 - Henderson NV',img:UP+'2026/09/CHIMERA-11.14.26-1-819x1024.jpg',body:'Raiders fans and Seahawks fans meet in a 4-man scramble with playoffs. 8:00 am shotgun start at Chimera Golf Club. $175 per player, $700 per foursome. Includes golf, cart, giveaways, prizes for the top 2 teams and a taco bar after party.'},
- {id:'n2',tag:'Membership',title:'Official handicap, laser bag tag',meta:'Every chapter',img:UP+'2026/06/ROSS-SC-BT-953x1024.png',body:'Chapter members get an official GHIN handicap, a custom laser bag tag, and exclusive access to events and tournaments. Chapter dues are $225 per year. National membership is $99.'},
+ {id:'n2',tag:'Membership',title:'Official handicap, laser bag tag',meta:'Every chapter',img:UP+'2026/06/ROSS-SC-BT-953x1024.webp',body:'Chapter members get an official GHIN handicap, a custom laser bag tag, and exclusive access to events and tournaments. Chapter dues are $225 per year. National membership is $99.'},
  {id:'n3',tag:'Media',title:'Interviews with Raiders alumni',meta:'On YouTube',img:UP+'2026/06/YT-BANNER-1024x576.jpg',body:'Interviews with Raiders alumni, celebrities and fans, plus golf tips and breaking news. Find the channel from the links at the bottom of the home page.'}
 ];
 const COURSES=[
@@ -1320,9 +1239,9 @@ $('#chapterChips').addEventListener('change',e=>{if(e.target.id!=='chSel')return
 /* ---------- home: overview plus its own pages (join, leaders, shop, sponsors) ---------- */
 const PRES={SoCal:'ross',National:'ross',NorCal:'duran',Nevada:'garrison'};
 const LEAD_X={
- ross:{id:'ross',name:'Ross Ricks',first:'Ross',role:'Club President',chapters:'National and Southern California',img:UP+'2026/06/ROSS-PREZ-NATIONAL-324x324.png',big:UP+'2026/06/ROSS-PREZ-NATIONAL-1024x915.png'},
- duran:{id:'duran',name:'Jason Duran',first:'Jason',role:'Chapter President',chapters:'Northern California',img:UP+'2026/06/JASON-BT2-324x324.png',big:UP+'2026/06/JASON-BT2-942x1024.png'},
- garrison:{id:'garrison',name:'Jason Garrison',first:'Jason',role:'Chapter President',chapters:'Las Vegas and Nevada',img:UP+'2026/06/JG-VEGAS-BT-324x324.png',big:UP+'2026/06/JG-VEGAS-BT-944x1024.png'}
+ ross:{id:'ross',name:'Ross Ricks',first:'Ross',role:'Club President',chapters:'National and Southern California',img:UP+'2026/06/ROSS-PREZ-NATIONAL-324x324.webp',big:UP+'2026/06/ROSS-PREZ-NATIONAL-1024x915.webp'},
+ duran:{id:'duran',name:'Jason Duran',first:'Jason',role:'Chapter President',chapters:'Northern California',img:UP+'2026/06/JASON-BT2-324x324.webp',big:UP+'2026/06/JASON-BT2-942x1024.webp'},
+ garrison:{id:'garrison',name:'Jason Garrison',first:'Jason',role:'Chapter President',chapters:'Las Vegas and Nevada',img:UP+'2026/06/JG-VEGAS-BT-324x324.webp',big:UP+'2026/06/JG-VEGAS-BT-944x1024.webp'}
 };
 /* sponsor facts: only what the club site and flyers show; logo + site filled in when verified */
 const SPONS_X=[
@@ -1356,7 +1275,7 @@ function overviewHTML(){
   const f=next&&fmtDate(next.date),ng=GAMES.find(g=>!g.res);
   const tile=(k,ic,t,s)=>`<button class="card tile" data-sub="home|${k}"><i class="ph-bold ph-${ic}"></i><b>${t}</b><small>${s}</small></button>`;
   return `<div class="rise">
-   ${viewBar()}
+   
    <div class="hero"><div class="bg" style="background-image:url('${UP}2026/06/IMG_5442-1024x768.jpg')"></div><div class="in">
      ${S.member?`<span class="tag">Member - ${esc(chName(S.cfg.my.chapter))}</span>
      <h1>Welcome back, ${esc(firstName())}</h1>
@@ -1448,8 +1367,8 @@ function shopHTML(){
   const evs=EVENTS.filter(e=>!e.status&&!isPast(e.date));
   const item=(img,t,price,meta,url,fit)=>`<a class="card shopitem" href="${url}" ${ext}><div class="simg ${fit||''}"><img src="${img}" alt="" loading="lazy"></div><div class="sbody"><b>${t}</b><div class="meta">${meta}</div><div class="sprice">${price}</div><span class="btn small">Buy on club store</span></div></a>`;
   return pageHead('Club shop','Checkout is on the club store.')+`
-   <h3 class="shophead">Club gear</h3><div class="shopgrid rise">${item(UP+'2026/06/RNGC-POLO-26-1-324x324.png','RNGC Golf Polo, The OG Classic','$60 - $65','Sizes S to 4XL',SHOP+'rngc-golf-polo-the-og-classic/')}</div>
-   <h3 class="shophead">Memberships</h3><div class="shopgrid">${PLANS.map(p=>item(p.chapter==='National'?UP+'2026/06/ROSS-PREZ-NATIONAL-324x324.png':LEAD_X[PRES[p.chapter]].img,p.name+' membership','$'+p.price+' per year',p.chapter==='National'?'For fans anywhere':'GHIN handicap, laser bag tag',p.url,'contain')).join('')}</div>
+   <h3 class="shophead">Club gear</h3><div class="shopgrid rise">${item(UP+'2026/06/RNGC-POLO-26-1-324x324.webp','RNGC Golf Polo, The OG Classic','$60 - $65','Sizes S to 4XL',SHOP+'rngc-golf-polo-the-og-classic/')}</div>
+   <h3 class="shophead">Memberships</h3><div class="shopgrid">${PLANS.map(p=>item(p.chapter==='National'?UP+'2026/06/ROSS-PREZ-NATIONAL-324x324.webp':LEAD_X[PRES[p.chapter]].img,p.name+' membership','$'+p.price+' per year',p.chapter==='National'?'For fans anywhere':'GHIN handicap, laser bag tag',p.url,'contain')).join('')}</div>
    ${evs.length?`<h3 class="shophead">Event entries</h3><div class="shopgrid">${evs.map(e=>item(e.img,e.name,e.price,fmtDate(e.date).dow+', '+fmtDate(e.date).m+' '+fmtDate(e.date).d+' - '+e.where,e.url,'top')).join('')}</div>`:''}
    <a class="btn ghost" style="margin-top:16px" href="${SITE}/shop/" ${ext}><i class="ph-bold ph-storefront"></i> Open the full club store</a>`;
 }
@@ -1693,11 +1612,13 @@ async function loadSchedule(){
       else if(c.timeValid!==false&&e.timeValid!==false){g.date=laDate(e.date);g.kick=laTime(e.date);g.tbd=false}
     });
     LIVE.record=d.team&&d.team.recordSummary;LIVE.stamp=new Date();
-    GAMES.filter(g=>!g.res&&g.eid).forEach(loadPred);
+    /* win chances: the next game now (Home shows it); the rest when someone opens the schedule (saves 7 lookups on every open) */
+    {const ng=nextGame();if(ng)loadPred(ng)}if(S.tab==='games')loadAllPred();
     loadSummary(nextGame());
   }catch(err){LIVE.sched=-1}
   refreshGames();
 }
+function loadAllPred(){GAMES.filter(g=>!g.res&&g.eid).forEach(loadPred)}
 async function loadPred(g){
   if(!g.eid||g.eid in LIVE.pred)return;LIVE.pred[g.eid]=null;
   try{const p=await getJSON(`${CORE}events/${g.eid}/competitions/${g.eid}/predictor`);
@@ -1736,22 +1657,13 @@ function midHTML(g,big){
   return `<div class="ko"><i class="at">@</i><b>${g.tbd?'TBD':g.kick}</b><span>${g.tbd?'Time TBD':big?f.dow+' '+f.m+' '+f.d+' PT':'PT'}</span></div>`;
 }
 const winBar=p=>`<div class="wc"><div class="wcl"><span>Raiders win chance</span><b>${Math.round(p)}%</b></div><div class="wct"><i style="width:${Math.max(3,Math.min(97,p))}%"></i></div></div>`;
-/* who is going to each game (demo: a fixed, seeded set of members; your own tap adds you) */
-function gameGoing(g){
-  if(g.res)return [];
-  const V=VENUES[g.v];
-  const demo=MEMBERS.filter(m=>{const p=memPos(m),near=miles(V.lat,V.lng,p[0],p[1])<=100,r=scHash(m.id+'|'+g.id)%100;return near?r<55:r<(g.home?14:6)});
-  return demo;
-}
-const goingCount=g=>g.res?0:gameGoing(g).length+(S.gameGo&&S.gameGo[g.id]?1:0);
-function cardCounts(g){return ''}
 function matchup(g){
   const [a,h]=sides(g),f=fmtDate(g.date),p=g.eid?LIVE.pred[g.eid]:null;
   return `<button class="card mx ${S.selGame===g.id?'sel':''} ${g.res?'done':''}" data-selgame="${g.id}">
    <div class="mxtop"><span>Week ${g.wk} - ${g.tbd?f.m+' TBD':f.dow+', '+f.m+' '+f.d}</span><span>${g.res?`<em class="wl ${g.res[0]}">${g.res[0]}</em>`:esc(g.tv||'')}</span></div>
    <div class="mxrow">${tside(a)}${midHTML(g)}${tside(h,1)}</div>
    ${!g.res&&p!=null?winBar(p):''}
-   <div class="mxbot"><i class="ph-bold ph-map-pin"></i>${esc(VENUES[g.v].n)}, ${esc(VENUES[g.v].city)}</div>${cardCounts(g)}</button>`;
+   <div class="mxbot"><i class="ph-bold ph-map-pin"></i>${esc(VENUES[g.v].n)}, ${esc(VENUES[g.v].city)}</div></button>`;
 }
 function lineHTML(g){
   const s=g.eid&&LIVE.sum[g.eid],ln=s&&s.line;if(!ln)return '';
@@ -1762,7 +1674,7 @@ function heroHTML(g){
   return `<div class="card hero2"><div class="mxtop"><span>Next game - Week ${g.wk}</span><span>${g.tbd?'Date TBD':daysTo(g.date)+' days - '+esc(g.tv||'')}</span></div>
    <div class="mxrow big">${tside(a)}${midHTML(g,1)}${tside(h,1)}</div>
    ${p!=null?winBar(p):''}${lineHTML(g)}
-   <div class="hero2c">${cardCounts(g)}</div>
+   <div class="hero2c"></div>
    <div class="acts"><a class="btn small" href="${VENUES[g.v].tix}" ${ext}><i class="ph-bold ph-ticket"></i> Tickets</a><button class="btn small ghost" data-game="${g.id}">Game info</button></div></div>`;
 }
 let gMarkers={};
@@ -1770,7 +1682,7 @@ function renderGames(){
   const v=$('#v-games');
   const chip=(k,ic,t)=>`<button class="chip" data-gv="${k}" aria-pressed="${S.gview===k}"><i class="ph-bold ph-${ic}"></i> ${t}</button>`;
   const seg=`<div class="seg" role="tablist" aria-label="Games">${chip('sched','calendar-dots','Schedule')}${chip('news','newspaper','Player news')}${chip('ff','trophy','Fantasy')}</div>`;
-  loadSchedule();
+  loadSchedule();loadAllPred();
   if(S.gview==='ff'){v.innerHTML=seg+ffHTML();return}
   if(S.gview==='news'){v.innerHTML=seg+'<div id="gnews"></div>';loadNews();fillNews();return}
   v.innerHTML=seg+`<div class="gwrap"><div class="gside"><div class="mapbox" id="gmap" aria-label="Map of 2026 Raiders stadiums"></div>
@@ -1817,13 +1729,6 @@ function selPanel(){
    <h3 class="cardh">${esc(g.home?'Raiders vs '+TEAMS[g.o]:'Raiders at '+TEAMS[g.o])}</h3><div class="meta">${g.res?'Final':gWhen(g)}</div><div class="meta">${esc(V.n)}, ${esc(V.city)}</div>
    ${golf?`<p class="meta"><i class="ph-bold ph-flag-pennant"></i> ${esc(golf.c.name)}, about ${Math.round(golf.d)} miles away</p>`:''}
    <div class="acts">${g.res?'':`<a class="btn small" href="${VENUES[g.v].tix}" ${ext}><i class="ph-bold ph-ticket"></i> Tickets</a>`}<button class="btn small ghost" data-game="${g.id}">Game info</button><button class="btn small ghost" data-allstad>${PHONE()?'Close map':'All stadiums'}</button></div></div>`;
-}
-function goingHTML(g){
-  const list=gameGoing(g),me=S.gameGo&&S.gameGo[g.id],n=goingCount(g);
-  const names=!S.member?`<p class="meta">${n} member${n===1?'':'s'} confirmed. <button class="linkbtn" data-signin>Sign in to see who</button></p>`
-    :`<div class="memchips">${me?`<span class="memchip you"><i>${initials(S.name||'You')}</i>You</span>`:''}${list.map(m=>`<span class="memchip"><i>${initials(m.name)}</i>${esc(m.name)}<small>${esc(m.chapter)}</small></span>`).join('')||(me?'':'<span class="meta">Nobody yet. Be the first.</span>')}</div>`;
-  return `<h4 class="minihead">Going to this game - ${n}</h4>${names}
-   <button class="btn small ${me?'ghost':''}" data-gogame="${g.id}" style="margin-top:10px">${me?'<i class="ph-bold ph-check"></i> You\'re going':'<i class="ph-bold ph-hand-waving"></i> I\'m going'}</button>`;
 }
 const PHONE=()=>window.innerWidth<1000;
 /* phone: the map panel moves right under the tapped game; computer: it stays in the side column */
@@ -1895,7 +1800,7 @@ function openVenue(k){
 }
 function openGame(id,quiet){
   const g=GAMES.find(x=>x.id===id);if(!g)return;const V=VENUES[g.v],[a,h]=sides(g),p=g.eid?LIVE.pred[g.eid]:null;
-  S.selGame=id;
+  loadPred(g);S.selGame=id;
   if(!quiet){document.querySelectorAll('#v-games .mx').forEach(b=>b.classList.toggle('sel',b.dataset.game===id));
     if(maps.games&&S.tab==='games')maps.games.panTo({lat:V.lat,lng:V.lng});
     if(!g.res)loadSummary(g)}
@@ -1934,7 +1839,6 @@ document.addEventListener('click',e=>{
   const gv=e.target.closest('[data-gv]');if(gv){S.gview=gv.dataset.gv;save();renderGames();return}
   const sg=e.target.closest('[data-selgame]');if(sg){const id=sg.dataset.selgame;closeSheet();if(S.tab!=='games'||S.gview!=='sched'){S.selGame=id;S.gview='sched';save();setTab('games');return}if(PHONE()&&S.selGame===id&&$('#v-games .gside.inline')){allStadiums();return}selectGame(id,true);return}
   if(e.target.closest('[data-allstad]')){allStadiums();return}
-  const gg=e.target.closest('[data-gogame]');if(gg){if(!S.member){openSignIn();return}const id=gg.dataset.gogame;S.gameGo=S.gameGo||{};S.gameGo[id]=!S.gameGo[id];save();fillGames();selPanel();document.querySelectorAll('#v-games .mx').forEach(b=>b.classList.toggle('sel',b.dataset.selgame===S.selGame));toast(S.gameGo[id]?'Marked going. Members at this game can see you.':'Taken off the list');return}
   if(e.target.closest('[data-signin]')){openSignIn();return}
   const gm=e.target.closest('[data-game]');if(gm){openGame(gm.dataset.game);return}
   if(e.target.closest('[data-gotix]')){closeSheet();S.mview='tix';S.tixFilter='all';S.tixGame=null;save();setTab('members');return}
@@ -1944,19 +1848,13 @@ document.addEventListener('click',e=>{
 });
 
 /* ---------- members (member area) ---------- */
-function visibleMembers(){
-  let list=MEMBERS.filter(m=>S.chapter==='All'||m.chapter===S.chapter);
-  if(S.tripOnly)list=list.filter(m=>m.trip);
-  return list;
-}
-function myPos(){const c=CITIES[S.myCity];return c?[c.lat,c.lng]:null}
 function renderMembers(){
   const v=$('#v-members');
   if(!['inbox','dir','alumni','tix'].includes(S.mview))S.mview='inbox';
   const seg=`<div class="seg" role="tablist" aria-label="Member area"><button class="chip" data-mv="inbox" aria-pressed="${S.mview==='inbox'}"><i class="ph-bold ph-envelope-simple"></i> Messages${MSG.unread?' ('+MSG.unread+')':''}</button><button class="chip" data-mv="dir" aria-pressed="${S.mview==='dir'}"><i class="ph-bold ph-users-three"></i> Members</button><button class="chip" data-mv="tix" aria-pressed="${S.mview==='tix'}"><i class="ph-bold ph-ticket"></i> Tickets${tixUnread()?' ('+tixUnread()+')':''}</button><button class="chip" data-mv="alumni" aria-pressed="${S.mview==='alumni'}"><i class="ph-bold ph-trophy"></i> Alumni<span class="pm-long"> &amp; Hall of Fame</span></button></div>`;
   if(!authTok()){
     v.innerHTML=`<div class="card gate rise"><i class="ph-fill ph-lock-key"></i><h3>Members only</h3><p>Messages, the member list, the ticket exchange and the Alumni and Hall of Fame page are for signed-in members. Sign in with the email on your membership.</p><div class="acts"><button class="btn" id="realIn"><i class="ph-bold ph-sign-in"></i> Sign in</button><a class="btn ghost" href="${SITE}/shop/" ${ext}>Become a member</a></div></div>`;
-    renderCoach();return}
+    return}
   if(S.mview==='tix'){tixView(v,seg);return}
   if(S.mview==='inbox'){inboxView(v,seg);return}
   if(!DIR.items){v.innerHTML=seg+'<p class="meta" style="margin-top:14px">Loading...</p>';loadDir();return}
@@ -2186,39 +2084,7 @@ function openVisibility(){
     save();closeSheet();renderMembers();toast('Saved. Only members can see your pin.')});
 }
 
-/* ---------- demo tour ---------- */
-const TOUR=[
- {t:'The member map',x:'Every pin is a member, placed on their city. No addresses. Tap one to see who they are.',spot:'[data-mem=m11]',setup:()=>{S.mview='map';S.goingTo=''},tryL:'Open a member',doit:()=>openMember('m11')},
- {t:'Heading out of town?',x:'Pick a city and see which members are within 100 miles, so you can find a round.',spot:'#goingTo',setup:()=>{S.mview='map';S.goingTo=''},tryL:'Try Phoenix',doit:()=>{S.goingTo='phx';renderMembers()}},
- {t:'Tell members you are coming',x:'Set your city, choose who sees you, and post a trip. A plane shows on your pin.',spot:'#myVis',setup:()=>{S.mview='map';S.goingTo=''},tryL:'Open my visibility',doit:()=>openVisibility()},
- {t:'Ticket exchange',x:'Members sell or trade tickets to Raiders games and club events with each other.',spot:'[data-mv=tix]',setup:()=>{S.mview='tix';S.tixFilter='all'},tryL:'Show trades only',doit:()=>{S.tixFilter='trade';renderMembers()}},
- {t:'Make an offer',x:'Offer a price or propose a trade. The seller decides. Contact stays inside the app.',spot:'[data-offer=x1]',setup:()=>{S.mview='tix';S.tixFilter='all'},tryL:'Make an offer',doit:()=>openOffer('x1')},
- {t:'Post your own tickets',x:'Sell at a price you set, or ask for a trade. Your listing shows your name and chapter.',spot:'#postTix',setup:()=>{S.mview='tix';S.tixFilter='all'},tryL:'Post tickets',doit:()=>openPostTix()},
- {t:'That is the member area',x:'The live version uses each member\'s existing club account and a real database. Ross decides the rules.',setup:()=>{S.mview='map';S.goingTo=''}}
-];
-function goTour(i){
-  S.tour=Math.max(0,Math.min(TOUR.length-1,i));TOUR[S.tour].setup();renderMembers();
-}
-function renderCoach(){
-  const c=$('#coach');if(!c)return;
-  document.querySelectorAll('.spot').forEach(e=>e.classList.remove('spot'));
-  if(!S.demo||S.tab!=='members'||S.tour<0||!S.member){c.classList.remove('on');return}
-  const s=TOUR[S.tour],last=S.tour===TOUR.length-1;
-  c.innerHTML=`<div class="st">Demo tour - step ${S.tour+1} of ${TOUR.length}</div><h4>${s.t}</h4><p>${s.x}</p>
-   <div class="cr">${s.doit?`<button class="btn" data-tour="try">${s.tryL}</button>`:''}${S.tour>0?'<button class="btn ghost" data-tour="back">Back</button>':''}<button class="btn ${s.doit?'ghost':''}" data-tour="${last?'exit':'next'}">${last?'Finish':'Next'}</button><button class="x" data-tour="close">Hide</button></div>`;
-  c.classList.add('on');
-  if(s.spot){const t=document.querySelector('#v-members '+s.spot);if(t)t.classList.add('spot')}
-}
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-tour]');if(t){const a=t.dataset.tour;
-    if(a==='next')goTour(S.tour+1);
-    else if(a==='back')goTour(S.tour-1);
-    else if(a==='try')TOUR[S.tour].doit();
-    else if(a==='close'){S.tour=-1;renderCoach()}
-    else if(a==='restart')goTour(0);
-    else if(a==='exit'){S.demo=false;S.member=false;S.tour=-1;S.tix=[];S.offers=[];S.tixClosed={};S.goingTo='';S.mview='map';S.trip=null;save();renderMembers();syncTop();toast('Demo ended')}
-    return}
-  if(e.target.closest('#demoIn')){S.member=true;S.demo=true;if(!S.name)S.name='Demo Member';save();goTour(0);return}
   if(e.target.closest('#realIn')){openSignIn();return}
 });
 
@@ -2538,7 +2404,7 @@ let gateOn=false;
 function showGate(t){
   gateOn=true;
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-gate'));
-  $('#fab').classList.remove('on');$('#banner').style.display='none';
+  $('#fab').classList.remove('on');
   $('#v-gate').innerHTML=`<div class="card gate rise"><i class="ph-fill ph-lock-key"></i><h3>Members only</h3><p>${esc(GATE_N[t]||'This page')} opens for club members. Sign in with the email on your membership to see events, golf, games, courses and the member area.</p><div class="acts"><button class="btn" data-signin><i class="ph-bold ph-sign-in"></i> Sign in</button><button class="btn ghost" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Become a member</button></div></div>`;
   $('#v-gate').scrollTop=0;renderSubnav();
 }
@@ -2551,13 +2417,12 @@ function setTab(t){
   gateOn=false;
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+t));
   $('#fab').classList.toggle('on',t==='forum'&&(!S.openThread||window.innerWidth>=1000));
-  $('#banner').style.display='none';
   if(t==='home')renderHome();
   if(t==='settings')renderSettings();
   if(t==='events')renderEvents();
   if(t==='courses')renderCourses();
   if(t==='games')renderGames();
-  if(t==='members')renderMembers();else renderCoach();
+  if(t==='members')renderMembers();
   if(t==='forum')renderForum();
   if(t==='golf')renderGolf();
   document.getElementById('v-'+t).scrollTop=0;
@@ -2673,7 +2538,6 @@ const selCfg=(path,val,opts)=>`<select class="field sm" data-cfg="${path}">${opt
 const txtCfg=(path,val,ph)=>`<input class="field sm" data-cfg="${path}" value="${esc(val||'')}" placeholder="${esc(ph||'')}">`;
 const group=(title,body,sub)=>`<div class="card setgroup"><h3 class="setgh">${title}</h3>${sub?`<p class="meta" style="margin:-4px 0 6px">${sub}</p>`:''}${body}</div>`;
 const prevNote='<div class="card privacy"><i class="ph-bold ph-info"></i><span>Preview: changes save on this device only. In the live app they apply to the whole club.</span></div>';
-const getPath=(o,p)=>p.split('.').reduce((a,k)=>a&&a[k],o);
 function setPath(o,p,v){const ks=p.split('.');let a=o;ks.slice(0,-1).forEach(k=>{a[k]=a[k]||{};a=a[k]});a[ks[ks.length-1]]=v}
 
 /* ---------- Club setup: a plain checklist for the club admin. Each answer goes to David's club inbox as a message
@@ -2774,9 +2638,8 @@ function renderSettings(){
     <div class="acts"><button class="btn" data-signin><i class="ph-bold ph-sign-in"></i> Sign in</button></div></div>`;return}
   const ok=SPAGES.find(p=>p[0]===S.spage&&p[2]());if(!ok)S.spage='account';
   const pg=S.spage||'account';
-  const bar=true?'':`<div class="rolebar"><span><i class="ph-bold ph-eye"></i> Preview as</span><div class="seg2">${ROLES.map(r=>`<button class="chip" data-role="${r[0]}" aria-pressed="${S.role===r[0]}">${r[1]}</button>`).join('')}</div></div>`;
   const body={setup:setupHTML,account:accountHTML,notify:notifyHTML,users:usersHTML,perms:permsHTML,events:evMgrHTML,chapters:chaptersHTML,tix:tixSetHTML,forum:forumSetHTML,sponsors:sponsSetHTML,announce:annHTML,lead:()=>window.RNGCCHAPTER?RNGCCHAPTER.html():'',club:clubHTML}[pg]();
-  v.innerHTML=subChips('settings')+bar+body;
+  v.innerHTML=subChips('settings')+body;
   if(pg==='users')fillUsers();
   if(pg==='lead'&&window.RNGCCHAPTER)RNGCCHAPTER.wire();
 }
@@ -2856,24 +2719,6 @@ function notifyHTML(){
   </div>`;
 }
 /* ---- users ---- */
-function usersHTML_OLD(){
-  const all=USERS.map(userNow),n=k=>all.filter(u=>u.role===k).length,ex=all.filter(u=>u.expired).length;
-  const f=S.uf||'all';
-  return pageHead('Users')+`
-   <div class="kpis">${[['Members',all.length],['Leaders',n('admin')+n('chapter')],['Sub admins',n('sub')],['Dues expired',ex]].map(([k,b])=>`<div class="card kpi"><small>${k}</small><b>${b}</b></div>`).join('')}</div>
-   <div class="inrow" style="margin-top:10px"><input class="field" id="usersQ" placeholder="Search by name" value="${esc(S.uq||'')}" autocomplete="off"><button class="btn small" id="userAdd"><i class="ph-bold ph-user-plus"></i> Add</button></div>
-   <div class="chips">${[['all','All'],['leaders','Admins'],['sub','Sub admins'],['member','Members'],['expired','Dues expired']].map(([k,t])=>`<button class="chip" data-uf="${k}" aria-pressed="${f===k}">${t}</button>`).join('')}</div>
-   <div class="stack" id="userList" style="margin-top:12px"></div>${prevNote}`;
-}
-function fillUsers_OLD(){
-  const box=$('#userList');if(!box)return;const q=(S.uq||'').toLowerCase(),f=S.uf||'all';
-  let L=USERS.map(userNow).filter(u=>(!q||u.name.toLowerCase().includes(q))&&(S.chapter==='All'||u.chapter===S.chapter));
-  if(S.role==='chapter')L=L.filter(u=>u.chapter===S.cfg.my.chapter||u.role==='admin');
-  L=L.filter(u=>f==='all'||(f==='leaders'?(u.role==='admin'||u.role==='chapter'):f==='expired'?u.expired:u.role===f));
-  const order={admin:0,chapter:1,sub:2,member:3};L.sort((a,b)=>order[a.role]-order[b.role]||a.name.localeCompare(b.name));
-  box.innerHTML=L.length?L.map(u=>`<button class="card userrow" data-user="${u.id}"><span class="av">${initials(u.name)}</span><span><b>${esc(u.name)}</b><small>${esc(u.chapter)} - ${esc(u.plan)} - since ${u.joined}</small></span>
-    <span class="ur"><span class="pill role-${u.role}">${ROLE_N[u.role]}</span>${u.status==='suspended'?'<span class="pill out">Suspended</span>':u.expired?'<span class="pill out">Dues expired</span>':''}</span></button>`).join(''):'<div class="card empty">Nobody matches.</div>';
-}
 
 function usersHTML(){
   if(!DIR.items){loadDir();return pageHead('Members')+'<p class="meta">Loading the member list...</p>'}
@@ -3081,7 +2926,6 @@ const canInvite=()=>S.member&&S.cfg.club.invites&&(S.cfg.club.invWho==='all'||S.
 function syncTop(){const b=document.querySelector('.topjoin');if(!b)return;
   if(S.member&&canInvite()){b.dataset.sub='home|invite';b.innerHTML='<i class="ph-bold ph-paper-plane-tilt"></i> Invite a friend'}
   else{b.dataset.sub='home|join';b.innerHTML='<i class="ph-bold ph-identification-badge"></i> Join the club'}}
-function viewBar(){return '';return `<div class="viewbar"><span><i class="ph-bold ph-eye"></i> Viewing as</span><div class="seg2"><button class="chip" data-asview="guest" aria-pressed="${!S.member}">Guest</button><button class="chip" data-asview="member" aria-pressed="${S.member}">Member</button></div><small>Preview switch. In the live app this follows sign-in.</small></div>`}
 const PERKS=[['map-trifold','Member map','See members near you and who is going to each game'],['ticket','Ticket exchange','Buy, sell and trade seats for every Raiders game'],['chats-circle','Chat with members','Start a talk or reply. Guests can read only'],['golf','Scorecards and handicap','Club leaderboard, chapter cup, official handicap'],['paper-plane-tilt','Your own invite link','Bring friends into your chapter']];
 const perksHTML=()=>`<ul class="perks">${PERKS.map(([i,t,d])=>`<li><i class="ph-bold ph-${i}"></i><span><b>${t}</b><small>${d}</small></span></li>`).join('')}</ul>`;
 function guestCard(){return `<div class="card guestcard"><h3>What members get</h3>${perksHTML()}
@@ -3112,10 +2956,6 @@ function invCopy(){const t=invLink(),done=()=>{S.invLog=S.invLog||{};S.invLog.sh
 function fallbackCopy(t){const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()}
 document.addEventListener('click',e=>{
   const sel=e.target.closest('[data-invsel]');if(sel){sel.select();return}
-  const av=e.target.closest('[data-asview]');if(av){
-    if(av.dataset.asview==='member'){S.member=true;S.demo=true;if(!S.name)S.name='Demo Member';toast('Member view: demo member')}
-    else{S.member=false;S.demo=false;S.tour=-1;toast('Guest view')}
-    save();renderAll();renderSubnav();return}
   const b=e.target.closest('[data-inv]');if(!b)return;const k=b.dataset.inv;
   if(k==='copy'){invCopy();return}
   if(k==='share'){if(navigator.share){navigator.share({title:'Raider Nation Golf Club',text:'Hey, come golf with us. Raider Nation Golf Club: golf, travel and Raiders football.',url:invLink()}).then(()=>{S.invLog=S.invLog||{};S.invLog.shared=(S.invLog.shared||0)+1;save();refreshInvite()}).catch(()=>{})}else invCopy();return}
@@ -3154,9 +2994,10 @@ renderChips();renderAll();setTab('home');loadSchedule();
   const STATIC=lg.getAttribute('src'),ANIM='assets/logo/rngc-ball-animated.svg',LEN=7600;
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   let busy=false,last=Date.now(),clicks=0,svg=null,url=null;
-  fetch(ANIM).then(r=>r.ok?r.text():null).then(t=>{svg=t}).catch(()=>{});
+  const getSvg=()=>rngcLogo().then(t=>{svg=t});
+  if(document.readyState==='complete')setTimeout(getSvg,3000);else addEventListener('load',()=>setTimeout(getSvg,3000),{once:true});
   function play(){
-    if(busy||reduce)return;busy=true;last=Date.now();clicks=0;
+    if(busy||reduce)return;busy=true;last=Date.now();clicks=0;if(!svg)getSvg();
     if(url)URL.revokeObjectURL(url);
     url=svg?URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'})):null;
     lg.src=url||ANIM+'?r='+Date.now();
