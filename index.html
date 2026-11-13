@@ -2460,11 +2460,17 @@ function appNudge(){
 function openGetApp(){
   if(isStandalone()){toast('You already have the club app open.');return}
   if(installEvt){const e=installEvt;installEvt=null;e.prompt();e.userChoice.then(c=>{if(c.outcome==='accepted')toast('Adding the club app to your phone.')}).catch(()=>{});return}
-  const ua=navigator.userAgent,inApp=/FBAN|FBAV|Instagram|Line\/|Snapchat|TikTok/i.test(ua);
+  const ua=navigator.userAgent,inApp=/FBAN|FBAV|FB_IAB|Instagram|Line\/|Snapchat|TikTok|GSA\/|LinkedInApp|Twitter/i.test(ua);
+  /* iPhone (David, Nov 13): iOS 26 Safari hides Share behind the three dots by the address bar, so the old "Share at the bottom" step pointed at nothing.
+     Safari's Version/ token carries the real iOS number (26+) even though the iPhone OS number in the agent string stays at 18. */
+  const iosVer=+((ua.match(/Version\/(\d+)/)||[])[1]||0),iosOther=/CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo/i.test(ua);
+  const iosSteps=iosOther?[`Tap the <b>Share</b> button <i class="ph-bold ph-export"></i> at the top right, next to the address bar`,`Scroll down and tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>. Don't see it? Tap <b>More</b>.`,`Tap <b>Add</b>. The RNGC icon shows up on your home screen.`]
+    :iosVer>=26?[`Tap the <b>three dots</b> <i class="ph-bold ph-dots-three"></i> next to the address bar. If you see the Share button <i class="ph-bold ph-export"></i> instead, tap that.`,`Tap <b>Share</b>, then scroll down and tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>. Don't see it? Tap <b>More</b>.`,`Leave <b>Open as Web App</b> on and tap <b>Add</b>. The RNGC icon shows up on your home screen.`]
+    :[`Tap the <b>Share</b> button <i class="ph-bold ph-export"></i> at the bottom of Safari. Don't see it? Tap the page once to bring the bar back.`,`Scroll down and tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>`,`Tap <b>Add</b>. The RNGC icon shows up on your home screen.`];
   const steps=inApp?[`Tap the <i class="ph-bold ph-dots-three"></i> menu at the top`,`Tap <b>Open in browser</b>${isIOS()?' or <b>Open in Safari</b>':''}`,`Tap <b>Get the app</b> again from there`]
-    :isIOS()?[`Tap the <b>Share</b> button <i class="ph-bold ph-export"></i>. In Safari it's at the bottom; in Chrome it's at the top right.`,`Scroll down and tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>`,`Tap <b>Add</b>. The RNGC icon shows up on your home screen.`]
+    :isIOS()?iosSteps
     :/android/i.test(ua)?[`Tap the menu <i class="ph-bold ph-dots-three-vertical"></i> at the top right of the browser`,`Tap <b>Install app</b> or <b>Add to Home screen</b>`,`Tap <b>Install</b>. The RNGC icon shows up with your apps.`]
-    :[`Open <b>raidernationgolfclub.com</b> on your phone`,`iPhone: tap Share <i class="ph-bold ph-export"></i>, then <b>Add to Home Screen</b>`,`Android: tap the menu <i class="ph-bold ph-dots-three-vertical"></i>, then <b>Install app</b>`];
+    :[`Open <b>raidernationgolfclub.com</b> on your phone`,`iPhone: tap the three dots <i class="ph-bold ph-dots-three"></i> by the address bar, then <b>Share</b>, then <b>Add to Home Screen</b>`,`Android: tap the menu <i class="ph-bold ph-dots-three-vertical"></i>, then <b>Install app</b>`];
   openSheet(`<div class="apphead"><img src="assets/app/icon-192.png" alt="" width="56" height="56"><div><h3 style="margin:0">Get the club app</h3><p class="help" style="margin:2px 0 0">Free. No app store, no download wait.</p></div></div>
    <ol class="appsteps">${steps.map(s=>`<li><span>${s}</span></li>`).join('')}</ol>
    ${navigator.share?'<button class="btn ghost full" type="button" id="shareApp"><i class="ph-bold ph-share-network"></i> Send it to a friend</button>':''}
@@ -3247,7 +3253,7 @@ $('#ivBack').addEventListener('click',()=>{inviteMode(false);codeMode(false);set
 $('#siInvite').addEventListener('submit',async e=>{e.preventDefault();const m=$('#ivMsg'),b=e.target.querySelector('button[type=submit]'),password=$('#ivPass').value;
   if(password.length<8){m.textContent='The password needs 8 or more characters.';return}
   b.disabled=true;m.textContent='Saving...';
-  try{signedIn(await authCall('/auth/invite',{code:ivCode,password}));$('#ivPass').value='';inviteMode(false);setTimeout(()=>toast('You are in. Tip: Share, then Add to Home Screen, for one tap next time.'),2300)}catch(err){m.textContent=err.message}b.disabled=false});
+  try{signedIn(await authCall('/auth/invite',{code:ivCode,password}));$('#ivPass').value='';inviteMode(false);setTimeout(()=>toast('You are in. Tip: tap Get the app on Home for one tap next time.'),2300)}catch(err){m.textContent=err.message}b.disabled=false});
 function setupMode(on){$('#siForm').hidden=on;$('#siSetup').hidden=!on;$('#suMsg').textContent='';$('#siMsg').textContent='';
   if(on)$('#suEmail').value=$('#siEmail').value.trim()}
 function codeMode(on){suCode=on;$('#suGhinL').textContent=on?'Setup code (email not needed for a 12-letter code)':'GHIN number';$('#suGhin').inputMode=on?'text':'numeric';
