@@ -233,8 +233,8 @@ function trSeed(){const r=rng(hash('rngc-tracker-demo')),c=COURSES.chimera,tee=c
 const EMBED=(()=>{try{return window.top!==window}catch(e){return true}})();
 function trBar(title,sub,right=''){return `<div class="bar">${EMBED?'':`<a href="../" aria-label="Back to the club app"><img class="logo" src="${LOGO}" alt=""></a>`}<div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${right}</div>`}
 const trBack=h=>`<a class="ib" href="${h}" aria-label="Back"><i class="ph-bold ph-arrow-left"></i></a>`;
-function trTabs(cur){return `<div class="seg" role="group" aria-label="Golf sections">${[['me','My golf'],['log','Play log'],['groups','Groups'],['events','Events']].filter(([k])=>k!=='groups'||G.groups.length||cur==='groups').map(([k,l])=>`<button data-tab="${k}" aria-pressed="${k===cur}">${l}</button>`).join('')}</div>`}
-function trWire(){document.querySelectorAll('.joinlive').forEach(b=>b.onclick=()=>{const c=prompt('Live round code from your scorekeeper (5 letters and numbers)');if(c)trJoin(c)});document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>location.hash='#/'+b.dataset.tab);
+function trTabs(cur){return `<div class="seg" role="group" aria-label="Golf sections">${[['me','My golf'],['log','Play log'],['groups','Groups'],['events','Events'],...(EMBED?[['courses','Courses']]:[])].filter(([k])=>k!=='groups'||G.groups.length||cur==='groups').map(([k,l])=>`<button data-tab="${k}" aria-pressed="${k===cur}">${l}</button>`).join('')}</div>`}
+function trWire(){document.querySelectorAll('.joinlive').forEach(b=>b.onclick=()=>{const c=prompt('Live round code from your scorekeeper (5 letters and numbers)');if(c)trJoin(c)});document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(b.dataset.tab==='courses'){try{parent.postMessage({golfCourses:1},location.origin)}catch(e){}return}location.hash='#/'+b.dataset.tab});
   document.querySelectorAll('[data-round]').forEach(b=>b.onclick=()=>location.hash='#/round/'+b.dataset.round)}
 
 function hub(h){$('#app').className='wrap';

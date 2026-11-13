@@ -1077,8 +1077,6 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
     <div class="subnav" data-for="golf"><div></div></div>
     <button class="tab" role="tab" data-tab="games" aria-selected="false"><i class="ph-fill ph-football"></i>Games<span class="bar"></span></button>
     <div class="subnav" data-for="games"><div></div></div>
-    <button class="tab" role="tab" data-tab="courses" aria-selected="false"><i class="ph-fill ph-flag-pennant"></i>Courses<span class="bar"></span></button>
-    <div class="subnav" data-for="courses"><div></div></div>
     <button class="tab" role="tab" data-tab="members" aria-selected="false"><i class="ph-fill ph-users-three"></i>Members<span class="bar"></span></button>
     <div class="subnav" data-for="members"><div></div></div>
     <button class="tab tab-settings-only" role="tab" data-tab="settings" aria-selected="false"><i class="ph-fill ph-gear-six"></i>Settings<span class="bar"></span></button>
@@ -2350,7 +2348,8 @@ function showGate(t){
 }
 function setTab(t){
   S.tab=t;
-  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  const lit=t==='courses'?'golf':t;   /* Courses lives under Golf (David, Nov 12) */
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===lit));
   if(t!=='golf')document.body.classList.remove('golffull');
   if(locked(t)){showGate(t);return}
   gateOn=false;
@@ -2374,11 +2373,12 @@ function renderGolf(){const fr=$('#golfFrame'),want=new URL('scorecard/#/'+(S.go
   fr.src=want}
 /* in a round the golf screen takes the whole phone: the club header and tab bar step aside until the round screen closes */
 window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&'golfFull' in e.data)document.body.classList.toggle('golffull',!!e.data.golfFull&&S.tab==='golf')});
+window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.golfCourses)goSub('golf','c-map')});   /* the golf screen's Courses button */
 window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||!e.data.golf)return;const k=e.data.golf;if(['me','log','groups','events'].includes(k)&&S.golfv!==k){S.golfv=k;renderSubnav()}});
 /* side menu: the open page shows its sub-links underneath it */
 const SUBNAV={
  home:[['About and media','about'],['Photos','photos'],['Join a chapter','join'],['Invite a friend','invite'],['Club leaders','leaders'],['Club news','news'],['Club shop','shop'],['Sponsors','sponsors']],
- golf:[['My golf','me'],['Play log','log'],['Groups','groups'],['Club events','events']],
+ golf:[['My golf','me'],['Play log','log'],['Groups','groups'],['Club events','events'],['Course map','c-map'],['Where we play','c-list']],
  events:[['Upcoming','up'],['Raider Cup','cup'],['Past events','past']],
  games:[['Raiders schedule','sched'],['Player news','news']],
  courses:[['Course map','map'],['Where we play','list']],
@@ -2390,7 +2390,7 @@ function subNow(t){
   if(t==='home')return S.hpage||'overview';
   if(t==='events')return !S.eview||S.eview==='list'?'up':S.eview;
   if(t==='courses')return S.cview||'map';
-  if(t==='golf')return S.golfv||'me';
+  if(t==='golf')return S.tab==='courses'?'c-'+(S.cview||'map'):S.golfv||'me';
   if(t==='settings')return S.spage||'account';
   if(t==='games')return S.gview;
   if(t==='members')return S.mview;
@@ -2399,7 +2399,7 @@ function subNow(t){
 }
 function renderSubnav(){
   document.querySelectorAll('.subnav').forEach(n=>{
-    const t=n.dataset.for,open=t===S.tab&&!locked(t),cur=subNow(t);
+    const t=n.dataset.for,open=t===(S.tab==='courses'?'golf':S.tab)&&!locked(S.tab),cur=subNow(t);
     n.classList.toggle('open',open);
     n.firstElementChild.innerHTML=(SUBNAV[t]||[]).map(([l,k])=>`<button type="button" data-sub="${t}|${esc(k)}" aria-current="${open&&k===cur}" ${open?'':'tabindex="-1"'}>${l}${k==='inbox'&&MSG.unread?' ('+MSG.unread+')':''}</button>`).join('');
   });
@@ -2409,6 +2409,7 @@ function goSub(t,k){
   if(t==='home'){S.hpage=k;if(k==='join')S.joinSent=null}
   if(t==='events'){S.eview=k;save()}
   if(t==='courses')S.cview=k;
+  if(t==='golf'&&k.startsWith('c-')){S.cview=k.slice(2);closeSheet();setTab('courses');return}
   if(t==='golf')S.golfv=k;
   if(t==='settings')S.spage=k;
   if(t==='games'){S.gview=k;save()}
