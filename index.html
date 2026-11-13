@@ -364,6 +364,17 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .appsteps li::before{content:counter(st);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--silver);color:var(--on-silver);font-weight:700}
 .appsteps i{font-size:19px;vertical-align:-3px}
 .apphead{display:flex;gap:12px;align-items:center;margin-bottom:10px}.apphead img{border-radius:14px}
+.a2or{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--muted);font-size:13px}.a2or::before,.a2or::after{content:'';flex:1;height:1px;background:currentColor;opacity:.35}
+#a2hsGuide{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:flex-end;padding:16px}
+#a2hsGuide.bottom{justify-content:flex-end;padding-bottom:calc(env(safe-area-inset-bottom) + 64px)}
+#a2hsGuide.top{justify-content:flex-start;padding-top:calc(env(safe-area-inset-top) + 8px)}#a2hsGuide.top .a2arrow{order:-1}
+#a2hsGuide .a2box{background:var(--card,#16181c);color:var(--text,#fff);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px 16px;max-width:340px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#a2hsGuide .a2title{display:block;font-size:17px;margin-bottom:6px}
+#a2hsGuide ol{margin:0 0 12px;padding-left:20px;display:grid;gap:8px;font-size:16px;line-height:1.4}#a2hsGuide ol i{font-size:18px;vertical-align:-3px}
+#a2hsGuide .a2arrow{display:block;flex:none;margin:6px 6px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6));animation:a2bob 1s ease-in-out infinite}
+#a2hsGuide.top .a2arrow{animation-name:a2bobup}
+@keyframes a2bob{50%{transform:translateY(10px)}}@keyframes a2bobup{50%{transform:translateY(-10px)}}
+@media (prefers-reduced-motion:reduce){#a2hsGuide .a2arrow{animation:none}}
 /* phone and tablet: no big map on top; tap a game and a small map opens under it, zoomed on the stadium (David, Nov 12) */
 @media (max-width:999px){.gwrap .gside{display:none}.gwrap .gside.inline{display:block;margin:-2px 0 8px}.gwrap .gside.inline .mapbox{height:230px;border-radius:14px}.gwrap .gside.inline .gsel{margin-top:8px}}
 @media (min-width:1000px){
@@ -2334,16 +2345,16 @@ function openGetApp(){
     :iosVer>=26?[`Tap the <b>three dots</b> <i class="ph-bold ph-dots-three"></i> at the bottom, next to the address bar`,`Tap <b>Share</b> <i class="ph-bold ph-export"></i>`,`In the row of buttons, tap <b>More</b> <i class="ph-bold ph-dots-three"></i>. On some phones it says <b>View More</b>.`,`Tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>, leave <b>Open as Web App</b> on, then tap <b>Add</b>`]
     :[`Tap the <b>Share</b> button <i class="ph-bold ph-export"></i> at the bottom of Safari. Don't see it? Tap the page once to bring the bar back.`,`Scroll down and tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>`,`Tap <b>Add</b>. The RNGC icon shows up on your home screen.`];
   /* iPhone one-tap install (David, Nov 13: "need it to be easier than trying to find the add to home button"): Safari downloads a small
-     install file that puts the RNGC icon on the home screen; iPhone itself walks through Allow > Settings > Install. Trial: shows only after
-     opening the site once with ?iphonetest, until David OKs it for everyone. */
-  let ipTest=false;try{if(/iphonetest/.test(location.search))localStorage.setItem('rngc-iptest','1');ipTest=localStorage.getItem('rngc-iptest')==='1'}catch(e){}
-  const oneTap=ipTest&&isIOS()&&!inApp&&!iosOther;
+     install file that puts the RNGC icon on the home screen; iPhone itself walks through Allow > Settings > Install. Second way: Add it from Safari
+     shows an arrow on the screen pointing at Safari's own button. */
+  const oneTap=isIOS()&&!inApp&&!iosOther; /* on for every iPhone/iPad Safari (David, Nov 13: "do it both ways") */
   if(oneTap){openSheet(`<div class="apphead"><img src="assets/app/icon-192.png" alt="" width="56" height="56"><div><h3 style="margin:0">Get the club app</h3><p class="help" style="margin:2px 0 0">Free. No app store.</p></div></div>
    <a class="btn full" href="https://rngc-club.137.184.188.41.sslip.io/rngc-app.mobileconfig" id="ipInstall"><i class="ph-bold ph-download-simple"></i> Install the app</a>
    <ol class="appsteps" style="margin-top:14px"><li><span>Tap <b>Allow</b>, then <b>Close</b></span></li><li><span>Within 8 minutes, open the <b>Settings</b> app and tap <b>Profile Downloaded</b> at the top. Not there? Tap <b>General</b>, then <b>VPN &amp; Device Management</b>.</span></li><li><span>Tap <b>Install</b>, type your phone passcode, tap <b>Install</b> again. The RNGC icon is on your home screen.</span></li></ol>
-   <details class="help" style="margin:0 0 12px"><summary>Rather do it by hand?</summary><ol class="appsteps" style="margin-top:10px">${iosSteps.map(s=>`<li><span>${s}</span></li>`).join('')}</ol></details>
+   <div class="a2or"><span>or</span></div>
+   <button class="btn ghost full" type="button" id="ipSafari"><i class="ph-bold ph-compass"></i> Add it from Safari</button>
    <button class="btn ghost full" type="button" id="closeApp">Close</button>`);
-   $('#closeApp').addEventListener('click',closeSheet);
+   $('#closeApp').addEventListener('click',closeSheet);$('#ipSafari').addEventListener('click',()=>{closeSheet();setTimeout(()=>safariGuide(iosVer),330)});
    /* step 2 (David, Nov 13: take them right to where they accept it): after the download, swap to one big Open Settings button.
       Apple blocks websites from opening Settings (David's iPad: address is invalid), so no button, just where to tap. */
    $('#ipInstall').addEventListener('click',()=>setTimeout(()=>{if(!$('#ipInstall'))return;
@@ -2368,6 +2379,18 @@ function openGetApp(){
     const ok=()=>toast('Link copied. Open Safari and paste it in the address bar.');
     if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(ok).catch(()=>prompt('Copy this link, then open it in Safari:',u));else prompt('Copy this link, then open it in Safari:',u)});
   const sh=$('#shareApp');if(sh)sh.addEventListener('click',()=>navigator.share({title:'Raider Nation Golf Club',text:'Our club app: events, golf scorecard and Raiders games.',url:'https://raidernationgolfclub.com/'}).catch(()=>{}));
+}
+/* Safari way (David, Nov 13): dim the page and point an arrow at Safari's own button; iPhone = bottom right, iPad = top right */
+function safariGuide(ver){
+  const old=document.getElementById('a2hsGuide');if(old)old.remove();
+  const ipad=/ipad/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),newer=ver>=26||!ver;
+  const first=ipad?`Tap <b>Share</b> <i class="ph-bold ph-export"></i> up here${newer?', or the <b>three dots</b> <i class="ph-bold ph-dots-three"></i> in the address bar':''}`
+    :newer?`Tap the <b>three dots</b> <i class="ph-bold ph-dots-three"></i> down here. See <b>Share</b> <i class="ph-bold ph-export"></i> instead? Tap that.`:`Tap <b>Share</b> <i class="ph-bold ph-export"></i> down here`;
+  const g=document.createElement('div');g.id='a2hsGuide';g.className=ipad?'top':'bottom';g.setAttribute('role','dialog');
+  g.innerHTML=`<div class="a2box"><b class="a2title">Add the club app</b><ol>
+    <li>${first}</li>${newer?'<li>Tap <b>Share</b>, then <b>More</b> or <b>View More</b></li>':''}<li>Tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>, then <b>Add</b></li></ol>
+    <button class="btn small" type="button">Got it</button></div><svg class="a2arrow" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"${ipad?' style="rotate:180deg"':''}><path d="M22 4h20v30h14L32 60 8 34h14z" fill="#fff"/></svg>`;
+  g.addEventListener('click',()=>g.remove());document.body.appendChild(g);
 }
 document.addEventListener('click',e=>{
   if(e.target.closest('[data-getapp]')){e.preventDefault();openGetApp();return}
