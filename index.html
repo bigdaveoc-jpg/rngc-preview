@@ -1043,8 +1043,8 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
   /* The animation must start from frame one while the screen is showing. Phones keep one clock per logo file, so a
      logo the phone already loaded (earlier visit, or behind the launch splash of the home-screen app) can show up
      already finished. So: download the logo, wait until the page is on screen, then show it from a brand-new copy
-     (same trick as the header logo replay). The 5.4 s clock starts when it shows; no logo in 4 s: skip. */
-  var started=false,start=function(){if(started)return;started=true;setTimeout(done,5400)};
+     (same trick as the header logo replay). The 7 s clock starts when it shows; no logo in 4 s: skip. */
+  var started=false,start=function(){if(started)return;started=true;setTimeout(done,7000)};   /* the logo's story ends at 5.2 s; 7 s lets it finish and settle on a slow phone (David, Nov 13: it was cut off) */
   var put=function(t){if(started||!el.isConnected)return;
     var go=function(){if(document.visibilityState!=='visible')return;document.removeEventListener('visibilitychange',go);
       setTimeout(function(){
