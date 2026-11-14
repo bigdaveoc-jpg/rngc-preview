@@ -169,6 +169,8 @@ body.sun .mk.e,body.sun .mk.d{box-shadow:0 0 0 2px #fff,0 0 0 3.5px currentColor
 .lrow .nm{min-width:0}
 .hereic{display:inline-flex;align-items:center;gap:1px;margin-left:7px;font-size:13px;font-weight:800;color:#4ade80;vertical-align:1px;white-space:nowrap}.hereic i{font-size:15px}body.sun .hereic{color:#15803d}
 .here{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-top:2px}.here.no{opacity:.7}.here.on{color:#4ade80}.here.on i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-right:6px;vertical-align:1px}body.sun .here.on{color:#15803d}body.sun .here.on i{background:#15803d}
+.rstars{display:flex;justify-content:center;gap:6px;margin:14px 0 6px}.rstars button{font-size:40px;line-height:1;color:var(--muted);min-width:52px;min-height:52px;background:none;border:0;padding:0}.rstars button.on{color:#f2c94c}
+.rbox{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px;margin:0 0 10px}.rbox .rhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.rbox .rhead b{font-size:22px}.rbox .rrow{border-top:1px solid var(--line);padding:8px 0 0;margin-top:8px;font-size:14px}.rbox .rrow i{color:#f2c94c;font-style:normal;letter-spacing:1px}
 .herebar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 10px}.herebar>div{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:10px 12px}.herebar b{display:block;font-size:22px;line-height:1.1}.herebar small{font-size:12.5px;color:var(--muted)}.herebar .on b{color:#4ade80}body.sun .herebar .on b{color:#15803d}
 .lrow .nm>span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lrow .tp{font-family:var(--display);font-size:28px;font-weight:800;text-align:right}
@@ -541,7 +543,7 @@ function scFillMine(){if(!S.team||SC_BUSY||scT&&scDiff().n)return;const c=REMOTE
   for(const[kind,unit]of[['ctp','ft'],['ld','yd']]){const seen=SC_SIDE[kind]||(SC_SIDE[kind]={});for(const h in c[kind]||{}){const v=c[kind][h];seen[h]=JSON.stringify({pid:v.pid,[unit]:v[unit]});if(!(S[kind]&&S[kind][h])){(S[kind]||(S[kind]={}))[h]=v;ch=true}}}
   if(ch){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}
 function scPull(){if(!SYNC)return;const mt=S.team&&TEAMS.find(x=>x.id===S.team);scCall('/event/board',mt&&S.me&&ids(mt).includes(S.me)?{team:S.team,me:S.me}:null).then(j=>{const na=j.admin&&!ADMIN;if(j.admin)ADMIN=true;const cs0=canScore();const fch=applyField(j.field||null);REMOTE=j.cards||{};gNames();let hch=false;try{hch=hereSet(j)}catch(e){}
-  if(cs0!==canScore()&&/^#\/(hole|team)/.test(location.hash)&&!$('#sheet.on')){const mt=myTeam();note(canScore()?'This phone keeps score':first(PEOPLE()[keeperOf(mt)].name)+' keeps score now');route()}REMOTE_AT=Date.now();SC_ERR=0;scFillMine();scSend();const h=location.hash;if(hch&&!fch&&h.startsWith('#/field')&&!$('#sheet.on'))fieldPage();if((fch&&!/^#\/(hole|setup|field|card|team|bets)/.test(h))||(na&&!/^#\/hole/.test(h))||(!ADMIN&&/^#\/(setup|field)/.test(h)))route()}).catch(()=>{SC_ERR++;if(!ADMIN&&/^#\/(setup|field)/.test(location.hash))route()})}
+  if(cs0!==canScore()&&/^#\/(hole|team)/.test(location.hash)&&!$('#sheet.on')){const mt=myTeam();note(canScore()?'This phone keeps score':first(PEOPLE()[keeperOf(mt)].name)+' keeps score now');route()}REMOTE_AT=Date.now();SC_ERR=0;scFillMine();scSend();setTimeout(rateMaybe,50);const h=location.hash;if(hch&&!fch&&h.startsWith('#/field')&&!$('#sheet.on'))fieldPage();if((fch&&!/^#\/(hole|setup|field|card|team|bets)/.test(h))||(na&&!/^#\/hole/.test(h))||(!ADMIN&&/^#\/(setup|field)/.test(h)))route()}).catch(()=>{SC_ERR++;if(!ADMIN&&/^#\/(setup|field)/.test(location.hash))route()})}
 const remoteOf=t=>REMOTE[t.id]||{};
 /* who is on the round (David, Nov 14 2026: "on the group set up i want to be able to see who has logged into the app, also on the
    leader boards we can show a icon who is connected"). Each phone says its group and player with every board pull; the club server
@@ -993,10 +995,11 @@ function review(){const t=myTeam(),f=F();$('#app').className='wrap';
   ${done?`<div class="card done-banner"><i class="ph-fill ph-seal-check"></i><div><b>Card turned in</b><div class="muted" style="font-size:14px">Locked. The event admin can fix a mistake from the clubhouse.</div></div></div>`:
    missing.length?`<p class="note"><i class="ph-bold ph-warning"></i><span>Still blank: hole${missing.length>1?'s':''} ${missing.join(', ')}.</span></p>`:''}
   ${done?'':betWinPrompt()}
-  <div class="stick">${done?`<a class="btn block" href="#/board"><i class="ph-bold ph-ranking"></i> Live leaderboard</a>`:
+  <div class="stick">${done&&SYNC&&!CASUAL&&rated()!=='done'?`<button class="btn ghost block" id="rateApp" style="margin-bottom:8px"><i class="ph-bold ph-star"></i> Rate the app</button>`:''}${done?`<a class="btn block" href="#/board"><i class="ph-bold ph-ranking"></i> Live leaderboard</a>`:
    `${CASUAL?`<button class="btn block" id="finish" ${18-missing.length<9?'disabled':''}>Finish and save the round</button>`:`<button class="btn block" id="submit" ${missing.length||!canScore()?'disabled':''}>Turn in card</button>`}<div style="height:8px"></div><button class="btn ghost block" id="back"><i class="ph-bold ph-pencil-simple"></i> Fix a hole</button>`}</div>`;
-  const sb=$('#submit');if(sb)sb.onclick=()=>{if(confirm('Turn in this card? Have one other player in your group check it first. It locks after this.')){S.submitted[scoreKey(t.id)]=true;save();logEvent();review()}};
+  const sb=$('#submit');if(sb)sb.onclick=()=>{if(confirm('Turn in this card? Have one other player in your group check it first. It locks after this.')){S.submitted[scoreKey(t.id)]=true;save();logEvent();review();setTimeout(rateMaybe,600)}};
   const fn=$('#finish');if(fn)fn.onclick=finishRound;
+  const ra=$('#rateApp');if(ra)ra.onclick=rateSheet;
   if(!done)$('#revCard').querySelectorAll('table').forEach(tb=>{const hs=[...tb.querySelectorAll('thead th')].map(th=>+th.textContent||0);tb.querySelectorAll('thead th').forEach((th,i)=>{if(hs[i])th.classList.add('hl')});tb.onclick=e=>{const c=e.target.closest('td,th');if(!c)return;const h=hs[c.cellIndex];if(h>=1&&h<=18)location.hash='#/hole/'+h}});
   const bk=$('#back');if(bk)bk.onclick=()=>location.hash='#/hole/'+(missing[0]||order(t.start)[17]);wireBetWin();
   wireSun()}
@@ -1049,10 +1052,42 @@ function fieldSave(body,okMsg){return scCall('/admin/field',body).then(j=>{apply
 function saveTeams(ts,msg){closeSheet();return fieldSave({teams:plainTeams(ts)},msg).catch(()=>{}).finally(()=>{if(location.hash.startsWith('#/field'))fieldPage()})}
 const cloneTeams=()=>TEAMS.map(t=>({...t,players:t.players.map(p=>({...p}))}));
 const hasScores=id=>{const c=REMOTE[id];return !!(c&&Object.values(c.scores||{}).some(e=>Object.values(e).some(h=>Object.keys(h).length)))};
+/* app rating at the end of the round (David, Nov 14 2026: "a quick rating of the use of the app for each person that used it.
+   It can also be skipped"). Once this phone's group has every hole in (or the card is turned in), the phone asks once:
+   1 to 5 stars and an optional note, or Skip. Never on the hole screen, so it can't get in the way of a score. One answer per
+   phone per event; the event's leaders see them on the Groups page. */
+const RKEY=()=>'rngc-rated:'+S.event;
+const rated=()=>{try{return localStorage.getItem(RKEY())||''}catch(e){return''}};
+let RATE_ASKED=false;
+function groupDone(){const t=myTeam();if(!t)return false;return !!S.submitted[scoreKey(t.id)]||order(t.start).every(h=>holeDone(h))}
+function rateMaybe(){if(CASUAL||!SYNC||RATE_ASKED||rated()||!groupDone())return;
+  if($('#sheet.on')||/^#\/(hole|setup|field|tv)/.test(location.hash))return;RATE_ASKED=true;rateSheet()}
+function rateSend(stars,note0){const t=myTeam(),me=t&&ids(t).includes(S.me)?S.me:'';const p=me&&PEOPLE()[me];
+  return scCall('/event/rate',{dev:myDev(),stars,note:note0||'',team:t?t.id:'',me,name:p?p.name:''})}
+function rateSheet(){let n=0;
+  sheetOpen(`<b style="font-size:20px">How was the app today?</b><div class="muted">Quick rating for the club. Takes 5 seconds, or skip it.</div>
+   <div class="rstars" role="group" aria-label="Your rating">${[1,2,3,4,5].map(k=>`<button type="button" data-star="${k}" aria-label="${k} star${k>1?'s':''}"><i class="ph-bold ph-star"></i></button>`).join('')}</div>
+   <textarea class="field" id="rNote" maxlength="400" rows="3" placeholder="Anything we should fix or add? Optional" aria-label="Your note" style="height:auto;padding-top:10px"></textarea>
+   <button class="btn block" id="rSend" style="margin-top:10px" disabled>Send rating</button>`);
+  const cl=$('#closeSheet');cl.textContent='Skip';
+  cl.onclick=()=>{try{localStorage.setItem(RKEY(),'skip')}catch(e){}closeSheet();rateSend(0).catch(()=>{})};
+  const paint=()=>document.querySelectorAll('[data-star]').forEach(b=>{const on=+b.dataset.star<=n;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.innerHTML=`<i class="ph-${on?'fill':'bold'} ph-star"></i>`});
+  document.querySelectorAll('[data-star]').forEach(b=>b.onclick=()=>{n=+b.dataset.star;paint();$('#rSend').disabled=false;try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}});
+  $('#rSend').onclick=()=>{const b=$('#rSend');b.disabled=true;b.textContent='Sending...';
+    rateSend(n,$('#rNote').value.trim()).then(()=>{try{localStorage.setItem(RKEY(),'done')}catch(e){}closeSheet();note('Thanks! Your rating went to the club.');if(/^#\/card/.test(location.hash))route()})
+     .catch(()=>{b.disabled=false;b.textContent='Send rating';note('Could not send. Check your signal and try again.')})}}
+/* leaders: the answers so far, on the Groups page */
+let RATES=null,RATES_AT=0;
+function ratesBox(){if(!SYNC||CASUAL||!ADMIN)return'';
+  if(Date.now()-RATES_AT>30000){RATES_AT=Date.now();scCall('/event/ratings').then(j=>{const was=JSON.stringify(RATES);RATES=j;if(was!==JSON.stringify(j)&&location.hash.startsWith('#/field')&&!$('#sheet.on'))fieldPage()}).catch(()=>{})}
+  const r=RATES;if(!r)return'';const st=k=>'★'.repeat(k)+'☆'.repeat(5-k);
+  return `<div class="rbox"><div class="rhead"><b>${r.avg!=null?r.avg+' ★':'No ratings yet'}</b><span class="muted">App rating · ${r.n} rated${r.skipped?' · '+r.skipped+' skipped':''}</span></div>
+   ${r.items.slice(0,40).map(x=>`<div class="rrow"><i>${st(x.stars)}</i> <b>${esc(x.name||'Someone')}</b>${x.note?`<div class="muted">${esc(x.note)}</div>`:''}</div>`).join('')}</div>`}
 function fieldPage(){if(!ADMIN||CASUAL){if(!CASUAL){if(SYNC&&!REMOTE_AT&&!SC_ERR){$('#app').innerHTML=bar('Edit the event',EV().name)+'<p class="note"><i class="ph-bold ph-hourglass"></i><span>Checking your sign-in.</span></p>';return}}location.hash=HOME;return}$('#app').className='wrap';
   const allP=TEAMS.flatMap(t=>ids(t).map(id=>[t.id,id])),inN=allP.filter(([a,b])=>hereAt(a,b)).length,onN=allP.filter(([a,b])=>isOn(a,b)).length;
   $('#app').innerHTML=bar('Groups',EV().name)+`
   ${SYNC?`<div class="herebar"><div><b>${inN} of ${allP.length}</b><small>checked in on the app</small></div><div class="on"><b>${onN}</b><small>on now</small></div></div>`:''}
+  ${ratesBox()}
   <p class="note"><i class="ph-bold ph-info"></i><span>Tap a player to move, rename or remove. Every change saves for every phone.${SYNC?' Checked in = that player picked their name on their own phone. On now = their phone was on the round in the last 15 minutes.':''}</span></p>
   ${TEAMS.map(t=>`<section class="card fg"><div class="fgh"><b>${esc(t.name)}</b><span class="muted">Hole ${t.start} · ${t.players.length} player${t.players.length===1?'':'s'}</span></div>
    <button type="button" class="btn ghost block" data-tset="${t.id}" style="margin:2px 0 8px"><i class="ph-bold ph-gear-six"></i> Team settings: name, starting hole</button>
@@ -1261,7 +1296,7 @@ const reload=()=>{const fresh=load();for(const k of Object.keys(S))delete S[k];O
   const h=location.hash;if(h.startsWith('#/board')||h.startsWith('#/tv'))route()};
 window.addEventListener('storage',e=>{if(e.key===KEY)reload()});
 if(bc)bc.onmessage=reload;
-window.addEventListener('hashchange',()=>{route();scrollTo(0,0)});   /* a new screen always opens at its top */
+window.addEventListener('hashchange',()=>{route();scrollTo(0,0);setTimeout(rateMaybe,400)});   /* a new screen always opens at its top */
 /* ===== in a round nothing scrolls (David 2026-11-11): every hole screen, the card review and the hole map fit the phone.
    Steps: f1-f4 tighten spacing and fold extras that also live in the header (live share, hints), then the blocks above the
    Next bar shrink together until the screen fits. Inside the club app the club's own header and tab bar step aside. */
