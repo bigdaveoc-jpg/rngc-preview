@@ -44,7 +44,7 @@ function previewCode(ev){let x=2166136261;for(const c of 'rngc-pass:'+ev){x^=c.c
   const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';x>>>=0;for(let i=0;i<6;i++){s+=A[x%32];x=Math.floor(x/32)||(x^0x9e3779b9)>>>0}return s}
 function parsePass(q){const m=/^([a-z0-9]{2,24})-([A-Z2-9]{6,12})$/i.exec(String(q||'').trim());return m?{ev:m[1].toLowerCase(),code:m[2].toUpperCase()}:null}
 
-window.RNGCPASS={windowFor,status,leftText,previewCode,parsePass,AFTER_MS,
+window.RNGCPASS={windowFor,status,leftText,previewCode,parsePass,AFTER_MS,findName,rosterOf,
   get(){try{return JSON.parse(localStorage.getItem(PASS_KEY)||'null')}catch(e){return null}},
   active(){return isOpen(status(this.get(),Date.now()))}};
 if(typeof document==='undefined'||typeof S==='undefined')return;   /* tests stop here */
@@ -68,6 +68,11 @@ const savePass=p=>{try{localStorage.setItem(PASS_KEY,JSON.stringify(p))}catch(e)
 .gpup .opt .pr{font-family:var(--display);font-weight:800;font-size:22px;text-align:right;white-space:nowrap}
 .gpup .opt .pr small{display:block;font-family:var(--body);font-weight:600;font-size:11px}
 .gpcode{text-align:center;font:700 26px/1.2 ui-monospace,monospace;letter-spacing:.12em;margin:0}
+.gphits{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.gphit{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;min-height:48px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.gphit b{font-weight:700;font-size:16px}.gphit span{color:var(--muted);font-size:13px;white-space:nowrap}
+.gpmine{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:12px 14px;margin-top:10px;border:1px solid var(--silver)}
+.gpmine>i{font-size:26px;color:#62c184}.gpmine b{display:block;font-size:16px}.gpmine span{display:block;color:var(--muted);font-size:13px}
 .gpqr{position:relative;background:#fff;padding:14px;border-radius:12px;max-width:300px;margin:0 auto;box-shadow:0 0 0 3px var(--silver),0 10px 30px rgba(0,0,0,.45)}
 .gpqr svg{display:block;width:100%;height:auto}
 .gpqr .gplogo{position:absolute;left:50%;top:50%;width:22%;aspect-ratio:120/140;transform:translate(-50%,-50%);background:#fff;border-radius:10px;padding:4px;box-sizing:content-box;display:flex}
@@ -135,24 +140,61 @@ async function redeem(ev,code,name,clubName){
   if(code!==previewCode(ev))throw new Error('That pass code doesn\'t match this event.');
   return Object.assign({ev,name,club:clubName,ename:e.name,date:e.date,at:Date.now()},windowFor(e.date));
 }
+/* guests: find your name on the event's groups (David, Nov 14 2026: "they either create a profile or enter their name
+   then it matches to the player on the roster"). Type a few letters, tap your name, golf opens on your group's card
+   with your name on this phone. Not on the list: the name you typed becomes your guest profile. */
+function normName(t){return String(t||'').toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim()}
+function rosterOf(f){const out=[];for(const t of (f&&f.teams)||[])for(const p of t.players||[])out.push({id:p.id,name:p.name,team:t.id,start:t.start,mates:(t.players||[]).filter(x=>x.id!==p.id).map(x=>x.name)});return out}
+function findName(list,q){const qt=normName(q).split(' ').filter(Boolean);if(!qt.length||normName(q).length<2)return [];
+  return list.filter(p=>{const nt=normName(p.name).split(' ');return qt.every(w=>nt.some(n=>n.startsWith(w)))}).slice(0,6)}
+const grpName=id=>'Group '+String(id||'').slice(1);
 function openRedeem(pp){
   const e=evById(pp.ev);
   if(!e){toast('That pass is for an event we can\'t find.');return}
   const w=windowFor(e.date),st=status(w,Date.now());
   if(st==='expired'){showUpgrade({ename:e.name,exp:w.exp});return}
   const opp=(/vs (?:the )?(.+)$/i.exec(e.name)||[])[1]||'';
-  openSheet(`<h3 style="margin:0">Guest golf pass</h3><p class="sub" style="margin:4px 0 10px">${esc(e.name)} - ${esc(e.where)}</p>
-   <div class="card" style="padding:12px 14px;font-size:14px;color:var(--muted)">The full scorecard, live leaderboard, skins, Nassau and other side games, your rounds and stats. Good on event day and for 72 hours after, until ${esc(fmt(w.exp))}. No card needed.</div>
-   <label class="meta" for="gpName" style="display:block;margin:12px 0 6px">Your name</label><input class="field" id="gpName" maxlength="24" autocomplete="name">
+  let field=null,roster=[],pick=null;
+  openSheet(`<h3 style="margin:0">Welcome to the course</h3><p class="sub" style="margin:4px 0 10px">${esc(e.name)} - ${esc(e.where)}</p>
+   <label class="meta" for="gpName" style="display:block;margin:0 0 6px">Find your name</label>
+   <input class="field" id="gpName" maxlength="24" autocomplete="name" placeholder="Start typing your name">
+   <div id="gpHits" class="gphits"></div>
+   <div id="gpMine"></div>
+   <div id="gpNew" class="meta" style="margin:10px 0 0;display:none">Not on the list? No problem. Tap Start golfing and we'll make your guest profile with that name.</div>
    <label class="meta" for="gpClub" style="display:block;margin:12px 0 6px">Your club</label><input class="field" id="gpClub" maxlength="40" value="${esc(opp)}">
-   <div class="acts" style="margin-top:14px"><button class="btn full" id="gpGo" style="width:100%"><i class="ph-bold ph-golf"></i> ${st==='early'?'Save my pass':'Start golfing'}</button></div>`);
+   <div class="acts" style="margin-top:14px"><button class="btn full" id="gpGo" style="width:100%"><i class="ph-bold ph-golf"></i> ${st==='early'?'Save my pass':'Start golfing'}</button></div>
+   <p class="meta" style="text-align:center;margin:10px 0 0">Free today plus 72 hours: live scorecard, leaderboard, skins and side games. Already a member? <button class="linkbtn" data-signin style="margin:0">Sign in</button></p>`);
+  const inp=$('#gpName'),hits=$('#gpHits'),mine=$('#gpMine'),nw=$('#gpNew');
+  const showPick=()=>{if(!pick){mine.innerHTML='';return}
+    mine.innerHTML=`<div class="card gpmine"><i class="ph-fill ph-check-circle"></i><div><b>${esc(pick.name)}</b><span>${esc(grpName(pick.team))}, starts on hole ${pick.start}${pick.mates.length?' with '+esc(pick.mates.map(n=>n.split(' ')[0]).join(', ')):''}</span></div><button class="linkbtn" id="gpUnpick" style="margin:0">Not me</button></div>`;
+    $('#gpUnpick').onclick=()=>{pick=null;inp.value='';showPick();draw();inp.focus()}};
+  const draw=()=>{if(pick){hits.innerHTML='';nw.style.display='none';return}
+    const q=inp.value,m=findName(roster,q);
+    hits.innerHTML=m.map(p=>`<button type="button" class="gphit" data-pid="${esc(p.id)}"><b>${esc(p.name)}</b><span>${esc(grpName(p.team))} &middot; hole ${p.start}</span></button>`).join('');
+    nw.style.display=roster.length&&normName(q).length>=3&&!m.length?'block':'none'};
+  inp.addEventListener('input',draw);
+  hits.addEventListener('click',ev2=>{const b=ev2.target.closest('[data-pid]');if(!b)return;pick=roster.find(p=>p.id===b.dataset.pid)||null;if(pick)inp.value=pick.name.slice(0,24);showPick();draw()});
+  if(!PREVIEW)club('/pass/roster',{ev:pp.ev,code:pp.code}).then(r=>{field=r.field;roster=rosterOf(field);draw()}).catch(()=>{});
   $('#gpGo').addEventListener('click',async()=>{
-    const name=$('#gpName').value.trim(),club=$('#gpClub').value.trim();
-    if(!name){toast('Add your name for the scorecard');return}
-    try{const p=await redeem(pp.ev,pp.code,name,club);savePass(p);closeSheet();syncGolf();
-      if(status(p,Date.now())==='early')toast('Pass saved. It opens on '+fmt(p.start));else{toast('Welcome, '+name.split(' ')[0]+'. Golf is open.');setTab('golf')}}
-    catch(err){toast(err.message)}});
+    const typed=inp.value.trim(),clubName=$('#gpClub').value.trim();
+    if(!pick&&typed){const ex=roster.filter(p=>normName(p.name)===normName(typed));if(ex.length===1){pick=ex[0];showPick()}}
+    const name=pick?pick.name.slice(0,24):typed;
+    if(!name){toast('Add your name for the scorecard');inp.focus();return}
+    const b=$('#gpGo');b.disabled=true;
+    try{const p=await redeem(pp.ev,pp.code,name,clubName);if(pick){p.pid=pick.id;p.team=pick.team}savePass(p);
+      if(pick)seatOnCard(pp.ev,pick,field);
+      closeSheet();syncGolf();
+      if(status(p,Date.now())==='early')toast('Pass saved. It opens on '+fmt(p.start));
+      else{toast(pick?'You\'re in '+grpName(pick.team)+', '+name.split(' ')[0]+'. Golf is open.':'Welcome, '+name.split(' ')[0]+'. Golf is open.');S.golfv='event';setTab('golf');S.golfv='me'}}
+    catch(err){b.disabled=false;toast(err.message)}});
 }
+/* put the guest on their group's card on this phone: the event scorecard reads its saved state when it opens */
+function seatOnCard(ev,pick,field){try{
+  const K='rngc-scorecard-ev3',st=JSON.parse(localStorage.getItem(K)||'{}');
+  if(st.event&&st.event!==ev)return;
+  st.event=ev;st.team=pick.team;st.me=pick.id;localStorage.setItem(K,JSON.stringify(st));
+  if(field)localStorage.setItem('rngc-field:'+ev,JSON.stringify(field));
+}catch(e){}}
 
 /* upgrade screen: shown when the pass has ended */
 function upgradeHTML(p){
