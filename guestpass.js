@@ -68,6 +68,19 @@ const savePass=p=>{try{localStorage.setItem(PASS_KEY,JSON.stringify(p))}catch(e)
 .gpup .opt .pr{font-family:var(--display);font-weight:800;font-size:22px;text-align:right;white-space:nowrap}
 .gpup .opt .pr small{display:block;font-family:var(--body);font-weight:600;font-size:11px}
 .gpcode{text-align:center;font:700 26px/1.2 ui-monospace,monospace;letter-spacing:.12em;margin:0}
+.gpqr{position:relative;background:#fff;padding:14px;border-radius:12px;max-width:300px;margin:0 auto;box-shadow:0 0 0 3px var(--silver),0 10px 30px rgba(0,0,0,.45)}
+.gpqr svg{display:block;width:100%;height:auto}
+.gpqr .gplogo{position:absolute;left:50%;top:50%;width:22%;aspect-ratio:120/140;transform:translate(-50%,-50%);background:#fff;border-radius:10px;padding:4px;box-sizing:content-box;display:flex}
+.gpqr .gplogo img{width:100%;height:100%;display:block}
+.gpqr.gpload{aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px}
+.gphome{padding:16px;margin:0 0 16px;border:1px solid var(--silver);text-align:center;background:radial-gradient(120% 80% at 50% 0,rgba(213,218,225,.14),transparent 60%),var(--panel)}
+.gphome .tag{display:inline-flex;align-items:center;gap:6px;font:700 13px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--bg);background:var(--silver);padding:6px 10px;border-radius:999px}
+.gphome h3{font-family:var(--display);font-size:24px;text-transform:uppercase;margin:10px 0 2px}
+.gphome .meta{margin:0 0 14px}
+.gphome .gpqr{max-width:260px}
+.gphome .gpcode{margin:14px 0 12px;font-size:22px}
+.gphome .acts{display:flex;gap:8px}
+.gphome .acts .btn{flex:1}
 `;document.head.appendChild(s)})();
 
 /* leaders: QR for an event */
@@ -75,20 +88,44 @@ async function issue(ev){
   if(!PREVIEW){const r=await club('/admin/pass',{ev});return r.code}
   return previewCode(ev);
 }
+/* one code per event, made once and kept for this visit */
+const qrCache={};
+async function passData(ev){
+  if(qrCache[ev])return qrCache[ev];
+  const [code,qr]=await Promise.all([issue(ev),loadQR()]);
+  const link=location.origin+location.pathname+'?pass='+ev+'-'+code;
+  const q=qr(0,'H');q.addData(link);q.make();   /* H: the club mark in the middle still scans */
+  return qrCache[ev]={code,link,svg:q.createSvgTag({cellSize:6,margin:0,scalable:true})};
+}
+const qrBox=d=>`<div class="gpqr">${d.svg}<span class="gplogo"><img src="assets/logo/rngc-mark.svg" alt=""></span></div>`;
 async function showPassQR(ev){
   const e=evById(ev);if(!e)return;
-  try{const [code,qr]=await Promise.all([issue(ev),loadQR()]);
-    const link=location.origin+location.pathname+'?pass='+ev+'-'+code,w=windowFor(e.date);
-    const q=qr(0,'M');q.addData(link);q.make();
+  try{const d=await passData(ev),w=windowFor(e.date);
     openSheet(`<h3 style="margin:0;text-align:center">Guest golf pass</h3>
      <p class="meta" style="text-align:center;margin:6px 0 12px">${esc(e.name)}. Guests scan with the phone camera and tap the link.</p>
-     <div style="background:#fff;padding:14px;max-width:300px;margin:0 auto">${q.createSvgTag({cellSize:6,margin:0,scalable:true})}</div>
+     ${qrBox(d)}
      <p class="meta" style="text-align:center;margin:14px 0 4px">No camera? Open the club app and type this pass code:</p>
-     <p class="gpcode">${esc(ev.toUpperCase()+'-'+code)}</p>
+     <p class="gpcode">${esc(ev.toUpperCase()+'-'+d.code)}</p>
      <p class="meta" style="text-align:center;margin:10px 0 0">Full golf tracking from ${esc(fmt(w.start))} until ${esc(fmt(w.exp))} (event day plus 72 hours).${PREVIEW?' Preview code: the live code comes from the club server.':''}</p>
-     <div class="acts" style="display:flex;gap:8px;margin-top:14px"><button class="btn ghost" style="flex:1" data-gpshare="${esc(link)}"><i class="ph-bold ph-share-network"></i> Share link</button></div>`);
+     <div class="acts" style="display:flex;gap:8px;margin-top:14px"><button class="btn ghost" style="flex:1" data-gpshare="${esc(d.link)}"><i class="ph-bold ph-share-network"></i> Share link</button></div>`);
   }catch(err){toast(err.message||'Could not make the pass')}
 }
+/* event day: the guest pass QR sits at the top of the leaders' Home screen (David, Nov 14 2026: "on the day of put the
+   qr code on Ross's home screen"). Leaders only, only on the event's own day in Pacific time. */
+const todayPT=()=>new Date().toLocaleDateString('en-CA',{timeZone:TZ});
+window.passHomeCard=function(){
+  if(!isLeader())return '';
+  const t=todayPT(),e=(typeof EVENTS!=='undefined'?EVENTS:[]).find(x=>x.date===t&&!x.status&&(typeof SCORECARD_EVENTS==='undefined'||SCORECARD_EVENTS.includes(x.id)));
+  if(!e)return '';
+  const d=qrCache[e.id];
+  if(!d)setTimeout(()=>passData(e.id).then(()=>{const b=document.getElementById('gphome');if(b)b.outerHTML=window.passHomeCard()})
+    .catch(err=>{const b=document.querySelector('#gphome .gpqr');if(b)b.textContent=err.message||'Could not make the pass. Pull down to try again.'}),0);
+  return `<div class="card gphome rise" id="gphome"><span class="tag"><i class="ph-fill ph-qr-code"></i> Today &middot; Guest golf pass</span>
+   <h3>${esc(e.name)}</h3><p class="meta">Guests scan with the phone camera. Live scorecard, side games and stats, today plus 72 hours.</p>
+   ${d?qrBox(d):'<div class="gpqr gpload">Making the code...</div>'}
+   <p class="gpcode">${d?esc(e.id.toUpperCase()+'-'+d.code):'&nbsp;'}</p>
+   <div class="acts"><button class="btn" data-gpshare="${d?esc(d.link):''}"${d?'':' disabled'}><i class="ph-bold ph-share-network"></i> Share link</button><button class="btn ghost" data-gpqr="${esc(e.id)}"><i class="ph-bold ph-arrows-out"></i> Full screen</button></div></div>`;
+};
 window.passBtn=e=>isLeader()&&!isPast(e.date)?`<button class="btn small ghost" data-gpqr="${esc(e.id)}"><i class="ph-bold ph-qr-code"></i> Guest pass QR</button>`:'';
 
 /* guests: open the link */

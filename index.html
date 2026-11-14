@@ -1429,7 +1429,7 @@ function renderHome(){
   else if(pg==='invite')v.innerHTML=subChips('home')+inviteHTML();
   else if(pg==='about')v.innerHTML=subChips('home')+aboutHTML();
   else if(pg==='photos')v.innerHTML=subChips('home')+photosHTML();
-  else v.innerHTML=subChips('home')+(window.RNGCLIVE?RNGCLIVE.banner():'')+setupNudge()+appNudge()+overviewHTML();
+  else v.innerHTML=subChips('home')+(window.RNGCLIVE?RNGCLIVE.banner():'')+(window.passHomeCard?passHomeCard():'')+setupNudge()+appNudge()+overviewHTML();
   syncTop();
 }
 const cdNum=d=>{const n=daysTo(d);return n<=0?'<span class="now">Today</span>':`${n}<small>${n===1?'day':'days'}</small>`};
@@ -3476,7 +3476,7 @@ syncTop();
 <script src="chapter.js?v=8"></script>
 <script src="photos.js?v=1"></script>
 <script src="fantasy.js"></script>
-<script src="guestpass.js?v=club3"></script>
+<script src="guestpass.js?v=club4"></script>
 <script src="shop.js?v=club2"></script>
 </body>
 </html>
