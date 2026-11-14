@@ -374,7 +374,8 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .appsteps i{font-size:19px;vertical-align:-3px}
 .apphead{display:flex;gap:12px;align-items:center;margin-bottom:10px}.apphead img{border-radius:14px}
 .a2or{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--muted);font-size:13px}.a2or::before,.a2or::after{content:'';flex:1;height:1px;background:currentColor;opacity:.35}
-#a2hsGuide{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:flex-end;padding:16px}
+#a2hsGuide{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:center;padding:16px}
+#a2hsGuide .a2look{display:flex;gap:12px;margin-top:8px}#a2hsGuide .a2look span{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;color:var(--muted)}#a2hsGuide .a2look i{font-size:30px;width:56px;height:56px;display:grid;place-items:center;border-radius:14px;background:rgba(255,255,255,.12);color:#fff;vertical-align:0}
 #a2hsGuide.bottom{justify-content:flex-end;padding-bottom:calc(env(safe-area-inset-bottom) + 64px)}
 #a2hsGuide.top{justify-content:flex-start;padding-top:calc(env(safe-area-inset-top) + 8px)}#a2hsGuide.top .a2arrow{order:-1}
 #a2hsGuide .a2box{background:var(--card,#16181c);color:var(--text,#fff);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px 16px;max-width:340px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.5)}
@@ -2397,15 +2398,16 @@ function openGetApp(){
     if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(ok).catch(()=>prompt('Copy this link, then open it in Safari:',u));else prompt('Copy this link, then open it in Safari:',u)});
   const sh=$('#shareApp');if(sh)sh.addEventListener('click',()=>navigator.share({title:'Raider Nation Golf Club',text:'Our club app: events, golf scorecard and Raiders games.',url:'https://raidernationgolfclub.com/'}).catch(()=>{}));
 }
-/* Safari way (David, Nov 13): dim the page and point an arrow at Safari's own button; iPhone = bottom right, iPad = top right */
+/* Safari way (David, Nov 13): dim the page, point an arrow at Safari's bar (bottom on iPhone, top on iPad) and show big pictures of the
+   buttons to find. The exact spot moves with Safari's layout setting, so the arrow aims at the bar, not one button (iPad: arrow was off). */
 function safariGuide(ver){
   const old=document.getElementById('a2hsGuide');if(old)old.remove();
   const ipad=/ipad/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),newer=ver>=26||!ver;
-  const first=ipad?`Tap <b>Share</b> <i class="ph-bold ph-export"></i> up here${newer?', or the <b>three dots</b> <i class="ph-bold ph-dots-three"></i> in the address bar':''}`
-    :newer?`Tap the <b>three dots</b> <i class="ph-bold ph-dots-three"></i> down here. See <b>Share</b> <i class="ph-bold ph-export"></i> instead? Tap that.`:`Tap <b>Share</b> <i class="ph-bold ph-export"></i> down here`;
+  const where=ipad?'at the top of Safari':'at the bottom of Safari';
+  const first=`Find one of these buttons ${where} and tap it`;
   const g=document.createElement('div');g.id='a2hsGuide';g.className=ipad?'top':'bottom';g.setAttribute('role','dialog');
   g.innerHTML=`<div class="a2box"><b class="a2title">Add the club app</b><ol>
-    <li>${first}</li>${newer?'<li>Tap <b>Share</b>, then <b>More</b> or <b>View More</b></li>':''}<li>Tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>, then <b>Add</b></li></ol>
+    <li>${first}<div class="a2look"><span><i class="ph-bold ph-export"></i>Share</span>${newer?'<span><i class="ph-bold ph-dots-three"></i>Three dots</span>':''}</div></li>${newer?'<li>Tapped the three dots? Tap <b>Share</b>. Then tap <b>More</b> or <b>View More</b> if you need to.</li>':''}<li>Tap <b>Add to Home Screen</b> <i class="ph-bold ph-plus-square"></i>, then <b>Add</b></li></ol>
     <button class="btn small" type="button">Got it</button></div><svg class="a2arrow" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"${ipad?' style="rotate:180deg"':''}><path d="M22 4h20v30h14L32 60 8 34h14z" fill="#fff"/></svg>`;
   g.addEventListener('click',()=>g.remove());document.body.appendChild(g);
 }
