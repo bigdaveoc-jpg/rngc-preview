@@ -237,6 +237,37 @@ a.card.course{color:inherit;text-decoration:none}
 .mem.alumcard,.card.hofcard{border-color:var(--silver-2)}
 .av.hofav{background:none;border:0;width:44px;height:44px}
 .card.hofcard{background:linear-gradient(135deg,rgba(213,218,225,.16),rgba(213,218,225,.03) 60%),var(--panel)}
+/* player cards (Nov 14 2026) */
+.pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:12px}
+@media (min-width:700px){.pcards{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
+.pcard{perspective:900px;aspect-ratio:5/7;cursor:pointer;outline-offset:3px;-webkit-tap-highlight-color:transparent}
+.pcard .in{position:relative;width:100%;height:100%;transition:transform .6s cubic-bezier(.2,.7,.2,1);transform-style:preserve-3d}
+.pcard.flip .in{transform:rotateY(180deg)}
+.pcard .f,.pcard .b{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:14px;overflow:hidden;padding:12px;display:flex;flex-direction:column;
+  background:radial-gradient(120% 80% at 80% 0%,#2a2d33 0%,#101114 55%,#060708 100%);color:#f5f7fa;box-shadow:0 12px 26px rgba(0,0,0,.45)}
+.pcard .f::before,.pcard .b::before{content:'';position:absolute;inset:0;border-radius:14px;padding:2px;pointer-events:none;
+  background:linear-gradient(135deg,#f5f7fa,#7d8591 35%,#e8ecf1 52%,#5f6670 70%,#d5dae1);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.pcard .f::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.10) 48%,transparent 60%);transform:translateX(-60%);transition:transform .9s ease}
+.pcard:hover .f::after{transform:translateX(60%)}
+.pcard .b{transform:rotateY(180deg)}
+.pcard .num{position:absolute;right:-4px;top:26%;font-size:118px;font-weight:900;line-height:1;color:rgba(255,255,255,.07);letter-spacing:-6px;font-variant-numeric:tabular-nums}
+.pcard .tp{display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c9ced6;position:relative}
+.pcard .tp svg{width:26px;height:26px}
+.pcard .shield{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);opacity:.9}.pcard .shield svg{width:78px;height:78px}
+.pcard .nm{margin-top:auto;font-size:19px;font-weight:900;line-height:1.05;text-transform:uppercase;letter-spacing:.01em;position:relative;overflow-wrap:anywhere}
+.pcard .ps{font-size:12.5px;color:#b8bec7;margin-top:4px;position:relative}
+.pcard .band{margin:10px -12px -12px;padding:7px 12px;background:linear-gradient(90deg,#e8ecf1,#9aa3ae);color:#0a0b0d;font-weight:800;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;position:relative}
+.pcard .b h4{margin:0;font-size:15px;text-transform:uppercase;letter-spacing:.04em}
+.pcard .b ul{list-style:none;padding:0;margin:7px 0 5px;display:grid;gap:4px;font-size:11.5px;line-height:1.25}
+.pcard .b li{padding:4px 7px;background:rgba(255,255,255,.07);border-radius:6px}
+.pcard .b .nt{font-size:11.5px;line-height:1.3;color:#b8bec7;margin:0 0 5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pcard .b .ln{margin-top:auto;display:grid;gap:6px;position:relative}
+.pcard .b .ln{grid-template-columns:1fr 1fr}.pcard .b .ln a:only-child,.pcard .b .ln button:only-child{grid-column:1/-1}
+.pcard .b .ln a,.pcard .b .ln button{display:block;text-align:center;padding:7px 4px;border-radius:9px;font:inherit;font-size:12.5px;font-weight:700;text-decoration:none;cursor:pointer}
+.pcard .b .ln a{background:#e8ecf1;color:#0a0b0d;border:0}.pcard .b .ln button{background:transparent;color:#f5f7fa;border:1px solid rgba(255,255,255,.3)}
+.pcard .hint{display:none}
+@media (prefers-reduced-motion:reduce){.pcard .in{transition:none}.pcard .f::after{display:none}}
 .mem{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;padding:12px 14px;transition:transform .18s var(--ease),border-color .2s}
 .mem:active{transform:scale(.985)}
 .mem b{font-family:var(--display);font-size:20px;text-transform:uppercase;letter-spacing:.02em;line-height:1.05;display:block}
@@ -1288,6 +1319,23 @@ const MEMBERS=[];
 /* alumni and Hall of Fame come from the club's member list on the server (set by club admins) */
 const memBadges=m=>(m&&m.alum?'<span class="badge alum"><i class="ph-fill ph-football"></i> Alumni</span>':'')+(m&&m.hof?'<span class="badge hof"><i class="ph-fill ph-star"></i> Hall of Fame</span>':'');
 const HOFLOGO='<svg viewBox="0 0 40 40" width="44" height="44" aria-label="Hall of Fame" role="img"><path d="M20 2 35 8v12c0 9-7 15-15 18C12 35 5 29 5 20V8Z" fill="#e8ecf1" stroke="#9aa3ae" stroke-width="2"/><path d="M20 6 31 10.5V20c0 6.8-5 11.4-11 14-6-2.6-11-7.2-11-14v-9.5Z" fill="none" stroke="#0a0b0d" stroke-opacity=".35"/><polygon points="20,10 22.4,16.2 29,16.6 23.9,20.8 25.6,27.2 20,23.6 14.4,27.2 16.1,20.8 11,16.6 17.6,16.2" fill="#0a0b0d"/></svg>';
+/* player card (David, Nov 14 2026: "do something cool for the alumni and hall of famers, maybe their player card"):
+   front = number, name, position, years; tap to flip for highlights, the note and the official stats link */
+const pcStats=a=>String((a&&a.stats)||'').split(/\s*[·|;\n]\s*/).map(x=>x.trim()).filter(Boolean).slice(0,6);
+function pcardHTML(m){const a=m.alum||null,h=m.hof||null,no=a&&a.no?esc(a.no):'',st=pcStats(a);
+  const band=h?'Hall of Fame · Class of '+esc(h.year):'Raiders alumni';
+  const sub=a?[a.pos,a.yrs].filter(Boolean).map(esc).join(' · '):esc(h&&h.honor||'');
+  return `<div class="pcard" role="button" tabindex="0" aria-label="${esc(m.name)} player card. Tap to flip." data-pc="${esc(m.id)}"><div class="in">
+   <div class="f">${no?`<div class="num" aria-hidden="true">${no}</div>`:`<div class="shield" aria-hidden="true">${HOFLOGO}</div>`}
+    <div class="tp"><span>${a?'Raiders':'RNGC'}${no?' · #'+no:''}</span>${h?HOFLOGO:''}</div>
+    <div class="nm">${esc(m.name)}</div><div class="ps">${sub||'&nbsp;'}</div>
+    <div class="band">${band}</div></div>
+   <div class="b"><h4>${esc(m.name)}</h4>
+    ${st.length?`<ul>${st.slice(0,h&&a?3:4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+    ${h&&h.honor&&a?`<p class="nt"><b style="color:#f5f7fa">${esc(h.honor)}</b>${h.note?' · '+esc(h.note):''}</p>`:h&&h.note?`<p class="nt">${esc(h.note)}</p>`:''}
+    ${a&&a.note&&!(h&&h.honor)?`<p class="nt">${esc(a.note)}</p>`:''}
+    <div class="ln">${a&&a.link&&/^https:\/\//.test(a.link)?`<a href="${esc(a.link)}" target="_blank" rel="noopener">Career stats</a>`:''}<button type="button" data-dm="${esc(m.id)}">Profile</button></div>
+    <div class="hint">Tap to flip back</div></div></div></div>`}
 const avOf=m=>m&&m.hof?`<span class="av hofav" title="Hall of Fame">${HOFLOGO}</span>`:`<span class="av">${initials(m?m.name:'?')}</span>`;
 const jit=id=>{let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))%997;return[((h%17)-8)*.004,(((h>>2)%17)-8)*.004]};
 const memPos=m=>{const c=CITIES[m.city],j=jit(m.id);return[c.lat+j[0],c.lng+j[1]]};
@@ -2114,7 +2162,9 @@ function alumniView(v,seg){
   v.innerHTML=seg+`<h2 class="sec" style="margin-bottom:0">Alumni &amp; Hall of Fame</h2><p class="sub">Members who played for the team, and members the club honors.</p>
    ${admin?'<div class="acts" style="margin-top:10px"><button class="btn" id="honorAdd"><i class="ph-bold ph-plus"></i> Add or edit</button></div>':''}
    <div class="seg" style="margin-top:10px">${flt.map(([k,l])=>`<button class="chip" data-af="${k}" aria-pressed="${af===k}">${l}</button>`).join('')}</div>
-   <div class="stack" style="margin-top:12px">${L.length?L.map(m=>`<button class="card mem ${m.hof?'hofcard':'alumcard'}" data-dm="${esc(m.id)}">${avOf(m)}<span><b>${esc(m.name)}</b><small>${m.hof?'Hall of Fame '+m.hof.year+(m.hof.honor?' - '+esc(m.hof.honor):''):'Alumni'}${m.alum&&(m.alum.pos||m.alum.yrs)?' - '+esc([m.alum.pos,m.alum.yrs].filter(Boolean).join(', ')):''}</small><span style="display:block">${memBadges(m)}</span>${(m.hof&&m.hof.note)||(m.alum&&m.alum.note)?`<small style="display:block;margin-top:4px">${esc((m.hof&&m.hof.note)||m.alum.note)}</small>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join(''):`<div class="empty"><i class="ph-bold ph-trophy"></i>${admin?'Nobody added yet. Tap Add or edit.':'Nobody added yet. Club leaders add members here.'}</div>`}</div>`;
+   ${L.length?`<div class="pcards rise">${L.map(pcardHTML).join('')}</div><p class="meta" style="margin-top:10px">Tap a card to flip it.</p>`:''}
+   <div class="stack" style="margin-top:12px" hidden>${L.length?L.map(m=>`<button class="card mem ${m.hof?'hofcard':'alumcard'}" data-dm="${esc(m.id)}">${avOf(m)}<span><b>${esc(m.name)}</b><small>${m.hof?'Hall of Fame '+m.hof.year+(m.hof.honor?' - '+esc(m.hof.honor):''):'Alumni'}${m.alum&&(m.alum.pos||m.alum.yrs)?' - '+esc([m.alum.pos,m.alum.yrs].filter(Boolean).join(', ')):''}</small><span style="display:block">${memBadges(m)}</span>${(m.hof&&m.hof.note)||(m.alum&&m.alum.note)?`<small style="display:block;margin-top:4px">${esc((m.hof&&m.hof.note)||m.alum.note)}</small>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join(''):''}</div>
+   ${L.length?'':`<div class="empty" style="margin-top:12px"><i class="ph-bold ph-trophy"></i>${admin?'Nobody added yet. Tap Add or edit.':'Nobody added yet. Club leaders add members here.'}</div>`}`;
 }
 const canLink=m=>!!S.authMe&&(S.authMe.role==='admin'||(S.authMe.leads||[]).some(c=>(m.chapters||[]).includes(c)));
 const SETLINK={};
@@ -2157,7 +2207,7 @@ function pfPublic(m){
     ${m.home?pfCard('Home course',esc(m.home)):''}
     ${m.city?pfCard('City',esc(m.city)):''}
     ${m.hi?pfCard('Handicap index',pfIdx(m)):''}
-    ${m.alum?pfCard('Played for the team',esc([m.alum.pos,m.alum.yrs].filter(Boolean).join(', ')||'Alumni'),m.alum.note?`<p class="meta">${esc(m.alum.note)}</p>`:''):''}
+    ${m.alum?pfCard('Played for the team'+(m.alum.no?' · #'+esc(m.alum.no):''),esc([m.alum.pos,m.alum.yrs].filter(Boolean).join(', ')||'Alumni'),(pcStats(m.alum).length?`<p class="meta">${pcStats(m.alum).map(esc).join(' · ')}</p>`:'')+(m.alum.note?`<p class="meta">${esc(m.alum.note)}</p>`:'')+(m.alum.link&&/^https:\/\//.test(m.alum.link)?`<a class="btn small ghost" style="margin-top:6px" href="${esc(m.alum.link)}" target="_blank" rel="noopener"><i class="ph-bold ph-arrow-square-out"></i> Career stats</a>`:'')):''}
     ${m.hof?pfCard('Hall of Fame, class of '+m.hof.year,esc(m.hof.honor||'Hall of Fame'),m.hof.note?`<p class="meta">${esc(m.hof.note)}</p>`:''):''}`}
 function pfHeader(m){return `<div class="who" style="gap:14px">${avOf(m)}<div><h3 style="margin:0">${esc(m.name)}</h3><span class="pill">${esc(chapLine(m))}</span>${memBadges(m)?`<div>${memBadges(m)}</div>`:''}</div></div>`}
 function openDirMember(id,keep){
@@ -2258,21 +2308,26 @@ function openHonor(id){
    <form id="honForm" novalidate>
     <label for="hnWho">Member</label><select class="field" id="hnWho">${L.map(x=>`<option value="${esc(x.id)}" ${m&&x.id===m.id?'selected':''}>${esc(x.name)} (${esc(chapLine(x))})</option>`).join('')}</select>
     <label class="check"><input type="checkbox" id="hnA" ${m&&m.alum?'checked':''}> Alumni (played for the team)</label>
-    <div id="hnAF"><input class="field" id="hnPos" maxlength="60" placeholder="Position, like Linebacker" value="${esc(a.pos||'')}"><input class="field" id="hnYrs" maxlength="30" placeholder="Years, like 1999-2005" value="${esc(a.yrs||'')}" style="margin-top:8px"><input class="field" id="hnANote" maxlength="240" placeholder="One line about them" value="${esc(a.note||'')}" style="margin-top:8px"></div>
+    <div id="hnAF"><input class="field" id="hnPos" maxlength="60" placeholder="Position, like Linebacker" value="${esc(a.pos||'')}"><input class="field" id="hnYrs" maxlength="30" placeholder="Years, like 1999-2005" value="${esc(a.yrs||'')}" style="margin-top:8px"><input class="field" id="hnANote" maxlength="240" placeholder="One line about them" value="${esc(a.note||'')}" style="margin-top:8px">
+     <input class="field" id="hnNo" inputmode="numeric" maxlength="2" placeholder="Jersey number, like 22" value="${esc(a.no||'')}" style="margin-top:8px">
+     <textarea class="field" id="hnStats" maxlength="160" rows="2" placeholder="Card highlights, split with a dot: Super Bowl XVIII champ · 9 Pro Bowls" style="margin-top:8px">${esc(a.stats||'')}</textarea>
+     <input class="field" id="hnLink" type="url" maxlength="200" placeholder="Career stats link, https://..." value="${esc(a.link||'')}" style="margin-top:8px"></div>
     <label class="check"><input type="checkbox" id="hnH" ${m&&m.hof?'checked':''}> Hall of Fame</label>
     <div id="hnHF"><input class="field" id="hnYear" inputmode="numeric" maxlength="4" placeholder="Class year, like 2026" value="${esc(hf.year||new Date().getFullYear())}"><input class="field" id="hnHonor" maxlength="60" placeholder="Honor, like Chapter Builder" value="${esc(hf.honor||'')}" style="margin-top:8px"><input class="field" id="hnHNote" maxlength="240" placeholder="Why they are in" value="${esc(hf.note||'')}" style="margin-top:8px"></div>
     <button class="btn full" type="submit" style="margin-top:12px"><i class="ph-bold ph-check"></i> Save</button><p class="si-msg" id="hnMsg" role="status"></p></form>`);
   const sync=()=>{$('#hnAF').hidden=!$('#hnA').checked;$('#hnHF').hidden=!$('#hnH').checked};
   const fill=()=>{const x=L.find(y=>y.id===$('#hnWho').value)||{};$('#hnA').checked=!!x.alum;$('#hnH').checked=!!x.hof;
-    $('#hnPos').value=(x.alum&&x.alum.pos)||'';$('#hnYrs').value=(x.alum&&x.alum.yrs)||'';$('#hnANote').value=(x.alum&&x.alum.note)||'';
+    $('#hnPos').value=(x.alum&&x.alum.pos)||'';$('#hnYrs').value=(x.alum&&x.alum.yrs)||'';$('#hnANote').value=(x.alum&&x.alum.note)||'';$('#hnNo').value=(x.alum&&x.alum.no)||'';$('#hnStats').value=(x.alum&&x.alum.stats)||'';$('#hnLink').value=(x.alum&&x.alum.link)||'';
     $('#hnYear').value=(x.hof&&x.hof.year)||new Date().getFullYear();$('#hnHonor').value=(x.hof&&x.hof.honor)||'';$('#hnHNote').value=(x.hof&&x.hof.note)||'';sync()};
   $('#hnA').addEventListener('change',sync);$('#hnH').addEventListener('change',sync);$('#hnWho').addEventListener('change',fill);sync();
   $('#honForm').addEventListener('submit',async ev=>{ev.preventDefault();const msg=$('#hnMsg'),b=ev.target.querySelector('button[type=submit]');
-    const body={id:$('#hnWho').value,alum:$('#hnA').checked?{pos:$('#hnPos').value,yrs:$('#hnYrs').value,note:$('#hnANote').value}:null,
+    const body={id:$('#hnWho').value,alum:$('#hnA').checked?{pos:$('#hnPos').value,yrs:$('#hnYrs').value,note:$('#hnANote').value,no:$('#hnNo').value,stats:$('#hnStats').value,link:$('#hnLink').value.trim()}:null,
       hof:$('#hnH').checked?{year:$('#hnYear').value,honor:$('#hnHonor').value,note:$('#hnHNote').value}:null};
     b.disabled=true;msg.textContent='Saving...';
     try{await authCall('/club/honor',body,authTok());closeSheet();toast('Saved');DIR.items=null;loadDir()}catch(err){msg.textContent=err.message;b.disabled=false}})}
+document.addEventListener('keydown',e=>{const pc=e.target.closest&&e.target.closest('.pcard');if(pc&&e.target===pc&&(e.key==='Enter'||e.key===' ')){e.preventDefault();pc.classList.toggle('flip')}});
 document.addEventListener('click',e=>{
+  const pc=e.target.closest('.pcard');if(pc&&!e.target.closest('a,[data-dm]')){pc.classList.toggle('flip');return}
   const dm=e.target.closest('[data-dm]');if(dm){openDirMember(dm.dataset.dm);return}
   const dc=e.target.closest('[data-dch]');if(dc){S.dirCh=dc.dataset.dch;save();if(S.tab==='settings')renderSettings();else renderMembers();return}
   const mt=e.target.closest('[data-msgto]');if(mt){const id=mt.dataset.msgto;closeSheet();setTimeout(()=>openCompose({person:id}),330);return}
