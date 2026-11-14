@@ -245,7 +245,7 @@ function hub(h){$('#app').className='wrap';
   if(a==='groups')return trGroups();
   if(a==='group'&&b)return trGroup(b);
   if(a==='events')return trEvents();
-  if(a==='new')return trNew(b||null);
+  if(a==='new')return b==='solo'||b==='crew'?trNew(null,b==='crew'):trNew(b||null);
   if(a==='round'&&b)return trRound(b);
   if(a==='log')return trLog(b||'all');
   if(a==='welcome')return trWelcome();
@@ -280,9 +280,9 @@ function trMe(){const my=trMine(),full=my.filter(x=>x.p.holes===18&&x.p.par>=66)
    ${live.map(l=>`<section class="card ev" style="padding:14px;margin-top:14px"><span class="tag rngc">In progress</span><h2 style="font-size:24px;margin:6px 0 2px">${esc(l.name)}</h2>
      <div class="muted">${esc(COURSES[l.course].name)} · ${esc(l.dateTxt)} · thru ${trThru(l.id)}</div>
      <div class="row2"><a class="btn" href="./?r=${l.id}#/hole/${trNextHole(l.id)}">Keep scoring</a><button class="btn ghost" data-drop="${l.id}">Throw it out</button></div></section>`).join('')}
-   <a class="btn block" style="margin-top:14px;min-height:60px;font-size:20px" href="#/new"><i class="ph-bold ph-flag"></i> Start a round</a>
-   <div class="row2" style="margin-top:8px"><a class="btn ghost" href="#/groups"><i class="ph-bold ph-users-three"></i> Group round</a><button class="btn ghost joinlive"><i class="ph-bold ph-broadcast"></i> Join a live round</button></div>
-   ${TR_TOK()?'<button class="btn ghost block" data-bringguest style="margin-top:8px"><i class="ph-bold ph-ticket"></i> Bring a guest, free for 72 hours</button>':''}
+   <div class="lbl">Play golf</div>
+   <div class="row2 playgo"><a class="btn" href="#/new/solo"><i class="ph-bold ph-user"></i><span>Play solo</span><small>just you</small></a><a class="btn" href="#/new/crew"><i class="ph-bold ph-users-three"></i><span>Play with a group</span><small>you + up to 3</small></a></div>
+   <div class="row2" style="margin-top:8px"><button class="btn ghost joinlive"${TR_TOK()?'':' style="grid-column:1/-1"'}><i class="ph-bold ph-broadcast"></i> Join a live round</button>${TR_TOK()?'<button class="btn ghost" data-bringguest><i class="ph-bold ph-ticket"></i> Bring a guest</button>':''}</div>
    <div class="lbl">Your game</div>
    <div class="tiles"><button class="card" id="editMe"><b>${hcTop}</b><span>Handicap</span><small>${hcSub}</small></button>
     ${tile(grossA.length?Math.round(trAvg(grossA)):'-','Avg score',grossA.length?'last '+grossA.length+' full 18s':'after a full 18')}
@@ -527,9 +527,9 @@ function trPrefTee(c){const p=G.pref||{tees:'mid',w:false},all=c.tees,ts=all.fil
   return (p.tees==='back'?L[0]:p.tees==='fwd'?L[L.length-1]:L[Math.floor((L.length-1)/2)]).id}
 function trRecent(id){G.recent=[id,...(G.recent||[]).filter(x=>x!==id)].slice(0,8)}
 const GAMES={none:['No bet',null],sk2:['Skins $2',{type:'skins',amt:2}],sk5:['Skins $5',{type:'skins',amt:5}],na5:['Nassau $5',{type:'nassau',amt:5}],na10:['Nassau $10',{type:'nassau',amt:10}]};
-function trNew(gid){const g=gid?G.groups.find(x=>x.id===gid):null;
-  if(!NR||NR.gid!==(g?g.id:null)){const co=(G.recent||[]).find(k=>COURSES[k])||(G.home&&COURSES[G.home]?G.home:'chimera');
-    NR={gid:g?g.id:null,course:co,tee:null,who:g?g.members.slice(0,4).map(m=>m.id):['me'],guests:[],format:g&&g.format?g.format:'stroke',hcp:true,game:g&&g.game||'none',sg:(G.pref||{}).sg||'course'}}
+function trNew(gid,crew){const g=gid?G.groups.find(x=>x.id===gid):null;
+  if(!NR||NR.gid!==(g?g.id:null)||(crew!==undefined&&!g&&!!NR.crew!==crew)){const co=(G.recent||[]).find(k=>COURSES[k])||(G.home&&COURSES[G.home]?G.home:'chimera');
+    NR={gid:g?g.id:null,course:co,tee:null,who:g?g.members.slice(0,4).map(m=>m.id):['me'],guests:[],format:g&&g.format?g.format:'stroke',hcp:true,game:g&&g.game||'none',sg:(G.pref||{}).sg||'course',crew:!!crew}}
   if(!COURSES[NR.course])NR.course='chimera';
   const c=COURSES[NR.course];if(!NR.tee||!c.tees.find(t=>t.id===NR.tee))NR.tee=((G.lastTee||{})[NR.course]&&c.tees.find(t=>t.id===G.lastTee[NR.course]))?G.lastTee[NR.course]:trPrefTee(c);
   const pool=g?g.members:[{id:'me',name:G.me.name,hcp:G.me.hcp}],count=NR.who.length+NR.guests.length;
@@ -537,7 +537,8 @@ function trNew(gid){const g=gid?G.groups.find(x=>x.id===gid):null;
   if(pw)tg.reverse();const selW=(tees.find(t=>t.id===NR.tee)||{}).w,noW=pw&&!tees.some(t=>t.w);
   const teeBtns=ts=>`<div class="teel">${ts.map(x=>{const yd=trSum(x.y||[]);return `<button data-tee="${x.id}" data-w="${x.w?1:0}" aria-pressed="${x.id===NR.tee}"><b>${esc(x.name.replace(/ · W$/,''))}</b><span>${yd?yd.toLocaleString()+' yds':'Yards not set'}</span></button>`}).join('')}</div>`;
   const canNassau=count===2||count===4;if(!canNassau&&NR.game.startsWith('na'))NR.game='none';if(count<2)NR.game='none';
-  $('#app').innerHTML=trBar(g?g.name:'New round',g?'Group round':'Just you, or bring a guest',trBack(g?'#/group/'+g.id:'#/me'))+`
+  const crewM=!g&&NR.crew,saved=G.groups.filter(x=>!x.demo);
+  $('#app').innerHTML=trBar(g?g.name:crewM?'Group round':'Solo round',g?'Group round':crewM?'You + up to 3 players':'Just you',trBack(g?'#/group/'+g.id:'#/me'))+`
    <div class="lbl">Course</div>
    <div class="chips2">${trCoChips().map(([k,v])=>`<button class="chip2" data-co="${k}" aria-pressed="${k===NR.course}">${esc(v.name)}</button>`).join('')}<button class="chip2" id="findCo"><i class="ph-bold ph-magnifying-glass"></i> Find a course</button><button class="chip2" id="addCo"><i class="ph-bold ph-plus"></i> Add your own</button></div>
    <p style="font-size:16px;margin-top:8px"><b>Playing ${esc(c.name)}</b>${c.city?`<span class="muted"> · ${esc(c.city)}${c.n9?' · 9 holes, played twice for 18':''}</span>`:''}</p>
@@ -546,7 +547,9 @@ function trNew(gid){const g=gid?G.groups.find(x=>x.id===gid):null;
    ${tg.length?`${tg.length>1||noW?`<div class="sublbl">${tg[0][0]}</div>`:''}${teeBtns(tg[0][1])}`:''}
    ${tg.length>1?`<details class="moretees" ${(pw?!selW:selW)?'open':''}><summary>${tg[1][0]} (${tg[1][1].length})</summary>${teeBtns(tg[1][1])}</details>`:''}
    <div class="lbl">Who's playing · ${count} of 4</div>
-   <div class="chips2">${pool.map(p=>`<button class="chip2" data-pl="${p.id}" aria-pressed="${NR.who.includes(p.id)}">${esc(first(p.name))} <span style="font-weight:500;opacity:.7">${trHc(p.hcp)}</span></button>`).join('')}${NR.guests.map((p,i)=>`<button class="chip2" data-ug="${i}" aria-pressed="true" aria-label="Remove ${esc(p.name)}">${esc(first(p.name))} <span style="font-weight:500;opacity:.7">${trHc(p.hcp)}</span> <i class="ph-bold ph-x"></i></button>`).join('')}${count<4?`<button class="chip2" id="addG"><i class="ph-bold ph-plus"></i> Add a guest</button>`:''}</div>
+   ${crewM&&saved.length?`<div class="chips2" style="margin-bottom:8px"><span class="muted" style="font-size:14px;align-self:center">Your groups:</span>${saved.map(x=>`<a class="chip2" href="#/new/${x.id}"><i class="ph-bold ph-users-three"></i> ${esc(x.name)}</a>`).join('')}</div>`:''}
+   <div class="chips2">${pool.map(p=>`<button class="chip2" data-pl="${p.id}" aria-pressed="${NR.who.includes(p.id)}">${esc(first(p.name))} <span style="font-weight:500;opacity:.7">${trHc(p.hcp)}</span></button>`).join('')}${NR.guests.map((p,i)=>`<button class="chip2" data-ug="${i}" aria-pressed="true" aria-label="Remove ${esc(p.name)}">${esc(first(p.name))} <span style="font-weight:500;opacity:.7">${trHc(p.hcp)}</span> <i class="ph-bold ph-x"></i></button>`).join('')}${count<4&&!crewM?`<button class="chip2" id="addG"><i class="ph-bold ph-plus"></i> Add a player</button>`:''}</div>
+   ${count<4&&crewM?`<button class="btn block" id="addG" style="margin-top:10px"><i class="ph-bold ph-user-plus"></i> Add a player</button>`:''}
    ${NR.guests.length&&TR_TOK()?`<button class="linkbtn" data-bringguest style="display:block;margin:8px 0 0"><i class="ph-bold ph-ticket"></i> Give ${esc(first(NR.guests[0].name))}${NR.guests.length>1?' and the group':''} 72 hours of golf in the app</button>`:''}
    ${count===1?`<div class="lbl">Your game today</div>
    <div class="sggrid">${TR_SG.map(([k,l,,sh])=>`<button class="card fmtc" data-sg="${k}" aria-pressed="${(NR.sg||'course')===k}"><b>${l}</b><span>${sh}</span></button>`).join('')}</div>
@@ -556,7 +559,7 @@ function trNew(gid){const g=gid?G.groups.find(x=>x.id===gid):null;
    <div class="lbl">Handicaps ${hlp('net')}</div>
    <div class="seg" role="group" aria-label="Handicaps"><button data-h="0" aria-pressed="${!NR.hcp}">Gross, no strokes</button><button data-h="1" aria-pressed="${NR.hcp}">Net, with strokes</button></div>
    <p class="muted" style="font-size:14px;margin-top:6px">${NR.hcp?'Net: your handicap strokes come off, so players of any level have a fair shot.':'Gross: just the strokes you took, no handicap.'}</p>
-   ${count===1?`<p class="muted" style="font-size:14px;margin:8px 0 0">Playing with a buddy who isn't on the app? Tap Add a guest above for skins or a Nassau.</p></details>`:''}
+   ${count===1?`<p class="muted" style="font-size:14px;margin:8px 0 0">Playing with a buddy? Tap Add a player above for skins or a Nassau.</p></details>`:''}
    ${count>1?`<div class="lbl">Side game ${hlp('skins')}</div>
    <div class="chips2">${Object.entries(GAMES).filter(([k])=>canNassau||!k.startsWith('na')).map(([k,[l]])=>`<button class="chip2" data-game="${k}" aria-pressed="${NR.game===k}">${l}</button>`).join('')}</div>
    ${NR.game.startsWith('na')?`<p class="note"><i class="ph-bold ph-info"></i><span>${count===4?(()=>{const nm=[...NR.who.map(id=>{const p=pool.find(x=>x.id===id);return p?first(p.name):'?'}),...NR.guests.map(p=>first(p.name))];return esc(nm[0]+' & '+nm[2]+' vs '+nm[1]+' & '+nm[3])+', better ball. '})():''}Front 9, back 9 and overall, ${NR.hcp?'net':'gross'}. Change sides from the coin button on the first tee.</span></p>`:''}
@@ -585,17 +588,19 @@ function trNew(gid){const g=gid?G.groups.find(x=>x.id===gid):null;
       const t={id:'my'+Date.now().toString(36),name:($('#otN').value.trim()||'My tee')+' · W',rating:rt,slope:sl,y:(base.y||[]).slice()};
       const mt=(G.myTees||(G.myTees={}));(mt[NR.course]||(mt[NR.course]=[])).push(t);c.tees.push(t);NR.tee=t.id;gsave();closeSheet();trNew(gid)}};
   const ag=$('#addG');if(ag)ag.onclick=()=>{
-    $('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">Add a guest</h2>
-     <div class="trrow2"><input class="field" id="agN" placeholder="Name" autocomplete="off"><input class="field" id="agI" type="number" inputmode="decimal" step="0.1" placeholder="Index"></div>
+    $('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">Add a player</h2>
+     <div class="trrow2"><input class="field" id="agN" placeholder="Name" autocomplete="off"><input class="field" id="agI" type="number" inputmode="decimal" step="0.1" placeholder="Handicap"></div>
+     <p class="muted" style="font-size:14px;margin:6px 0 0">Handicap is optional. Blank counts as 18.</p>
      <button class="btn block" style="margin-top:12px" id="agSave">Add</button><button class="btn ghost block" style="margin-top:8px" id="closeSheet">Cancel</button>`;
     trOpen();$('#agN').focus();
     $('#agSave').onclick=()=>{const n=$('#agN').value.trim();if(!n){$('#agN').focus();return}NR.guests.push({id:'q'+Date.now().toString(36),name:n,hcp:trIdx($('#agI').value)});closeSheet();trNew(gid)}};
+  if(crewM&&count===1&&!NR.asked&&ag){NR.asked=1;ag.click()}
   $('#goR').onclick=()=>trCreate(g)}
 
 function trCreate(g){const pool=g?g.members:[],me={id:'me',name:G.me.name,hcp:G.me.hcp};
   const ps=[me,...pool.filter(p=>p.id!=='me'&&NR.who.includes(p.id)).map(p=>({id:p.id,name:p.name,hcp:p.hcp})),...NR.guests.map(p=>({id:p.id,name:p.name,hcp:p.hcp,guest:true}))];
   const id='c'+Date.now().toString(36),now=Date.now();
-  G.live[id]={id,kind:g?'group':'solo',group:g?g.id:null,name:g?g.name:(ps.length>1?'Casual round':'Solo round'),date:now,dateTxt:trDay(now),course:NR.course,
+  G.live[id]={id,kind:g?'group':'solo',group:g?g.id:null,name:g?g.name:(ps.length>1?'Group round':'Solo round'),date:now,dateTxt:trDay(now),course:NR.course,
     cfg:{format:NR.format,tee:NR.tee,hcp:NR.hcp,allow:FORMATS[NR.format].allow,ctp:[],ld:0,skins:'off',buyin:0,sg:ps.length===1?NR.sg||'course':null},players:ps,
     bench:g?g.members.filter(p=>p.id!=='me'&&!NR.who.includes(p.id)).map(p=>({id:p.id,name:p.name,hcp:p.hcp,club:''})):[]};
   trRecent(NR.course);(G.lastTee||(G.lastTee={}))[NR.course]=NR.tee;if(g){g.format=NR.format;g.game=NR.game}
