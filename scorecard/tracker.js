@@ -845,7 +845,7 @@ function holeTop(n){const m=CO().maps&&CO().maps[n];if(!m)return holeInfoBtn(n);
 function holeYardsWire(n){trGpsStop();const m=CO().maps&&CO().maps[n];if(!m)return;
   const go=$('#yGo');if(go)go.onclick=()=>{G.gps=true;gsave();hole(n)};
   if(G.gps===false||!('geolocation'in navigator))return;
-  trGpsId=navigator.geolocation.watchPosition(p=>{const g=greenYards(n,p.coords.latitude,p.coords.longitude),src=$('#ySrc');if(!src)return;
+  trGpsId=navigator.geolocation.watchPosition(p=>{window.RNGC_FIX={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy,t:Date.now()};const g=greenYards(n,p.coords.latitude,p.coords.longitude),src=$('#ySrc');if(!src)return;
     if(g.far){src.textContent=`Yards from the tee · you're ${g.mi} mi from the course`;return}
     if(g.center>(TEE().y[n-1]||m.yd)+20){src.textContent=`Yards from the tee · GPS shows you're not on this hole yet`;return}
     $('#yF').textContent=g.front;$('#yC').textContent=g.center;$('#yB').textContent=g.back;{const ty=TEE().y[n-1]||m.yd,dn=ty-g.center;if(dn>25)src.innerHTML=`<b class="ylive"><i class="ph-fill ph-map-pin"></i> From where you stand</b> · the hole is ${ty} from the tee`;else src.textContent=`Yards from the tee box · ${ty} tee to green`}},

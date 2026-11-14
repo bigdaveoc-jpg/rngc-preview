@@ -225,6 +225,17 @@ body.sun{--rough:#dfe8dc}
 .hd{display:grid;grid-template-columns:128px 1fr;gap:14px;align-items:start;margin-top:12px}
 .hmap{width:128px;height:min(50dvh,380px);background:var(--rough);border-radius:10px;overflow:hidden}
 .hmap svg{width:100%;height:100%;display:block}
+#bigh{position:fixed;inset:0;z-index:60;background:var(--rough);display:none;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#bigh.on{display:flex}body.bh-open{overflow:hidden}
+.bhbar{display:flex;align-items:center;gap:10px;padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));background:var(--panel);border-bottom:1px solid var(--line)}
+.bhbar b{font-size:22px}.bhbar span{flex:1;color:var(--muted);font-size:15px}.bhbar .ib{min-width:44px;min-height:44px}.bhbar .ib.on{background:var(--silver);color:var(--on-silver)}
+.bhmap{flex:1;min-height:0}.bhmap svg{width:100%;height:100%;display:block;touch-action:manipulation;cursor:crosshair}
+.bhread{display:flex;align-items:center;gap:18px;min-height:72px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));background:var(--panel);border-top:1px solid var(--line)}
+.bhn{display:flex;flex-direction:column}.bhn b{font-size:34px;line-height:1;font-variant-numeric:tabular-nums}.bhn span{font-size:13px;color:var(--muted)}
+.bhread .linkbtn{margin-left:auto;min-height:44px}.bhhint{color:var(--muted);font-size:15px;display:flex;gap:8px;align-items:center}
+.hmap[role=button]{cursor:zoom-in}
+#bigh svg.sat path[fill]{fill-opacity:.12}#bigh svg.sat path[fill="#6fbf7a"]{fill-opacity:0;stroke:#fff;stroke-opacity:.75;stroke-width:1}#bigh svg.sat{background:#000}
+
 .hlist{list-style:none;display:grid;gap:10px}
 .hlist li{display:flex;gap:10px;align-items:flex-start;font-size:15px;line-height:1.3}
 .hlist li i{font-size:18px;color:var(--silver-2);margin-top:1px;flex:none}
@@ -333,7 +344,7 @@ document.write('<div style="min-height:100vh;display:flex;align-items:center;jus
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Team card"></div>
 <script src="../bucks.js?v=club2"></script>
-<script src="holes-chimera.js?v=27"></script>
+<script src="holes-chimera.js?v=28"></script>
 <script>
 /* ===================== DATA ===================== */
 /* Chimera Golf Club, Henderson NV. Real card: pars, yardages, stroke index and rating/slope per tee
@@ -797,6 +808,57 @@ function holeSvg(n,big){const m=CO().maps&&CO().maps[n];if(!m)return'';
     extra+=`<circle cx="${gx[0]}" cy="${gx[1]}" r="2" fill="#0a0b0d"/><line x1="${gx[0]}" y1="${gx[1]}" x2="${gx[0]}" y2="${gx[1]-14}" stroke="#0a0b0d" stroke-width="1.2"/><path d="M${gx[0]} ${gx[1]-14}l7 2.5-7 2.5z" fill="#e25c5c"/>`}
   return `<svg viewBox="${m.vb.join(' ')}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Map of hole ${n}">${sh}${extra}</svg>`}
 
+/* Full-screen hole view (Nov 13 2026, after studying Hole19): tap anywhere on the hole for yards to that spot and
+   from it to the middle of the green; the flag button zooms to the green and back. Yards start from where you stand
+   when the phone has a fix on this hole and the map knows its tee spot, otherwise from the tee. */
+window.RNGC_FIX=window.RNGC_FIX||null;
+function holeLocal(m,lat,lng){if(!m.tc)return null;const[ta,tn]=m.tc,kx=111320*Math.cos(ta*Math.PI/180),ky=110540;
+  const gx=(m.gc[1]-tn)*kx,gy=(m.gc[0]-ta)*ky,phi=Math.atan2(-m.greenAt[1],m.greenAt[0])-Math.atan2(gy,gx),c=Math.cos(phi),s=Math.sin(phi);
+  const x=(lng-tn)*kx,y=(lat-ta)*ky;return[x*c-y*s,-(x*s+y*c)]}
+function bigHole(n){const m=CO().maps&&CO().maps[n];if(!m)return;const c=CO(),tee=TEE();let el=$('#bigh');
+  if(!el){el=document.createElement('div');el.id='bigh';document.body.appendChild(el)}
+  const ty=tee.y[n-1]||m.yd;
+  el.innerHTML=`<div class="bhbar"><button class="ib" id="bhX" aria-label="Close the hole view"><i class="ph-bold ph-x"></i></button><b>Hole ${n}</b><span>Par ${c.par[n-1]} · ${ty} yds</span><button class="ib" id="bhG" aria-label="Zoom to the green"><i class="ph-bold ph-flag"></i></button></div>
+   <div class="bhmap" id="bhMap">${holeSvg(n,true)}</div>
+   <div class="bhread" id="bhRead" aria-live="polite"><span class="bhhint"><i class="ph-bold ph-target"></i> Tap anywhere on the hole for yards to that spot</span></div>`;
+  el.classList.add('on');document.body.classList.add('bh-open');
+  const svg=el.querySelector('svg'),NS='http://www.w3.org/2000/svg',G=m.greenAt,box=$('#bhMap').getBoundingClientRect(),asp=box.width&&box.height?box.width/box.height:.5;
+  /* fill the screen like a photo: widen (or lengthen) the hole's box to the screen's shape, centered */
+  const fit=([x,y,w,h])=>{if(w/h<asp){const W=h*asp;x-=(W-w)/2;w=W}else{const H=w/asp;y-=(H-h)/2;h=H}return[x,y,w,h].map(v=>Math.round(v*10)/10)};
+  const fv=fit(m.vb),full=fv.join(' ');svg.setAttribute('viewBox',full);svg.setAttribute('preserveAspectRatio','xMidYMid slice');
+  const R=Math.max(14,(m.depth||24)/YD/2+12),gbox=fit([G[0]-R,G[1]-R*1.25,2*R,2.5*R]).join(' ');
+  const layer=document.createElementNS(NS,'g');svg.appendChild(layer);
+  /* aerial photo under the drawing: USGS NAIP (public domain, free), fetched north-up for the hole's box and turned
+     to match the map. Needs the tee spot (m.tc); maps without it keep the drawing only. */
+  if(m.tc){const[ta,tn]=m.tc,kx=111320*Math.cos(ta*Math.PI/180),ky=110540,gx=(m.gc[1]-tn)*kx,gy=(m.gc[0]-ta)*ky;
+    const phi=Math.atan2(-G[1],G[0])-Math.atan2(gy,gx),c=Math.cos(phi),s=Math.sin(phi),[vx,vy,vw,vh]=fv,pad=10;
+    const en=([X,Y])=>[X*c-Y*s,-X*s-Y*c],cs=[[vx-pad,vy-pad],[vx+vw+pad,vy-pad],[vx-pad,vy+vh+pad],[vx+vw+pad,vy+vh+pad]].map(en);
+    const W=Math.min(...cs.map(q=>q[0])),E=Math.max(...cs.map(q=>q[0])),S=Math.min(...cs.map(q=>q[1])),N=Math.max(...cs.map(q=>q[1]));
+    const px=Math.min(1600,Math.round((E-W)/.6)),py=Math.min(1600,Math.round((N-S)/.6)),f=v=>v.toFixed(6);
+    const bb=[f(tn+W/kx),f(ta+S/ky),f(tn+E/kx),f(ta+N/ky)].join(',');
+    const img=document.createElementNS(NS,'image');img.setAttribute('href',`https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=${bb}&bboxSR=4326&imageSR=4326&size=${px},${py}&format=jpg&f=image`);
+    img.setAttribute('x',W);img.setAttribute('y',-N);img.setAttribute('width',E-W);img.setAttribute('height',N-S);img.setAttribute('preserveAspectRatio','none');
+    img.setAttribute('transform',`matrix(${c} ${-s} ${s} ${c} 0 0)`);
+    img.addEventListener('load',()=>svg.classList.add('sat'));img.addEventListener('error',()=>img.remove());
+    svg.insertBefore(img,svg.firstChild)}
+  const sc=()=>{const b=svg.viewBox.baseVal;return Math.max(b.width,b.height)/300};
+  const me=()=>{const f=window.RNGC_FIX;if(!f||Date.now()-f.t>60000)return null;const p=holeLocal(m,f.lat,f.lng);if(!p)return null;
+    const dg=Math.hypot(p[0]-G[0],p[1]-G[1])*YD;return dg<=ty+60?p:null};
+  let tgt=null;
+  const draw=()=>{const k=sc(),o=me(),from=o||[0,0];let h='';
+    if(o)h+=`<circle cx="${o[0]}" cy="${o[1]}" r="${4.5*k}" fill="#3b82f6" stroke="#fff" stroke-width="${1.6*k}"/>`;
+    if(tgt){const a=Math.round(Math.hypot(tgt[0]-from[0],tgt[1]-from[1])*YD),b=Math.round(Math.hypot(G[0]-tgt[0],G[1]-tgt[1])*YD);
+      h+=`<polyline points="${from.join(',')} ${tgt.join(',')} ${G.join(',')}" fill="none" stroke="#fff" stroke-width="${1.6*k}"/>`;
+      h+=`<circle cx="${tgt[0]}" cy="${tgt[1]}" r="${7*k}" fill="none" stroke="#fff" stroke-width="${1.8*k}"/><circle cx="${tgt[0]}" cy="${tgt[1]}" r="${1.6*k}" fill="#fff"/>`;
+      const lab=(p,q,t)=>{const x=(p[0]+q[0])/2+8*k,y=(p[1]+q[1])/2;return `<text x="${x}" y="${y}" font-size="${13*k}" font-weight="800" fill="#fff" stroke="#0a0b0d" stroke-width="${3*k}" paint-order="stroke" font-family="Barlow,system-ui">${t}</text>`};
+      h+=lab(from,tgt,a)+lab(tgt,G,b);
+      $('#bhRead').innerHTML=`<div class="bhn"><b>${a}</b><span>${o?'From you':'From the tee'}</span></div><div class="bhn"><b>${b}</b><span>Then to the green</span></div><button class="linkbtn" id="bhClr">Clear</button>`;
+      $('#bhClr').onclick=()=>{tgt=null;$('#bhRead').innerHTML='<span class="bhhint"><i class="ph-bold ph-target"></i> Tap anywhere on the hole for yards to that spot</span>';draw()}}
+    layer.innerHTML=h};
+  svg.addEventListener('click',e=>{const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());tgt=[Math.round(q.x*10)/10,Math.round(q.y*10)/10];draw()});
+  let zoomed=false;$('#bhG').onclick=()=>{zoomed=!zoomed;svg.setAttribute('viewBox',zoomed?gbox:full);$('#bhG').classList.toggle('on',zoomed);$('#bhG').setAttribute('aria-label',zoomed?'Back to the whole hole':'Zoom to the green');draw()};
+  const close=()=>{el.classList.remove('on');document.body.classList.remove('bh-open');clearInterval(el._t);el.innerHTML=''};
+  $('#bhX').onclick=close;clearInterval(el._t);el._t=setInterval(draw,3000);draw()}
 const nice=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
 function holeNotes(n){const m=CO().maps&&CO().maps[n];if(!m)return null;const teeY=TEE().y[n-1]||m.yd;
   const hz=m.hz.filter(z=>!(z.to-z.from<=1&&z.from>=m.yd-20));
@@ -826,7 +888,7 @@ function greenYards(n,lat,lng){const m=CO().maps[n],c=m.gc,kx=111320*Math.cos(c[
   if(f==null){f=d;bk=d}return{front:Math.round(f*YD),center:Math.round(d*YD),back:Math.round(bk*YD),far:d>3000,mi:(d/1609).toFixed(1)}}
 function startGps(n){const box=$('#gpsNums');if(!('geolocation'in navigator)){box.innerHTML='<p class="muted">This phone has no GPS in the browser.</p>';return}
   box.innerHTML='<p class="muted">Finding you...</p>';stopGps();
-  gpsId=navigator.geolocation.watchPosition(p=>{const g=greenYards(n,p.coords.latitude,p.coords.longitude);
+  gpsId=navigator.geolocation.watchPosition(p=>{window.RNGC_FIX={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy,t:Date.now()};const g=greenYards(n,p.coords.latitude,p.coords.longitude);
     box.innerHTML=g.far?`<p class="muted">You're ${g.mi} miles from the course. Yards show up once you're on it.</p>`
       :`<div class="nums"><div><b>${g.front}</b><span>Front</span></div><div><b>${g.center}</b><span>Center</span></div><div><b>${g.back}</b><span>Back</span></div></div><p class="src">GPS: from where you stand right now, not the tee${p.coords.accuracy>=3?', give or take '+Math.round(p.coords.accuracy*YD):''}.</p>`},
    e=>{box.innerHTML='<p class="muted">'+(e.code===1?'Location is off for this page. Turn it on in your phone settings to see yards.':'No GPS signal yet. Try again in a moment.')+'</p>';stopGps()},{enableHighAccuracy:true,maximumAge:3000,timeout:20000})}
@@ -839,7 +901,7 @@ function openHole(n){const h=holeNotes(n);if(!h)return;const c=CO(),tee=TEE();
    <div class="card gps"><div style="display:flex;align-items:center;gap:10px"><b style="flex:1">Yards from where you stand</b><button class="btn ghost" style="min-height:40px;font-size:15px" id="gpsGo"><i class="ph-bold ph-crosshair"></i> Use my location</button></div><div id="gpsNums"><p class="muted" style="font-size:14px">Finding you...</p></div></div>
    <p class="src">Hole shapes © OpenStreetMap contributors. White dots are yards to the middle of the green. Close, not laser exact.</p>
    <button class="btn ghost block" style="margin-top:12px;position:sticky;bottom:0;z-index:2;background:var(--panel)" id="closeSheet">Back to scoring</button>`;
-  $('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#closeSheet').onclick=closeSheet;$('#gpsGo').onclick=()=>startGps(n);if(G.gps!==false)startGps(n);else $('#gpsNums').innerHTML='<p class="muted" style="font-size:14px">Tap to see front, center and back from where you stand.</p>'}
+  $('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#closeSheet').onclick=closeSheet;$('#gpsGo').onclick=()=>startGps(n);{const hm=$('#sheet .hmap');if(hm){hm.setAttribute('role','button');hm.setAttribute('aria-label','Open the full hole view');hm.onclick=()=>bigHole(n)}}if(G.gps!==false)startGps(n);else $('#gpsNums').innerHTML='<p class="muted" style="font-size:14px">Tap to see front, center and back from where you stand.</p>'}
 
 function swipe(el,left,right){let x0=null,y0=null;el.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
   el.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5)(dx<0?left:right)()})}
@@ -1144,7 +1206,7 @@ function tellClub(){try{if(window.parent!==window)window.parent.postMessage({gol
 addEventListener('hashchange',tellClub);tellClub();fitSoon();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
-<script src="tracker.js?v=37"></script>
+<script src="tracker.js?v=38"></script>
 <script src="../live.js?v=3"></script>
 </body>
 </html>
