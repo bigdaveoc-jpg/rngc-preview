@@ -933,6 +933,15 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
   .top,.tabs{background:rgba(14,16,20,.5);-webkit-backdrop-filter:blur(24px) saturate(150%);backdrop-filter:blur(24px) saturate(150%);border-right:1px solid var(--glass-edge)}
 }
 @media (prefers-reduced-transparency:reduce){.card{background:var(--panel);-webkit-backdrop-filter:none;backdrop-filter:none}}
+/* phones: smooth page changes (David, Nov 14: tapping the logo home "jumps around"). Every card had its own frosted blur and
+   each one slid in on its own, so the phone re-blurred a dozen panels every frame. On a phone the cards sit on a still
+   background, so the blur showed nothing: cards keep the glass look without it, and a page change is one quick fade. */
+@media (max-width:999px){
+  .card{-webkit-backdrop-filter:none;backdrop-filter:none}
+  .rise > *{animation:none}
+  .view,.view.on{transform:none;transition:opacity .18s ease,visibility 0s .18s}
+  .view.on{transition:opacity .18s ease}
+}
 
 /* bottom menu locked on every page (David, Nov 14 2026: "on mobile the bottom menu navigation disappears or becomes moved and you
    have to scroll. That menu should be on every page and locked in"). Phones: the menu is pinned to the screen, the page itself never
@@ -1438,16 +1447,18 @@ function subChips(t){
 }
 const pageHead=(title,sub)=>`<h2 class="sec pagehead">${title}</h2>${sub?`<p class="sub">${sub}</p>`:''}`;
 function renderHome(){
-  const pg=S.hpage||'overview',v=$('#v-home');
-  if(pg==='join')v.innerHTML=subChips('home')+joinHTML();
-  else if(pg==='leaders')v.innerHTML=subChips('home')+leadersHTML();
-  else if(pg==='shop')v.innerHTML=subChips('home')+shopHTML();
-  else if(pg==='sponsors')v.innerHTML=subChips('home')+sponsorsHTML();
-  else if(pg==='news')v.innerHTML=subChips('home')+newsHTML();
-  else if(pg==='invite')v.innerHTML=subChips('home')+inviteHTML();
-  else if(pg==='about')v.innerHTML=subChips('home')+aboutHTML();
-  else if(pg==='photos')v.innerHTML=subChips('home')+photosHTML();
-  else v.innerHTML=subChips('home')+(window.RNGCLIVE?RNGCLIVE.banner():'')+(window.passHomeCard?passHomeCard():'')+setupNudge()+appNudge()+overviewHTML();
+  const pg=S.hpage||'overview',v=$('#v-home');let h;
+  if(pg==='join')h=subChips('home')+joinHTML();
+  else if(pg==='leaders')h=subChips('home')+leadersHTML();
+  else if(pg==='shop')h=subChips('home')+shopHTML();
+  else if(pg==='sponsors')h=subChips('home')+sponsorsHTML();
+  else if(pg==='news')h=subChips('home')+newsHTML();
+  else if(pg==='invite')h=subChips('home')+inviteHTML();
+  else if(pg==='about')h=subChips('home')+aboutHTML();
+  else if(pg==='photos')h=subChips('home')+photosHTML();
+  else h=subChips('home')+(window.RNGCLIVE?RNGCLIVE.banner():'')+(window.passHomeCard?passHomeCard():'')+setupNudge()+appNudge()+overviewHTML();
+  /* nothing changed: leave the page alone, so a data refresh never redraws (and flickers) what's already on screen */
+  if(v._h!==h||!v._n||v._n.parentNode!==v){v.innerHTML=h;v._h=h;v._n=v.firstElementChild}
   syncTop();
 }
 const cdNum=d=>{const n=daysTo(d);return n<=0?'<span class="now">Today</span>':`${n}<small>${n===1?'day':'days'}</small>`};
