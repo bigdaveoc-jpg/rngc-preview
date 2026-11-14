@@ -165,6 +165,7 @@ function gfresh(){const f=gload();for(const k of Object.keys(f))G[k]=f[k]}
 function trOpen(){$('#scrim').classList.add('on');$('#sheet').classList.add('on');const c=$('#closeSheet');if(c)c.onclick=closeSheet}
 function trSetMe(n,i){G.me.name=n;G.me.hcp=i;for(const g of G.groups)for(const m of g.members)if(m.id==='me'){m.name=n;m.hcp=i}gsave()}
 const trBetName=b=>b.type==='skins'?'Skins '+money(b.amt):b.type==='nassau'?'Nassau '+money(b.amt)+' each way':(b.label||b.name||'Side bet');
+const trMailto=(subj,body)=>'mailto:?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
 function trShare(btn,text){const done=t=>{btn.innerHTML='<i class="ph-bold ph-check"></i> '+t;setTimeout(()=>btn.innerHTML=btn.dataset.l,2200)};btn.dataset.l=btn.dataset.l||btn.innerHTML;
   if(navigator.share){navigator.share({text}).catch(()=>{});return}
   try{navigator.clipboard.writeText(text).then(()=>done('Copied, paste it in your group text'),()=>done('Copy failed'))}catch(e){done('Copy failed')}}
@@ -970,9 +971,11 @@ function trBringGuest(){
    <div id="gqr" style="background:#fff;padding:12px;max-width:240px;margin:14px auto 0;min-height:60px;color:#111;text-align:center">Making the pass...</div>
    <p class="muted" style="text-align:center;font-size:14px;margin:8px 0 0">They scan it with the phone camera, or you text them the link. One link works for your whole group.</p>
    <button class="btn block" id="gqShare" style="margin-top:12px" disabled><i class="ph-bold ph-share-fat"></i> Text the link</button>
+   <a class="btn ghost block" id="gqMail" style="margin-top:8px;opacity:.5" target="_top" aria-disabled="true"><i class="ph-bold ph-envelope-simple"></i> Email the link</a>
    <button class="btn ghost block" style="margin-top:8px" id="closeSheet">Done</button>`;
   $('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#closeSheet').onclick=()=>{closeSheet();route()};
   trGuestLink().then(url=>{const sh=$('#gqShare');sh.disabled=false;sh.onclick=()=>trShare(sh,`I got you 72 hours of golf in the Raider Nation Golf Club app. Tap to start: ${url}`);
+    const gm=$('#gqMail');gm.removeAttribute('aria-disabled');gm.style.opacity='';gm.href=trMailto('72 hours of golf in the Raider Nation Golf Club app',`I got you 72 hours of golf in the Raider Nation Golf Club app. Tap to start: ${url}`);
     const lq=window.parent&&window.parent!==window&&window.parent.loadQR?window.parent.loadQR():null;
     const box=$('#gqr');if(!lq){box.textContent=url;box.style.fontSize='13px';return}
     lq.then(qr=>{const q=qr(0,'M');q.addData(url);q.make();box.innerHTML=q.createSvgTag({cellSize:5,margin:0,scalable:true})}).catch(()=>{box.textContent=url})})
@@ -997,9 +1000,11 @@ function trShareLive(){if(!S.share){S.share=trCode();save()}trLivePush('open');
    <div class="livecode" id="liveCode">${S.share}</div>
    <p class="muted" style="text-align:center;font-size:14px;margin:0">Or they tap Join a live round in the golf app and enter this code.</p>
    <button class="btn block" id="lvShare" style="margin-top:12px"><i class="ph-bold ph-share-fat"></i> Send the link</button>
+   <a class="btn ghost block" id="lvMail" style="margin-top:8px" target="_top"><i class="ph-bold ph-envelope-simple"></i> Email the link</a>
    <button class="btn ghost block" style="margin-top:8px" id="closeSheet">Done</button>`;
   $('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#closeSheet').onclick=()=>{closeSheet();route()};
-  const sh=$('#lvShare');sh.onclick=()=>trShare(sh,`Follow our round live, code ${S.share}.${gtxt} ${url}`)}
+  const sh=$('#lvShare');sh.onclick=()=>trShare(sh,`Follow our round live, code ${S.share}.${gtxt} ${url}`);
+  const lm=$('#lvMail'),lmk=()=>lm.href=trMailto('Follow our golf round live',`Follow our round live, code ${S.share}.${gtxt} ${url}`);lmk();lm.onclick=()=>{lm.href=trMailto('Follow our golf round live',`Follow our round live, code ${S.share}.${gtxt} ${url}`)}}
 /* buddy side: pull the round every few seconds */
 let trFollowV=0,trTouch=0;
 /* relay data comes from anyone with a round code: strip anything that could become page code (security review, Nov 13) */

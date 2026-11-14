@@ -1921,7 +1921,7 @@ const canLink=m=>!!S.authMe&&(S.authMe.role==='admin'||(S.authMe.leads||[]).some
 const SETLINK={};
 /* a member who already has a sign-in gets the same one-time link, worded as a password reset */
 const hasSignIn=id=>{const m=(DIR.items||[]).find(x=>x.id===id);return !!(m&&m.signedUp)};
-const linkBtns=m=>{const w=m.signedUp?'reset':'setup';return `<button class="btn ghost" data-setlink="${esc(m.id)}"><i class="ph-bold ph-chat-text"></i> Text a ${w} link</button><button class="btn ghost" data-setqr="${esc(m.id)}"><i class="ph-bold ph-qr-code"></i> Show a ${w} code</button>`};
+const linkBtns=m=>{const w=m.signedUp?'reset':'setup';return `<button class="btn ghost" data-setlink="${esc(m.id)}"><i class="ph-bold ph-chat-text"></i> Text a ${w} link</button><button class="btn ghost" data-setmail="${esc(m.id)}"><i class="ph-bold ph-envelope-simple"></i> Email a ${w} link</button><button class="btn ghost" data-setqr="${esc(m.id)}"><i class="ph-bold ph-qr-code"></i> Show a ${w} code</button>`};
 const RESET_HELP='<p class="help" style="margin:0">A reset link lets them pick a new password. It works once, for 21 days. You never see their password.</p>';
 async function getSetLink(id){if(!SETLINK[id])SETLINK[id]=await authCall('/admin/link',{id},authTok());return SETLINK[id]}
 let qrLib=null;
@@ -1935,8 +1935,13 @@ async function showSetQR(id){try{const [r,qr]=await Promise.all([getSetLink(id),
    <p style="text-align:center;font:700 26px/1.2 ui-monospace,monospace;letter-spacing:.12em;margin:0">${esc(code.match(/.{1,4}/g).join('-'))}</p>
    <p class="meta" style="text-align:center;margin:10px 0 0">Works once, for 21 days.</p>`)}catch(err){toast(err.message)}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-setqr]');if(b)showSetQR(b.dataset.setqr)});
+const setLinkText=(r,first,reset)=>reset?`Hey ${first}, here is your link to pick a new password for the Raider Nation Golf Club app: ${r.link} It works once, for 21 days.`:`Hey ${first}, our Raider Nation Golf Club app is ready. Tap your own link, pick a password and you're in: ${r.link} Then tap Share and Add to Home Screen so it's one tap on game day.`;
+/* email the same setup/reset link: opens the phone's mail app addressed to the member (David, Nov 14 2026: an email button wherever there's a text button) */
+async function mailSetLink(id){try{const r=await getSetLink(id),first=r.name.split(' ')[0],reset=hasSignIn(id),m=(DIR.items||[]).find(x=>x.id===id)||{};
+  location.href='mailto:'+encodeURIComponent(m.email||'')+'?subject='+encodeURIComponent(reset?'Your Raider Nation Golf Club password link':'Your Raider Nation Golf Club app link')+'&body='+encodeURIComponent(setLinkText(r,first,reset))}catch(err){toast(err.message)}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-setmail]');if(b)mailSetLink(b.dataset.setmail)});
 async function sendSetLink(id){try{const r=await getSetLink(id),first=r.name.split(' ')[0],reset=hasSignIn(id);
-  const text=reset?`Hey ${first}, here is your link to pick a new password for the Raider Nation Golf Club app: ${r.link} It works once, for 21 days.`:`Hey ${first}, our Raider Nation Golf Club app is ready. Tap your own link, pick a password and you're in: ${r.link} Then tap Share and Add to Home Screen so it's one tap on game day.`;
+  const text=setLinkText(r,first,reset);
   if(navigator.share){try{await navigator.share({text});toast((reset?'Reset':'Setup')+' link ready for '+first);return}catch(e){if(e&&e.name==='AbortError')return}}
   if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(text)}catch(e){fallbackCopy(text)}}else fallbackCopy(text);
   toast('Text for '+first+' copied. Paste it in a text. The link works once, for 21 days.')}catch(err){toast(err.message)}}
