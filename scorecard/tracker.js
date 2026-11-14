@@ -524,12 +524,13 @@ function trEvents(){const e=EVENTS.nov14,c=COURSES[e.course],past=G.rounds.filte
     <div class="facts"><div><b>${esc(F().name)}</b><span>${esc(hcpLine())}</span></div><div><b>${TEAMS.length}</b><span>groups</span></div><div><b>${esc(TEE().name)}</b><span>tees</span></div></div>
     ${t?`<p class="note"><i class="ph-bold ph-users"></i><span>You're with ${esc(t.name)}, starting on hole ${t.start}.</span></p>`:''}
     <div class="row2"><a class="btn" href="#/event">${t?'Open my card':'Pick my group'}</a><a class="btn ghost" href="#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a></div>
-    ${ADMIN?'<a class="btn ghost block" style="margin-top:12px" href="#/setup"><i class="ph-bold ph-sliders-horizontal"></i> Edit the event · groups, game, start</a>':''}</section>
+    ${ADMIN?'<a class="btn ghost block" style="margin-top:12px" href="#/setup"><i class="ph-bold ph-sliders-horizontal"></i> Edit the event · groups, game, start</a>'+(window.parent!==window?'<button class="btn ghost block" style="margin-top:8px" id="gpQR"><i class="ph-bold ph-qr-code"></i> Guest pass QR</button>':''):''}</section>
    <div class="lbl">Your past events</div>
    <section class="card tcard">${past.length?past.map(r=>`<button class="rrow" data-round="${r.id}"><div><b>${esc(r.name)}</b><span>${trDay(r.date)} · ${esc(r.cname)} · ${esc(r.team||'')}</span></div><div class="sc">${esc(r.result||'-')}<small>${r.pos?'place '+r.pos:''}</small></div></button>`).join('')
      :'<div class="trow"><span class="muted">Turn in an event card and it shows up here.</span></div>'}</section>
    <p class="note"><i class="ph-bold ph-info"></i><span>Club events come off the club calendar. The admin picks the game, tees, handicaps and contests, and every group plays the same setup.</span></p><div style="height:28px"></div>`;
-  trWire()}
+  trWire()
+  {const gq=document.getElementById('gpQR');if(gq)gq.onclick=()=>{try{window.parent.postMessage({gpqr:e.id||'nov14'},location.origin)}catch(x){}}}}
 
 /* ---------- start a round ---------- */
 let NR=null;

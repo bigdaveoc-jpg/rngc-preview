@@ -82,7 +82,10 @@ function openInfo(id){const e=evs().find(x=>x.id===id);if(!e)return;
    ${hasCard(id)?`<a class="btn ghost" style="width:100%" href="scorecard/#/field"><i class="ph-bold ph-users-three"></i> Teams: names, starting holes, players</a>
      <a class="btn ghost" style="width:100%;margin-top:8px" href="scorecard/#/setup"><i class="ph-bold ph-sliders-horizontal"></i> Game, contests, skins, start time</a>`
      :'<p class="meta">Groups and the game open once this event\'s course scorecard is set up. Ask David.</p>'}
-   ${h4('5. Invite')}
+   ${h4('5. Guests')}
+   ${typeof isPast==='function'&&!isPast(e.date)?`<button class="btn ghost" style="width:100%" data-gpqr="${esc(id)}" type="button"><i class="ph-bold ph-qr-code"></i> Guest pass QR: share it or show it</button>
+   <p class="meta" style="margin-top:6px">Players from other clubs scan it and get the scorecard and leaderboard for event day plus 72 hours.</p>`:'<p class="meta">Guest passes are for upcoming events.</p>'}
+   ${h4('6. Invite')}
    <button class="btn ghost" style="width:100%" id="eiInv" type="button"><i class="ph-bold ph-paper-plane-tilt"></i> Write the invite</button>
    <p class="meta" style="margin-top:6px">Opens the club message box with the invite written. You pick who gets it and tap Send.</p>`);
   const f=document.getElementById('eiForm');

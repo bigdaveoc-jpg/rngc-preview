@@ -194,6 +194,8 @@ if(q){const pp=parsePass(q);history.replaceState(null,'',location.pathname+locat
 /* server mode: a pass must carry the server's signature and still be good, or it is dropped */
 if(!PREVIEW){const gp=P.get();if(gp){const drop=()=>{try{localStorage.removeItem(PASS_KEY)}catch(e){}syncGolf();if(S.tab==='golf')setTab('golf')};
   if(!gp.token)drop();else club('/pass/check',{pass:gp.token}).then(r=>{if(!r.ok||r.status==='invalid')drop()}).catch(()=>{})}}
+/* the golf Events page asks for the QR from inside the golf screen (David, Nov 14 2026: "where did the QR code go, so Ross can just share that") */
+window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.gpqr&&isLeader())showPassQR(String(e.data.gpqr))});
 syncGolf();
 const _setTab=window.setTab;window.setTab=function(t){_setTab(t);syncGolf()};
 })();
