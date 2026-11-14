@@ -595,7 +595,7 @@ function skinsResults(list){const cfg=CFG();if(cfg.skins==='off')return null;con
 const LOGO='../assets/logo/rngc-ball-static.svg';
 /* inside the club app the club header already shows the logo, so the golf header gets a back arrow instead (David, Nov 13 2026: double logo on mobile) */
 const IN_CLUB=(()=>{try{return window.top!==window}catch(e){return true}})();
-function bar(title,sub,right=''){const back=CASUAL?'./#/'+(LIVE.group?'group/'+LIVE.group:'me'):'./#/events';return `<div class="bar">${IN_CLUB?`<a class="ib" href="${back}" aria-label="Back to golf home"><i class="ph-bold ph-arrow-left"></i></a>`:`<a href="${back}" aria-label="Back to golf home"><img class="logo" src="${LOGO}" alt=""></a>`}<div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${sizeBtn()}${sunAny()}${right}</div>`}
+function bar(title,sub,right=''){const back=CASUAL?'./#/'+(LIVE.group?'group/'+LIVE.group:'me'):'./#/events';return `<div class="bar">${IN_CLUB&&!/^#\/(hole|card)/.test(location.hash)?`<a class="ib" href="${back}" aria-label="Back to golf home"><i class="ph-bold ph-arrow-left"></i></a>`:`<a href="${back}" aria-label="Back to golf home"><img class="logo" src="${LOGO}" alt=""></a>`}<div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${sizeBtn()}${sunAny()}${right}</div>`}
 /* text size, any screen: one tap = bigger text, tap again = regular. Same setting as the start screen's Text size. */
 const bigOn=()=>typeof G!=='undefined'&&!!G.big;
 const sizeBtn=()=>location.hash.startsWith('#/tv')?'':`<button class="ib" id="sizeBtn" type="button" aria-pressed="${bigOn()}" aria-label="${bigOn()?'Text is bigger. Tap for regular text':'Make the text bigger'}" title="Text size"><span class="s">A</span><span class="l">A</span></button>`;
