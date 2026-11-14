@@ -167,6 +167,9 @@ body.sun .mk.e,body.sun .mk.d{box-shadow:0 0 0 2px #fff,0 0 0 3.5px currentColor
 .lrow .pos{font-family:var(--display);font-size:20px;font-weight:800;color:var(--muted)}
 .lrow .nm b{display:block;font-size:16px;line-height:1.2}
 .lrow .nm{min-width:0}
+.hereic{display:inline-flex;align-items:center;gap:1px;margin-left:7px;font-size:13px;font-weight:800;color:#4ade80;vertical-align:1px;white-space:nowrap}.hereic i{font-size:15px}body.sun .hereic{color:#15803d}
+.here{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-top:2px}.here.no{opacity:.7}.here.on{color:#4ade80}.here.on i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-right:6px;vertical-align:1px}body.sun .here.on{color:#15803d}body.sun .here.on i{background:#15803d}
+.herebar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 10px}.herebar>div{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:10px 12px}.herebar b{display:block;font-size:22px;line-height:1.1}.herebar small{font-size:12.5px;color:var(--muted)}.herebar .on b{color:#4ade80}body.sun .herebar .on b{color:#15803d}
 .lrow .nm>span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lrow .tp{font-family:var(--display);font-size:28px;font-weight:800;text-align:right}
 .lrow .th{text-align:right;font-size:12px;color:var(--muted);line-height:1.1}
@@ -537,9 +540,26 @@ function scFillMine(){if(!S.team||SC_BUSY||scT&&scDiff().n)return;const c=REMOTE
   for(const w in rs)for(const h in rs[w]){SC_SENT[w+':'+h]=rs[w][h];if(!(m[w]&&m[w][h]!=null)){(m[w]||(m[w]={}))[h]=rs[w][h];ch=true}}
   for(const[kind,unit]of[['ctp','ft'],['ld','yd']]){const seen=SC_SIDE[kind]||(SC_SIDE[kind]={});for(const h in c[kind]||{}){const v=c[kind][h];seen[h]=JSON.stringify({pid:v.pid,[unit]:v[unit]});if(!(S[kind]&&S[kind][h])){(S[kind]||(S[kind]={}))[h]=v;ch=true}}}
   if(ch){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}
-function scPull(){if(!SYNC)return;scCall('/event/board').then(j=>{const na=j.admin&&!ADMIN;if(j.admin)ADMIN=true;const cs0=canScore();const fch=applyField(j.field||null);REMOTE=j.cards||{};gNames();
-  if(cs0!==canScore()&&/^#\/(hole|team)/.test(location.hash)&&!$('#sheet.on')){const mt=myTeam();note(canScore()?'This phone keeps score':first(PEOPLE()[keeperOf(mt)].name)+' keeps score now');route()}REMOTE_AT=Date.now();SC_ERR=0;scFillMine();scSend();const h=location.hash;if((fch&&!/^#\/(hole|setup|field|card|team|bets)/.test(h))||(na&&!/^#\/hole/.test(h))||(!ADMIN&&/^#\/(setup|field)/.test(h)))route()}).catch(()=>{SC_ERR++;if(!ADMIN&&/^#\/(setup|field)/.test(location.hash))route()})}
+function scPull(){if(!SYNC)return;const mt=S.team&&TEAMS.find(x=>x.id===S.team);scCall('/event/board',mt&&S.me&&ids(mt).includes(S.me)?{team:S.team,me:S.me}:null).then(j=>{const na=j.admin&&!ADMIN;if(j.admin)ADMIN=true;const cs0=canScore();const fch=applyField(j.field||null);REMOTE=j.cards||{};gNames();let hch=false;try{hch=hereSet(j)}catch(e){}
+  if(cs0!==canScore()&&/^#\/(hole|team)/.test(location.hash)&&!$('#sheet.on')){const mt=myTeam();note(canScore()?'This phone keeps score':first(PEOPLE()[keeperOf(mt)].name)+' keeps score now');route()}REMOTE_AT=Date.now();SC_ERR=0;scFillMine();scSend();const h=location.hash;if(hch&&!fch&&h.startsWith('#/field')&&!$('#sheet.on'))fieldPage();if((fch&&!/^#\/(hole|setup|field|card|team|bets)/.test(h))||(na&&!/^#\/hole/.test(h))||(!ADMIN&&/^#\/(setup|field)/.test(h)))route()}).catch(()=>{SC_ERR++;if(!ADMIN&&/^#\/(setup|field)/.test(location.hash))route()})}
 const remoteOf=t=>REMOTE[t.id]||{};
+/* who is on the round (David, Nov 14 2026: "on the group set up i want to be able to see who has logged into the app, also on the
+   leader boards we can show a icon who is connected"). Each phone says its group and player with every board pull; the club server
+   keeps the first and last time. On now = that player's phone pulled the board in the last 15 minutes. */
+let HERE={},HERE_OFF=0,HERE_SIG='';
+const HERE_LIVE=15*60000;
+const hereAt=(tid,pid)=>(HERE[tid]||{})[pid]||null;
+const isOn=(tid,pid)=>{const h=hereAt(tid,pid);return !!h&&Date.now()+HERE_OFF-h[1]<HERE_LIVE};
+const hhmm=ms=>new Date(ms).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/Los_Angeles'});
+function hereSet(j){HERE=j&&j.here&&typeof j.here==='object'?j.here:{};if(j&&j.t)HERE_OFF=j.t-Date.now();
+  const sig=JSON.stringify(HERE)+'|'+TEAMS.map(t=>ids(t).filter(id=>isOn(t.id,id)).join(',')).join(';');const ch=sig!==HERE_SIG;HERE_SIG=sig;return ch}
+function hereTag(tid,pid){if(!SYNC)return'';const h=hereAt(tid,pid);
+  if(!h)return'<small class="here no">Not on the app yet</small>';
+  return isOn(tid,pid)?`<small class="here on"><i></i>On now · in at ${hhmm(h[0])}</small>`:`<small class="here">In at ${hhmm(h[0])} · last ${hhmm(h[1])}</small>`}
+function hereIcon(x){if(!SYNC||!x||!x.team)return'';const t=x.team,F0=F();
+  const list=F0.entry==='team'||F0.team?ids(t):[x.who];const n=list.filter(id=>isOn(t.id,id)).length;if(!n)return'';
+  const lbl=list.length>1?n+' of '+list.length+' on the app now':'On the app now';
+  return `<span class="hereic" role="img" aria-label="${lbl}" title="${lbl}"><i class="ph-bold ph-device-mobile"></i>${list.length>1?n:''}</span>`}
 function scNote(){if(!SYNC)return'';if(SC_ERR&&!REMOTE_AT)return' Can\'t reach the club server right now. Your scores are safe on this phone and send when signal is back.';
   if(SC_ERR)return' No signal right now. Showing scores from '+Math.round((Date.now()-REMOTE_AT)/60000)+' min ago; yours send when signal is back.';
   if(!REMOTE_AT)return' Loading the other groups.';return' Every group\'s scores, updated '+Math.max(1,Math.round((Date.now()-REMOTE_AT)/1000))+' sec ago.'}
@@ -1030,11 +1050,13 @@ function saveTeams(ts,msg){closeSheet();return fieldSave({teams:plainTeams(ts)},
 const cloneTeams=()=>TEAMS.map(t=>({...t,players:t.players.map(p=>({...p}))}));
 const hasScores=id=>{const c=REMOTE[id];return !!(c&&Object.values(c.scores||{}).some(e=>Object.values(e).some(h=>Object.keys(h).length)))};
 function fieldPage(){if(!ADMIN||CASUAL){if(!CASUAL){if(SYNC&&!REMOTE_AT&&!SC_ERR){$('#app').innerHTML=bar('Edit the event',EV().name)+'<p class="note"><i class="ph-bold ph-hourglass"></i><span>Checking your sign-in.</span></p>';return}}location.hash=HOME;return}$('#app').className='wrap';
+  const allP=TEAMS.flatMap(t=>ids(t).map(id=>[t.id,id])),inN=allP.filter(([a,b])=>hereAt(a,b)).length,onN=allP.filter(([a,b])=>isOn(a,b)).length;
   $('#app').innerHTML=bar('Groups',EV().name)+`
-  <p class="note"><i class="ph-bold ph-info"></i><span>Tap a player to move, rename or remove. Every change saves for every phone.</span></p>
+  ${SYNC?`<div class="herebar"><div><b>${inN} of ${allP.length}</b><small>checked in on the app</small></div><div class="on"><b>${onN}</b><small>on now</small></div></div>`:''}
+  <p class="note"><i class="ph-bold ph-info"></i><span>Tap a player to move, rename or remove. Every change saves for every phone.${SYNC?' Checked in = that player picked their name on their own phone. On now = their phone was on the round in the last 15 minutes.':''}</span></p>
   ${TEAMS.map(t=>`<section class="card fg"><div class="fgh"><b>${esc(t.name)}</b><span class="muted">Hole ${t.start} · ${t.players.length} player${t.players.length===1?'':'s'}</span></div>
    <button type="button" class="btn ghost block" data-tset="${t.id}" style="margin:2px 0 8px"><i class="ph-bold ph-gear-six"></i> Team settings: name, starting hole</button>
-   <div class="fgl">${t.players.map(p=>`<button type="button" class="fgp" data-p="${p.id}"><span>${esc(p.name)}</span><i class="ph-bold ph-caret-right"></i></button>`).join('')}
+   <div class="fgl">${t.players.map(p=>`<button type="button" class="fgp" data-p="${p.id}"><span>${esc(p.name)}${hereTag(t.id,p.id)}</span><i class="ph-bold ph-caret-right"></i></button>`).join('')}
    ${t.players.length<6?`<button type="button" class="fgp add" data-addp="${t.id}"><span><i class="ph-bold ph-user-plus"></i> Add player</span></button>`:''}
    ${t.players.length?'':`<button type="button" class="fgp del" data-delg="${t.id}"><span><i class="ph-bold ph-trash"></i> Remove this group</span></button>`}</div></section>`).join('')}
   <button type="button" class="btn ghost block" id="addg" style="margin-top:12px"><i class="ph-bold ph-plus"></i> Add a group</button>
@@ -1191,7 +1213,7 @@ function board(tv){const e=EV(),c=CO(),list=field(),f=ranked(list.slice()),fm=F(
   const recent=moves.length?moves[Math.floor(Date.now()/5000)%moves.length]:null;
   const row=x=>{const moved=lastPos[x.id]!=null&&lastPos[x.id]!==x.pos;return `<button class="lrow ${x.mine?'me':''} ${moved?'flash':''}" data-open="${x.id}">
     <span class="pos">${x.thru?(x.tie?'T':'')+x.pos:'-'}</span>
-    <span class="nm"><b>${esc(x.name)}${x.mine&&(fm.team||x.who===S.me)?' · you':''}</b><span>${tagFor(x.club)} ${esc(x.sub)}</span></span>
+    <span class="nm"><b>${esc(x.name)}${x.mine&&(fm.team||x.who===S.me)?' · you':''}${hereIcon(x)}</b><span>${tagFor(x.club)} ${esc(x.sub)}</span></span>
     <span class="tp ${scoreCls(x)}">${showScore(x)}</span>
     <span class="th"><b>${x.thru===18?'F':x.thru||'-'}</b>${x.thru===18?'':'thru'}</span></button>`};
   const half=Math.ceil(f.length/2);
@@ -1216,7 +1238,7 @@ function board(tv){const e=EV(),c=CO(),list=field(),f=ranked(list.slice()),fm=F(
     :bar('Leaderboard',e.name+' · '+fm.name,`<span class="live" style="margin-right:4px"><i></i>LIVE</span><a class="ib" href="#/tv" aria-label="Big screen view"><i class="ph-bold ph-television-simple"></i></a>${S.team?`<a class="ib" href="#/hole/${S.hole||order(myTeam().start)[0]}" aria-label="Back to my card"><i class="ph-bold ph-pencil-simple-line"></i></a>`:`<a class="ib" href="${HOME}" aria-label="Scorecard"><i class="ph-bold ph-pencil-simple-line"></i></a>`}`))+
    (!tv&&hasCt?`<div class="seg" role="group" aria-label="Board view" style="margin-bottom:10px"><button data-bt2="lb" aria-pressed="${BTAB==='lb'}">Leaderboard</button><button data-bt2="ct" aria-pressed="${BTAB==='ct'}">Contests</button></div>`:'')+
    (!tv&&BTAB==='ct'&&hasCt?contests():`<div class="${tv?'':'boardgrid'}">${tv?side:`<div class="side">${side}</div>`}<div>${lbHtml}</div></div>`)+
-   (CASUAL?'':`<p class="note" style="margin:14px 0 24px"><i class="ph-bold ph-info"></i><span>Real groups for Saturday.${scNote()}</span></p>`);
+   (CASUAL?'':`<p class="note" style="margin:14px 0 24px"><i class="ph-bold ph-info"></i><span>Real groups for Saturday.${scNote()} <i class="ph-bold ph-device-mobile"></i> = players on the app right now.</span></p>`);
   lastPos={};f.forEach(x=>lastPos[x.id]=x.pos);
   document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openCard(b.dataset.open));
   document.querySelectorAll('[data-net]').forEach(b=>b.onclick=()=>{VIEWNET=b.dataset.net==='1';board(tv)});
