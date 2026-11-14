@@ -232,7 +232,7 @@ function trSeed(){const r=rng(hash('rngc-tracker-demo')),c=COURSES.chimera,tee=c
 
 /* ---------- golf home ---------- */
 const EMBED=(()=>{try{return window.top!==window}catch(e){return true}})();
-function trBar(title,sub,right=''){return `<div class="bar">${EMBED?'':`<a href="../" aria-label="Back to the club app"><img class="logo" src="${LOGO}" alt=""></a>`}<div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${typeof sizeBtn==='function'?sizeBtn():''}${right}</div>`}
+function trBar(title,sub,right=''){return `<div class="bar">${EMBED?'':`<a href="../" aria-label="Back to the club app"><img class="logo" src="${LOGO}" alt=""></a>`}<div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${typeof sizeBtn==='function'?sizeBtn():''}${typeof sunAny==='function'?sunAny():''}${right}</div>`}
 const trBack=h=>`<a class="ib" href="${h}" aria-label="Back"><i class="ph-bold ph-arrow-left"></i></a>`;
 function trTabs(cur){return `<div class="seg" role="group" aria-label="Golf sections">${[['me','My golf'],['log','Play log'],['groups','Groups'],['events','Events'],...(EMBED?[['courses','Courses']]:[])].filter(([k])=>k!=='groups'||G.groups.length||cur==='groups').map(([k,l])=>`<button data-tab="${k}" aria-pressed="${k===cur}">${l}</button>`).join('')}</div>`}
 function trWire(){document.querySelectorAll('.joinlive').forEach(b=>b.onclick=()=>{const c=prompt('Live round code from your scorekeeper (5 letters and numbers)');if(c)trJoin(c)});document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(b.dataset.tab==='courses'){try{parent.postMessage({golfCourses:1},location.origin)}catch(e){}return}location.hash='#/'+b.dataset.tab});
@@ -667,7 +667,7 @@ function trPick(id,gid,btn,cb){const row=LIB&&LIB.courses.find(c=>c[0]===id),inf
 /* ---------- a saved round ---------- */
 /* signed in to the club site: the golf tab already knows who you are */
 function trSiteMe(){try{const s=JSON.parse(localStorage.getItem('rngc-site-v2')||'{}');if(!s.member||s.demo||!s.name)return null;return{name:String(s.name).slice(0,24),ghin:(s.cfg&&s.cfg.my&&s.cfg.my.ghin)||null}}catch(e){return null}}
-function trBig(){document.body.classList.toggle('bigt',!!G.big);document.body.classList.toggle('sun',!!(G.pref||{}).sun&&!location.hash.startsWith('#/tv'))}
+function trBig(){document.body.classList.toggle('bigt',!!G.big);document.body.classList.toggle('sun',(typeof sunOn==='function'?sunOn():!!(G.pref||{}).sun)&&!location.hash.startsWith('#/tv'))}
 trBig();
 {const sm=trSiteMe();if(sm&&G.me.name!==sm.name)trSetMe(sm.name,G.me.hcp)}
 

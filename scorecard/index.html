@@ -300,7 +300,7 @@ select.field{appearance:none;-webkit-appearance:none}
 .bhead{display:flex;align-items:flex-start;gap:10px}
 .bhead b{flex:1}
 .ib.sm{width:36px;height:36px;font-size:16px}
-#sunBtn{width:auto;padding:0 10px;gap:6px;display:flex;align-items:center;font-size:18px}#sizeBtn{width:auto;padding:0 9px;display:flex;align-items:baseline;justify-content:center;gap:1px;font-weight:800;line-height:1}#sizeBtn .s{font-size:13px}#sizeBtn .l{font-size:20px}@media (max-width:480px){#sunBtn span{display:none}#sunBtn{width:44px;padding:0;justify-content:center}#sizeBtn{padding:0 4px}.bar{gap:7px}.bigt .bar .live{font-size:0;gap:0}}#sunBtn span{font-size:13px;font-weight:700}
+#sunBtn{width:auto;padding:0 10px;gap:6px;display:flex;align-items:center;font-size:18px}#sizeBtn{width:auto;padding:0 9px;display:flex;align-items:baseline;justify-content:center;gap:1px;font-weight:800;line-height:1}#sizeBtn .s{font-size:13px}#sizeBtn .l{font-size:20px}@media (max-width:480px){#sunBtn span{display:none}#sunBtn{width:44px;padding:0;justify-content:center}#sizeBtn{padding:0 4px}.bar{gap:7px}.bigt .bar .live{font-size:0;gap:0}.bar a[href="#/tv"]{display:none}}#sunBtn span{font-size:13px;font-weight:700}
 .moretees{margin-top:6px}.moretees summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700;color:var(--muted);font-size:14px}
 .allpar{width:100%;min-height:48px;margin-top:8px;font-weight:700}button.hpick{background:none;border:0;padding:0;color:inherit;text-align:left;cursor:pointer;min-height:44px}button.hpick small i{font-size:12px;vertical-align:1px}.strip.hgrid{grid-template-columns:repeat(6,1fr);gap:8px;margin-top:0}.strip.hgrid button{height:56px;font-size:15px;color:var(--text)}.strip.hgrid button b{font-size:13px}
 .bline{font-size:14px;margin-top:4px}
@@ -593,7 +593,7 @@ function skinsResults(list){const cfg=CFG();if(cfg.skins==='off')return null;con
 
 /* ===================== SCREENS ===================== */
 const LOGO='../assets/logo/rngc-ball-static.svg';
-function bar(title,sub,right=''){return `<div class="bar"><a href="${CASUAL?'./#/'+(LIVE.group?'group/'+LIVE.group:'me'):'./#/events'}" aria-label="Back to golf home"><img class="logo" src="${LOGO}" alt=""></a><div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${sizeBtn()}${right}</div>`}
+function bar(title,sub,right=''){return `<div class="bar"><a href="${CASUAL?'./#/'+(LIVE.group?'group/'+LIVE.group:'me'):'./#/events'}" aria-label="Back to golf home"><img class="logo" src="${LOGO}" alt=""></a><div class="t"><b>${esc(title)}</b><span>${esc(sub)}</span></div>${sizeBtn()}${sunAny()}${right}</div>`}
 /* text size, any screen: one tap = bigger text, tap again = regular. Same setting as the start screen's Text size. */
 const bigOn=()=>typeof G!=='undefined'&&!!G.big;
 const sizeBtn=()=>location.hash.startsWith('#/tv')?'':`<button class="ib" id="sizeBtn" type="button" aria-pressed="${bigOn()}" aria-label="${bigOn()?'Text is bigger. Tap for regular text':'Make the text bigger'}" title="Text size"><span class="s">A</span><span class="l">A</span></button>`;
@@ -604,7 +604,11 @@ const sunBtn=()=>`<button class="ib" id="sunBtn" aria-pressed="${sunOn()}" aria-
 const boardBtn=()=>`<a class="ib" href="#/board" aria-label="Live leaderboard"><i class="ph-bold ph-ranking"></i></a>`;
 const betsBtn=()=>`<a class="ib" href="#/bets" aria-label="Side bets"><i class="ph-bold ph-coins"></i></a>`;
 const sunOn=()=>typeof G!=='undefined'&&G.pref&&G.pref.sun!=null?!!G.pref.sun:!!S.sun;
-const wireSun=()=>{const b=$('#sunBtn');if(b)b.onclick=()=>{const on=!sunOn();S.sun=on;save();if(typeof G!=='undefined'){(G.pref||(G.pref={})).sun=on;gsave()}route()}};
+/* bright mode switch rides in every golf header next to text size, so it can be turned off on any screen (David, Nov 14 2026: stuck on bright) */
+const sunAny=()=>location.hash.startsWith('#/tv')?'':sunBtn();
+const wireSun=()=>{};
+document.addEventListener('click',e=>{if(!e.target.closest('#sunBtn'))return;const on=!sunOn();S.sun=on;save();if(typeof G!=='undefined'){(G.pref||(G.pref={})).sun=on;gsave()}
+  document.body.classList.toggle('sun',on);route()});
 
 function route(){const h=location.hash.replace(/^#\/?/,'');window.__cur=/^(me|events|groups?|round|log)(\/|$)/.test(h)?'usd':null;document.body.classList.toggle('sun',sunOn()&&!h.startsWith('tv'));document.body.classList.toggle('tv',h.startsWith('tv'));
   closeSheet();clearInterval(boardTimer);
@@ -755,7 +759,7 @@ function hole(n){if(n!==STRIP_N){STRIP_ALT=false;STRIP_N=n;QP=null}const t=myTea
     return `<button class="${h===n?'cur':''} ${d?'done':''} ${mark?'ctst':''}" data-go="${h}" aria-label="Hole ${h}${d?', scored':''}${mark?', contest hole':''}">${lab}${h}</button>`}).join('');
   const last=idx_===17,next=ord[idx_+1],prev=ord[idx_-1];
   const gname=CASUAL&&players(t).length===1&&typeof TR_SG!=='undefined'&&CFG().sg&&CFG().sg!=='none'?((TR_SG.find(x=>x[0]===CFG().sg)||[0,f.name])[1]):f.name;
-  $('#app').innerHTML=bar(t.name,idx_+1===n?gname:`Hole ${idx_+1} of 18`,sunBtn()+(CASUAL&&players(t).length===1&&!myBets().length?'':betsBtn()+(CASUAL&&typeof liveBtn==='function'&&players(t).length>1?liveBtn():boardBtn())))+
+  $('#app').innerHTML=bar(t.name,idx_+1===n?gname:`Hole ${idx_+1} of 18`,(CASUAL&&players(t).length===1&&!myBets().length?'':betsBtn()+(CASUAL&&typeof liveBtn==='function'&&players(t).length>1?liveBtn():boardBtn())))+
   `<div class="prog" aria-hidden="true"><i style="width:${(myUnits()[0]||{thru:0}).thru/18*100}%"></i></div>
   <section class="hole${f.entry!=='team'&&players(t).length>1?' grp':''}" id="holeSwipe">
    <div class="hhead"><button class="hnum hpick" id="hpick" aria-label="Hole ${n}. Tap to pick another hole"><small>HOLE <i class="ph-bold ph-caret-down"></i></small>${n}</button>
@@ -933,7 +937,7 @@ function review(){const t=myTeam(),f=F();$('#app').className='wrap';
     :us.length===1&&us[0].rows.length===1?(()=>{const u=us[0],rw=u.rows[0],hs=order(t.start).filter(x=>rw.get(x)!=null),g=hs.reduce((a,x)=>a+rw.get(x),0),pr=hs.reduce((a,x)=>a+CO().par[x-1],0);
       return `<div class="card"><b>${hs.length?g:'-'}</b><span>Strokes${hs.length&&hs.length<18?' · '+hs.length+' holes':''}</span></div><div class="card"><b class="${g-pr<0?'under':g-pr>0?'over':''}">${hs.length?toPar(g-pr):'-'}</b><span>${(d=>d>0?'Over par':d<0?'Under par':'Par')(hs.length?g-pr:0)}</span></div>${f.points||useNet()?`<div class="card"><b class="${scoreCls(u)}">${(x=>x==='E'?'Even':x)(showScore(u))}</b><span>${f.points?'Points':'After handicap'}</span></div>`:''}`})()
     :(()=>{const r=ranked(us.slice());const b=r[0];return `<div class="card"><b>${us[0]?us[0].thru:0}</b><span>Holes</span></div><div class="card"><b class="${scoreCls(b)}">${showScore(b)}</b><span>${esc(first(b.name))} leads${useNet()?', net':''}</span></div><div class="card"><b style="font-size:22px;padding-top:8px">${esc(f.name)}</b><span>${useNet()?'Net':'Gross'}</span></div>`})();
-  $('#app').innerHTML=bar('Your card',t.name+' · '+CO().name,sunBtn())+`
+  $('#app').innerHTML=bar('Your card',t.name+' · '+CO().name)+`
   <div class="sumrow">${box}</div>
   <div class="card paper" id="revCard">${paperTable(rows)}</div>
   ${done?'':(()=>{const n=rows.reduce((a,r)=>a+order(t.start).filter(h=>r.id&&S.au&&S.au[r.id+':'+h]&&r.get(h)!=null).length,0);return `<p class="note"><i class="ph-bold ph-hand-tap"></i><span>Tap any hole on the card to fix it.${n?` A dot means it was left blank and saved as par${useNet()?' after your free strokes':''} (${n} score${n>1?'s':''}).`:''}</span></p>`})()}
@@ -1212,7 +1216,7 @@ function tellClub(){try{if(window.parent!==window)window.parent.postMessage({gol
 addEventListener('hashchange',tellClub);tellClub();fitSoon();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
-<script src="tracker.js?v=40"></script>
+<script src="tracker.js?v=41"></script>
 <script src="../live.js?v=3"></script>
 </body>
 </html>
