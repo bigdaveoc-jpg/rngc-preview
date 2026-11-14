@@ -934,7 +934,16 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 }
 @media (prefers-reduced-transparency:reduce){.card{background:var(--panel);-webkit-backdrop-filter:none;backdrop-filter:none}}
 
-@media (max-width:999px){body.golffull .top,body.golffull .tabs{display:none}body.golffull #v-golf.view{padding:0!important;inset:0}}
+/* bottom menu locked on every page (David, Nov 14 2026: "on mobile the bottom menu navigation disappears or becomes moved and you
+   have to scroll. That menu should be on every page and locked in"). Phones: the menu is pinned to the screen, the page itself never
+   scrolls (only the page area inside does), and during a golf round the header hides but the menu stays, the round sits above it. */
+@media (max-width:999px){
+  html,body{overflow:hidden;overscroll-behavior:none}
+  .app .top{position:fixed}
+  .app .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40}
+  body.golffull .top{display:none}
+  body.golffull #v-golf.view{padding:0 0 calc(62px + max(8px,env(safe-area-inset-bottom)))!important;inset:0}
+}
 /* faint club shield behind the glass (club's own mark, not the NFL Raiders logo) */
 .views::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:url("assets/logo/rngc-ball-static.svg") center 58%/min(78%,560px) auto no-repeat;opacity:0;filter:grayscale(1) brightness(1.4);animation:wmIn .7s ease 1s forwards}
 /* shield waits for the page to finish rising, so a refresh never shows it through half-faded cards (David, Nov 13) */
@@ -2754,6 +2763,10 @@ function renderGolf(){const fr=$('#golfFrame'),want=new URL('scorecard/#/'+(S.go
   try{const cur=fr.contentWindow&&fr.contentWindow.location.href;if(cur&&cur!=='about:blank'&&cur.split('#')[0]===want.split('#')[0]){if(cur!==want)fr.contentWindow.location.replace(want);return}}catch(e){}
   fr.src=want}
 /* in a round the golf screen takes the whole phone: the club header and tab bar step aside until the round screen closes */
+(()=>{const mq=matchMedia('(max-width:999px)');const typing=()=>{const a=document.activeElement;return a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)};
+  const home=()=>{if(mq.matches&&(window.scrollY||window.scrollX)&&!typing())window.scrollTo(0,0)};
+  window.addEventListener('scroll',home,{passive:true});document.addEventListener('focusout',()=>setTimeout(home,250));
+  if(window.visualViewport)visualViewport.addEventListener('resize',()=>setTimeout(home,250))})();
 window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&'golfFull' in e.data)document.body.classList.toggle('golffull',!!e.data.golfFull&&S.tab==='golf')});
 window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.golfCourses)goSub('golf','c-list')});   /* the golf screen's Courses button */
 window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||!e.data.golf)return;const k=e.data.golf;if(['me','log','groups','events'].includes(k)&&S.golfv!==k){S.golfv=k;renderSubnav()}});
