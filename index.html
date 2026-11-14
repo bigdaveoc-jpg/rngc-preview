@@ -2773,7 +2773,8 @@ const can=p=>S.member&&(S.role==='admin'||!!(S.cfg.perms[S.role]||{})[p]);
 const USERS=[];
 const userNow=u=>({...u,...(S.cfg.users[u.id]||{})});
 
-const SPAGES=[['setup','Club setup',()=>csCan()],['account','My account',()=>true],['users','Members',()=>S.member&&S.realRole==='admin'],['lead','Chapter tools',()=>S.member&&!!window.RNGCCHAPTER&&RNGCCHAPTER.canLead()],['announce','Messages',()=>S.member&&!!authTok()],['tix','Ticket exchange',()=>S.member&&!!authTok()&&!!S.authMe&&(S.authMe.role==='admin'||(S.authMe.leads||[]).length>0)]];
+/* Club setup checklist removed (David, Nov 14); its code stays below, unused */
+const SPAGES=[['account','My account',()=>true],['users','Members',()=>S.member&&S.realRole==='admin'],['lead','Chapter tools',()=>S.member&&!!window.RNGCCHAPTER&&RNGCCHAPTER.canLead()],['announce','Messages',()=>S.member&&!!authTok()],['tix','Ticket exchange',()=>S.member&&!!authTok()&&!!S.authMe&&(S.authMe.role==='admin'||(S.authMe.leads||[]).length>0)]];
 Object.defineProperty(SUBNAV,'settings',{enumerable:true,configurable:true,get:()=>SPAGES.filter(p=>p[2]()).map(p=>[p[1],p[0]])});
 
 /* small building blocks */
@@ -2834,7 +2835,7 @@ async function csMark(id,done,btn){if(btn)btn.disabled=true;
   try{CS.marks=(await csClub('/admin/setup',{id,done})).done||{};CS.open[id]=false;renderSettings();toast(done?'Marked complete for you and '+(csTo()==='Ross'?'Ross':'David'):'Marked not done')}
   catch(e){toast(e.message||'That did not save. Try again.');if(btn)btn.disabled=false}}
 const csLeft=()=>CSETUP.filter(it=>!csDone(it)).length;
-function setupNudge(){if(!csCan())return '';if(!CS.sent){csLoad();return ''}
+function setupNudge(){return '';if(!CS.sent){csLoad();return ''}
   const n=csLeft();if(!n)return '';
   return `<div class="card csnudge rise"><div><b>Club setup: ${n} ${n===1?'thing':'things'} left</b><p class="meta">Quick answers so the app works for the club. Each one goes straight to David.</p></div><button class="btn" data-csgo><i class="ph-bold ph-list-checks"></i> Open the checklist</button></div>`}
 function csField(it,f,i,val){const id=`cs-${it.id}-${i}`,[k,label,x]=f;
