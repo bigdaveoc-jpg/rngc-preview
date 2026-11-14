@@ -3522,5 +3522,21 @@ syncTop();
 <script src="fantasy.js"></script>
 <script src="guestpass.js?v=club6"></script>
 <script src="shop.js?v=club2"></script>
+<script>
+/* quiet updates (autoupdate.js): never while a sheet, the sign-in or the golf screen is busy; after the reload the person
+   lands back on the same page, golf hole included, at the same spot */
+window.rngcSafe=function(){if(document.querySelector('#sheet.on,#rlSheet:not([hidden]),.signin:not([hidden])'))return false;
+  try{const w=document.getElementById('golfFrame').contentWindow;if(S.tab==='golf'&&w&&w.rngcSafe&&!w.rngcSafe())return false}catch(e){}return true};
+window.rngcBeforeReload=function(){let fh='';try{fh=S.tab==='golf'?document.getElementById('golfFrame').contentWindow.location.hash:''}catch(e){}
+  const v=document.getElementById('v-'+S.tab);
+  try{sessionStorage.setItem('rngc-resume',JSON.stringify({at:Date.now(),tab:S.tab,hpage:S.hpage||'',fh:fh,st:v?v.scrollTop:0}))}catch(e){}};
+(function(){let r=null;try{r=JSON.parse(sessionStorage.getItem('rngc-resume')||'null');sessionStorage.removeItem('rngc-resume')}catch(e){}
+  if(!r||!r.tab||Date.now()-r.at>10*60000)return;
+  if(r.tab==='home')S.hpage=r.hpage||'overview';
+  window.setTab(r.tab);
+  if(r.tab==='golf'&&/^#\/[\w\/-]+$/.test(r.fh||''))document.getElementById('golfFrame').src=new URL('scorecard/'+r.fh,location.href).href;
+  setTimeout(()=>{const v=document.getElementById('v-'+r.tab);if(v&&r.st)v.scrollTop=r.st},60)})();
+</script>
+<script src="autoupdate.js?v=1" defer></script>
 </body>
 </html>

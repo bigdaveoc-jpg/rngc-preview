@@ -1326,5 +1326,10 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 <script src="weather.js?v=1"></script>
 <script src="balls.js?v=2"></script>
 <script src="../live.js?v=3"></script>
+<script>
+/* quiet updates (../autoupdate.js): not while a sheet is open or a score is still on its way to the club server */
+window.rngcSafe=function(){if(document.querySelector('#sheet.on'))return false;if(SC_BUSY)return false;try{if(SYNC&&S.team&&scDiff().n)return false}catch(e){return false}return true};
+</script>
+<script src="../autoupdate.js?v=1" defer></script>
 </body>
 </html>
