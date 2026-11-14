@@ -334,11 +334,16 @@ body.bigt #app.wrap{min-height:calc(100dvh / 1.13)}
 </style>
 </head>
 <body>
-<script>/* golf is for signed-in club members: no club sign-in on this browser = members-only screen, nothing else loads */
-(function(){var ok=false;try{ok=!!localStorage.getItem('rngc-auth-token');
-  /* or a guest pass inside its window: event day plus 72 hours (guestpass.js) */
-  var gp=JSON.parse(localStorage.getItem('rngc-guest-pass')||'null'),now=Date.now();if(gp&&now>=gp.start&&now<gp.exp)ok=true}catch(e){}if(ok)return;
-document.write('<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;background:#0b0b0c;color:#e9e9ea"><div style="max-width:420px"><div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#a7a9ac">Raider Nation Golf Club</div><h1 style="font-size:30px;text-transform:uppercase;margin:10px 0">Members only</h1><p style="color:#a7a9ac;line-height:1.5;margin:0 0 20px">The golf scorecard is for club members. Sign in on the club app with the email on your membership, then come back.</p><a href="../" style="display:inline-block;background:#e9e9ea;color:#0b0b0c;padding:12px 20px;font-weight:700;text-decoration:none">Go to the club app</a></div></div><plaintext style="display:none">');})();
+<script>/* golf is open to anyone (David, Nov 14 2026: "bypass the login for the golf piece ... all they have to do is put
+   their name"). Signed-in members, guest passes and anyone who has given a name go straight in; everyone else gets one
+   question, their name, then golf loads. */
+(function(){var ok=false;try{ok=!!localStorage.getItem('rngc-auth-token')||!!localStorage.getItem('rngc-golf-name');
+  var gp=JSON.parse(localStorage.getItem('rngc-guest-pass')||'null'),now=Date.now();if(gp&&now>=gp.start&&now<gp.exp)ok=true;
+  var g=JSON.parse(localStorage.getItem('rngc-golf-v1')||'null');if(g&&g.setup&&g.me&&g.me.name&&g.me.name!=='You')ok=true}catch(e){ok=true}if(ok)return;
+window.rngcSaveName=function(f){var n=(f.n.value||'').replace(/[<>"`]/g,'').trim().slice(0,24);if(n.length<2){f.n.focus();return false}
+  try{localStorage.setItem('rngc-golf-name',n);var g=JSON.parse(localStorage.getItem('rngc-golf-v1')||'{}');g.me=g.me||{};g.me.name=n;if(g.me.hcp==null)g.me.hcp=18;g.setup=true;localStorage.setItem('rngc-golf-v1',JSON.stringify(g))}catch(e){}
+  location.reload();return false};
+document.write('<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,sans-serif;background:#0b0b0c;color:#e9e9ea"><form onsubmit="return rngcSaveName(this)" style="max-width:420px;width:100%"><div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#a7a9ac">Raider Nation Golf Club</div><h1 style="font-size:30px;text-transform:uppercase;margin:10px 0">Golf is free</h1><p style="color:#a7a9ac;line-height:1.5;margin:0 0 18px">Live scorecard, yards to the green, wind and your stats. What\'s your name?</p><input name="n" maxlength="24" autocomplete="name" placeholder="Your name" required style="width:100%;box-sizing:border-box;font-size:18px;padding:14px;border-radius:10px;border:1px solid #3a3d42;background:#16191e;color:#e9e9ea;margin-bottom:12px"><button style="width:100%;min-height:52px;font-size:17px;font-weight:700;border:0;border-radius:10px;background:#e9e9ea;color:#0b0b0c">Start golfing</button></form></div><plaintext style="display:none">');})();
 </script>
 <div class="wrap" id="app"></div>
 <div class="scrim" id="scrim"></div>

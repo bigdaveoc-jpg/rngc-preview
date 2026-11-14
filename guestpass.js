@@ -148,8 +148,10 @@ function rosterOf(f){const out=[];for(const t of (f&&f.teams)||[])for(const p of
 function findName(list,q){const qt=normName(q).split(' ').filter(Boolean);if(!qt.length||normName(q).length<2)return [];
   return list.filter(p=>{const nt=normName(p.name).split(' ');return qt.every(w=>nt.some(n=>n.startsWith(w)))}).slice(0,6)}
 const grpName=id=>'Group '+String(id||'').slice(1);
-function openRedeem(pp){
-  const e=evById(pp.ev);
+function openRedeem(pp){nameSheet(pp.ev,pp.code)}
+function nameSheet(evId,code){
+  if(!evId){openPlainName();return}
+  const pp={ev:evId,code:code||''},e=evById(pp.ev);
   if(!e){toast('That pass is for an event we can\'t find.');return}
   const w=windowFor(e.date),st=status(w,Date.now());
   if(st==='expired'){showUpgrade({ename:e.name,exp:w.exp});return}
@@ -163,7 +165,7 @@ function openRedeem(pp){
    <div id="gpNew" class="meta" style="margin:10px 0 0;display:none">Not on the list? No problem. Tap Start golfing and we'll make your guest profile with that name.</div>
    <label class="meta" for="gpClub" style="display:block;margin:12px 0 6px">Your club</label><input class="field" id="gpClub" maxlength="40" value="${esc(opp)}">
    <div class="acts" style="margin-top:14px"><button class="btn full" id="gpGo" style="width:100%"><i class="ph-bold ph-golf"></i> ${st==='early'?'Save my pass':'Start golfing'}</button></div>
-   <p class="meta" style="text-align:center;margin:10px 0 0">Free today plus 72 hours: live scorecard, leaderboard, skins and side games. Already a member? <button class="linkbtn" data-signin style="margin:0">Sign in</button></p>`);
+   <p class="meta" style="text-align:center;margin:10px 0 0">Free: live scorecard, leaderboard, skins, side games and your stats. Club member? <button class="linkbtn" data-signin style="margin:0">Sign in</button></p>`);
   const inp=$('#gpName'),hits=$('#gpHits'),mine=$('#gpMine'),nw=$('#gpNew');
   const showPick=()=>{if(!pick){mine.innerHTML='';return}
     mine.innerHTML=`<div class="card gpmine"><i class="ph-fill ph-check-circle"></i><div><b>${esc(pick.name)}</b><span>${esc(grpName(pick.team))}, starts on hole ${pick.start}${pick.mates.length?' with '+esc(pick.mates.map(n=>n.split(' ')[0]).join(', ')):''}</span></div><button class="linkbtn" id="gpUnpick" style="margin:0">Not me</button></div>`;
@@ -174,20 +176,44 @@ function openRedeem(pp){
     nw.style.display=roster.length&&normName(q).length>=3&&!m.length?'block':'none'};
   inp.addEventListener('input',draw);
   hits.addEventListener('click',ev2=>{const b=ev2.target.closest('[data-pid]');if(!b)return;pick=roster.find(p=>p.id===b.dataset.pid)||null;if(pick)inp.value=pick.name.slice(0,24);showPick();draw()});
-  if(!PREVIEW)club('/pass/roster',{ev:pp.ev,code:pp.code}).then(r=>{field=r.field;roster=rosterOf(field);draw()}).catch(()=>{});
+  if(!PREVIEW)club('/pass/roster',pp.code?{ev:pp.ev,code:pp.code}:{ev:pp.ev}).then(r=>{field=r.field;roster=rosterOf(field);draw()}).catch(()=>{});
   $('#gpGo').addEventListener('click',async()=>{
     const typed=inp.value.trim(),clubName=$('#gpClub').value.trim();
     if(!pick&&typed){const ex=roster.filter(p=>normName(p.name)===normName(typed));if(ex.length===1){pick=ex[0];showPick()}}
     const name=pick?pick.name.slice(0,24):typed;
     if(!name){toast('Add your name for the scorecard');inp.focus();return}
     const b=$('#gpGo');b.disabled=true;
-    try{const p=await redeem(pp.ev,pp.code,name,clubName);if(pick){p.pid=pick.id;p.team=pick.team}savePass(p);
+    try{const p=pp.code?await redeem(pp.ev,pp.code,name,clubName):await openPass(pp.ev,name,clubName);saveGolfName(name);if(pick){p.pid=pick.id;p.team=pick.team}savePass(p);
       if(pick)seatOnCard(pp.ev,pick,field);
       closeSheet();syncGolf();
       if(status(p,Date.now())==='early')toast('Pass saved. It opens on '+fmt(p.start));
       else{toast(pick?'You\'re in '+grpName(pick.team)+', '+name.split(' ')[0]+'. Golf is open.':'Welcome, '+name.split(' ')[0]+'. Golf is open.');S.golfv='event';setTab('golf');S.golfv='me'}}
     catch(err){b.disabled=false;toast(err.message)}});
 }
+/* golf with just a name (David, Nov 14 2026: "bypass the login for the golf piece. If they scan or click or download let
+   it be open and all they have to do is put their name"). Tapping Golf with no sign-in asks for a name once; on an
+   event day it also finds them on the groups and gets them on the live board. */
+const NAME_KEY='rngc-golf-name';
+function golfName(){try{const n=localStorage.getItem(NAME_KEY);if(n)return n;const g=JSON.parse(localStorage.getItem('rngc-golf-v1')||'null');if(g&&g.setup&&g.me&&g.me.name&&g.me.name!=='You')return g.me.name}catch(e){}return ''}
+function saveGolfName(n){try{localStorage.setItem(NAME_KEY,n);const g=JSON.parse(localStorage.getItem('rngc-golf-v1')||'{}');g.me=g.me||{};g.me.name=n;if(g.me.hcp==null)g.me.hcp=18;g.setup=true;localStorage.setItem('rngc-golf-v1',JSON.stringify(g))}catch(e){}}
+function todayEv(){const now=Date.now();return(typeof EVENTS!=='undefined'?EVENTS:[]).find(e=>!e.status&&(typeof SCORECARD_EVENTS==='undefined'||SCORECARD_EVENTS.includes(e.id))&&status(windowFor(e.date),now)==='event')||null}
+async function openPass(ev,name,clubName){
+  if(!PREVIEW){const r=await club('/pass/open',{ev,name,club:clubName});return r.pass}
+  const e=evById(ev);return Object.assign({ev,name,club:clubName,ename:e.name,date:e.date,at:Date.now()},windowFor(e.date))}
+function openPlainName(){
+  openSheet(`<h3 style="margin:0">Golf is free</h3><p class="sub" style="margin:4px 0 10px">Live scorecard, yards to the green, wind and your stats. No sign-up.</p>
+   <label class="meta" for="gnName" style="display:block;margin:0 0 6px">What's your name?</label><input class="field" id="gnName" maxlength="24" autocomplete="name" placeholder="Your name">
+   <div class="acts" style="margin-top:14px"><button class="btn full" id="gnGo" style="width:100%"><i class="ph-bold ph-golf"></i> Start golfing</button></div>
+   <p class="meta" style="text-align:center;margin:10px 0 0">Club member? <button class="linkbtn" data-signin style="margin:0">Sign in</button></p>`);
+  const go=()=>{const n=$('#gnName').value.replace(/[<>"`]/g,'').trim().slice(0,24);if(n.length<2){toast('Add your name for the scorecard');return}
+    saveGolfName(n);closeSheet();toast('Welcome, '+n.split(' ')[0]+'. Golf is open.');setTab('golf')};
+  $('#gnGo').addEventListener('click',go);$('#gnName').addEventListener('keydown',e=>{if(e.key==='Enter')go()});setTimeout(()=>{const i=$('#gnName');if(i)i.focus()},250)}
+window.openGolfName=()=>{const e=todayEv();nameSheet(e?e.id:null,null)};
+/* someone who gave a name before: on event day, quietly get them on the live board too */
+let autoTried=false;
+function autoJoin(){if(autoTried||PREVIEW||authTok())return;const n=golfName(),e=todayEv();if(!n||!e)return;
+  const p=P.get();if(p&&p.ev===e.id&&isOpen(status(p,Date.now())))return;autoTried=true;
+  openPass(e.id,n,'').then(pp=>{savePass(pp);syncGolf()}).catch(()=>{})}
 /* put the guest on their group's card on this phone: the event scorecard reads its saved state when it opens */
 function seatOnCard(ev,pick,field){try{
   const K='rngc-scorecard-ev3',st=JSON.parse(localStorage.getItem(K)||'{}');
@@ -218,14 +244,14 @@ window.showGate=function(t){
 /* golf tab: time-left bar for guests */
 function syncGolf(){
   const v=$('#v-golf');if(!v)return;
-  const p=P.get(),st=status(p,Date.now()),guest=!authTok()&&isOpen(st);
+  const p=P.get(),st=status(p,Date.now()),guest=false;   /* golf is open to all now (Nov 14 2026): no pass bar */
   v.classList.toggle('gp',guest);
   let bar=v.querySelector('.gpbar');
   if(!guest){if(bar)bar.remove();return}
   if(!bar){bar=document.createElement('div');bar.className='gpbar';v.insertBefore(bar,v.firstChild)}
   bar.innerHTML=`<div><b>Guest pass</b> <span>${st==='event'?'event day, then 72 hours':esc(leftText(p.exp-Date.now()))+' left'}</span></div><button class="btn small ghost" data-gpup>Keep it</button>`;
 }
-setInterval(()=>{syncGolf();const p=P.get();if(S.tab==='golf'&&!authTok()&&p&&status(p,Date.now())==='expired'&&!gateOn)setTab('golf')},60e3);
+setInterval(syncGolf,60e3);
 
 document.addEventListener('submit',e=>{if(!e.target.classList.contains('gpform'))return;e.preventDefault();
   if(!window.rngcTryPassCode($('#gpCode').value))toast('That code is not a guest pass for a club event.')});
@@ -276,5 +302,7 @@ if(!PREVIEW){const gp=P.get();if(gp){const drop=()=>{try{localStorage.removeItem
 /* the golf Events page asks for the QR from inside the golf screen (David, Nov 14 2026: "where did the QR code go, so Ross can just share that") */
 window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.gpqr&&isLeader())showPassQR(String(e.data.gpqr))});
 syncGolf();
-const _setTab=window.setTab;window.setTab=function(t){_setTab(t);syncGolf()};
+const _setTab=window.setTab;window.setTab=function(t){
+  if((t==='golf'||t==='courses')&&!authTok()&&!golfName()&&!P.active()){window.openGolfName();return}
+  _setTab(t);syncGolf();if(t==='golf')autoJoin()};
 })();

@@ -2709,7 +2709,7 @@ document.addEventListener('click',e=>{
   const sc=e.target.closest('[data-scroll]');if(sc){e.preventDefault();const t=document.getElementById(sc.dataset.scroll);t&&t.scrollIntoView({behavior:'smooth'})}
 });
 /* the club website is Home only; every other page is for signed-in members */
-const PUBLIC_TABS=['home'];
+const PUBLIC_TABS=['home','golf','courses'];   /* golf is open, name only (David, Nov 14 2026) */
 const locked=t=>!PUBLIC_TABS.includes(t)&&!authTok()&&!(t==='golf'&&window.RNGCPASS&&RNGCPASS.active());   /* guest pass opens golf only (guestpass.js) */
 const GATE_N={events:'Club events',golf:'Golf',games:'Raiders games',courses:'Courses',forum:'The forum',members:'The member area',settings:'Settings'};
 let gateOn=false;
@@ -3476,7 +3476,7 @@ syncTop();
 <script src="chapter.js?v=8"></script>
 <script src="photos.js?v=1"></script>
 <script src="fantasy.js"></script>
-<script src="guestpass.js?v=club5"></script>
+<script src="guestpass.js?v=club6"></script>
 <script src="shop.js?v=club2"></script>
 </body>
 </html>
