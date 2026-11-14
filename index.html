@@ -695,7 +695,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .tixopt i{font-size:22px;color:var(--silver)}
 .tixopt b{font-family:var(--display);font-size:20px;text-transform:uppercase;line-height:1.05}
 .tixopt small{color:var(--muted);font-size:12px}
-@media (min-width:700px){.tixopts{grid-template-columns:repeat(4,1fr)}}
+@media (min-width:700px){.tixopts{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}}
 /* ---------- settings ---------- */
 
 .seg2{display:flex;gap:6px;flex-wrap:wrap}
@@ -2359,12 +2359,12 @@ function tixCard(x){
   const mine=TIX.threads.find(t=>t.tix===x.id&&t.me==='buyer');
   const head=g?(()=>{const [a,h]=sides(g),f=fmtDate(g.date);return `<div class="tixm">${tlogo(a,'tl s')}<span class="at">@</span>${tlogo(h,'tl s')}<span>Week ${g.wk} - ${g.tbd?f.m+' TBD':f.dow+', '+f.m+' '+f.d}${g.kick&&!g.tbd&&!g.res?' - '+g.kick+' PT':''}</span></div>`})()
     :`<div class="tixm"><svg class="logo s" aria-hidden="true"><use href="#mk"/></svg><span>Club event</span></div>`;
-  const acts=x.mine?`<span class="tixacts">${x.offers?`<button class="btn small" data-tixoffers="${x.id}">${x.offers} offer${x.offers===1?'':'s'}</button>`:''}<button class="btn small ghost" data-tixdone="${x.id}">Sold</button><button class="btn small ghost" data-tixdel="${x.id}">Remove</button></span>`
-    :`<span class="tixacts">${x.canApprove?`<button class="btn small" data-tixok="${x.id}">Approve</button>`:''}${x.canRemove?`<button class="btn small ghost" data-tixdel="${x.id}">Remove</button>`:''}${x.pending?'':mine?`<button class="btn small" data-tth="${mine.id}">Your offer</button>`:`<button class="btn small" data-offer="${x.id}">${x.mode==='sell'?'Make offer':'Propose trade'}</button>`}</span>`;
-  return `<article class="card tix">${head}<div class="row1"><h3>${esc(x.event)}${x.pending?' <span class="pill out">Waiting for approval</span>':''}</h3><span class="pill">${x.qty} ticket${x.qty===1?'':'s'}</span></div>
+  const acts=x.mine?`<span class="tixacts">${x.offers?`<button class="btn small" data-tixoffers="${x.id}">${x.offers} ${x.mode==='want'?'repl'+(x.offers===1?'y':'ies'):'offer'+(x.offers===1?'':'s')}</button>`:''}<button class="btn small ghost" data-tixdone="${x.id}">${x.mode==='want'?'Got them':'Sold'}</button><button class="btn small ghost" data-tixdel="${x.id}">Remove</button></span>`
+    :`<span class="tixacts">${x.canApprove?`<button class="btn small" data-tixok="${x.id}">Approve</button>`:''}${x.canRemove?`<button class="btn small ghost" data-tixdel="${x.id}">Remove</button>`:''}${x.pending?'':mine?`<button class="btn small" data-tth="${mine.id}">${x.mode==='want'?'Your reply':'Your offer'}</button>`:`<button class="btn small" data-offer="${x.id}">${x.mode==='sell'?'Make offer':x.mode==='want'?'I have these':'Propose trade'}</button>`}</span>`;
+  return `<article class="card tix">${head}<div class="row1"><h3>${esc(x.event)}${x.pending?' <span class="pill out">Waiting for approval</span>':''}</h3><span class="pill">${x.mode==='want'?'Needs ':''}${x.qty} ticket${x.qty===1?'':'s'}</span></div>
    <div class="meta" style="margin:2px 0 8px">${esc(x.venue)}</div>
    ${seatStrip(x)}
-   <div class="deal">${x.mode==='sell'?`<b>${money(x.price)}</b><span> each</span>${x.face?`<span class="meta" style="margin:0 0 0 10px">Face value ${money(x.face)}</span>`:''}${above?'<span class="pill" style="margin-left:10px">Above face</span>':''}`:`<span class="pill">Trade</span><span style="margin-left:10px">Wants: ${esc(x.want)}</span>`}</div>
+   <div class="deal">${x.mode==='want'?`<span class="pill hot">Looking for</span><span style="margin-left:10px">${x.price?'Up to <b>'+money(x.price)+'</b> each':'Open to offers'}</span>`:x.mode==='sell'?`<b>${money(x.price)}</b><span> each</span>${x.face?`<span class="meta" style="margin:0 0 0 10px">Face value ${money(x.face)}</span>`:''}${above?'<span class="pill" style="margin-left:10px">Above face</span>':''}`:`<span class="pill">Trade</span><span style="margin-left:10px">Wants: ${esc(x.want)}</span>`}</div>
    ${x.note?`<p class="note2"><i class="ph-bold ph-chat-text"></i> ${esc(x.note)}</p>`:''}
    <div class="row2"><span class="who"><span class="av s">${initials(x.name||'')}</span>${x.mine?'You':esc(x.name)} <span class="meta" style="margin:0">${esc(x.chapter)}</span></span>${acts}</div></article>`;
 }
@@ -2372,7 +2372,7 @@ function tixCard(x){
 function tixGameHTML(){
   const g=S.tixGame&&GAMES.find(y=>y.id===S.tixGame);if(!g)return '';
   const V=VENUES[g.v],[a,h]=sides(g),f=fmtDate(g.date),L=allTix().filter(x=>x.game===g.id),fl=S.tixFilter;
-  const nS=L.filter(x=>x.mode==='sell').length,nT=L.filter(x=>x.mode==='trade').length,team=g.home?'Raiders':TEAMS[g.o];
+  const nS=L.filter(x=>x.mode==='sell').length,nT=L.filter(x=>x.mode==='trade').length,nW=L.filter(x=>x.mode==='want').length,team=g.home?'Raiders':TEAMS[g.o];
   const opt=(attr,on,ic,t,sub)=>`<button class="card tixopt" ${attr} aria-pressed="${on}"><i class="ph-bold ph-${ic}"></i><b>${t}</b><small>${sub}</small></button>`;
   return `<div class="card tixgame rise"><div class="tixm">${tlogo(a,'tl s')}<span class="at">@</span>${tlogo(h,'tl s')}<span>Week ${g.wk} - ${g.tbd?f.m+' TBD':f.dow+', '+f.m+' '+f.d}${g.kick&&!g.tbd?' - '+g.kick+' PT':''}</span></div>
    <h3 class="cardh">${esc(g.home?'Raiders vs '+TEAMS[g.o]:'Raiders at '+TEAMS[g.o])}</h3><div class="meta">${esc(V.n)}, ${esc(V.city)}</div>
@@ -2380,6 +2380,7 @@ function tixGameHTML(){
     ${opt('data-tf="sell"',fl==='sell','ticket','Buy',nS+' listing'+(nS===1?'':'s')+' from members')}
     ${opt('data-postas="sell"',false,'tag','Sell','List your seats')}
     ${TIX.rules&&!TIX.rules.trades?'':opt('data-tf="trade"',fl==='trade','swap','Trade',nT?nT+' trade offer'+(nT===1?'':'s'):'Swap seats or games')}
+    ${nW?opt('data-tf="want"',fl==='want','magnifying-glass','Looking for',nW+' member'+(nW===1?' wants':'s want')+' seats'):opt('data-postas="want"',false,'magnifying-glass','Looking for','Post the seats you want')}
     <a class="card tixopt" href="${V.tix}" ${ext}><i class="ph-bold ph-arrow-square-out"></i><b>Team box office</b><small>Buy from the ${esc(team)} official site</small></a>
    </div>
    <button class="linkbtn" data-tixall style="margin-top:12px">Show tickets for every game</button></div>`;
@@ -2391,13 +2392,13 @@ function tthRow(t){
 function tixHTML(){
   const f=S.tixFilter,list=allTix().filter(x=>(f==='all'||f==='mine'?f!=='mine'||x.mine:x.mode===f)&&(!S.tixGame||x.game===S.tixGame));
   const nMine=allTix().filter(x=>x.mine).length,tr=!TIX.rules||TIX.rules.trades;
-  return `<div class="tixhead"><div><h2 class="sec" style="margin:18px 0 0">Ticket exchange</h2></div><button class="btn" id="postTix"><i class="ph-bold ph-plus"></i> Post tickets</button></div>
+  return `<div class="tixhead"><div><h2 class="sec" style="margin:18px 0 0">Ticket exchange</h2></div><span class="inrow"><button class="btn ghost" data-postas="want"><i class="ph-bold ph-magnifying-glass"></i> Looking for</button><button class="btn" id="postTix"><i class="ph-bold ph-plus"></i> Post tickets</button></span></div>
    <div class="card privacy" style="margin-top:0"><i class="ph-bold ph-shield-check"></i><span><b style="color:var(--text)">Keep it safe.</b> Transfer in the official ticket app, pay after it lands. The club never holds money.</span></div>
    ${TIX.err?`<div class="card privacy" style="margin-top:10px"><i class="ph-bold ph-wifi-slash"></i><span>${esc(TIX.err)} <button class="linkbtn" data-tixreload>Try again</button></span></div>`:''}
    ${tixGameHTML()}
    ${TIX.threads.length?`<h3 class="sec" style="font-size:20px;margin:18px 0 8px">Your conversations${tixUnread()?' <span class="pill">'+tixUnread()+' new</span>':''}</h3><div class="stack">${TIX.threads.slice(0,S.tthAll?100:3).map(tthRow).join('')}</div>${TIX.threads.length>3&&!S.tthAll?'<button class="linkbtn" data-tthall style="margin-top:8px">Show all '+TIX.threads.length+'</button>':''}`:''}
-   <div class="chips" style="padding-top:14px"><button class="chip" data-tf="all" aria-pressed="${f==='all'}">All</button><button class="chip" data-tf="sell" aria-pressed="${f==='sell'}">For sale</button>${tr?`<button class="chip" data-tf="trade" aria-pressed="${f==='trade'}">Trades</button>`:''}${nMine?`<button class="chip" data-tf="mine" aria-pressed="${f==='mine'}">Mine (${nMine})</button>`:''}</div>
-   <div class="tixgrid rise" style="margin-top:12px">${TIX.items===null?'<p class="meta">Loading tickets...</p>':list.map(tixCard).join('')||'<div class="card empty"><i class="ph-bold ph-ticket"></i>No tickets listed here yet. Post yours.</div>'}</div>`;
+   <div class="chips" style="padding-top:14px"><button class="chip" data-tf="all" aria-pressed="${f==='all'}">All</button><button class="chip" data-tf="sell" aria-pressed="${f==='sell'}">For sale</button>${tr?`<button class="chip" data-tf="trade" aria-pressed="${f==='trade'}">Trades</button>`:''}<button class="chip" data-tf="want" aria-pressed="${f==='want'}">Looking for</button>${nMine?`<button class="chip" data-tf="mine" aria-pressed="${f==='mine'}">Mine (${nMine})</button>`:''}</div>
+   <div class="tixgrid rise" style="margin-top:12px">${TIX.items===null?'<p class="meta">Loading tickets...</p>':list.map(tixCard).join('')||'<div class="card empty"><i class="ph-bold ph-ticket"></i>'+(f==='want'?'Nobody is looking here yet. Tap Looking for to post what you want.':'No tickets listed here yet. Post yours.')+'</div>'}</div>`;
 }
 function tixView(v,seg){
   v.innerHTML=seg+tixHTML();
@@ -2406,19 +2407,20 @@ function tixView(v,seg){
 function openPostTix(pre){
   pre=pre||{game:S.tixGame};
   const R=TIX.rules||{trades:true,cap:'none'},capNote=R.cap==='face'?'Club rule: face value or less.':R.cap==='pct'?'Club rule: up to '+R.pct+'% over face value.':'';
-  openSheet(`<h3>Post tickets</h3><form id="tixForm">
+  openSheet(`<h3 id="tixFormH">${pre.mode==='want'?'Looking for tickets':'Post tickets'}</h3><form id="tixForm">
    <label for="tg">Which game?</label><select class="field" id="tg"><option value="">${R.clubSpots===false?'Pick a game':'Club event or something else'}</option>${GAMES.filter(g=>!g.res).map(g=>`<option value="${g.id}">Week ${g.wk}: Raiders ${g.home?'vs':'at'} ${TEAMS[g.o]}, ${g.tbd?'date TBD':fmtDate(g.date).m+' '+fmtDate(g.date).d}</option>`).join('')}</select>
    <label for="te">Game or event</label><input class="field" id="te" required maxlength="70" placeholder="Raiders home game vs ...">
    <label for="tv">Venue</label><input class="field" id="tv" maxlength="70" placeholder="Allegiant Stadium, Las Vegas">
-   <div class="three"><div><label for="tsec">Section</label><input class="field" id="tsec" maxlength="12" placeholder="118"></div>
+   <div id="tixSeatBits"><div class="three"><div><label for="tsec">Section</label><input class="field" id="tsec" maxlength="12" placeholder="118"></div>
    <div><label for="trow">Row</label><input class="field" id="trow" maxlength="8" placeholder="14"></div>
    <div><label for="tseats">Seats</label><input class="field" id="tseats" maxlength="16" placeholder="5-6"></div></div>
    <label class="check"><input type="checkbox" id="ttog" checked> Seats are together</label>
-   <div class="two"><div><label for="tq">How many</label><input class="field" id="tq" type="number" min="1" max="8" value="2" required></div>
-   <div><label for="tf">Face value each${R.cap==='none'?' (optional)':''}</label><input class="field" id="tf" type="number" min="0" inputmode="decimal" placeholder="$"></div></div>
+   </div><div class="two"><div><label for="tq">How many</label><input class="field" id="tq" type="number" min="1" max="8" value="2" required></div>
+   <div id="tixFaceBit"><label for="tf">Face value each${R.cap==='none'?' (optional)':''}</label><input class="field" id="tf" type="number" min="0" inputmode="decimal" placeholder="$"></div></div>
    <label class="radio"><input type="radio" name="tm" value="sell" checked><span><b>Sell</b>Set a price per ticket.</span></label>
    ${R.trades?'<label class="radio"><input type="radio" name="tm" value="trade"><span><b>Trade</b>Say what you want in return.</span></label>':''}
-   <label for="tp">Price each, or what you want</label><input class="field" id="tp" required maxlength="80" placeholder="140  or  a Broncos game">
+   <label class="radio"><input type="radio" name="tm" value="want"><span><b>Looking for</b>Tell members which game you need seats for.</span></label>
+   <label for="tp" id="tpL">Price each, or what you want</label><input class="field" id="tp" required maxlength="80" placeholder="140  or  a Broncos game">
    <label for="tnote">Comment (optional)</label><textarea class="field" id="tnote" maxlength="200" placeholder="Aisle seats, parking pass included, shade after 2 pm..."></textarea>
    <p class="help">${capNote?capNote+' ':''}Your name and chapter show on the listing. Offers come to you here in the app.${R.approve?' A club leader OKs new listings first.':''}</p>
    <button class="btn full" type="submit">Post to exchange</button></form>`);
@@ -2426,22 +2428,32 @@ function openPostTix(pre){
     $('#te').value=g.home?'Raiders home game vs '+TEAMS[g.o]:'Raiders at '+TEAMS[g.o]+' in '+V.city.split(',')[0];$('#tv').value=V.n+', '+V.city});
   if(pre.game&&GAMES.some(y=>y.id===pre.game)){$('#tg').value=pre.game;$('#tg').dispatchEvent(new Event('change'))}
   if(pre.mode){const r=document.querySelector('input[name=tm][value='+pre.mode+']');if(r)r.checked=true}
+  /* Looking for (David, Nov 14 2026): no seats or face value to fill in, the price is an optional budget */
+  const tmSync=()=>{const w=document.querySelector('input[name=tm]:checked').value==='want',tp=$('#tp');
+    $('#tixSeatBits').hidden=w;$('#tixFaceBit').hidden=w;$('#tixFormH').textContent=w?'Looking for tickets':'Post tickets';
+    $('#tpL').textContent=w?'Most you will pay each (optional)':'Price each, or what you want';tp.required=!w;tp.placeholder=w?'150':'140  or  a Broncos game';
+    $('#tnote').placeholder=w?'Any section, need 2 together, can meet in Vegas...':'Aisle seats, parking pass included, shade after 2 pm...';
+    $('#tixForm [type=submit]').textContent=w?'Post what I want':'Post to exchange'};
+  document.querySelectorAll('input[name=tm]').forEach(i=>i.addEventListener('change',tmSync));tmSync();
   $('#tixForm').addEventListener('submit',async ev=>{ev.preventDefault();
     const mode=document.querySelector('input[name=tm]:checked').value,p=$('#tp').value.trim(),g=GAMES.find(y=>y.id===$('#tg').value);
     const me=S.authMe||{},x={game:g?g.id:null,ends:kickMs(g)||null,event:$('#te').value.trim(),venue:$('#tv').value.trim(),qty:+$('#tq').value||1,mode,
       chapter:me.chapter||'National',face:+$('#tf').value||0,sec:$('#tsec').value.trim(),row:$('#trow').value.trim(),seats:$('#tseats').value.trim(),
       together:$('#ttog').checked,note:$('#tnote').value.trim()};
-    if(mode==='sell'){const n=parseFloat(p.replace(/[^0-9.]/g,''));if(!n){toast('Enter a price like 140');return}x.price=n}else x.want=p;
+    if(mode==='sell'){const n=parseFloat(p.replace(/[^0-9.]/g,''));if(!n){toast('Enter a price like 140');return}x.price=n}
+    else if(mode==='want'){x.price=parseFloat(p.replace(/[^0-9.]/g,''))||0;x.face=0;x.sec=x.row=x.seats='';x.together=false}
+    else x.want=p;
     const b=ev.target.querySelector('[type=submit]');b.disabled=true;
-    try{const r=await tclub('/tix/post',x);closeSheet();S.tixFilter='all';toast(r.pending?'Posted. A club leader OKs it before members see it.':'Posted to the exchange');loadTix(true)}
+    try{const r=await tclub('/tix/post',x);closeSheet();S.tixFilter='all';toast(r.pending?'Posted. A club leader OKs it before members see it.':mode==='want'?'Posted. Members with seats can answer you here.':'Posted to the exchange');loadTix(true)}
     catch(e){b.disabled=false;toast(e.message)}});
 }
 function openOffer(id){
   const x=allTix().find(t=>String(t.id)===String(id));if(!x)return;
-  openSheet(`<h3>${x.mode==='sell'?'Make an offer':'Propose a trade'}</h3><p class="help" style="margin:0 0 4px">${esc(x.event)} - ${x.qty} ticket${x.qty===1?'':'s'}${seatTxt(x)?', '+esc(seatTxt(x)):''} from ${esc(x.name)}</p>
-   <form id="offerForm">${x.mode==='sell'?`<label for="oa">Your offer per ticket</label><input class="field" id="oa" inputmode="decimal" placeholder="${money(x.price)}" required>`:`<label for="oa">What you can trade</label><input class="field" id="oa" required maxlength="80" placeholder="A Chargers game, 2 seats">`}
+  const W=x.mode==='want';
+  openSheet(`<h3>${W?'I have these tickets':x.mode==='sell'?'Make an offer':'Propose a trade'}</h3><p class="help" style="margin:0 0 4px">${esc(x.event)} - ${W?esc((x.name||'A member').split(' ')[0])+' wants '+x.qty+(x.price?', up to '+money(x.price)+' each':''):x.qty+' ticket'+(x.qty===1?'':'s')+(seatTxt(x)?', '+esc(seatTxt(x)):'')+' from '+esc(x.name)}</p>
+   <form id="offerForm">${W?`<label for="oa">Your seats and price</label><input class="field" id="oa" required maxlength="80" placeholder="Sec 118, row 14, $140 each">`:x.mode==='sell'?`<label for="oa">Your offer per ticket</label><input class="field" id="oa" inputmode="decimal" placeholder="${money(x.price)}" required>`:`<label for="oa">What you can trade</label><input class="field" id="oa" required maxlength="80" placeholder="A Chargers game, 2 seats">`}
    <label for="om">Message</label><textarea class="field" id="om" maxlength="300" placeholder="Say hello and when you can move them"></textarea>
-   <p class="help">${esc((x.name||'The seller').split(' ')[0])} gets it here in the app and can reply. Settle up only after the transfer shows in your ticket app.</p>
+   <p class="help">${esc((x.name||'The seller').split(' ')[0])} gets it here in the app and can reply. ${W?'Send the tickets in the official ticket app, get paid after they land.':'Settle up only after the transfer shows in your ticket app.'}</p>
    <button class="btn full" type="submit">Send</button></form>`);
   $('#offerForm').addEventListener('submit',async ev=>{ev.preventDefault();const b=ev.target.querySelector('[type=submit]');b.disabled=true;
     try{const r=await tclub('/tix/offer',{id:x.id,amt:$('#oa').value.trim(),msg:$('#om').value.trim()});closeSheet();toast('Sent to '+(x.name||'the seller').split(' ')[0]);await loadTix(true);openTixThread(r.thread)}
@@ -2450,10 +2462,10 @@ function openOffer(id){
 function openTixThread(id){
   const t=TIX.threads.find(y=>String(y.id)===String(id));if(!t)return;
   const x=allTix().find(y=>y.id===t.tix),tm=ms=>{const d=new Date(ms);return d.toLocaleDateString([], {month:'short',day:'numeric'})+' '+d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})};
-  openSheet(`<h3>${esc(t.with||'Member')}</h3><p class="help" style="margin:0 0 10px">${esc(t.event)}${t.me==='buyer'?' - you made an offer':' - offer on your listing'}${t.open?'':' - listing closed'}</p>
-   <div class="tthread">${t.msgs.map(m=>`<div class="tmsg${m.mine?' me':''}">${m.amt?`<b>${m.mine?'Your offer':'Offer'}: ${esc(m.amt)}</b>`:''}${m.body?`<span>${esc(m.body)}</span>`:''}<small>${tm(m.at)}</small></div>`).join('')}</div>
+  openSheet(`<h3>${esc(t.with||'Member')}</h3><p class="help" style="margin:0 0 10px">${esc(t.event)}${t.mode==='want'?(t.me==='buyer'?' - you have seats for them':' - they have seats for you'):t.me==='buyer'?' - you made an offer':' - offer on your listing'}${t.open?'':' - listing closed'}</p>
+   <div class="tthread">${t.msgs.map(m=>`<div class="tmsg${m.mine?' me':''}">${m.amt?`<b>${t.mode==='want'?(m.mine?'Your seats':'Seats'):m.mine?'Your offer':'Offer'}: ${esc(m.amt)}</b>`:''}${m.body?`<span>${esc(m.body)}</span>`:''}<small>${tm(m.at)}</small></div>`).join('')}</div>
    <form id="tthForm"><textarea class="field" id="tthBody" maxlength="500" required placeholder="Write a reply"></textarea><button class="btn full" type="submit">Send</button></form>
-   ${t.me==='seller'&&x&&x.mine?`<button class="btn ghost full" data-tixdone="${x.id}" style="margin-top:8px">Mark these tickets sold</button>`:''}
+   ${t.me==='seller'&&x&&x.mine?`<button class="btn ghost full" data-tixdone="${x.id}" style="margin-top:8px">${x.mode==='want'?'I got my tickets, close this post':'Mark these tickets sold'}</button>`:''}
    <p class="help">Keep it in the app. Send tickets in the official ticket app, pay after they land.</p>`);
   const th=document.querySelector('#sheet .tthread');if(th)th.scrollTop=th.scrollHeight;
   if(t.unread){t.unread=0;tclub('/tix/seen',{thread:t.id}).catch(()=>{});if(typeof renderSubnav==='function')renderSubnav()}
@@ -2474,8 +2486,8 @@ document.addEventListener('click',e=>{
   const th=e.target.closest('[data-tth]');if(th){openTixThread(th.dataset.tth);return}
   const ox=e.target.closest('[data-tixoffers]');if(ox){const L=TIX.threads.filter(t=>String(t.tix)===ox.dataset.tixoffers);
     if(L.length===1){openTixThread(L[0].id);return}
-    openSheet(`<h3>Offers</h3><div class="stack">${L.map(tthRow).join('')}</div>`);return}
-  const dn=e.target.closest('[data-tixdone]');if(dn){tixAct('/tix/close',{id:+dn.dataset.tixdone,status:'done'},'Marked sold');return}
+    openSheet(`<h3>${(allTix().find(x=>String(x.id)===ox.dataset.tixoffers)||{}).mode==='want'?'Replies':'Offers'}</h3><div class="stack">${L.map(tthRow).join('')}</div>`);return}
+  const dn=e.target.closest('[data-tixdone]');if(dn){const w=(allTix().find(x=>x.id===+dn.dataset.tixdone)||{}).mode==='want';tixAct('/tix/close',{id:+dn.dataset.tixdone,status:'done'},w?'Post closed. Enjoy the game':'Marked sold');return}
   const dl=e.target.closest('[data-tixdel]');if(dl){if(confirm('Take this listing down?'))tixAct('/tix/close',{id:+dl.dataset.tixdel,status:'gone'},'Removed');return}
   const ok=e.target.closest('[data-tixok]');if(ok){tixAct('/tix/approve',{id:+ok.dataset.tixok},'Listing approved');return}
 });
