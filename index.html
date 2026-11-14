@@ -2186,14 +2186,12 @@ function dirView(v,seg){
 }
 const dirRows=L=>L.length?L.map(m=>`<button class="card mem ${m.hof?'hofcard':''}" data-dm="${esc(m.id)}">${avOf(m)}<span><b>${esc(m.name)}</b><small>${esc(chapLine(m))}${roleTag(m)?' - '+roleTag(m):''}${DIR.admin&&m.status==='suspended'?' - on hold':''}</small>${m.signedUp!==undefined?`<small class="connl ${connOf(m)}">${esc(connLine(m))}</small>`:''}${memBadges(m)?`<span style="display:block">${memBadges(m)}</span>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join(''):'<div class="empty"><i class="ph-bold ph-users-three"></i>No members match.</div>';
 function alumniView(v,seg){
-  const af=S.af||'all',admin=MSG.perm?MSG.perm.role==='admin':DIR.admin;
-  const L=DIR.items.filter(m=>m.alum||m.hof).filter(m=>af==='all'||(af==='hof'?m.hof:m.alum))
+  const admin=MSG.perm?MSG.perm.role==='admin':DIR.admin;   /* one page for everyone, Hall of Fame first (David, Nov 14: don't need 3 pages) */
+  const L=DIR.items.filter(m=>m.alum||m.hof)
     .sort((x,y)=>((y.hof?y.hof.year:0)-(x.hof?x.hof.year:0))||((y.hof?1:0)-(x.hof?1:0))||x.name.localeCompare(y.name));
   const nH=DIR.items.filter(m=>m.hof).length,nA=DIR.items.filter(m=>m.alum).length;
-  const flt=[['all','Everyone'],['hof','Hall of Fame ('+nH+')'],['alumni','Alumni ('+nA+')']];
-  v.innerHTML=seg+`<h2 class="sec" style="margin-bottom:0">Alumni &amp; Hall of Fame</h2><p class="sub">Members who played for the team, and members the club honors.</p>
+  v.innerHTML=seg+`<h2 class="sec" style="margin-bottom:0">Alumni &amp; Hall of Fame</h2><p class="sub">Members who played for the team, and members the club honors.${nH||nA?` ${nH} Hall of Fame · ${nA} alumni.`:''}</p>
    ${admin?'<div class="acts" style="margin-top:10px"><button class="btn" id="honorAdd"><i class="ph-bold ph-plus"></i> Add or edit</button></div>':''}
-   <div class="seg" style="margin-top:10px">${flt.map(([k,l])=>`<button class="chip" data-af="${k}" aria-pressed="${af===k}">${l}</button>`).join('')}</div>
    ${L.length?`<div class="pcards rise">${L.map(pcardHTML).join('')}</div><p class="meta" style="margin-top:10px">Tap a card to flip it.</p>`:''}
    <div class="stack" style="margin-top:12px" hidden>${L.length?L.map(m=>`<button class="card mem ${m.hof?'hofcard':'alumcard'}" data-dm="${esc(m.id)}">${avOf(m)}<span><b>${esc(m.name)}</b><small>${m.hof?'Hall of Fame '+m.hof.year+(m.hof.honor?' - '+esc(m.hof.honor):''):'Alumni'}${m.alum&&(m.alum.pos||m.alum.yrs)?' - '+esc([m.alum.pos,m.alum.yrs].filter(Boolean).join(', ')):''}</small><span style="display:block">${memBadges(m)}</span>${(m.hof&&m.hof.note)||(m.alum&&m.alum.note)?`<small style="display:block;margin-top:4px">${esc((m.hof&&m.hof.note)||m.alum.note)}</small>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join(''):''}</div>
    ${L.length?'':`<div class="empty" style="margin-top:12px"><i class="ph-bold ph-trophy"></i>${admin?'Nobody added yet. Tap Add or edit.':'Nobody added yet. Club leaders add members here.'}</div>`}`;
