@@ -148,7 +148,7 @@ body.sun .mk.bo{border-color:#b48a5a}
 .statc{padding:8px 12px!important;margin-top:8px}.statc .r{margin-top:4px!important;gap:5px}.statc .chip2{min-height:36px;padding:0 9px}
 .htop{margin-top:8px;padding:6px 10px}.htop .ysub{min-height:22px}
 details.whyd>summary{cursor:pointer;color:var(--silver-2);font-size:15px;font-weight:700;min-height:40px;display:flex;align-items:center;gap:6px;list-style:none}
-details.whyd>summary::-webkit-details-marker{display:none}
+details.whyd>summary::-webkit-details-marker{display:none}.clip3 .rrow:nth-of-type(n+4){display:none}
 `;document.head.appendChild(s)})();
 
 /* ---------- small helpers ---------- */
@@ -478,25 +478,27 @@ function trGroup(id){const g=G.groups.find(x=>x.id===id);if(!g){location.hash='#
    <div class="lbl">Season table</div>
    ${tbl.length?`<section class="card" style="padding:4px 12px"><table class="stbl"><thead><tr><th>Player</th><th>Rounds</th><th>Wins</th><th>${STB?'Avg pts':'Avg net'}</th><th>Money</th></tr></thead><tbody>
      ${tbl.map(x=>`<tr><td>${esc(first(nm(x.id)))}</td><td>${x.n}</td><td>${x.w}</td><td>${STB?(x.pts.length?trOne(trAvg(x.pts)):'-'):x.nets.length?toPar(Math.round(trAvg(x.nets)*10)/10):'-'}</td><td class="${x.money>0?'under':x.money<0?'over':''}">${x.money>0?'+':''}${money(x.money)}</td></tr>`).join('')}</tbody></table></section>
-     <p class="note"><i class="ph-bold ph-info"></i><span>${STB?'Avg pts is your average Stableford points. ':''}A win is the low net score of the round, or the most points in a Stableford round, ties count for nobody. Money adds up the side bets from each round below, tap a round to see its bets.</span></p>
+     <details class="whyd"><summary><i class="ph-bold ph-caret-right"></i> How wins and money work</summary><p class="note"><i class="ph-bold ph-info"></i><span>${STB?'Avg pts is your average Stableford points. ':''}A win is the low net score of the round, or the most points in a Stableford round, ties count for nobody. Money adds up the side bets from each round below, tap a round to see its bets.</span></p></details>
      <button class="btn ghost block" id="shareT" style="margin-top:8px"><i class="ph-bold ph-share-fat"></i> Send the season money to the group</button>`
     :'<section class="card tcard"><div class="trow"><span class="muted">No rounds yet. Start one and the table fills in.</span></div></section>'}
-   <div class="lbl">Members</div>
+   <details class="whyd" id="gMem"${(G.pref||{}).gmem?' open':''} style="margin-top:14px"><summary><i class="ph-bold ph-caret-right"></i> Members · ${g.members.length}${mgr?' · add, remove, handicaps':''}</summary>
    <section class="card tcard">${g.members.map(m=>`<div class="trow"><div><b>${esc(m.name)}${m.id===g.manager?' <span class="tag rngc">Manager</span>':''}${m.id==='me'?' <span class="tag">You</span>':''}</b>
      ${mgr&&m.id!=='me'?`<button class="linkbtn" data-rm="${m.id}">Remove</button> <button class="linkbtn" data-mg="${m.id}">Make manager</button>`:''}</div>
      <label class="idxbox"><span>Index</span><input class="field idx" type="number" inputmode="decimal" step="0.1" min="-5" max="54" value="${m.hcp}" data-gi="${m.id}" ${mgr||m.id==='me'?'':'disabled'} aria-label="${esc(m.name)} handicap"></label></div>`).join('')}
     ${mgr?`<button class="btn ghost block" style="margin:10px 0" id="addM"><i class="ph-bold ph-user-plus"></i> Add a member</button>`:''}</section>
-   <p class="note"><i class="ph-bold ph-lock-simple"></i><span>${mgr?'You manage this group, so you can add and remove people and fix anyone\'s handicap.':esc(first(man.name))+' manages this group. You can fix your own handicap. <button class="linkbtn" id="takeBack" style="margin:0;min-height:0">Preview: take it back</button>'}</span></p>
+   <p class="note"><i class="ph-bold ph-lock-simple"></i><span>${mgr?'You manage this group, so you can add and remove people and fix anyone\'s handicap.':esc(first(man.name))+' manages this group. You can fix your own handicap.'}</span></p></details>
    <div class="lbl">Rounds</div>
-   <section class="card tcard">${rs.length?rs.map(r=>{const w=trWinner(r);return `<button class="rrow" data-round="${r.id}"><div><b>${trDay(r.date)} · ${esc(r.cname)}</b><span>${r.players.map(p=>esc(first(nm(p.id)))+' '+p.gross).join(' · ')}</span>${r.money&&Object.keys(r.money).length?`<span style="display:block">${r.bets&&r.bets.length?esc(r.bets.join(' + '))+': ':'Bets: '}${r.players.map(p=>{const v=r.money[p.id]||0;return esc(first(nm(p.id)))+' '+(v>0?'+':'')+money(v)}).join(' · ')}</span>`:''}</div><div class="sc" style="font-size:20px">${w?esc(first(nm(w.id))):'-'}<small>${w?(r.format==='stableford'&&w.pts!=null?'most points':'low net'):'net tie'}</small></div></button>`}).join('')
+   <section class="card tcard${rs.length>3?' clip3':''}" id="gRounds">${rs.length?rs.map(r=>{const w=trWinner(r);return `<button class="rrow" data-round="${r.id}"><div><b>${trDay(r.date)} · ${esc(r.cname)}</b><span>${r.players.map(p=>esc(first(nm(p.id)))+' '+p.gross).join(' · ')}</span>${r.money&&Object.keys(r.money).length?`<span style="display:block">${r.bets&&r.bets.length?esc(r.bets.join(' + '))+': ':'Bets: '}${r.players.map(p=>{const v=r.money[p.id]||0;return esc(first(nm(p.id)))+' '+(v>0?'+':'')+money(v)}).join(' · ')}</span>`:''}</div><div class="sc" style="font-size:20px">${w?esc(first(nm(w.id))):'-'}<small>${w?(r.format==='stableford'&&w.pts!=null?'most points':'low net'):'net tie'}</small></div></button>`}).join('')
      :'<div class="trow"><span class="muted">None yet</span></div>'}${rs.some(r=>r.money&&Object.keys(r.money).length)?`<div class="trow"><span><b>These ${rs.length} rounds add up to</b><br><span class="muted">${tbl.map(x=>esc(first(nm(x.id)))+' '+(x.money>0?'+':'')+money(x.money)).join(' · ')}, same as the season table. Wins count low net only; money comes from the bets, so a player can win money without a win.</span></span></div>`:''}</section>
+   ${rs.length>3?`<button class="btn ghost block" id="allR" style="margin-top:8px">Show all ${rs.length} rounds</button>`:''}
    ${mgr?`<button class="linkbtn" id="delG" style="margin:16px 0 28px">Delete this group</button>`:'<div style="height:28px"></div>'}`;
   const shT=$('#shareT');if(shT)shT.onclick=()=>trShare(shT,`${g.name} season money, ${rs.length} round${rs.length===1?'':'s'}\n${tbl.map(x=>first(nm(x.id))+'  '+(x.money>0?'+':'')+money(x.money)+'  ('+x.w+' win'+(x.w===1?'':'s')+')').join('\n')}\n\nFrom the RNGC golf app. A tally only.`);
   trWire();
   document.querySelectorAll('[data-gi]').forEach(inp=>inp.onchange=()=>{const m=g.members.find(x=>x.id===inp.dataset.gi);m.hcp=trIdx(inp.value);if(m.id==='me')trSetMe(G.me.name,m.hcp);gsave();trGroup(id)});
   document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{const m=g.members.find(x=>x.id===b.dataset.rm);if(confirm('Take '+first(m.name)+' out of the group? Their old rounds stay in the table.')){g.members=g.members.filter(x=>x!==m);gsave();trGroup(id)}});
   document.querySelectorAll('[data-mg]').forEach(b=>b.onclick=()=>{const m=g.members.find(x=>x.id===b.dataset.mg);if(confirm('Make '+first(m.name)+' the manager? They get the controls for adding people and fixing handicaps.')){g.manager=m.id;gsave();trGroup(id)}});
-  const tb=$('#takeBack');if(tb)tb.onclick=()=>{g.manager='me';gsave();trGroup(id)};
+  {const gm=$('#gMem');if(gm)gm.ontoggle=()=>{(G.pref||(G.pref={})).gmem=gm.open;gsave()}}
+  {const ar=$('#allR');if(ar)ar.onclick=()=>{$('#gRounds').classList.remove('clip3');ar.remove()}}
   const dg=$('#delG');if(dg)dg.onclick=()=>{if(confirm('Delete '+g.name+'? Rounds you played stay in your own history.')){G.groups=G.groups.filter(x=>x!==g);gsave();location.hash='#/groups'}};
   const am=$('#addM');if(am)am.onclick=()=>{
     $('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">Add a member</h2>
@@ -840,8 +842,8 @@ function trRound(id){const r=G.rounds.find(x=>x.id===id);if(!r){location.hash='#
      ${tx.length?`<section class="card tcard" style="margin-top:8px"><div class="trow"><b>Settle up</b></div>${tx.map(x=>`<div class="trow"><span>${esc(x)}</span></div>`).join('')}</section>`:''}
      <button class="btn ghost block" id="shareS" style="margin-top:8px"><i class="ph-bold ph-share-fat"></i> Send the settle-up to the group</button>`:''}
    ${r.kind==='group'&&r.group&&G.groups.some(g=>g.id===r.group)?`<a class="btn block" style="margin-top:12px" href="#/new/${r.group}"><i class="ph-bold ph-arrow-counter-clockwise"></i> Play again with this crew</a>`:''}
-   <div class="lbl">Notes</div>
-   <textarea class="field" id="rNote" rows="3" maxlength="400" placeholder="Wind, new driver, what worked..." style="padding:10px 12px;min-height:84px">${esc(r.note||'')}</textarea>
+   <details class="whyd" style="margin-top:14px"${r.note?' open':''}><summary><i class="ph-bold ph-caret-right"></i> ${r.note?'Notes':'Add a note'}</summary>
+   <textarea class="field" id="rNote" rows="3" maxlength="400" placeholder="Wind, new driver, what worked..." style="padding:10px 12px;min-height:84px">${esc(r.note||'')}</textarea></details>
    <div class="muted" style="font-size:13px;margin-top:6px">${r.kind==='event'?'':'Teed off '+new Date(r.date).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' · '}${esc(r.cname)}${COURSES[r.course]&&COURSES[r.course].city?', '+esc(COURSES[r.course].city):''}</div>
    <button class="linkbtn" id="delR" style="margin:36px 0 28px;color:#e07a6a">Delete this round</button>`;
   document.querySelectorAll('[data-math]').forEach(b=>b.onclick=()=>{const m=b.nextElementSibling;m.hidden=!m.hidden;b.textContent=m.hidden?"How it's figured":"Hide the math"});
@@ -954,6 +956,7 @@ function trLog(f){const all=G.rounds.slice().sort((a,b)=>b.date-a.date),rs=all.f
     <div class="card"><b>${holes}</b><span>Holes</span><small>played</small></div></div>
    ${Object.entries(byMonth).map(([k,list])=>`<div class="lbl">${esc(k)} · ${list.length} round${list.length===1?'':'s'}</div>
     <section class="card tcard">${list.map(r=>trRow(r,meP(r))).join('')}</section>`).join('')}
+   <details class="whyd" style="margin-top:14px"><summary><i class="ph-bold ph-caret-right"></i> Where and when you play</summary>
    <div class="lbl">Where you play</div>
    ${W.length?`<section class="card" style="padding:4px 12px"><table class="stbl"><thead><tr><th>Course</th><th>Rounds</th><th>Avg</th><th>Best</th><th>Last</th></tr></thead><tbody>
      ${W.map(([n,w])=>`<tr><td>${esc(n)}</td><td>${w.n}</td><td>${w.g.length?Math.round(trAvg(w.g)):'-'}</td><td>${w.g.length?Math.min(...w.g):'-'}</td><td>${new Date(w.last).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</td></tr>`).join('')}</tbody></table></section>`
@@ -961,6 +964,7 @@ function trLog(f){const all=G.rounds.slice().sort((a,b)=>b.date-a.date),rs=all.f
    <div class="lbl">When you play · ${esc(fav)}s most</div>
    <section class="card" style="padding:12px 14px"><div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;align-items:end;height:96px">
      ${months.map(m=>`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end"><b style="font-size:13px">${m.n||''}</b><i style="display:block;width:70%;height:${m.n/mx*60}px;min-height:${m.n?4:1}px;background:${m.n?'var(--silver-2)':'var(--line)'};border-radius:3px"></i><span class="muted" style="font-size:12px">${m.l}</span></div>`).join('')}</div></section>
+   </details>
    <p class="note"><i class="ph-bold ph-info"></i><span>Tap a round for the full card, side bets and notes.</span></p><div style="height:28px"></div>`;
   trWire();document.querySelectorAll('[data-lf]').forEach(b=>b.onclick=()=>location.hash='#/log/'+b.dataset.lf);const lc=$('#lfCo');if(lc)lc.onchange=()=>{LOGCO=lc.value;trLog(f)}}
 
