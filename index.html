@@ -2772,6 +2772,13 @@ function setTab(t){
   document.getElementById('v-'+t).scrollTop=0;
   renderSubnav();
 }
+/* links to the golf pages (live banner Leaderboard and My scorecard, the event's Live scorecard) open inside the Golf tab, so the
+   club menu stays at the bottom (David, Nov 14: on the live leaderboard the menu icons weren't at the bottom; those links left the app) */
+document.addEventListener('click',e=>{if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+  const a=e.target.closest('a[href]');if(!a||a.target==='_blank')return;
+  const u=new URL(a.getAttribute('href'),location.href);if(u.origin!==location.origin||!/\/scorecard\/$/.test(u.pathname)||u.search)return;
+  const k=(u.hash.match(/^#\/([a-z]+)$/)||[])[1];if(!k)return;
+  e.preventDefault();if(typeof closeSheet==='function')closeSheet();S.golfv=k;save();setTab('golf')},true);
 /* Golf tab: same golf tracker as the scorecard page, shown inside the app; the side menu picks its section */
 function renderGolf(){const fr=$('#golfFrame'),want=new URL('scorecard/#/'+(S.golfv||'me'),location.href).href;
   try{const cur=fr.contentWindow&&fr.contentWindow.location.href;if(cur&&cur!=='about:blank'&&cur.split('#')[0]===want.split('#')[0]){if(cur!==want)fr.contentWindow.location.replace(want);return}}catch(e){}
