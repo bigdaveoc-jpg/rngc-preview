@@ -1006,6 +1006,7 @@ function fieldPage(){if(!ADMIN||CASUAL){if(!CASUAL){if(SYNC&&!REMOTE_AT&&!SC_ERR
   $('#app').innerHTML=bar('Groups',EV().name)+`
   <p class="note"><i class="ph-bold ph-info"></i><span>Tap a player to move, rename or remove. Every change saves for every phone.</span></p>
   ${TEAMS.map(t=>`<section class="card fg"><div class="fgh"><b>${esc(t.name)}</b><span class="muted">Hole ${t.start} · ${t.players.length} player${t.players.length===1?'':'s'}</span></div>
+   <button type="button" class="btn ghost block" data-tset="${t.id}" style="margin:2px 0 8px"><i class="ph-bold ph-gear-six"></i> Team settings: name, starting hole</button>
    <div class="fgl">${t.players.map(p=>`<button type="button" class="fgp" data-p="${p.id}"><span>${esc(p.name)}</span><i class="ph-bold ph-caret-right"></i></button>`).join('')}
    ${t.players.length<6?`<button type="button" class="fgp add" data-addp="${t.id}"><span><i class="ph-bold ph-user-plus"></i> Add player</span></button>`:''}
    ${t.players.length?'':`<button type="button" class="fgp del" data-delg="${t.id}"><span><i class="ph-bold ph-trash"></i> Remove this group</span></button>`}</div></section>`).join('')}
@@ -1013,12 +1014,30 @@ function fieldPage(){if(!ADMIN||CASUAL){if(!CASUAL){if(SYNC&&!REMOTE_AT&&!SC_ERR
   <div class="stick"><div class="navrow"><a class="btn ghost" href="#/setup" aria-label="Game setup"><i class="ph-bold ph-sliders-horizontal"></i></a><a class="btn" href="${HOME}">Done</a></div></div>`;
   document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>playerSheet(b.dataset.p));
   document.querySelectorAll('[data-addp]').forEach(b=>b.onclick=()=>addSheet(b.dataset.addp));
+  document.querySelectorAll('[data-tset]').forEach(b=>b.onclick=()=>teamSetSheet(b.dataset.tset));
+  {const q=location.hash.split('/')[2];if(q&&TEAMS.some(t=>t.id===q))setTimeout(()=>teamSetSheet(q),0)}
   document.querySelectorAll('[data-delg]').forEach(b=>b.onclick=()=>{const id=b.dataset.delg;
     if(hasScores(id)&&!confirm('This group has scores. Remove it anyway? Its scores leave the leaderboard.'))return;
     saveTeams(cloneTeams().filter(t=>t.id!==id),'Group removed')});
   $('#addg').onclick=groupSheet}
 function sheetOpen(html){$('#sheet').innerHTML=`<div class="grab"></div>${html}<button class="btn ghost block" style="margin-top:12px" id="closeSheet">Cancel</button>`;
   $('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#closeSheet').onclick=closeSheet}
+/* Team settings (David, Nov 14 2026: "from event setup you should be able to get to the team settings"): an admin names any group
+   and sets its starting hole; both reach every phone with the next leaderboard pull. Players are changed in the list below it. */
+function teamSetSheet(tid){const t=TEAMS.find(x=>x.id===tid);if(!t)return;const dn=t.dflt||t.name,taken=TEAMS.filter(x=>x.id!==t.id).map(x=>x.start);
+  sheetOpen(`<b style="font-size:18px">Team settings</b><div class="muted">${esc(dn)} · ${t.players.map(p=>esc(first(p.name))).join(', ')||'no players yet'}</div>
+   <div class="lbl">Team name</div><input class="field" id="tsName" maxlength="24" value="${esc(t.name!==dn?t.name:'')}" placeholder="${esc(dn)}" autocomplete="off" aria-label="Team name">
+   <p class="muted" style="margin:6px 0 0;font-size:13px">Shows on the leaderboard. Leave it blank for ${esc(dn)}.</p>
+   <div class="lbl">Starting hole</div><select class="field" id="tsStart" aria-label="Starting hole">${Array.from({length:18},(_,i)=>i+1).map(n=>`<option value="${n}" ${n===t.start?'selected':''}>Hole ${n}${taken.includes(n)?' · also '+esc(TEAMS.filter(x=>x.id!==t.id&&x.start===n).map(x=>x.name).join(', ')):''}</option>`).join('')}</select>
+   <p class="muted" id="tsMsg" role="status" style="margin:6px 0 0;font-size:13px;min-height:1.2em"></p>
+   <button class="btn block" style="margin-top:12px" id="tsSave"><i class="ph-bold ph-check"></i> Save for every phone</button>`);
+  $('#tsSave').onclick=async()=>{const b=$('#tsSave'),m=$('#tsMsg'),n=$('#tsName').value.trim(),st=+$('#tsStart').value,cur=t.name!==dn?t.name:'';
+    if(n&&n.length<2){m.textContent='Use 2 to 24 letters, or leave it blank.';return}
+    b.disabled=true;m.textContent='Saving...';
+    try{if(n!==cur){const j=await scCall('/event/name',{team:t.id,name:n});const c=REMOTE[t.id]||(REMOTE[t.id]={});if(j.name)c.name=j.name;else delete c.name;gNames()}
+      if(st!==t.start){const ts=cloneTeams();ts.find(x=>x.id===t.id).start=st;await fieldSave({teams:plainTeams(ts)},'Team settings saved');gNames()}else note('Team settings saved');
+      closeSheet();if(location.hash.startsWith('#/field'))fieldPage()}
+    catch(st2){b.disabled=false;m.textContent=st2===401?'Sign in first.':st2===403?'Only club admins and the chapter president change this.':st2===400?'Use 2 to 24 letters for the name.':st2===429?'Too many changes. Try again later.':'No signal. Try again in a minute.'}}}
 function playerSheet(pid){const from=TEAMS.find(t=>t.players.some(p=>p.id===pid));if(!from)return;const p=from.players.find(x=>x.id===pid);
   sheetOpen(`<b style="font-size:18px">${esc(p.name)}</b><div class="muted">${esc(from.name)}</div>
    <div class="lbl">Move to</div><div class="chips2">${TEAMS.filter(t=>t.id!==from.id).map(t=>`<button class="chip2" data-to="${t.id}" ${t.players.length>=6?'disabled':''}>${esc(t.name.replace('Group ',''))} <span class="muted" style="font-weight:500">${t.players.length}</span></button>`).join('')}</div>

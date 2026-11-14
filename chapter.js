@@ -79,7 +79,7 @@ function openInfo(id){const e=evs().find(x=>x.id===id);if(!e)return;
    <button class="btn full" type="submit" style="width:100%;margin-top:12px"><i class="ph-bold ph-check"></i> Save for everyone</button>
    <p class="meta" id="eiErr" role="alert" style="color:#ffb3b5;min-height:1.2em;margin-top:6px"></p></form>
    ${h4('4. Groups and the game')}
-   ${hasCard(id)?`<a class="btn ghost" style="width:100%" href="scorecard/#/field"><i class="ph-bold ph-users-three"></i> Groups: add, move, remove players</a>
+   ${hasCard(id)?`<a class="btn ghost" style="width:100%" href="scorecard/#/field"><i class="ph-bold ph-users-three"></i> Teams: names, starting holes, players</a>
      <a class="btn ghost" style="width:100%;margin-top:8px" href="scorecard/#/setup"><i class="ph-bold ph-sliders-horizontal"></i> Game, contests, skins, start time</a>`
      :'<p class="meta">Groups and the game open once this event\'s course scorecard is set up. Ask David.</p>'}
    ${h4('5. Invite')}
