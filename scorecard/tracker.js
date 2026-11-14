@@ -241,7 +241,7 @@ function trWire(){document.querySelectorAll('.joinlive').forEach(b=>b.onclick=()
 function hub(h){$('#app').className='wrap';
   if(!G.setup){if(G.rounds.some(r=>!r.demo))G.setup=true;else if(!h.startsWith('welcome')&&!h.startsWith('events'))return trWelcome()}
   const[a,b]=h.split('/');
-  if(EMBED)try{parent.postMessage({golf:a==='group'||a==='new'&&b?'groups':a==='round'||a===''||a==='new'?'me':a},location.origin)}catch(e){}
+  if(EMBED)try{parent.postMessage({golf:a==='group'||a==='new'&&b&&b!=='solo'&&b!=='crew'?'groups':a==='round'||a===''||a==='new'||a==='welcome'?'me':a},location.origin)}catch(e){}
   if(a==='groups')return trGroups();
   if(a==='group'&&b)return trGroup(b);
   if(a==='events')return trEvents();
@@ -446,7 +446,7 @@ function trEditMe(){$('#sheet').innerHTML=`<div class="grab"></div><h2 style="fo
 
 /* ---------- groups ---------- */
 function trGroups(){
-  $('#app').innerHTML=trBar('My golf',G.me.name+' · handicap '+G.me.hcp)+trTabs('groups')+`
+  $('#app').innerHTML=trBar('Groups',G.me.name)+trTabs('groups')+`
    <p class="note" style="margin-top:14px"><i class="ph-bold ph-info"></i><span>Your regular crew. Play rounds together, keep a season table and track who owes who.</span></p>
    ${G.groups.map(g=>{const rs=G.rounds.filter(r=>r.group===g.id);return `<a class="card gcard" href="#/group/${g.id}"><div><b>${esc(g.name)}${g.manager==='me'?' <span class="tag">You manage</span>':''}</b><span>${g.members.map(m=>esc(first(m.name))).join(', ')}</span></div><div class="sc">${rs.length}<small>round${rs.length===1?'':'s'}</small></div></a>`}).join('')}
    <button class="btn ghost block" style="margin-top:14px" id="newG"><i class="ph-bold ph-plus"></i> New group</button><div style="height:28px"></div>`;
@@ -508,8 +508,8 @@ function trGroup(id){const g=G.groups.find(x=>x.id===id);if(!g){location.hash='#
 
 /* ---------- club events ---------- */
 function trEvents(){const e=EVENTS.nov14,c=COURSES[e.course],past=G.rounds.filter(r=>r.kind==='event').sort((a,b)=>b.date-a.date),t=S.team&&TEAMS.find(x=>x.id===S.team);
-  $('#app').innerHTML=trBar('My golf',G.me.name+' · handicap '+G.me.hcp)+trTabs('events')+`
-   <section class="card ev" style="padding:16px;margin-top:14px"><span class="tag">Next club event</span><h1>${esc(e.name)}</h1><div class="muted">${esc(e.date)} · ${esc(e.start)} · ${esc(c.name)}</div>
+  $('#app').innerHTML=trBar('Golf events',G.me.name)+trTabs('events')+`
+   <section class="card ev" style="padding:16px;margin-top:14px"><span class="tag">${(()=>{const d=new Date(String(e.date).replace(/^[A-Za-z]+ /,'')),n=new Date(),x=isNaN(d)?1e9:Math.round((d-new Date(n.getFullYear(),n.getMonth(),n.getDate()))/864e5);return x===0?'Today':x===1?'Tomorrow':x<0?'Last club event':'Next club event'})()}</span><h1>${esc(e.name)}</h1><div class="muted">${esc(e.date)} · ${esc(e.start)} · ${esc(c.name)}</div>
     <div class="facts"><div><b>${esc(F().name)}</b><span>${esc(hcpLine())}</span></div><div><b>${TEAMS.length}</b><span>groups</span></div><div><b>${esc(TEE().name)}</b><span>tees</span></div></div>
     ${t?`<p class="note"><i class="ph-bold ph-users"></i><span>You're with ${esc(t.name)}, starting on hole ${t.start}.</span></p>`:''}
     <div class="row2"><a class="btn" href="#/event">${t?'Open my card':'Pick my group'}</a><a class="btn ghost" href="#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a></div>
@@ -946,7 +946,7 @@ function trLog(f){const all=G.rounds.slice().sort((a,b)=>b.date-a.date),rs=all.f
   const fav=rs.length?new Date(2026,0,4+dows.indexOf(Math.max(...dows))).toLocaleDateString(undefined,{weekday:'long'}):'-';
   const byMonth={};for(const r of rs){const d=new Date(r.date),k=d.toLocaleDateString(undefined,{month:'long',year:'numeric'});(byMonth[k]||(byMonth[k]=[])).push(r)}
   const score=r=>{const p=meP(r);return p?`${p.gross}<small>${toPar(p.gross-p.par)}${p.holes<18?' · '+p.holes+' holes':''}</small>`:`${esc(r.result||'-')}<small>${r.pos?'place '+r.pos:'event'}</small>`};
-  $('#app').innerHTML=trBar('Play log',G.me.name+' · every round, where and when',trBack('#/me'))+`
+  $('#app').innerHTML=trBar('Play log',G.me.name+' · every round, where and when')+trTabs('log')+`
    ${new Set(all.map(r=>r.kind)).size>1||f!=='all'?`<div class="seg" role="group" aria-label="Which rounds">${[['all','All'],['solo','Solo'],['group','Group'],['event','Events']].map(([k,l])=>`<button data-lf="${k}" aria-pressed="${k===f}">${l}</button>`).join('')}</div>`:''}
    ${cos.length>1?`<select class="field" id="lfCo" aria-label="Course" style="margin-top:8px"><option value="">All courses</option>${cos.map(c=>`<option ${c===LOGCO?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}
    <div class="tiles" style="margin-top:12px"><div class="card"><b>${rs.length}</b><span>Rounds</span><small>${rs.filter(r=>new Date(r.date).getFullYear()===yr).length} this year</small></div>

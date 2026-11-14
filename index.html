@@ -2527,7 +2527,7 @@ function goSub(t,k){
 document.addEventListener('click',e=>{const b=e.target.closest('[data-sub]');if(!b)return;const i=b.dataset.sub.indexOf('|');goSub(b.dataset.sub.slice(0,i),b.dataset.sub.slice(i+1))});
 document.addEventListener('click',e=>{if(e.target.closest('[data-ev],[data-gv],[data-mv],[data-board]'))setTimeout(renderSubnav,0)});
 $('#tabProfile').addEventListener('click',()=>$('#btnProfile').click());
-document.querySelectorAll('.tab[data-tab]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.tab==='home')S.hpage='overview';setTab(b.dataset.tab)}));
+document.querySelectorAll('.tab[data-tab]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.tab==='home')S.hpage='overview';if(b.dataset.tab==='golf'&&(S.tab==='golf'||S.tab==='courses'))S.golfv='me';setTab(b.dataset.tab)}));
 /* ---------- settings (preview: saved on this device; the live app saves for everyone) ---------- */
 /* user types: Member, Sub admin, Chapter admin, Admin. Sub admins get only the areas a leader hands them. */
 const ROLES=[['member','Member','Plays, posts, buys and sells tickets'],['sub','Sub admin','Helps run the areas a leader gives them'],['chapter','Chapter admin','Runs one chapter: members, events, scores'],['admin','Admin','Runs the whole club, every setting']];

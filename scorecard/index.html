@@ -622,7 +622,7 @@ function route(){const h=location.hash.replace(/^#\/?/,'');window.__cur=/^(me|ev
   if(h.startsWith('team')&&S.team)return teamPage();
   if(h.startsWith('bets')&&S.team)return betsPage();
   if(h.startsWith('hole')&&S.team){const n=+h.split('/')[1]||order(myTeam().start)[0];return hole(n)}
-  if(!CASUAL&&!(h.startsWith('event')||h.startsWith('pick')))return hub(h);
+  if(!CASUAL&&!(/^event(\/|$)/.test(h)||h.startsWith('pick')))return hub(h);
   start()}
 
 const contestLine=()=>{const c=CFG(),a=[];if(c.ctp&&c.ctp.length)a.push('Closest to the pin '+c.ctp.join(', '));if(c.ld)a.push('Long drive '+c.ld);if(c.skins!=='off')a.push((c.skins==='net'?'Net':'Gross')+' skins '+money(c.buyin));return a.join(' · ')};
@@ -1214,11 +1214,12 @@ let fitQ=0;const fitSoon=()=>{cancelAnimationFrame(fitQ);fitQ=requestAnimationFr
 new MutationObserver(fitSoon).observe($('#app'),{childList:true});
 const shObs=new MutationObserver(fitSoon),shOpt={childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']};shObs.observe($('#sheet'),shOpt);
 addEventListener('resize',fitSoon);addEventListener('hashchange',fitSoon);
-function tellClub(){try{if(window.parent!==window)window.parent.postMessage({golfFull:inRound()},location.origin)}catch(e){}}
+function tellClub(){try{if(window.parent!==window){window.parent.postMessage({golfFull:inRound()},location.origin);
+  const h=location.hash.replace(/^#\/?/,'');if(/^(event|pick|board|tv|setup|field|team|hole|card|bets)(\/|$)/.test(h))window.parent.postMessage({golf:CASUAL?(LIVE.group?'groups':'me'):'events'},location.origin)}}catch(e){}}
 addEventListener('hashchange',tellClub);tellClub();fitSoon();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
-<script src="tracker.js?v=44"></script>
+<script src="tracker.js?v=45"></script>
 <script src="../live.js?v=3"></script>
 </body>
 </html>
