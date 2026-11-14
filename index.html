@@ -197,8 +197,10 @@ a.card.course{color:inherit;text-decoration:none}
 .ctee td{padding:10px 2px;border-top:1px solid var(--line)}
 .ctee th:not(:first-child),.ctee td:not(:first-child){text-align:right}
 .cev{display:grid;gap:10px}
+.cevr{display:flex;gap:12px;align-items:center;color:inherit;text-decoration:none}
+.cevr img{width:44px;height:55px;object-fit:cover;border-radius:6px;flex:none;border:1px solid var(--line)}
 .cevr b{display:block;font-size:16px}.cevr span{font-size:13px;color:var(--muted)}
-.cevr.past b{color:var(--muted);font-weight:600}
+.cevr.past b{font-weight:600}
 .findsrc{font-size:12px;color:var(--muted);margin:14px 2px 24px}
 .detail{margin-top:12px;display:none}
 .detail.on{display:block;animation:rise .35s var(--ease) both}
@@ -1165,6 +1167,23 @@ const COURSES=[
  {id:'goosecreek',name:'Goose Creek Golf Club',city:'Mira Loma, CA',chapter:'SoCal',lat:33.9910,lng:-117.5400,note:'On the SoCal chapter rotation.',lib:'2949e626-b8bf-41b8-ad3a-cae02e9844bf',phone:'951-735-3982',web:'https://goosecreekgc.com',addr:'11418 68th St, Jurupa Valley, CA 91752'},
  {id:'aviara',name:'Aviara Golf Club',city:'Carlsbad, CA',chapter:'SoCal',lat:33.1030,lng:-117.2800,note:'On the SoCal chapter rotation.',lib:'438f5194-838f-42bb-8af2-6ab0ec1dd4af',phone:'760-603-6900',web:'https://parkhyattaviara.com/golf/',addr:'7447 Batiquitos Dr, Carlsbad, CA 92011'},
  {id:'quivira',name:'Quivira Golf Club',city:'San Diego, CA',chapter:'SoCal',lat:32.7650,lng:-117.2300,note:'On the SoCal chapter rotation.'},
+ {id:'legacy',name:'The Legacy Golf Club',city:'Henderson, NV',chapter:'Nevada',lat:36.0345,lng:-115.0829,lib:'c55ecf9b-78b2-4ced-92ca-f0ff5bbef28c',web:'http://www.thelegacygc.com'},
+ {id:'revere',name:'Revere Golf Club',city:'Henderson, NV',chapter:'Nevada',lat:35.9551,lng:-115.1024,web:'http://www.reveregolf.com/',sub:'2 courses',
+  venues:[{name:'Revere: Concord'},{name:'Revere: Lexington'}]},
+ {id:'spanishtrail',name:'Spanish Trail Country Club',city:'Las Vegas, NV',chapter:'Nevada',lat:36.0970,lng:-115.2543,lib:'768b8f38-d9fa-40e7-a202-5c2fb3259f56',web:'https://www.spanishtrailcc.com/',addr:'5050 Spanish Trail Ln, Las Vegas, NV 89113'},
+ {id:'balihai',name:'Bali Hai Golf Club',city:'Las Vegas, NV',chapter:'Nevada',lat:36.0833,lng:-115.1749,lib:'f01dcee8-1dcc-4fb8-b330-7b3f69ca73c9',web:'http://www.balihaigolfclub.com/'},
+ {id:'arroyo',name:'Arroyo Golf Club at Red Rock',city:'Las Vegas, NV',chapter:'Nevada',lat:36.1506,lng:-115.3505,lib:'c2c117b5-e0d3-4fa0-81f6-079cebac8d90',web:'http://thearroyogolfclub.com/'},
+ {id:'losserranos',name:'Los Serranos Golf Club, North Course',city:'Chino Hills, CA',chapter:'SoCal',lat:33.9694,lng:-117.7008,lib:'8a1c40a7-70d0-4081-8521-1013b6e85262',web:'https://losserranoscountryclub.com/',addr:'15656 Yorba Ave, Chino Hills, CA 91709'},
+ {id:'lakechabot',name:'Lake Chabot Golf Course',city:'Oakland, CA',chapter:'NorCal',lat:37.7395,lng:-122.1193,lib:'5faf63dc-27f2-4f9e-9e20-cb2067e32cb5',web:'http://www.lakechabotgolf.com/',addr:'11450 Golf Links Rd, Oakland, CA 94605'},
+ {id:'monarchbay',name:'Monarch Bay Golf Club',city:'San Leandro, CA',chapter:'NorCal',lat:37.6951,lng:-122.1856,web:'http://www.monarchbaygc.com/',addr:'13800 Monarch Bay Dr, San Leandro, CA 94577',sub:'2 courses',
+  venues:[{name:'Monarch Bay: Tony Lema',city:'San Leandro, CA',lib:'e816a255-df61-43c2-aa46-84fc8c717026',web:'http://www.monarchbaygc.com/',addr:'13800 Monarch Bay Dr, San Leandro, CA 94577'},{name:'Monarch Bay: Marina, 9 holes'}]},
+ {id:'bbh',name:'Bayonet Black Horse',city:'Seaside, CA',chapter:'NorCal',lat:36.6279,lng:-121.8231,web:'https://www.bayonetblackhorse.com',addr:'1 McClure Way, Seaside, CA 93955',phone:'831-899-7271',sub:'2 courses',
+  venues:[{name:'Bayonet Black Horse: Black Horse',city:'Seaside, CA',lib:'6cfd9281-c2d5-470d-9867-f3e47cee46c7',phone:'831-899-7271',web:'https://www.bayonetblackhorse.com',addr:'1 McClure Way, Seaside, CA 93955'},
+   {name:'Bayonet Black Horse: Bayonet',city:'Seaside, CA',lib:'69af7f2f-efc2-46e6-9633-7a7ebab7788c',phone:'831-899-7271',web:'https://www.bayonetblackhorse.com',addr:'1 McClure Way, Seaside, CA 93955'}]},
+ {id:'pacificgrove',name:'Pacific Grove Golf Links',city:'Pacific Grove, CA',chapter:'NorCal',lat:36.6337,lng:-121.9313,lib:'be86ec12-7dd7-408c-9534-64cbb87b432b',web:'https://www.playpacificgrove.com/',addr:'77 Asilomar Ave, Pacific Grove, CA 93950'},
+ {id:'bullerock',name:'Bulle Rock',city:'Havre de Grace, MD',chapter:'National',away:true},
+ {id:'coloradonational',name:'Colorado National Golf Club',city:'Erie, CO',chapter:'National',away:true},
+ {id:'thorncreek',name:'Thorncreek Golf Course',city:'Thornton, CO',chapter:'National',away:true},
  {id:'stgeorge',name:'St. George, UT (Raider Cup)',short:'Raider Cup 2026, St. George',sub:'4 courses, May 22-24',city:'St. George, UT',chapter:'National',lat:37.0965,lng:-113.5684,note:'Raider Cup 2026, May 22-24, played four courses in the area.',
   venues:[{name:'Copper Rock'},{name:'Coral Canyon'},{name:'Sand Hollow'},{name:'Sky Mountain'}]},
  {id:'monterey',name:'Monterey Bay, CA (Raider Cup 2027)',short:'Raider Cup 2027, Monterey Bay',sub:'3 courses, May 28-30',city:'Monterey Bay, CA',chapter:'National',lat:36.5830,lng:-121.8300,note:'Raider Cup 2027, May 28-30: Carmel Valley Ranch, Poppy Hills and Bayonet Black Horse.',
@@ -1173,8 +1192,39 @@ const COURSES=[
    {name:'Bayonet Black Horse: Black Horse',city:'Seaside, CA',lib:'6cfd9281-c2d5-470d-9867-f3e47cee46c7',phone:'831-899-7271',web:'https://www.bayonetblackhorse.com',addr:'1 McClure Way, Seaside, CA 93955',lat:36.6254,lng:-121.8252},
    {name:'Bayonet Black Horse: Bayonet',city:'Seaside, CA',lib:'69af7f2f-efc2-46e6-9633-7a7ebab7788c',phone:'831-899-7271',web:'https://www.bayonetblackhorse.com',addr:'1 McClure Way, Seaside, CA 93955',lat:36.6303,lng:-121.8210}]}
 ];
+/* Past club events from the old site's flyers (read Nov 13 2026). Year only where the flyer prints it, the file name has it,
+   the weekday fits one year, or the series number fixes it; md = month and day only. */
+const PAST=[
+ {c:'chimera',n:'Pets for Vets charity golf party',d:'2021-09-11',x:'2-Man Scramble',f:'bnb-62223'},
+ {c:'chimera',n:'RNGC vs Dawg Pound',md:'Sat, Sep 28',x:'8x8 Match and 4-Man Scramble',f:'chimera'},
+ {c:'chimera',n:'RNGC vs Orange Crush',md:'Sat, Nov 23',f:'chimera-11.23'},
+ {c:'chimera',n:'Clash with the Titans',d:'2025-10-11',x:'4-Man Scramble',f:'chimera-10.11.2025'},
+ {c:'chimera',n:'RNGC vs Dem Boys',d:'2025-11-15',x:'4-Man Scramble',f:'chimera-11.15.2025'},
+ {c:'legacy',n:'Rod Martin 2022 Invitational',d:'2022-09-17',f:'legacy9.17-v2'},
+ {c:'legacy',n:'RNGC vs Steel Curtain',d:'2024-10-12',x:'12x12 Team Match and 4-Man Scramble',f:'legacy101224'},
+ {c:'legacy',n:'2026 Season Opener',d:'2026-09-12',x:'4-Man Scramble with playoffs',f:'legacy-9.12.26v3'},
+ {c:'revere',n:'RNGC vs Cardiac Cats',md:'Sat, Sep 21',x:'8x8 Match and 2-Man Scramble',f:'concord-1'},
+ {c:'spanishtrail',n:'RNGC vs Red Kingdom',d:'2024-10-26',f:'spanish-trails-2024'},
+ {c:'balihai',n:'The Woodson 24',d:'2022-10-22',f:'the-24'},
+ {c:'arroyo',n:'Battle for Las Vegas vs Steel Curtain',d:'2023-09-23',x:'4-Man Scramble and 16v16 Match Play',f:'arroyo-flyer'},
+ {c:'meadowlark',n:'Inaugural Surf City Invitational',d:'2022-04-02',x:'2-Man Blind Draw',f:'rngc-spring-2022-v2'},
+ {c:'meadowlark',n:'Surf City Invitational II',d:'2023-04-01',x:'2-Man Blind Draw',f:'rngc-spring-2023'},
+ {c:'meadowlark',n:'RNGC vs Mob Squad',d:'2024-10-19',x:'4-Man Scramble and 16v16 Match Play',f:'lark10.19.24'},
+ {c:'meadowlark',n:'RNGC vs Bolt Squad',d:'2025-11-29',x:'4-Man Scramble and 16v16 Match Play',f:'meadowlark-11.29.25'},
+ {c:'meadowlark',n:'Spring Invitational V',d:'2026-03-28',x:'4-Man Scramble',f:'rngc-spring-v'},
+ {c:'doslagos',n:'Spring Invitational III',d:'2024-04-06',x:'3-Man Scramble',f:'rngc-spring-2024'},
+ {c:'doslagos',n:'Spring Invitational IV',d:'2025-04-12',x:'4-Man Scramble',f:'rngc-spring-iv'},
+ {c:'losserranos',n:'Preseason Primer',d:'2025-08-09',f:'preseason-primer'},
+ {c:'lakechabot',n:'Raider Nation Golf Party',d:'2019-09-09',x:'Last Monday Night Football game in Oakland',f:'img_0773'},
+ {c:'monarchbay',n:'Raider Nation Golf Party',md:'Sat, Sep 14',f:'img_0902'},
+ {c:'bbh',n:'RNGC Invades Monterey, 36 holes',md:'Sat, Jun 22',f:'b4la2'},
+ {c:'pacificgrove',n:'RNGC Invades Monterey, day 2',md:'Sun, Jun 23',f:'b4la2'},
+ {c:'bullerock',n:'Battle for Baltimore vs Ravens Flock',d:'2024-09-14',x:'8x8 Match Play and 4-Man Scramble',f:'bulle-rock-2024'},
+ {c:'coloradonational',n:'Battle for Denver vs Orange Crush',md:'Sat, Oct 5',x:'8x8 Match and 4-Man Scramble',f:'cn2'},
+ {c:'thorncreek',n:'Battle for Denver vs Orange Crush',d:'2023-09-08',x:'16v16 Team Match Play',f:'thorncreek'}
+];
 /* par, holes, hole maps and tees [name, yards, rating, slope] from the golf tab's cards (built from courses/c + Chimera's GolfPass card) */
-const CARDS={"ed6d9544-d79b-423f-9b6f-3516954cc3e0":{"par":70,"holes":18,"maps":1,"tees":[["Blue",5568,68.1,119],["White",5251,66.4,115],["Yellow",4291,62.4,104],["Blue · W",5568,73.3,128],["White · W",5251,71.3,124],["Yellow · W",4291,65.9,113]]},"20b3dc23-3160-47a8-92c3-845e1f87df9f":{"par":72,"holes":18,"maps":1,"tees":[["Pros",0,73.1,131],["Blue",6461,71.0,127],["Blue/White",6331,70.4,126],["White",6189,69.7,125],["White · W",6189,76.9,132],["Silver/Gold · W",5625,72.7,129]]},"3ccb6cb6-ee2c-43f1-bfde-03eec47ce2aa":{"par":70,"holes":18,"maps":1,"tees":[["Blue",6205,71.7,130],["White",5631,68.3,124],["Red",4852,71.0,118],["Yellow",4603,68.5,105]]},"2949e626-b8bf-41b8-ad3a-cae02e9844bf":{"par":71,"holes":18,"maps":1,"tees":[["IV",6560,71.2,126],["III",6150,69.4,122],["II",5217,65.2,112],["I",4665,62.2,104],["III · W",6150,75.2,135],["II · W",5217,70.0,124],["I · W",4665,67.0,114]]},"438f5194-838f-42bb-8af2-6ab0ec1dd4af":{"par":72,"holes":18,"maps":0,"tees":[["Palmer",7007,74.6,140],["Blue",6591,72.6,134],["Blue/White",6340,71.4,131],["White",6054,70.1,128],["Gold",5007,65.1,116],["Blue · W",6591,78.5,143],["White · W",6054,75.6,137],["White/Gold · W",5410,71.9,129],["Gold · W",5007,69.5,124]]},"2ef33127-a4d5-4922-b126-0a8ffc16734e":{"par":70,"holes":18,"maps":1,"tees":[["Blue",6117,70.1,131],["White",4433,67.9,126],["Red",5230,65.7,121],["Gold",0,62.3,113],["White · W",4433,72.9,132],["Red · W",5230,70.8,129],["Gold · W",0,66.2,114]]},"c69c87d9-a4ca-4bb0-92ef-7e80c57c1fe6":{"par":71,"holes":18,"maps":1,"tees":[["Jones tee",0,74.9,142],["Black",6730,73.2,139],["Blue",6320,71.6,134],["Combo",6093,70.5,133],["White",5791,69.4,129],["Orange",5224,66.2,120],["Black · W",6730,79.2,144],["Blue · W",6320,77.0,139],["Combo · W",6093,75.8,136],["White · W",5791,74.1,134],["Orange · W",5224,70.8,127]]},"6cfd9281-c2d5-470d-9867-f3e47cee46c7":{"par":72,"holes":18,"maps":1,"tees":[["Black",7025,73.9,136],["Blue",6542,71.6,132],["Combo",6210,71.0,131],["White",5915,69.4,125],["Red · W",5040,69.9,120]]},"69af7f2f-efc2-46e6-9633-7a7ebab7788c":{"par":72,"holes":18,"maps":0,"tees":[["Black",7104,74.9,137],["Blue",6641,72.2,134],["Combo",6218,70.6,133],["White",5945,69.6,132],["Red · W",5229,70.6,124]]},"chimera":{"par":72,"holes":18,"maps":1,"tees":[["Pegasus",6757,71.8,124],["Serpent",6359,70.3,122],["Goat",5897,67.9,118],["Lion",5230,64.7,101],["Serpent · W",6359,76.1,135],["Goat · W",5897,73.7,126],["Lion · W",5230,69.3,117]]}};
+const CARDS={"ed6d9544-d79b-423f-9b6f-3516954cc3e0":{"par":70,"holes":18,"maps":1,"tees":[["Blue",5568,68.1,119],["White",5251,66.4,115],["Yellow",4291,62.4,104],["Blue · W",5568,73.3,128],["White · W",5251,71.3,124],["Yellow · W",4291,65.9,113]]},"20b3dc23-3160-47a8-92c3-845e1f87df9f":{"par":72,"holes":18,"maps":1,"tees":[["Pros",0,73.1,131],["Blue",6461,71.0,127],["Blue/White",6331,70.4,126],["White",6189,69.7,125],["White · W",6189,76.9,132],["Silver/Gold · W",5625,72.7,129]]},"3ccb6cb6-ee2c-43f1-bfde-03eec47ce2aa":{"par":70,"holes":18,"maps":1,"tees":[["Blue",6205,71.7,130],["White",5631,68.3,124],["Red",4852,71.0,118],["Yellow",4603,68.5,105]]},"2949e626-b8bf-41b8-ad3a-cae02e9844bf":{"par":71,"holes":18,"maps":1,"tees":[["IV",6560,71.2,126],["III",6150,69.4,122],["II",5217,65.2,112],["I",4665,62.2,104],["III · W",6150,75.2,135],["II · W",5217,70.0,124],["I · W",4665,67.0,114]]},"438f5194-838f-42bb-8af2-6ab0ec1dd4af":{"par":72,"holes":18,"maps":0,"tees":[["Palmer",7007,74.6,140],["Blue",6591,72.6,134],["Blue/White",6340,71.4,131],["White",6054,70.1,128],["Gold",5007,65.1,116],["Blue · W",6591,78.5,143],["White · W",6054,75.6,137],["White/Gold · W",5410,71.9,129],["Gold · W",5007,69.5,124]]},"2ef33127-a4d5-4922-b126-0a8ffc16734e":{"par":70,"holes":18,"maps":1,"tees":[["Blue",6117,70.1,131],["White",4433,67.9,126],["Red",5230,65.7,121],["Gold",0,62.3,113],["White · W",4433,72.9,132],["Red · W",5230,70.8,129],["Gold · W",0,66.2,114]]},"c69c87d9-a4ca-4bb0-92ef-7e80c57c1fe6":{"par":71,"holes":18,"maps":1,"tees":[["Jones tee",0,74.9,142],["Black",6730,73.2,139],["Blue",6320,71.6,134],["Combo",6093,70.5,133],["White",5791,69.4,129],["Orange",5224,66.2,120],["Black · W",6730,79.2,144],["Blue · W",6320,77.0,139],["Combo · W",6093,75.8,136],["White · W",5791,74.1,134],["Orange · W",5224,70.8,127]]},"6cfd9281-c2d5-470d-9867-f3e47cee46c7":{"par":72,"holes":18,"maps":1,"tees":[["Black",7025,73.9,136],["Blue",6542,71.6,132],["Combo",6210,71.0,131],["White",5915,69.4,125],["Red · W",5040,69.9,120]]},"69af7f2f-efc2-46e6-9633-7a7ebab7788c":{"par":72,"holes":18,"maps":0,"tees":[["Black",7104,74.9,137],["Blue",6641,72.2,134],["Combo",6218,70.6,133],["White",5945,69.6,132],["Red · W",5229,70.6,124]]},"chimera":{"par":72,"holes":18,"maps":1,"tees":[["Pegasus",6757,71.8,124],["Serpent",6359,70.3,122],["Goat",5897,67.9,118],["Lion",5230,64.7,101],["Serpent · W",6359,76.1,135],["Goat · W",5897,73.7,126],["Lion · W",5230,69.3,117]]},"c55ecf9b-78b2-4ced-92ca-f0ff5bbef28c":{"par":72,"holes":18,"maps":0,"tees":[["Black",7168,74.4,143],["Blue",6655,71.9,132],["White",6156,69.4,125],["White/Yellow",5797,67.9,120],["Yellow",5344,65.6,114],["White · W",6156,75.6,139],["White/Yellow · W",5797,73.0,134],["Yellow · W",5344,70.7,123]]},"768b8f38-d9fa-40e7-a202-5c2fb3259f56":{"par":71,"holes":18,"maps":0,"tees":[["Blue",5815,69.9,118],["White",0,69.5,114],["Red",5120,69.1,113]]},"f01dcee8-1dcc-4fb8-b330-7b3f69ca73c9":{"par":71,"holes":18,"maps":1,"tees":[["Black",7002,73.0,130],["Gold",6601,70.2,125],["Silver",6156,68.6,113],["Bronze",5535,71.5,122]]},"c2c117b5-e0d3-4fa0-81f6-079cebac8d90":{"par":72,"holes":18,"maps":1,"tees":[["Gold",6879,73.0,148],["Black",6421,71.2,135],["Blue",5874,67.9,126],["White",5318,65.0,104],["Green",4750,67.8,118],["White · W",5318,70.2,133]]},"8a1c40a7-70d0-4081-8521-1013b6e85262":{"par":72,"holes":18,"maps":1,"tees":[["Green",6639,72.8,131],["Blue",6360,71.4,128],["White",6118,70.3,125],["Gold",5683,68.3,119],["Pumpkin",3186,57.1,92],["White · W",6118,75.8,133],["Gold · W",5683,73.4,128]]},"5faf63dc-27f2-4f9e-9e20-cb2067e32cb5":{"par":72,"holes":18,"maps":1,"tees":[["Blue",5984,69.3,119],["White",5615,67.3,115],["Red",5172,65.1,111],["White · W",5615,72.8,123],["Red · W",5172,70.1,116]]},"e816a255-df61-43c2-aa46-84fc8c717026":{"par":71,"holes":18,"maps":1,"tees":[["Black",7015,73.8,132],["Gold",6567,72.2,128],["White",6061,69.6,124],["Green",5502,66.8,114],["Red · W",5140,69.8,119]]},"be86ec12-7dd7-408c-9534-64cbb87b432b":{"par":70,"holes":18,"maps":1,"tees":[["Blue",5732,67.9,113],["White",5491,67.0,110],["White · W",5491,72.3,120],["Red · W",5072,70.2,116]]}};
 
 /* ---------- Raiders 2026 schedule (ESPN + NFL release, checked Nov 9 2026). Times are Pacific. ---------- */
 const VENUES={
@@ -1613,7 +1663,8 @@ const cStat=c=>c?['Par '+c.par,cLong(c)?cLong(c).toLocaleString()+' yds':''].fil
 const cEvs=id=>EVENTS.filter(e=>!e.status&&e.course===id);
 const cNext=id=>cEvs(id).filter(e=>!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1)[0];
 const cDay=d=>{const f=fmtDate(d);return f.dow+', '+f.m+' '+f.d+', '+d.slice(0,4)};
-const cSort=a=>a.slice().sort((x,y)=>{const nx=cNext(x.id),ny=cNext(y.id);return(!!ny-!!nx)||(nx&&ny?(nx.date<ny.date?-1:1):0)});
+const cCount=id=>cEvs(id).filter(e=>isPast(e.date)).length+PAST.filter(p=>p.c===id).length;
+const cSort=a=>a.slice().sort((x,y)=>{const nx=cNext(x.id),ny=cNext(y.id);return(!!ny-!!nx)||(nx&&ny?(nx.date<ny.date?-1:1):0)||(cCount(y.id)-cCount(x.id))});
 let CLIB=null,CLIBP=null;const FOUND={};
 const clib=()=>CLIB?Promise.resolve(CLIB):(CLIBP=CLIBP||fetch('scorecard/courses/index.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>CLIB=j).catch(e=>{CLIBP=null;throw e}));
 function renderCourses(){
@@ -1622,16 +1673,16 @@ function renderCourses(){
   if(S.cview==='find')return coursesFind();
   S.cview='list';
   const list=COURSES.filter(c=>inChapter(c.chapter)||c.chapter==='National');
-  const card=c=>{const nx=cNext(c.id),sub=c.sub||cStat(CARDS[c.lib]);
-    return `<button class="card course" data-course="${c.id}"><span class="n"><i class="ph-fill ${c.venues?'ph-trophy':'ph-flag-pennant'}"></i></span><span><b>${esc(c.short||c.name)}</b><small>${esc(c.city)}${sub?' · '+esc(sub):''}</small>${nx?`<em class="ctag">Club event ${esc(cDay(nx.date).replace(/, \d{4}$/,''))}</em>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`};
-  const groups=[['Nevada',list.filter(c=>c.chapter==='Nevada')],['SoCal',list.filter(c=>c.chapter==='SoCal')],['Raider Cup trips',list.filter(c=>c.chapter==='National')]].filter(g=>g[1].length);
+  const card=c=>{const nx=cNext(c.id),sub=c.sub||cStat(CARDS[c.lib]),np=cCount(c.id);
+    return `<button class="card course" data-course="${c.id}"><span class="n"><i class="ph-fill ${c.venues?'ph-trophy':'ph-flag-pennant'}"></i></span><span><b>${esc(c.short||c.name)}</b><small>${esc(c.city)}${sub?' · '+esc(sub):''}</small>${nx?`<em class="ctag">Club event ${esc(cDay(nx.date).replace(/, \d{4}$/,''))}</em>`:''}${np?`<em class="ctag off">${np} club event${np===1?'':'s'} played</em>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`};
+  const groups=[['Nevada',list.filter(c=>c.chapter==='Nevada')],['SoCal',list.filter(c=>c.chapter==='SoCal')],['NorCal',list.filter(c=>c.chapter==='NorCal')],['Raider Cup trips',list.filter(c=>c.chapter==='National'&&!c.away)],['Away games',list.filter(c=>c.away)]].filter(g=>g[1].length);
   v.innerHTML=subChips('courses')+pageHead('Courses','Where the club plays. Tap one for tees, yards and club events.')+
    `<div class="mapbox cmapsm" id="cmap" aria-label="Map of club courses"></div>`+
    groups.map(([n,cs])=>`<div class="clbl">${n}</div><div class="cgrid rise">${cSort(cs).map(card).join('')}</div>`).join('')+
    `<div class="clbl">Any other course</div><button class="card course" data-sub="courses|find"><span class="n"><i class="ph-bold ph-magnifying-glass"></i></span><span><b>Find a course</b><small>1,500+ courses in California, Nevada and Arizona</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`;
   withMaps(ok=>{const el=$('#cmap');if(!el)return;const m=makeMap(el,'courses',[34.5,-116],6,ok);
-    if(m){list.forEach(c=>{const mk=new google.maps.Marker({map:m,position:{lat:c.lat,lng:c.lng},title:c.short||c.name,icon:pinIcon('flag',c.venues?'#ffffff':'#d5dae1')});mk.addListener('click',()=>openCourse(c.id));cMarkers[c.id]=mk});
-      if(list.length>1)fit(m,list.map(c=>[c.lat,c.lng]))}});
+    if(m){list.filter(c=>c.lat).forEach(c=>{const mk=new google.maps.Marker({map:m,position:{lat:c.lat,lng:c.lng},title:c.short||c.name,icon:pinIcon('flag',c.venues?'#ffffff':'#d5dae1')});mk.addListener('click',()=>openCourse(c.id));cMarkers[c.id]=mk});
+      const pts=list.filter(c=>c.lat);if(pts.length>1)fit(m,pts.map(c=>[c.lat,c.lng]))}});
 }
 let cMarkers={};
 function openCourse(id,lib){S.cview='course';S.selCourse=id||null;S.selLib=lib||null;if(!id)S.cfrom='find';else if(!lib)S.cfrom='list';renderCourses();renderSubnav();$('#v-courses').scrollTop=0}
@@ -1646,30 +1697,34 @@ function coursePage(){const i=cInfo();
   if(!i)return top+`<div class="empty">${S.selLib&&!FOUND[S.selLib]?'Loading the course...':'That course is not on the list anymore.'}</div>`;
   const c=i.card,dir='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(i.addr||((i.name||'')+' '+(i.city||'')));
   if(i.venues&&!S.selLib){const ev=cEvs(i.id);
-    return top+pageHead(esc(i.short||i.name),esc(i.note||''))+cEvHtml(ev)+`<div class="clbl">The courses</div><div class="cgrid">${i.venues.map(vn=>{const cd=vn.lib&&CARDS[vn.lib];
+    return top+pageHead(esc(i.short||i.name),esc(i.note||i.city||''))+cEvHtml(ev,null,i.id)+`<div class="clbl">The courses</div><div class="cgrid">${i.venues.map(vn=>{const cd=vn.lib&&CARDS[vn.lib];
       return vn.lib?`<button class="card course" data-venue="${esc(vn.lib)}"><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(vn.name)}</b><small>${esc(vn.city||i.city)}${cd?' · '+esc(cStat(cd)):''}</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`
-       :`<a class="card course" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(vn.name+' golf '+i.city)}" ${ext}><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(vn.name)}</b><small>${esc(i.city)} · Directions</small></span><i class="ph-bold ph-navigation-arrow" style="color:var(--muted)"></i></a>`}).join('')}</div>`}
+       :`<a class="card course" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(vn.name.replace(/:.*/,'')+' golf '+i.city)}" ${ext}><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(vn.name)}</b><small>${esc(i.city)} · Directions</small></span><i class="ph-bold ph-navigation-arrow" style="color:var(--muted)"></i></a>`}).join('')}</div>`}
   const tel=i.phone?i.phone.replace(/[^\d]/g,''):'';
   const facts=c?[[c.par,'Par'],[c.holes,'Holes'],[cLong(c)?cLong(c).toLocaleString():'—','Yards, back'],[c.maps?'Yes':'No','Hole maps']]:null;
   const teeRows=ts=>ts.map(t=>`<tr><td>${esc(t[0].replace(/ · W$/,''))}</td><td>${t[1]?t[1].toLocaleString():'—'}</td><td>${t[2]&&t[3]?t[2]+' / '+t[3]:'—'}</td></tr>`).join('');
   const men=c?c.tees.filter(cMen):[],wom=c?c.tees.filter(t=>!cMen(t)):[];
   const tbl=(lbl,ts)=>ts.length?`<div class="clbl">${lbl}</div><div class="card ctable"><table class="ctee"><thead><tr><th>Tee</th><th>Yards</th><th>Rating / slope</th></tr></thead><tbody>${teeRows(ts)}</tbody></table></div>`:'';
-  return top+pageHead(esc(i.name),esc([i.city,i.trip?(i.trip.short||'Raider Cup')+' venue':''].filter(Boolean).join(' · ')))+
+  return top+pageHead(esc(i.name),esc([i.city,i.trip&&i.trip.chapter==='National'?(i.trip.short||'Raider Cup')+' venue':''].filter(Boolean).join(' · ')))+
    (facts?`<div class="cfacts">${facts.map(([b,s])=>`<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>`:'')+
    `<div class="cacts">${c&&i.lib?`<button class="btn small" data-cplay="${esc(i.lib)}"><i class="ph-bold ph-golf"></i> Play here</button>`:''}
      <a class="btn small ghost" href="${dir}" ${ext}><i class="ph-bold ph-navigation-arrow"></i> Directions</a>
      ${tel?`<a class="btn small ghost" href="tel:${tel}"><i class="ph-bold ph-phone"></i> Call</a>`:''}
      ${i.web?`<a class="btn small ghost" href="${esc(i.web)}" ${ext}><i class="ph-bold ph-globe"></i> Website</a>`:''}</div>`+
    (i.addr||i.phone?`<p class="sub" style="margin-top:8px">${esc([i.addr,i.phone].filter(Boolean).join(' · '))}</p>`:'')+
-   (i.found?'':cEvHtml(cEvs(i.trip?i.trip.id:i.id),i.note))+
+   (i.found?'':cEvHtml(cEvs(i.trip?i.trip.id:i.id),i.note,i.trip?null:i.id))+
    (c?tbl("Men's tees",men)+tbl("Women's tees",wom):`<p class="note" style="margin-top:14px"><i class="ph-bold ph-info"></i><span>No scorecard on file yet. Start a round in Golf and add the card there.</span></p>`)+
    (c?`<p class="findsrc">${CSRC}</p>`:'')}
-function cEvHtml(ev,note){const up=ev.filter(e=>!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1),past=ev.filter(e=>isPast(e.date)).sort((a,b)=>a.date<b.date?1:-1);
-  if(!ev.length&&!note)return'';
-  return `<div class="clbl">Club events here</div><div class="card cev">${up.map(e=>`<div class="cevr"><b>${esc(e.name)}</b><span>${esc(cDay(e.date))}${e.price?' · '+esc(e.price):''}</span></div>`).join('')}
-   ${past.map(e=>`<div class="cevr past"><b>${esc(e.name)}</b><span>Played ${esc(cDay(e.date))}</span></div>`).join('')}
-   ${note&&!ev.length?`<p class="sub" style="margin:0">${esc(note)}</p>`:''}
-   ${ev.length?`<button class="linkbtn" data-go="events" style="min-height:40px">All club events</button>`:''}</div>`}
+function cEvHtml(ev,note,id){const up=ev.filter(e=>!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1);
+  const past=[...ev.filter(e=>isPast(e.date)).map(e=>({n:e.name,d:e.date,img:e.img})),...PAST.filter(p=>id&&p.c===id).map(p=>({n:p.n,d:p.d,md:p.md,x:p.x,f:p.f}))]
+    .sort((a,b)=>(b.d||'0')<(a.d||'0')?-1:(b.d||'0')>(a.d||'0')?1:0);
+  if(!up.length&&!past.length&&!note)return'';
+  const fl=f=>'assets/old-site/flyers/'+f;
+  return `<div class="clbl">Club events here</div><div class="card cev">${up.map(e=>`<div class="cevr"><div><b>${esc(e.name)}</b><span>${esc(cDay(e.date))}${e.price?' · '+esc(e.price):''}</span></div></div>`).join('')}
+   ${past.map(p=>{const thumb=p.f?fl(p.f)+'-sm.jpg':p.img||'',full=p.f?fl(p.f)+'.jpg':p.img||'';
+     return `<${full?`a href="${esc(full)}" ${ext}`:'div'} class="cevr past">${thumb?`<img src="${esc(thumb)}" alt="" loading="lazy">`:''}<div><b>${esc(p.n)}</b><span>${esc(p.d?cDay(p.d):p.md)}${p.x?' · '+esc(p.x):''}</span></div></${full?'a':'div'}>`}).join('')}
+   ${note&&!up.length&&!past.length?`<p class="sub" style="margin:0">${esc(note)}</p>`:''}
+   ${up.length||ev.length?`<button class="linkbtn" data-go="events" style="min-height:40px">All club events</button>`:''}</div>`}
 function wireCourse(){}
 function coursesFind(){const v=$('#v-courses');
   v.innerHTML=subChips('courses')+pageHead('Find a course','Any course in California, Nevada or Arizona. Tap one for its tees and yards.')+
