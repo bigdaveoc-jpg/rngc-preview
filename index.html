@@ -1085,10 +1085,13 @@ var rngcLogoP=null;function rngcLogo(){return rngcLogoP||(rngcLogoP=fetch('asset
      opened from the home-screen icon: every fresh launch (coming back from the background doesn't replay it).
      Android shares the browser's storage, so the once-a-day rule hid it on the icon's first launch (Nov 12 fix). */
   var app=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
-  var day=new Date().toDateString();
-  try{seen=app?sessionStorage.getItem('rngcIntroRun')==='1':localStorage.getItem('rngcIntroDay')===day}catch(e){}
+  var day=new Date().toDateString(),inn=false;
+  /* signed-in members: once a day on every version, browser and home-screen app alike (David, Nov 14);
+     signed out: the rules above stay */
+  try{inn=!!localStorage.getItem('rngc-auth-token');
+    seen=inn?localStorage.getItem('rngcIntroDay')===day:app?sessionStorage.getItem('rngcIntroRun')==='1':localStorage.getItem('rngcIntroDay')===day}catch(e){}
   if(seen||matchMedia('(prefers-reduced-motion: reduce)').matches){el.remove();return}
-  try{if(app)sessionStorage.setItem('rngcIntroRun','1');else localStorage.setItem('rngcIntroDay',day)}catch(e){}
+  try{localStorage.setItem('rngcIntroDay',day);if(app)sessionStorage.setItem('rngcIntroRun','1')}catch(e){}
   var done=function(){if(!el.isConnected)return;el.classList.add('out');setTimeout(function(){el.remove()},600)};
   /* The animation must start from frame one while the screen is showing. Phones keep one clock per logo file, so a
      logo the phone already loaded (earlier visit, or behind the launch splash of the home-screen app) can show up
@@ -3335,7 +3338,7 @@ function openInvite(inv){
 function renderAll(){renderHome();renderEvents();renderForum();if(S.tab==='courses')renderCourses();if(S.tab==='games')renderGames();if(S.tab==='members')renderMembers();if(S.tab==='settings')renderSettings();if(S.tab&&gateOn!==locked(S.tab))setTab(S.tab)}
 renderChips();renderAll();setTab('home');loadSchedule();
 
-/* header logo: tap it to replay the animation; it also replays on its own every few clicks (6+ clicks and 60+ seconds apart) */
+/* header logo: tap it to replay the animation; signed out, it also replays on its own every few clicks (6+ clicks and 60+ seconds apart) */
 (function(){
   const lg=document.getElementById('hdrLogo');if(!lg)return;
   const STATIC=lg.getAttribute('src'),ANIM='assets/logo/rngc-ball-animated.svg',LEN=7600;
@@ -3357,6 +3360,7 @@ renderChips();renderAll();setTab('home');loadSchedule();
   lg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tap()}});
   document.addEventListener('click',e=>{
     if(e.target.closest('#hdrLogo')||!e.target.closest('button,a,select'))return;
+    if(authTok())return;   /* signed in: the logo plays once a day with the intro, never again on its own */
     if(++clicks>=6&&Date.now()-last>60000)play();
   });
 })();
