@@ -52,7 +52,7 @@ async function mark(n,btn){const m=mapOf(n);if(!m||!m.tc)return;
     const prev=session(n),last=prev[prev.length-1],o=last?[last.x,last.y]:teeStart(n,m),me=measure(o,p,g);
     const b={id:'b'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),c:courseId(),h:n,par:CO().par[n-1],k:last?last.k:Date.now().toString(36),
       shot:prev.length+1,t:Date.now(),lat:+f.lat.toFixed(7),lng:+f.lng.toFixed(7),acc:r0(f.acc*YD),ox:+o[0].toFixed(1),oy:+o[1].toFixed(1),x:+p[0].toFixed(1),y:+p[1].toFixed(1),
-      d:r0(me.d),off:+me.off.toFixed(1),long:+me.long.toFixed(1),tg:r0(me.tg),aim:r0(me.aim),lie:lieAt(m,p[0],p[1]),club:null};
+      d:r0(me.d),off:+me.off.toFixed(1),long:+me.long.toFixed(1),tg:r0(me.tg),aim:r0(me.aim),lie:lieAt(m,p[0],p[1]),club:null,wx:typeof wxNow==='function'?wxNow(n):null};
     list().push(b);if(list().length>MAX)G.balls=list().slice(-MAX);gsave();
     if(navigator.vibrate)try{navigator.vibrate(18)}catch(e){}
     sheet(b);refreshCard(n)}
@@ -116,7 +116,9 @@ window.trBalls=function(){const b=list(),c=courseId();
    ${tee.length?`<div class="lbl">Off the tee · par 4s and 5s</div>
    <div class="tiles">${tile(r0(avg(tee.map(x=>x.d))),'Avg drive',tee.length+' marked')}${tile(r0(fw/tee.length*100)+'%','Fairways',fw+' of '+tee.length)}${tile(side(avg(tee.map(x=>x.off))),'Avg finish','from the middle')}</div>
    <section class="card bkcard">${plot(tee.slice(-80))}${legend()}</section>
-   ${missLine(tee.map(x=>x.off),'drives','Try aiming a little {s} of where you aim now.')}`:''}
+   ${missLine(tee.map(x=>x.off),'drives','Try aiming a little {s} of where you aim now.')}
+   ${(()=>{const into=tee.filter(x=>x.wx&&x.wx.h!=null&&x.wx.h>=5),help=tee.filter(x=>x.wx&&x.wx.h!=null&&x.wx.h<=-5);if(into.length<3||help.length<3)return'';
+     return `<p class="bkpat"><i class="ph-bold ph-wind"></i><span>Into the wind your drives go <b>${r0(avg(into.map(x=>x.d)))}</b>, with it <b>${r0(avg(help.map(x=>x.d)))}</b>. ${into.length+help.length} windy drives.</span></p>`})()}`:''}
    ${apn?`<div class="lbl">Into the green</div>
    <div class="tiles">${tile(r0(gr/apn*100)+'%','Greens',gr+' of '+apn+' shots')}${tile(shortN,'Short','of '+apn)}${tile(longN,'Long','of '+apn)}</div>
    ${apn>=4&&shortN>=apn*.5?`<p class="bkpat"><i class="ph-bold ph-arrow-down"></i><span><b>${shortN} of ${apn} approaches finish short</b>, about ${r0(-avg(app.concat(p3).filter(x=>x.long<-5).map(x=>x.long)))} yds. Try one more club.</span></p>`

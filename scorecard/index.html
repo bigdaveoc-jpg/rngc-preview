@@ -790,7 +790,7 @@ function hole(n){if(n!==STRIP_N){STRIP_ALT=false;STRIP_N=n;QP=null}const t=myTea
     <div class="run"><b class="${tot.c}">${tot.txt==='E'?'Even':tot.txt}</b><span>${tot.who?esc(tot.who)+' · ':''}${f.points?'points · ':useNet()?'with handicap · ':''}${tot.thru} played</span><div class="saved" id="saved" style="justify-content:flex-end;margin-top:4px"><i class="ph-bold ph-cloud-check"></i><span>Saved</span></div></div></div>
    ${ro&&!(LIVE&&LIVE.follow)?`<div class="card lock"><i class="ph-bold ph-lock-simple"></i><span>${esc(first(PEOPLE()[k].name))} keeps score for your group.</span><button class="btn small" id="takeKeep" style="margin-left:auto;white-space:nowrap">Keep score here</button></div>`:''}
    ${entry}
-   ${holeTop(n)}${typeof ballCard==='function'?ballCard(n):''}${typeof trSoloLine==='function'&&CASUAL&&players(t).length===1?trSoloLine(n):''}${typeof trLiveCard==='function'?trLiveCard(idx_):''}
+   ${holeTop(n)}${typeof wxStrip==='function'?wxStrip(n):''}${typeof ballCard==='function'?ballCard(n):''}${typeof trSoloLine==='function'&&CASUAL&&players(t).length===1?trSoloLine(n):''}${typeof trLiveCard==='function'?trLiveCard(idx_):''}
    ${statCard(n)}
    ${betLine()}${typeof trSoloLine==='function'&&!(CASUAL&&players(t).length===1)?trSoloLine(n):''}
    ${contestCard(n)}
@@ -1261,7 +1261,8 @@ addEventListener('hashchange',tellClub);tellClub();fitSoon();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
 <script src="tracker.js?v=50"></script>
-<script src="balls.js?v=1"></script>
+<script src="weather.js?v=1"></script>
+<script src="balls.js?v=2"></script>
 <script src="../live.js?v=3"></script>
 </body>
 </html>
