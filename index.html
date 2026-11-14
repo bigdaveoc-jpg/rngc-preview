@@ -180,6 +180,26 @@ h2.sec{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:
 .course .n{width:44px;height:44px;border-radius:12px;background:var(--panel-2);display:grid;place-items:center;font-size:22px;color:var(--silver)}
 .course b{font-family:var(--display);font-size:21px;text-transform:uppercase;letter-spacing:.02em;line-height:1.05;display:block}
 .course small{color:var(--muted);font-size:13px}
+.cmapsm{height:210px;margin:4px 0 2px}
+.clbl{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:20px 2px 8px}
+.course .ctag{display:inline-block;margin:6px 6px 0 0;font-style:normal;font-size:12px;font-weight:700;line-height:1;padding:5px 9px;border-radius:var(--pill);background:var(--silver);color:var(--on-silver)}
+.course .ctag.off{background:transparent;color:var(--muted);border:1px solid var(--line)}
+a.card.course{color:inherit;text-decoration:none}
+.cback{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--silver);font-weight:700;font-size:15px;margin:2px 0 4px}
+.cfacts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.cfacts div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 4px;text-align:center}
+.cfacts b{display:block;font-family:var(--display);font-size:22px;line-height:1.1}
+.cfacts span{font-size:12px;color:var(--muted)}
+.cacts{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0}
+.ctable{padding:4px 12px}
+.ctee{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+.ctee th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:8px 2px}
+.ctee td{padding:10px 2px;border-top:1px solid var(--line)}
+.ctee th:not(:first-child),.ctee td:not(:first-child){text-align:right}
+.cev{display:grid;gap:10px}
+.cevr b{display:block;font-size:16px}.cevr span{font-size:13px;color:var(--muted)}
+.cevr.past b{color:var(--muted);font-weight:600}
+.findsrc{font-size:12px;color:var(--muted);margin:14px 2px 24px}
 .detail{margin-top:12px;display:none}
 .detail.on{display:block;animation:rise .35s var(--ease) both}
 .detail h3{font-family:var(--display);font-size:26px;text-transform:uppercase;font-weight:800}
@@ -1136,17 +1156,25 @@ const NEWS=[
  {id:'n2',tag:'Membership',title:'Official handicap, laser bag tag',meta:'Every chapter',img:UP+'2026/06/ROSS-SC-BT-953x1024.webp',body:'Chapter members get an official GHIN handicap, a custom laser bag tag, and exclusive access to events and tournaments. Chapter dues are $225 per year. National membership is $99.'},
  {id:'n3',tag:'Media',title:'Interviews with Raiders alumni',meta:'On YouTube',img:UP+'2026/06/YT-BANNER-1024x576.jpg',body:'Interviews with Raiders alumni, celebrities and fans, plus golf tips and breaking news. Find the channel from the links at the bottom of the home page.'}
 ];
+/* Club courses. Phone, site and address checked on each course's own website, Nov 13 2026. lib = the golf tab's course card. */
 const COURSES=[
- {id:'chimera',name:'Chimera Golf Club',city:'Henderson, NV',chapter:'Nevada',lat:36.0805,lng:-114.9676,note:'Site of the Oct 3 and Nov 14, 2026 scrambles.'},
- {id:'meadowlark',name:'Meadowlark Golf Club',city:'Huntington Beach, CA',chapter:'SoCal',lat:33.7236,lng:-118.0037,note:'Hosted a club tournament on Nov 29, 2025.'},
- {id:'eldorado',name:'El Dorado Park Golf Course',city:'Long Beach, CA',chapter:'SoCal',lat:33.8039,lng:-118.0916,note:'On the SoCal chapter rotation.'},
- {id:'doslagos',name:'Dos Lagos Golf Course',city:'Corona, CA',chapter:'SoCal',lat:33.8480,lng:-117.5110,note:'On the SoCal chapter rotation.'},
- {id:'goosecreek',name:'Goose Creek Golf Club',city:'Mira Loma, CA',chapter:'SoCal',lat:33.9910,lng:-117.5400,note:'On the SoCal chapter rotation.'},
- {id:'aviara',name:'Aviara Golf Club',city:'Carlsbad, CA',chapter:'SoCal',lat:33.1030,lng:-117.2800,note:'On the SoCal chapter rotation.'},
+ {id:'chimera',name:'Chimera Golf Club',city:'Henderson, NV',chapter:'Nevada',lat:36.0805,lng:-114.9676,note:'Home of the Nevada chapter scrambles.',lib:'chimera',phone:'702-951-1500',web:'https://www.chimeragolfclub.com',addr:'901 Olivia Pkwy, Henderson, NV 89011'},
+ {id:'meadowlark',name:'Meadowlark Golf Club',city:'Huntington Beach, CA',chapter:'SoCal',lat:33.7236,lng:-118.0037,note:'Hosted a club tournament on Nov 29, 2025.',lib:'ed6d9544-d79b-423f-9b6f-3516954cc3e0',phone:'714-846-1364',web:'https://www.meadowlarkgc.com',addr:'16782 Graham St, Huntington Beach, CA 92649'},
+ {id:'eldorado',name:'El Dorado Park Golf Course',city:'Long Beach, CA',chapter:'SoCal',lat:33.8039,lng:-118.0916,note:'On the SoCal chapter rotation.',lib:'20b3dc23-3160-47a8-92c3-845e1f87df9f',phone:'562-430-5411',web:'https://www.eldoradoparkgc.com',addr:'2400 N Studebaker Rd, Long Beach, CA 90815'},
+ {id:'doslagos',name:'Dos Lagos Golf Course',city:'Corona, CA',chapter:'SoCal',lat:33.8480,lng:-117.5110,note:'On the SoCal chapter rotation.',lib:'3ccb6cb6-ee2c-43f1-bfde-03eec47ce2aa',phone:'951-277-8787',web:'https://www.doslagosgolf.com',addr:'4507 Cabot Dr, Corona, CA 92883'},
+ {id:'goosecreek',name:'Goose Creek Golf Club',city:'Mira Loma, CA',chapter:'SoCal',lat:33.9910,lng:-117.5400,note:'On the SoCal chapter rotation.',lib:'2949e626-b8bf-41b8-ad3a-cae02e9844bf',phone:'951-735-3982',web:'https://goosecreekgc.com',addr:'11418 68th St, Jurupa Valley, CA 91752'},
+ {id:'aviara',name:'Aviara Golf Club',city:'Carlsbad, CA',chapter:'SoCal',lat:33.1030,lng:-117.2800,note:'On the SoCal chapter rotation.',lib:'438f5194-838f-42bb-8af2-6ab0ec1dd4af',phone:'760-603-6900',web:'https://parkhyattaviara.com/golf/',addr:'7447 Batiquitos Dr, Carlsbad, CA 92011'},
  {id:'quivira',name:'Quivira Golf Club',city:'San Diego, CA',chapter:'SoCal',lat:32.7650,lng:-117.2300,note:'On the SoCal chapter rotation.'},
- {id:'stgeorge',name:'St. George, UT (Raider Cup)',city:'St. George, UT',chapter:'National',lat:37.0965,lng:-113.5684,note:'Raider Cup 2026 used four courses in the area.'},
- {id:'monterey',name:'Monterey Bay, CA (Raider Cup 2027)',city:'Monterey Bay, CA',chapter:'National',lat:36.5830,lng:-121.8300,note:'Raider Cup 2027, May 28-30: Carmel Valley Ranch, Poppy Hills and Bayonet Black Horse.'}
+ {id:'stgeorge',name:'St. George, UT (Raider Cup)',short:'Raider Cup 2026, St. George',sub:'4 courses, May 22-24',city:'St. George, UT',chapter:'National',lat:37.0965,lng:-113.5684,note:'Raider Cup 2026, May 22-24, played four courses in the area.',
+  venues:[{name:'Copper Rock'},{name:'Coral Canyon'},{name:'Sand Hollow'},{name:'Sky Mountain'}]},
+ {id:'monterey',name:'Monterey Bay, CA (Raider Cup 2027)',short:'Raider Cup 2027, Monterey Bay',sub:'3 courses, May 28-30',city:'Monterey Bay, CA',chapter:'National',lat:36.5830,lng:-121.8300,note:'Raider Cup 2027, May 28-30: Carmel Valley Ranch, Poppy Hills and Bayonet Black Horse.',
+  venues:[{name:'Carmel Valley Ranch',city:'Carmel, CA',lib:'2ef33127-a4d5-4922-b126-0a8ffc16734e',phone:'831-574-1820',web:'https://carmelvalleyranch.com/golf/',addr:'1 Old Ranch Rd, Carmel, CA 93923',lat:36.5193,lng:-121.8066},
+   {name:'Poppy Hills Golf Course',city:'Pebble Beach, CA',lib:'c69c87d9-a4ca-4bb0-92ef-7e80c57c1fe6',phone:'831-622-8239',web:'https://poppyhillsgolf.ncga.org',addr:'3200 Lopez Rd, Pebble Beach, CA 93953',lat:36.5824,lng:-121.9384},
+   {name:'Bayonet Black Horse: Black Horse',city:'Seaside, CA',lib:'6cfd9281-c2d5-470d-9867-f3e47cee46c7',phone:'831-899-7271',web:'https://www.bayonetblackhorse.com',addr:'1 McClure Way, Seaside, CA 93955',lat:36.6254,lng:-121.8252},
+   {name:'Bayonet Black Horse: Bayonet',city:'Seaside, CA',lib:'69af7f2f-efc2-46e6-9633-7a7ebab7788c',phone:'831-899-7271',web:'https://www.bayonetblackhorse.com',addr:'1 McClure Way, Seaside, CA 93955',lat:36.6303,lng:-121.8210}]}
 ];
+/* par, holes, hole maps and tees [name, yards, rating, slope] from the golf tab's cards (built from courses/c + Chimera's GolfPass card) */
+const CARDS={"ed6d9544-d79b-423f-9b6f-3516954cc3e0":{"par":70,"holes":18,"maps":1,"tees":[["Blue",5568,68.1,119],["White",5251,66.4,115],["Yellow",4291,62.4,104],["Blue · W",5568,73.3,128],["White · W",5251,71.3,124],["Yellow · W",4291,65.9,113]]},"20b3dc23-3160-47a8-92c3-845e1f87df9f":{"par":72,"holes":18,"maps":1,"tees":[["Pros",0,73.1,131],["Blue",6461,71.0,127],["Blue/White",6331,70.4,126],["White",6189,69.7,125],["White · W",6189,76.9,132],["Silver/Gold · W",5625,72.7,129]]},"3ccb6cb6-ee2c-43f1-bfde-03eec47ce2aa":{"par":70,"holes":18,"maps":1,"tees":[["Blue",6205,71.7,130],["White",5631,68.3,124],["Red",4852,71.0,118],["Yellow",4603,68.5,105]]},"2949e626-b8bf-41b8-ad3a-cae02e9844bf":{"par":71,"holes":18,"maps":1,"tees":[["IV",6560,71.2,126],["III",6150,69.4,122],["II",5217,65.2,112],["I",4665,62.2,104],["III · W",6150,75.2,135],["II · W",5217,70.0,124],["I · W",4665,67.0,114]]},"438f5194-838f-42bb-8af2-6ab0ec1dd4af":{"par":72,"holes":18,"maps":0,"tees":[["Palmer",7007,74.6,140],["Blue",6591,72.6,134],["Blue/White",6340,71.4,131],["White",6054,70.1,128],["Gold",5007,65.1,116],["Blue · W",6591,78.5,143],["White · W",6054,75.6,137],["White/Gold · W",5410,71.9,129],["Gold · W",5007,69.5,124]]},"2ef33127-a4d5-4922-b126-0a8ffc16734e":{"par":70,"holes":18,"maps":1,"tees":[["Blue",6117,70.1,131],["White",4433,67.9,126],["Red",5230,65.7,121],["Gold",0,62.3,113],["White · W",4433,72.9,132],["Red · W",5230,70.8,129],["Gold · W",0,66.2,114]]},"c69c87d9-a4ca-4bb0-92ef-7e80c57c1fe6":{"par":71,"holes":18,"maps":1,"tees":[["Jones tee",0,74.9,142],["Black",6730,73.2,139],["Blue",6320,71.6,134],["Combo",6093,70.5,133],["White",5791,69.4,129],["Orange",5224,66.2,120],["Black · W",6730,79.2,144],["Blue · W",6320,77.0,139],["Combo · W",6093,75.8,136],["White · W",5791,74.1,134],["Orange · W",5224,70.8,127]]},"6cfd9281-c2d5-470d-9867-f3e47cee46c7":{"par":72,"holes":18,"maps":1,"tees":[["Black",7025,73.9,136],["Blue",6542,71.6,132],["Combo",6210,71.0,131],["White",5915,69.4,125],["Red · W",5040,69.9,120]]},"69af7f2f-efc2-46e6-9633-7a7ebab7788c":{"par":72,"holes":18,"maps":0,"tees":[["Black",7104,74.9,137],["Blue",6641,72.2,134],["Combo",6218,70.6,133],["White",5945,69.6,132],["Red · W",5229,70.6,124]]},"chimera":{"par":72,"holes":18,"maps":1,"tees":[["Pegasus",6757,71.8,124],["Serpent",6359,70.3,122],["Goat",5897,67.9,118],["Lion",5230,64.7,101],["Serpent · W",6359,76.1,135],["Goat · W",5897,73.7,126],["Lion · W",5230,69.3,117]]}};
 
 /* ---------- Raiders 2026 schedule (ESPN + NFL release, checked Nov 9 2026). Times are Pacific. ---------- */
 const VENUES={
@@ -1575,39 +1603,102 @@ function pinIcon(glyph,fill,stroke){
 function fit(m,pts,pad){const b=new google.maps.LatLngBounds();pts.forEach(p=>b.extend({lat:p[0],lng:p[1]}));m.fitBounds(b,pad||40)}
 window.addEventListener('resize',()=>{if(window.google&&google.maps)Object.values(maps).forEach(m=>google.maps.event.trigger(m,'resize'))});
 
-/* ---------- courses ---------- */
+/* ---------- courses (David, Nov 13: rework, simplify, expand) ----------
+   Our courses: one map + one list by chapter, each tap opens a course page (par, yards, tees, club events, play it, call, directions).
+   Find a course: any of the golf tab's 1,500+ courses in CA, NV and AZ, same course page. */
+const CSRC='Tee cards: the golf tab, from OpenGolfAPI and OpenStreetMap contributors (ODbL). Check the card at the course.';
+const cMen=t=>!/ · W$/.test(t[0]);
+const cLong=c=>{const ys=c.tees.filter(t=>cMen(t)&&t[1]).map(t=>t[1]);return ys.length?Math.max(...ys):0};
+const cStat=c=>c?['Par '+c.par,cLong(c)?cLong(c).toLocaleString()+' yds':''].filter(Boolean).join(' · '):'';
+const cEvs=id=>EVENTS.filter(e=>!e.status&&e.course===id);
+const cNext=id=>cEvs(id).filter(e=>!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1)[0];
+const cDay=d=>{const f=fmtDate(d);return f.dow+', '+f.m+' '+f.d+', '+d.slice(0,4)};
+const cSort=a=>a.slice().sort((x,y)=>{const nx=cNext(x.id),ny=cNext(y.id);return(!!ny-!!nx)||(nx&&ny?(nx.date<ny.date?-1:1):0)});
+let CLIB=null,CLIBP=null;const FOUND={};
+const clib=()=>CLIB?Promise.resolve(CLIB):(CLIBP=CLIBP||fetch('scorecard/courses/index.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>CLIB=j).catch(e=>{CLIBP=null;throw e}));
 function renderCourses(){
+  const v=$('#v-courses');cMarkers={};
+  if(S.cview==='course')return v.innerHTML=coursePage(),wireCourse();
+  if(S.cview==='find')return coursesFind();
+  S.cview='list';
   const list=COURSES.filter(c=>inChapter(c.chapter)||c.chapter==='National');
-  if(S.cview==='list'){cMarkers={};
-    $('#v-courses').innerHTML=subChips('courses')+pageHead('Where we play')+`<div class="cgrid rise">${list.map(c=>`<button class="card course" data-course="${c.id}"><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(c.name)}</b><small>${esc(c.city)}</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join('')}</div>`;return}
-  $('#v-courses').innerHTML=subChips('courses')+`<div class="cmapwrap"><div class="mapbox" id="cmap" aria-label="Map of club courses"></div>
-   <div class="detail card" id="cdetail"></div>
-   <p class="sub" style="margin-top:10px">Tap a flag for the course. ${list.length} courses, pins are approximate.</p></div>`;
-  const el=$('#cmap');
-  withMaps(ok=>{
-    const m=makeMap(el,'courses',[34.5,-116],6,ok);cMarkers={};
-    if(m){list.forEach(c=>{const mk=new google.maps.Marker({map:m,position:{lat:c.lat,lng:c.lng},title:c.name,icon:pinIcon('flag','#d5dae1')});mk.addListener('click',()=>showCourse(c.id,true));cMarkers[c.id]=mk});
-      if(list.length>1)fit(m,list.map(c=>[c.lat,c.lng]))}
-    showCourse(S.selCourse,false);
-  });
+  const card=c=>{const nx=cNext(c.id),sub=c.sub||cStat(CARDS[c.lib]);
+    return `<button class="card course" data-course="${c.id}"><span class="n"><i class="ph-fill ${c.venues?'ph-trophy':'ph-flag-pennant'}"></i></span><span><b>${esc(c.short||c.name)}</b><small>${esc(c.city)}${sub?' · '+esc(sub):''}</small>${nx?`<em class="ctag">Club event ${esc(cDay(nx.date).replace(/, \d{4}$/,''))}</em>`:''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`};
+  const groups=[['Nevada',list.filter(c=>c.chapter==='Nevada')],['SoCal',list.filter(c=>c.chapter==='SoCal')],['Raider Cup trips',list.filter(c=>c.chapter==='National')]].filter(g=>g[1].length);
+  v.innerHTML=subChips('courses')+pageHead('Courses','Where the club plays. Tap one for tees, yards and club events.')+
+   `<div class="mapbox cmapsm" id="cmap" aria-label="Map of club courses"></div>`+
+   groups.map(([n,cs])=>`<div class="clbl">${n}</div><div class="cgrid rise">${cSort(cs).map(card).join('')}</div>`).join('')+
+   `<div class="clbl">Any other course</div><button class="card course" data-sub="courses|find"><span class="n"><i class="ph-bold ph-magnifying-glass"></i></span><span><b>Find a course</b><small>1,500+ courses in California, Nevada and Arizona</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`;
+  withMaps(ok=>{const el=$('#cmap');if(!el)return;const m=makeMap(el,'courses',[34.5,-116],6,ok);
+    if(m){list.forEach(c=>{const mk=new google.maps.Marker({map:m,position:{lat:c.lat,lng:c.lng},title:c.short||c.name,icon:pinIcon('flag',c.venues?'#ffffff':'#d5dae1')});mk.addListener('click',()=>openCourse(c.id));cMarkers[c.id]=mk});
+      if(list.length>1)fit(m,list.map(c=>[c.lat,c.lng]))}});
 }
 let cMarkers={};
-function showCourse(id,fly){
-  S.selCourse=id;const box=$('#cdetail');if(!box)return;
-  document.querySelectorAll('.course').forEach(b=>b.classList.toggle('sel',b.dataset.course===id));
-  Object.entries(cMarkers).forEach(([k,mk])=>{mk.setIcon(pinIcon('flag',k===id?'#ffffff':'#d5dae1'));mk.setZIndex(k===id?10:1)});
-  const c=COURSES.find(x=>x.id===id);
-  if(!c){box.classList.remove('on');return}
-  const n=EVENTS.filter(e=>e.course===c.id).length;
-  box.innerHTML=`<h3>${esc(c.name)}</h3><p>${esc(c.city)} - ${esc(c.note)}</p>
-   <div class="acts"><a class="btn small" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.name+' '+c.city)}" ${ext}><i class="ph-bold ph-navigation-arrow"></i> Directions</a>
-   <button class="btn small ghost" data-go="events"><i class="ph-bold ph-calendar"></i> ${n} club event${n===1?'':'s'}</button></div>`;
-  box.classList.add('on');
-  if(fly&&maps.courses){maps.courses.panTo({lat:c.lat,lng:c.lng});maps.courses.setZoom(11)}
-}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-course]');if(!b)return;
-  if(S.cview==='list'){S.selCourse=b.dataset.course;S.cview='map';renderCourses();renderSubnav();$('#v-courses').scrollTop=0;return}
-  showCourse(b.dataset.course,true);$('#v-courses').scrollTo({top:0,behavior:'smooth'})});
+function openCourse(id,lib){S.cview='course';S.selCourse=id||null;S.selLib=lib||null;if(!id)S.cfrom='find';else if(!lib)S.cfrom='list';renderCourses();renderSubnav();$('#v-courses').scrollTop=0}
+/* what one course page shows: club course, a Raider Cup venue, or a course found in the library */
+function cInfo(){const c=COURSES.find(x=>x.id===S.selCourse);
+  if(c&&S.selLib){const vn=(c.venues||[]).find(x=>x.lib===S.selLib);if(vn)return{...vn,card:CARDS[vn.lib],trip:c}}
+  if(c)return{...c,card:c.lib?CARDS[c.lib]:null};
+  const f=FOUND[S.selLib];return f?{...f,found:true}:null}
+function coursePage(){const i=cInfo();
+  const back=i&&i.trip?['Back to '+(i.trip.short||i.trip.name),'trip']:S.cfrom==='find'?['Back to Find a course','find']:['All courses','list'];
+  const top=`${subChips('courses')}<button class="cback" data-cback="${back[1]}"><i class="ph-bold ph-caret-left"></i> ${esc(back[0])}</button>`;
+  if(!i)return top+`<div class="empty">${S.selLib&&!FOUND[S.selLib]?'Loading the course...':'That course is not on the list anymore.'}</div>`;
+  const c=i.card,dir='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(i.addr||((i.name||'')+' '+(i.city||'')));
+  if(i.venues&&!S.selLib){const ev=cEvs(i.id);
+    return top+pageHead(esc(i.short||i.name),esc(i.note||''))+cEvHtml(ev)+`<div class="clbl">The courses</div><div class="cgrid">${i.venues.map(vn=>{const cd=vn.lib&&CARDS[vn.lib];
+      return vn.lib?`<button class="card course" data-venue="${esc(vn.lib)}"><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(vn.name)}</b><small>${esc(vn.city||i.city)}${cd?' · '+esc(cStat(cd)):''}</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`
+       :`<a class="card course" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(vn.name+' golf '+i.city)}" ${ext}><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(vn.name)}</b><small>${esc(i.city)} · Directions</small></span><i class="ph-bold ph-navigation-arrow" style="color:var(--muted)"></i></a>`}).join('')}</div>`}
+  const tel=i.phone?i.phone.replace(/[^\d]/g,''):'';
+  const facts=c?[[c.par,'Par'],[c.holes,'Holes'],[cLong(c)?cLong(c).toLocaleString():'—','Yards, back'],[c.maps?'Yes':'No','Hole maps']]:null;
+  const teeRows=ts=>ts.map(t=>`<tr><td>${esc(t[0].replace(/ · W$/,''))}</td><td>${t[1]?t[1].toLocaleString():'—'}</td><td>${t[2]&&t[3]?t[2]+' / '+t[3]:'—'}</td></tr>`).join('');
+  const men=c?c.tees.filter(cMen):[],wom=c?c.tees.filter(t=>!cMen(t)):[];
+  const tbl=(lbl,ts)=>ts.length?`<div class="clbl">${lbl}</div><div class="card ctable"><table class="ctee"><thead><tr><th>Tee</th><th>Yards</th><th>Rating / slope</th></tr></thead><tbody>${teeRows(ts)}</tbody></table></div>`:'';
+  return top+pageHead(esc(i.name),esc([i.city,i.trip?(i.trip.short||'Raider Cup')+' venue':''].filter(Boolean).join(' · ')))+
+   (facts?`<div class="cfacts">${facts.map(([b,s])=>`<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>`:'')+
+   `<div class="cacts">${c&&i.lib?`<button class="btn small" data-cplay="${esc(i.lib)}"><i class="ph-bold ph-golf"></i> Play here</button>`:''}
+     <a class="btn small ghost" href="${dir}" ${ext}><i class="ph-bold ph-navigation-arrow"></i> Directions</a>
+     ${tel?`<a class="btn small ghost" href="tel:${tel}"><i class="ph-bold ph-phone"></i> Call</a>`:''}
+     ${i.web?`<a class="btn small ghost" href="${esc(i.web)}" ${ext}><i class="ph-bold ph-globe"></i> Website</a>`:''}</div>`+
+   (i.addr||i.phone?`<p class="sub" style="margin-top:8px">${esc([i.addr,i.phone].filter(Boolean).join(' · '))}</p>`:'')+
+   (i.found?'':cEvHtml(cEvs(i.trip?i.trip.id:i.id),i.note))+
+   (c?tbl("Men's tees",men)+tbl("Women's tees",wom):`<p class="note" style="margin-top:14px"><i class="ph-bold ph-info"></i><span>No scorecard on file yet. Start a round in Golf and add the card there.</span></p>`)+
+   (c?`<p class="findsrc">${CSRC}</p>`:'')}
+function cEvHtml(ev,note){const up=ev.filter(e=>!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1),past=ev.filter(e=>isPast(e.date)).sort((a,b)=>a.date<b.date?1:-1);
+  if(!ev.length&&!note)return'';
+  return `<div class="clbl">Club events here</div><div class="card cev">${up.map(e=>`<div class="cevr"><b>${esc(e.name)}</b><span>${esc(cDay(e.date))}${e.price?' · '+esc(e.price):''}</span></div>`).join('')}
+   ${past.map(e=>`<div class="cevr past"><b>${esc(e.name)}</b><span>Played ${esc(cDay(e.date))}</span></div>`).join('')}
+   ${note&&!ev.length?`<p class="sub" style="margin:0">${esc(note)}</p>`:''}
+   ${ev.length?`<button class="linkbtn" data-go="events" style="min-height:40px">All club events</button>`:''}</div>`}
+function wireCourse(){}
+function coursesFind(){const v=$('#v-courses');
+  v.innerHTML=subChips('courses')+pageHead('Find a course','Any course in California, Nevada or Arizona. Tap one for its tees and yards.')+
+   `<input class="field" id="cfQ" type="search" placeholder="Course or city" value="${esc(S.cq||'')}" autocomplete="off" aria-label="Search courses">
+    <div class="chips" role="group" aria-label="State" style="margin-top:10px">${[['','All'],['CA','California'],['NV','Nevada'],['AZ','Arizona']].map(([k,n])=>`<button class="chip" data-cst="${k}" aria-pressed="${(S.cst||'')===k}">${n}</button>`).join('')}</div>
+    <div class="cgrid" id="cfL" style="margin-top:12px"><p class="sub">Loading courses...</p></div><p class="findsrc">${CSRC}</p>`;
+  const q=$('#cfQ');q.oninput=()=>{S.cq=q.value;cfList()};
+  v.querySelectorAll('[data-cst]').forEach(b=>b.onclick=()=>{S.cst=b.dataset.cst;v.querySelectorAll('[data-cst]').forEach(x=>x.setAttribute('aria-pressed',x===b));cfList()});
+  clib().then(cfList).catch(()=>{const l=$('#cfL');if(l)l.innerHTML='<p class="sub">The course list needs a signal. Try again in a moment.</p>'})}
+function cfList(){const box=$('#cfL');if(!box||!CLIB)return;const fold=t=>t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''),
+  w=fold(S.cq||'').split(/\s+/).filter(Boolean),st=S.cst||'';
+  let rs=CLIB.courses.filter(c=>(!st||c[3]===st)&&w.every(x=>fold(c[1]+' '+c[2]+' '+c[3]).includes(x)));
+  rs.sort((a,b)=>((b[6]>=18)-(a[6]>=18))||(b[7]-a[7])||(b[8]-a[8])||a[1].localeCompare(b[1]));const n=rs.length;rs=rs.slice(0,40);
+  box.innerHTML=`<p class="sub" style="margin:0">${n.toLocaleString()} course${n===1?'':'s'}${n>40?', top 40 shown. Type more to narrow it.':''}</p>`+rs.map(c=>`<button class="card course" data-found="${esc(c[0])}"><span class="n"><i class="ph-fill ph-flag-pennant"></i></span><span><b>${esc(c[1])}</b><small>${esc(c[2]?c[2]+', ':'')}${c[3]}${c[6]?' · '+c[6]+' holes':''}</small><em class="ctag ${c[7]===2?'':'off'}">${c[7]===2?'Full card':c[7]===1?'Pars only':'No card yet'}</em>${c[8]?'<em class="ctag">Hole maps</em>':''}</span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`).join('')}
+function openFound(id){const row=CLIB&&CLIB.courses.find(c=>c[0]===id);
+  const base=row?{name:row[1],city:(row[2]?row[2]+', ':'')+row[3],lat:row[4],lng:row[5]}:{name:'Course',city:''};
+  if(FOUND[id])return openCourse(null,id);
+  openCourse(null,id);
+  fetch('scorecard/courses/c/'+encodeURIComponent(id)+'.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{const a=d.app;
+    FOUND[id]={...base,lib:a&&a.par&&a.tees&&a.tees.length?id:null,addr:d.address||'',web:d.website||'',
+      card:a&&a.par&&a.tees&&a.tees.length?{par:a.par.reduce((x,y)=>x+y,0),holes:a.par.length,maps:a.maps?1:0,tees:a.tees.map(t=>[t.name,(t.y||[]).reduce((x,y)=>x+(+y||0),0),t.rating,t.slope])}:null}})
+   .catch(()=>{FOUND[id]={...base,lib:null,card:null}}).then(()=>{if(S.tab==='courses'&&S.cview==='course'&&S.selLib===id)renderCourses()})}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-course],[data-venue],[data-found],[data-cback],[data-cplay]');if(!b||!b.closest('#v-courses'))return;
+  if(b.dataset.course)return openCourse(b.dataset.course);
+  if(b.dataset.venue)return openCourse(S.selCourse,b.dataset.venue);
+  if(b.dataset.found)return openFound(b.dataset.found);
+  if(b.dataset.cback){const k=b.dataset.cback;if(k==='trip'){S.selLib=null;S.cview='course'}else S.cview=k;renderCourses();renderSubnav();$('#v-courses').scrollTop=0;return}
+  if(b.dataset.cplay){S.golfv='play/'+encodeURIComponent(b.dataset.cplay);setTab('golf');S.golfv='me';renderSubnav()}});
 
 /* ---------- games (Raiders schedule with live ESPN feed, player news, fantasy) ---------- */
 const TEAMS={LV:'Raiders',MIA:'Dolphins',LAC:'Chargers',NO:'Saints',KC:'Chiefs',NE:'Patriots',BUF:'Bills',LAR:'Rams',NYJ:'Jets',SF:'49ers',SEA:'Seahawks',DEN:'Broncos',CLE:'Browns',TEN:'Titans',ARI:'Cardinals'};
@@ -2480,15 +2571,15 @@ function renderGolf(){const fr=$('#golfFrame'),want=new URL('scorecard/#/'+(S.go
   fr.src=want}
 /* in a round the golf screen takes the whole phone: the club header and tab bar step aside until the round screen closes */
 window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&'golfFull' in e.data)document.body.classList.toggle('golffull',!!e.data.golfFull&&S.tab==='golf')});
-window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.golfCourses)goSub('golf','c-map')});   /* the golf screen's Courses button */
+window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.golfCourses)goSub('golf','c-list')});   /* the golf screen's Courses button */
 window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||!e.data.golf)return;const k=e.data.golf;if(['me','log','groups','events'].includes(k)&&S.golfv!==k){S.golfv=k;renderSubnav()}});
 /* side menu: the open page shows its sub-links underneath it */
 const SUBNAV={
  home:[['About and media','about'],['Photos','photos'],['Join a chapter','join'],['Invite a friend','invite'],['Club leaders','leaders'],['Club news','news'],['Club shop','shop'],['Sponsors','sponsors']],
- golf:[['My golf','me'],['Play log','log'],['Groups','groups'],['Club events','events'],['Course map','c-map'],['Where we play','c-list']],
+ golf:[['My golf','me'],['Play log','log'],['Groups','groups'],['Club events','events'],['Courses','c-list']],
  events:[['Upcoming','up'],['Raider Cup','cup'],['Past events','past']],
  games:[['Raiders schedule','sched'],['Player news','news']],
- courses:[['Course map','map'],['Where we play','list']],
+ courses:[['Our courses','list'],['Find a course','find']],
  forum:[['All posts','All'],['Tournaments','Tournaments'],['Game Day','Game Day'],['Golf Tips','Golf Tips'],['Travel','Travel'],['Gear','Gear']],
  members:[['Messages','inbox'],['Members','dir'],['Alumni & Hall of Fame','alumni']]
 };
@@ -2496,8 +2587,8 @@ const SUB={};
 function subNow(t){
   if(t==='home')return S.hpage||'overview';
   if(t==='events')return !S.eview||S.eview==='list'?'up':S.eview;
-  if(t==='courses')return S.cview||'map';
-  if(t==='golf')return S.tab==='courses'?'c-'+(S.cview||'map'):S.golfv||'me';
+  if(t==='courses')return S.cview==='find'||(S.cview==='course'&&S.cfrom==='find')?'find':'list';
+  if(t==='golf')return S.tab==='courses'?'c-list':S.golfv||'me';
   if(t==='settings')return S.spage||'account';
   if(t==='games')return S.gview;
   if(t==='members')return S.mview;
@@ -2516,7 +2607,7 @@ function goSub(t,k){
   if(t==='home'){S.hpage=k;if(k==='join')S.joinSent=null}
   if(t==='events'){S.eview=k;save()}
   if(t==='courses')S.cview=k;
-  if(t==='golf'&&k.startsWith('c-')){S.cview=k.slice(2);closeSheet();setTab('courses');return}
+  if(t==='golf'&&k.startsWith('c-')){S.cview='list';closeSheet();setTab('courses');return}
   if(t==='golf')S.golfv=k;
   if(t==='settings')S.spage=k;
   if(t==='games'){S.gview=k;save()}

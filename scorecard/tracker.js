@@ -246,11 +246,20 @@ function hub(h){$('#app').className='wrap';
   if(a==='group'&&b)return trGroup(b);
   if(a==='events')return trEvents();
   if(a==='new')return b==='solo'||b==='crew'?trNew(null,b==='crew'):trNew(b||null);
+  if(a==='play'&&b)return trPlayAt(decodeURIComponent(b));
   if(a==='round'&&b)return trRound(b);
   if(a==='log')return trLog(b||'all');
   if(a==='welcome')return trWelcome();
   return trMe()}
 
+/* Courses page "Play here": load that course's card, put it first, open Play solo on it */
+function trPlayAt(id){const go=()=>{trRecent(id);gsave();NR=null;location.replace('#/new/solo')};
+  if(COURSES[id])return go();
+  $('#app').innerHTML='<p class="muted" style="padding:40px 20px;text-align:center">Loading the course...</p>';
+  fetch('courses/c/'+encodeURIComponent(id)+'.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>{
+    if(!d.app){location.replace('#/new/solo');return}
+    const co=Object.assign(d.app,{lat:d.lat,lng:d.lng,phone:d.phone||'',web:d.website||''});(G.courses||(G.courses={}))[id]=co;COURSES[id]=co;go()})
+   .catch(()=>location.replace('#/new/solo'))}
 function trRoundState(id){try{return JSON.parse(localStorage.getItem('rngc-scorecard-v2:'+id)||'{}')}catch(e){return{}}}
 function trMeHoles(id){const s=trRoundState(id);return((s.scores||{})['g|players']||{}).me||{}}
 const trThru=id=>Object.values(trMeHoles(id)).filter(v=>v!=null).length;
