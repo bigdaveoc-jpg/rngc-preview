@@ -250,6 +250,7 @@ function hub(h){$('#app').className='wrap';
   if(a==='round'&&b)return trRound(b);
   if(a==='log')return trLog(b||'all');
   if(a==='welcome')return trWelcome();
+  if(a==='balls'&&typeof trBalls==='function')return trBalls();
   return trMe()}
 
 /* Courses page "Play here": load that course's card, put it first, open Play solo on it */
@@ -300,7 +301,7 @@ function trMe(){const my=trMine(),full=my.filter(x=>x.p.holes===18&&x.p.par>=66)
    <section class="card tcard">${my.length?my.slice(0,3).map(({r,p})=>trRow(r,p)).join('')
      :'<div class="trow"><span class="muted">No rounds yet. Start one and it lands here.</span></div>'}</section>
    ${G.rounds.some(r=>r.demo)?`<p class="note"><i class="ph-bold ph-flask"></i><span>These are sample rounds so you can see how it works. <button class="linkbtn" id="clearDemo" style="margin:0;min-height:0">Clear samples</button></span></p>`:''}
-   ${my.length?`<details class="whyd more" id="moreStats"${(G.pref||{}).more?' open':''} style="margin-top:14px"><summary><i class="ph-bold ph-caret-right"></i> More stats: goal, handicap, putts, trends</summary>
+   ${typeof ballLink==='function'?ballLink():''}${my.length?`<details class="whyd more" id="moreStats"${(G.pref||{}).more?' open':''} style="margin-top:14px"><summary><i class="ph-bold ph-caret-right"></i> More stats: goal, handicap, putts, trends</summary>
    ${trCoach(my,full)}
    ${mixR.length?`<div class="lbl">Scoring</div><div class="tiles">${tile(trOne((mix.b+mix.e)/n),'Birdies','per round')}<div class="card"><b>${my.length}</b><span>Rounds</span><small>${full.length} full 18${full.length===1?'':'s'}${nines?' · '+nines+' nine'+(nines===1?'':'s'):''}</small></div></div>`:''}
    <div class="lbl">Handicap ${hlp('index')}</div>

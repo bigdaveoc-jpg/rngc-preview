@@ -790,7 +790,7 @@ function hole(n){if(n!==STRIP_N){STRIP_ALT=false;STRIP_N=n;QP=null}const t=myTea
     <div class="run"><b class="${tot.c}">${tot.txt==='E'?'Even':tot.txt}</b><span>${tot.who?esc(tot.who)+' · ':''}${f.points?'points · ':useNet()?'with handicap · ':''}${tot.thru} played</span><div class="saved" id="saved" style="justify-content:flex-end;margin-top:4px"><i class="ph-bold ph-cloud-check"></i><span>Saved</span></div></div></div>
    ${ro&&!(LIVE&&LIVE.follow)?`<div class="card lock"><i class="ph-bold ph-lock-simple"></i><span>${esc(first(PEOPLE()[k].name))} keeps score for your group.</span><button class="btn small" id="takeKeep" style="margin-left:auto;white-space:nowrap">Keep score here</button></div>`:''}
    ${entry}
-   ${holeTop(n)}${typeof trSoloLine==='function'&&CASUAL&&players(t).length===1?trSoloLine(n):''}${typeof trLiveCard==='function'?trLiveCard(idx_):''}
+   ${holeTop(n)}${typeof ballCard==='function'?ballCard(n):''}${typeof trSoloLine==='function'&&CASUAL&&players(t).length===1?trSoloLine(n):''}${typeof trLiveCard==='function'?trLiveCard(idx_):''}
    ${statCard(n)}
    ${betLine()}${typeof trSoloLine==='function'&&!(CASUAL&&players(t).length===1)?trSoloLine(n):''}
    ${contestCard(n)}
@@ -839,7 +839,7 @@ function holeSvg(n,big){const m=CO().maps&&CO().maps[n];if(!m)return'';
           extra+=`<circle cx="${x}" cy="${yy}" r="2.6" fill="#fff"/><text x="${x+5}" y="${yy+3.5}" font-size="10" font-weight="700" fill="#fff" stroke="#0a0b0d" stroke-width="2.4" paint-order="stroke" font-family="Barlow,system-ui">${y}</text>`;ok=true;break}need-=L}
       if(!ok)break}
     const t=pts[0];extra+=`<circle cx="${t[0]}" cy="${t[1]}" r="3.4" fill="#fff" stroke="#0a0b0d" stroke-width="1.2"/>`;
-    extra+=`<circle cx="${gx[0]}" cy="${gx[1]}" r="2" fill="#0a0b0d"/><line x1="${gx[0]}" y1="${gx[1]}" x2="${gx[0]}" y2="${gx[1]-14}" stroke="#0a0b0d" stroke-width="1.2"/><path d="M${gx[0]} ${gx[1]-14}l7 2.5-7 2.5z" fill="#e25c5c"/>`}
+    extra+=`<circle cx="${gx[0]}" cy="${gx[1]}" r="2" fill="#0a0b0d"/><line x1="${gx[0]}" y1="${gx[1]}" x2="${gx[0]}" y2="${gx[1]-14}" stroke="#0a0b0d" stroke-width="1.2"/><path d="M${gx[0]} ${gx[1]-14}l7 2.5-7 2.5z" fill="#e25c5c"/>`;if(typeof ballDots==='function')extra+=ballDots(n)}
   return `<svg viewBox="${m.vb.join(' ')}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Map of hole ${n}">${sh}${extra}</svg>`}
 
 /* Full-screen hole view (Nov 13 2026, after studying Hole19): tap anywhere on the hole for yards to that spot and
@@ -1260,7 +1260,8 @@ function tellClub(){try{if(window.parent!==window){window.parent.postMessage({go
 addEventListener('hashchange',tellClub);tellClub();fitSoon();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
-<script src="tracker.js?v=49"></script>
+<script src="tracker.js?v=50"></script>
+<script src="balls.js?v=1"></script>
 <script src="../live.js?v=3"></script>
 </body>
 </html>
