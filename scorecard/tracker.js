@@ -256,6 +256,12 @@ function trMeHoles(id){const s=trRoundState(id);return((s.scores||{})['g|players
 const trThru=id=>Object.values(trMeHoles(id)).filter(v=>v!=null).length;
 function trNextHole(id){const m=trMeHoles(id);for(let h=1;h<=18;h++)if(m[h]==null)return h;return 18}
 
+/* next club event on golf home: shows the week before and on the day */
+function trNextEv(){const e=typeof EVENTS!=='undefined'&&EVENTS.nov14;if(!e||!e.date)return'';const d=new Date(String(e.date).replace(/^[A-Za-z]+ /,''));if(isNaN(d))return'';
+  const now=new Date(),diff=Math.round((d-new Date(now.getFullYear(),now.getMonth(),now.getDate()))/864e5);if(diff<0||diff>7)return'';
+  const tm=S.team&&TEAMS.find(x=>x.id===S.team),c=COURSES[e.course];
+  return `<section class="card ev" style="padding:14px;margin-top:14px"><span class="tag">${diff===0?'Today':diff===1?'Tomorrow':'Next club event'}</span><h2 style="font-size:24px;margin:6px 0 2px">${esc(e.name)}</h2><div class="muted">${diff>1?esc(e.date)+' · ':''}${esc(e.start||'')}${c?' · '+esc(c.name):''}</div>
+    <div class="row2"><a class="btn" href="#/event">${tm?'Open my card':'Pick my group'}</a><a class="btn ghost" href="#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a></div></section>`}
 function trMe(){const my=trMine(),full=my.filter(x=>x.p.holes===18&&x.p.par>=66),nines=my.filter(x=>x.p.holes>=9&&x.p.holes<18).length,est=trEst();
   const live=Object.values(G.live).filter(l=>COURSES[l.course]).sort((a,b)=>b.date-a.date);
   const grossA=full.map(x=>x.p.gross),best=full.slice().sort((a,b)=>a.p.gross-b.p.gross)[0];
@@ -267,23 +273,30 @@ function trMe(){const my=trMine(),full=my.filter(x=>x.p.holes===18&&x.p.par>=66)
   const MIXL=[['e','Eagles','var(--under)',1],['b','Birdies','var(--under)',.6],['p','Pars','var(--silver-2)',.75],['bo','Bogeys','var(--over)',.55],['d','Doubles+','var(--over)',1]];
   const tile=(v,l,s,h)=>`<div class="card"><b>${v}</b><span>${l}${h?' '+hlp(h):''}</span><small>${s}</small></div>`;
   const notT='tap Drive or Putts on a hole to start',few=(n,v)=>n>=1?v:'-',fewS=(n,t)=>n>=5?t:t+' · small sample';
-  $('#app').innerHTML=trBar('My golf',G.me.name+' · handicap '+trHc(G.me.hcp))+trTabs('me')+`
+  const hcTop=G.me.hcp!=null?trHc(G.me.hcp):est.v!=null?trHc(est.v):'-',hcSub=G.me.hcp!=null?'tap to change':est.v!=null?'worked out by the app':(3-est.n)+' more full round'+(3-est.n===1?'':'s')+' · or tap to enter it';
+  /* golf home, cleaned up (David, Nov 14 2026: "make it as obvious as possible and hide what can be"): event, start, your 3 numbers, last 3 rounds; every other stat sits under More stats */
+  $('#app').innerHTML=trBar('My golf',G.me.name)+trTabs('me')+`
+   ${trNextEv()}
    ${live.map(l=>`<section class="card ev" style="padding:14px;margin-top:14px"><span class="tag rngc">In progress</span><h2 style="font-size:24px;margin:6px 0 2px">${esc(l.name)}</h2>
      <div class="muted">${esc(COURSES[l.course].name)} · ${esc(l.dateTxt)} · thru ${trThru(l.id)}</div>
      <div class="row2"><a class="btn" href="./?r=${l.id}#/hole/${trNextHole(l.id)}">Keep scoring</a><button class="btn ghost" data-drop="${l.id}">Throw it out</button></div></section>`).join('')}
-   ${G.groups.some(g=>!g.demo)?`<div class="row2" style="margin-top:14px"><a class="btn" href="#/new"><i class="ph-bold ph-flag"></i> Start a round</a><a class="btn ghost" href="#/groups"><i class="ph-bold ph-users-three"></i> Group round</a></div>`
-     :`<a class="btn block" style="margin-top:14px" href="#/new"><i class="ph-bold ph-flag"></i> Start a round</a><p class="muted" style="text-align:center;margin:8px 0 0;font-size:15px">With friends? <a class="linkbtn" href="#/groups" style="margin:0;min-height:40px">Group round</a> · <button class="linkbtn joinlive" style="margin:0;min-height:40px">Join a live round</button></p>`}
-   ${TR_TOK()?'<button class="btn ghost block" data-bringguest style="margin-top:10px"><i class="ph-bold ph-ticket"></i> Bring a guest: 72 hours of golf, free</button>':''}
-   ${grossA.length||best||mixR.length?`<div class="lbl">Scoring</div>
-   <div class="tiles">
-    ${tile(grossA.length?Math.round(trAvg(grossA)):'-','Avg score',grossA.length?'last '+grossA.length+' full 18s':'18 holes')}
-    ${tile(best?best.p.gross:'-','Best',best?toPar(best.p.gross-best.p.par)+' · '+trDay(best.r.date):'-')}
-    ${tile(mixR.length?trOne((mix.b+mix.e)/n):'-','Birdies','per round')}</div>`:''}
+   <a class="btn block" style="margin-top:14px;min-height:60px;font-size:20px" href="#/new"><i class="ph-bold ph-flag"></i> Start a round</a>
+   <div class="row2" style="margin-top:8px"><a class="btn ghost" href="#/groups"><i class="ph-bold ph-users-three"></i> Group round</a><button class="btn ghost joinlive"><i class="ph-bold ph-broadcast"></i> Join a live round</button></div>
+   ${TR_TOK()?'<button class="btn ghost block" data-bringguest style="margin-top:8px"><i class="ph-bold ph-ticket"></i> Bring a guest, free for 72 hours</button>':''}
+   <div class="lbl">Your game</div>
+   <div class="tiles"><button class="card" id="editMe"><b>${hcTop}</b><span>Handicap</span><small>${hcSub}</small></button>
+    ${tile(grossA.length?Math.round(trAvg(grossA)):'-','Avg score',grossA.length?'last '+grossA.length+' full 18s':'after a full 18')}
+    ${tile(best?best.p.gross:'-','Best',best?toPar(best.p.gross-best.p.par)+' · '+trDay(best.r.date):'after a full 18')}</div>
+   <div class="lbl" style="display:flex;justify-content:space-between;align-items:center">Recent rounds <a class="linkbtn" href="#/log" style="margin:0;text-transform:none;letter-spacing:0">Full play log</a></div>
+   <section class="card tcard">${my.length?my.slice(0,3).map(({r,p})=>trRow(r,p)).join('')
+     :'<div class="trow"><span class="muted">No rounds yet. Start one and it lands here.</span></div>'}</section>
+   ${G.rounds.some(r=>r.demo)?`<p class="note"><i class="ph-bold ph-flask"></i><span>These are sample rounds so you can see how it works. <button class="linkbtn" id="clearDemo" style="margin:0;min-height:0">Clear samples</button></span></p>`:''}
+   ${my.length?`<details class="whyd more" id="moreStats"${(G.pref||{}).more?' open':''} style="margin-top:14px"><summary><i class="ph-bold ph-caret-right"></i> More stats: goal, handicap, putts, trends</summary>
    ${trCoach(my,full)}
+   ${mixR.length?`<div class="lbl">Scoring</div><div class="tiles">${tile(trOne((mix.b+mix.e)/n),'Birdies','per round')}<div class="card"><b>${my.length}</b><span>Rounds</span><small>${full.length} full 18${full.length===1?'':'s'}${nines?' · '+nines+' nine'+(nines===1?'':'s'):''}</small></div></div>`:''}
    <div class="lbl">Handicap ${hlp('index')}</div>
-   ${est.v==null?`<div class="tiles">${G.me.hcp!=null?`<button class="card" id="editMe"><b>${trHc(G.me.hcp)}</b><span>Your handicap</span><small>you entered it · tap to change</small></button>`:`<button class="card" id="editMe"><b>${est.v==null?'-':trHc(est.v)}</b><span>Your handicap</span><small>${est.v==null?(3-est.n)+' more full round'+(3-est.n===1?'':'s'):'worked out by the app'}</small></button>`}</div><p class="note"><i class="ph-bold ph-info"></i><span>${G.me.hcp!=null?'That\'s the handicap you entered. ':''}Play ${3-est.n} more full 18-hole round${3-est.n===1?'':'s'} and the app works out ${G.me.hcp!=null?'its own number to check it':'your handicap'}.${est.skip?' '+est.skip+' of your rounds were on courses with no rating on file, so they don\'t count.':''}</span></p>`:`<div class="tiles">${G.me.hcp!=null?`<button class="card" id="editMe"><b>${trHc(G.me.hcp)}</b><span>Your handicap</span><small>you entered it · tap to change</small></button>`:`<button class="card" id="editMe"><b>${est.v==null?'-':trHc(est.v)}</b><span>Your handicap</span><small>${est.v==null?(3-est.n)+' more full round'+(3-est.n===1?'':'s'):'worked out by the app'}</small></button>`}
-    <button class="card" id="estBtn">${(()=>{const g=G.me.hcp!=null&&est.v!=null?est.v-G.me.hcp:null;return g==null?`<b>${est.n}</b><span>Rounds for handicap</span><small>${est.n<3?(3-est.n)+' more to get your handicap':est.n<20?'best '+(est.k||0)+' count':'best 8 of 20'}</small>`:`<b><i class="ph-bold ph-${g<=-1?'trend-down':g>=1?'trend-up':'equals'}"></i></b><span>${g<=-1?'Heading down':g>=1?'Heading up':'Steady'}</span><small>your rounds work out to ${trHc(est.v)}</small>`})()}</button>
-    <div class="card"><b>${my.length}</b><span>Rounds</span><small>${full.length} full 18${full.length===1?'':'s'}${nines?' · '+nines+' nine'+(nines===1?'':'s'):''}</small></div></div>`+trHcLine(est)+`<details class="whyd"><summary><i class="ph-bold ph-caret-right"></i> How it's worked out</summary>${trWhy(est)}</details>`}
+   ${est.v==null?`<p class="note"><i class="ph-bold ph-info"></i><span>${G.me.hcp!=null?'That’s the handicap you entered. ':''}Play ${3-est.n} more full 18-hole round${3-est.n===1?'':'s'} and the app works out ${G.me.hcp!=null?'its own number to check it':'your handicap'}.${est.skip?' '+est.skip+' of your rounds were on courses with no rating on file, so they don’t count.':''}</span></p>`
+     :`<div class="tiles"><button class="card" id="estBtn">${(()=>{const g=G.me.hcp!=null&&est.v!=null?est.v-G.me.hcp:null;return g==null?`<b>${est.n}</b><span>Rounds for handicap</span><small>${est.n<3?(3-est.n)+' more to get your handicap':est.n<20?'best '+(est.k||0)+' count':'best 8 of 20'}</small>`:`<b><i class="ph-bold ph-${g<=-1?'trend-down':g>=1?'trend-up':'equals'}"></i></b><span>${g<=-1?'Heading down':g>=1?'Heading up':'Steady'}</span><small>your rounds work out to ${trHc(est.v)}</small>`})()}</button></div>`+trHcLine(est)+`<details class="whyd"><summary><i class="ph-bold ph-caret-right"></i> How it's worked out</summary>${trWhy(est)}</details>`}
    ${est.v!=null&&est.n>=20&&est.v!==G.me.hcp?`<button class="btn ghost block" id="useEst" style="margin-top:8px">Use ${trHc(est.v)} as my handicap</button>`:''}
    <div class="lbl">Your stats ${hlp('tracked')}</div>
    ${pn<9&&fwn<5?`<p class="note"><i class="ph-bold ph-chart-bar"></i><span>${pn?`Only ${pn} hole${pn===1?'':'s'} tracked so far, so no stats yet.`:'Want putts, fairways and greens?'} Tap Track my stats on the hole screen. Skip it and you still get score, handicap and the play log.</span></p>`:''}
@@ -303,12 +316,10 @@ function trMe(){const my=trMine(),full=my.filter(x=>x.p.holes===18&&x.p.par>=66)
    ${mixR.length?`<section class="card" style="padding:12px 14px;margin-top:8px"><b style="font-size:15px">A typical round</b><div class="mix" aria-hidden="true">${MIXL.map(([k,,c,o])=>`<i style="width:${mix[k]/mixT*100}%;background:${c};opacity:${o}"></i>`).join('')}</div>
      <div class="mixl">${MIXL.map(([k,l])=>`<span><b>${trOne(mix[k]/n)}</b> ${l}</span>`).join('')}</div></section>`:''}
    ${full.length>=2?`<section class="card" style="padding:12px 14px;margin-top:8px"><b style="font-size:15px">Last ${Math.min(10,full.length)} rounds</b>${trSpark(full.slice(0,10).reverse().map(x=>x.p.gross))}</section>`:''}
-   <div class="lbl" style="display:flex;justify-content:space-between;align-items:center">Recent rounds <a class="linkbtn" href="#/log" style="margin:0;text-transform:none;letter-spacing:0">Full play log</a></div>
-   <section class="card tcard">${my.length?my.slice(0,12).map(({r,p})=>trRow(r,p)).join('')
-     :'<div class="trow"><span class="muted">No rounds yet. Start one and it lands here.</span></div>'}</section>
-   ${G.rounds.some(r=>r.demo)?`<p class="note"><i class="ph-bold ph-flask"></i><span>These are sample rounds so you can see how it works. <button class="linkbtn" id="clearDemo" style="margin:0;min-height:0">Clear samples</button></span></p>`:''}
+   </details>`:''}
    <div style="height:28px"></div>`;
   trWire();
+  {const ms=$('#moreStats');if(ms)ms.ontoggle=()=>{(G.pref||(G.pref={})).more=ms.open;gsave()}}
   $('#editMe').onclick=trEditMe;{const eb=$('#estBtn');if(eb)eb.onclick=trEstSheet}
   document.querySelectorAll('[data-goal]').forEach(b=>b.onclick=()=>{G.me.goal=+b.dataset.goal;gsave();trMe()});
   document.querySelectorAll('[data-sgb]').forEach(b=>b.onclick=()=>{(G.pref||(G.pref={})).sgb=b.dataset.sgb;gsave();const y=scrollY;trMe();scrollTo(0,y)});
@@ -740,7 +751,7 @@ function trSG(my){const b=trSgB(),L=my.slice(0,20),all=trSgAgg(L,b);if(all.n<18)
   const nm=['off the tee','on approach shots','around the green','putting'],lo=all.v[worst],hi=all.v[best];
   const plain=`<p style="font-size:16px;line-height:1.4;margin:0 0 6px">${lo<-0.3?`You lose the most strokes <b>${nm[worst]}</b>, about ${trOne(Math.abs(lo))} a round next to a ${B.nm}.`:`No one area costs you much next to a ${B.nm}.`}${hi>0.3&&best!==worst?` You're best ${nm[best]}.`:''}</p>`;
   const beg=(G.me.hcp!=null?G.me.hcp:trEst().v||30)>18;
-  return `<div class="lbl">Where your strokes go</div><section class="card tcard where">${plain}
+  return `<div class="lbl">Where you lose strokes</div><section class="card tcard where">${plain}
    ${beg?`<details class="whyd"><summary><i class="ph-bold ph-caret-right"></i> Show the numbers</summary>`:''}
    <p class="muted" style="font-size:14px;margin:0 0 6px">Strokes a round you gain (+) or lose (-) against a ${B.nm} on the same holes, from ${all.n} holes you tracked.</p>
    <div class="chips2" role="group" aria-label="Compare me to" style="margin:0 0 6px">${Object.entries(TR_SGB).map(([k,x])=>`<button class="chip2" data-sgb="${k}" aria-pressed="${k===b}">${x.l}</button>`).join('')}</div>
