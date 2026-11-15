@@ -1460,7 +1460,7 @@ function renderHome(){
   else if(pg==='invite')h=subChips('home')+inviteHTML();
   else if(pg==='about')h=subChips('home')+aboutHTML();
   else if(pg==='photos')h=subChips('home')+photosHTML();
-  else h=subChips('home')+(window.RNGCLIVE?RNGCLIVE.banner():'')+(window.passHomeCard?passHomeCard():'')+setupNudge()+appNudge()+overviewHTML();
+  else h=subChips('home')+(window.RNGCLIVE?RNGCLIVE.banner():'')+setupNudge()+appNudge()+overviewHTML();
   /* nothing changed: leave the page alone, so a data refresh never redraws (and flickers) what's already on screen */
   if(v._h!==h||!v._n||v._n.parentNode!==v){v.innerHTML=h;v._h=h;v._n=v.firstElementChild}
   syncTop();
