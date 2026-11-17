@@ -235,7 +235,12 @@ body.sun{--rough:#dfe8dc}
 #bigh.on{display:flex}body.bh-open{overflow:hidden}
 .bhbar{display:flex;align-items:center;gap:10px;padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));background:var(--panel);border-bottom:1px solid var(--line)}
 .bhbar b{font-size:22px}.bhbar span{flex:1;color:var(--muted);font-size:15px}.bhbar .ib{min-width:44px;min-height:44px}.bhbar .ib.on{background:var(--silver);color:var(--on-silver)}
-.bhmap{flex:1;min-height:0}.bhmap svg{width:100%;height:100%;display:block;touch-action:manipulation;cursor:crosshair}
+.bhmap{flex:1;min-height:0;position:relative}
+.bh3d{position:absolute;inset:0;display:none;background:#0a0b0d}.bh3d.on{display:block}.bh3d gmp-map-3d{width:100%;height:100%;display:block}
+.bhbar .ib.b3d{font:800 15px/1 Barlow,system-ui;letter-spacing:.02em}
+.h3wait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;padding:24px;text-align:center;color:var(--muted);font-size:16px}
+.h3fly{position:absolute;right:12px;top:12px;z-index:2;display:flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border:0;border-radius:999px;background:var(--silver);color:var(--on-silver);font:700 15px/1 Barlow,system-ui}
+.h3hint{position:absolute;left:12px;bottom:12px;z-index:2;padding:6px 10px;border-radius:999px;background:rgba(10,11,13,.72);color:#fff;font-size:13px;pointer-events:none}.bhmap svg{width:100%;height:100%;display:block;touch-action:manipulation;cursor:crosshair}
 .bhread{display:flex;align-items:center;gap:18px;min-height:72px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));background:var(--panel);border-top:1px solid var(--line)}
 .bhn{display:flex;flex-direction:column}.bhn b{font-size:34px;line-height:1;font-variant-numeric:tabular-nums}.bhn span{font-size:13px;color:var(--muted)}
 .bhread .linkbtn{margin-left:auto;min-height:44px}.bhhint{color:var(--muted);font-size:15px;display:flex;gap:8px;align-items:center}
@@ -356,6 +361,7 @@ document.write('<div style="min-height:100vh;display:flex;align-items:center;jus
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Team card"></div>
 <script src="../bucks.js?v=club2"></script>
 <script src="holes-chimera.js?v=28"></script>
+<script src="hole3d.js?v=1"></script>
 <script>
 /* ===================== DATA ===================== */
 /* Chimera Golf Club, Henderson NV. Real card: pars, yardages, stroke index and rating/slope per tee
@@ -882,8 +888,8 @@ function holeLocal(m,lat,lng){if(!m.tc)return null;const[ta,tn]=m.tc,kx=111320*M
 function bigHole(n){const m=CO().maps&&CO().maps[n];if(!m)return;const c=CO(),tee=TEE();let el=$('#bigh');
   if(!el){el=document.createElement('div');el.id='bigh';document.body.appendChild(el)}
   const ty=tee.y[n-1]||m.yd;
-  el.innerHTML=`<div class="bhbar"><button class="ib" id="bhX" aria-label="Close the hole view"><i class="ph-bold ph-x"></i></button><b>Hole ${n}</b><span>Par ${c.par[n-1]} · ${ty} yds</span><button class="ib" id="bhG" aria-label="Zoom to the green"><i class="ph-bold ph-flag"></i></button></div>
-   <div class="bhmap" id="bhMap">${holeSvg(n,true)}</div>
+  el.innerHTML=`<div class="bhbar"><button class="ib" id="bhX" aria-label="Close the hole view"><i class="ph-bold ph-x"></i></button><b>Hole ${n}</b><span>Par ${c.par[n-1]} · ${ty} yds</span>${window.RNGC3D&&RNGC3D.can(m)?'<button class="ib b3d" id="bh3" aria-label="Show the hole in 3D" aria-pressed="false">3D</button>':''}<button class="ib" id="bhG" aria-label="Zoom to the green"><i class="ph-bold ph-flag"></i></button></div>
+   <div class="bhmap" id="bhMap">${holeSvg(n,true)}<div class="bh3d" id="bh3d"></div></div>
    <div class="bhread" id="bhRead" aria-live="polite"><span class="bhhint"><i class="ph-bold ph-target"></i> Tap anywhere on the hole for yards to that spot</span></div>`;
   el.classList.add('on');document.body.classList.add('bh-open');
   const svg=el.querySelector('svg'),NS='http://www.w3.org/2000/svg',G=m.greenAt,box=$('#bhMap').getBoundingClientRect(),asp=box.width&&box.height?box.width/box.height:.5;
@@ -921,7 +927,13 @@ function bigHole(n){const m=CO().maps&&CO().maps[n];if(!m)return;const c=CO(),te
     layer.innerHTML=h};
   svg.addEventListener('click',e=>{const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());tgt=[Math.round(q.x*10)/10,Math.round(q.y*10)/10];draw()});
   let zoomed=false;$('#bhG').onclick=()=>{zoomed=!zoomed;svg.setAttribute('viewBox',zoomed?gbox:full);$('#bhG').classList.toggle('on',zoomed);$('#bhG').setAttribute('aria-label',zoomed?'Back to the whole hole':'Zoom to the green');draw()};
-  const close=()=>{el.classList.remove('on');document.body.classList.remove('bh-open');clearInterval(el._t);el.innerHTML=''};
+  /* Google 3D (hole3d.js): only loads when tapped; stays on for the next hole until turned off (David, Nov 16 2026) */
+  const b3=$('#bh3'),set3=on=>{if(!b3)return;b3.classList.toggle('on',on);b3.setAttribute('aria-pressed',on);$('#bh3d').classList.toggle('on',on);$('#bhG').hidden=on;
+    try{sessionStorage.setItem('rngc3d',on?'1':'')}catch(e){}
+    $('#bhRead').innerHTML=on?'<span class="bhhint"><i class="ph-bold ph-cube"></i> Tap 3D again to measure yards</span>':'<span class="bhhint"><i class="ph-bold ph-target"></i> Tap anywhere on the hole for yards to that spot</span>';
+    if(on)RNGC3D.show($('#bh3d'),{tee:m.tc,green:m.gc});else{RNGC3D.hide();draw()}};
+  if(b3){b3.onclick=()=>set3(!b3.classList.contains('on'));let w='';try{w=sessionStorage.getItem('rngc3d')}catch(e){}if(w)set3(true)}
+  const close=()=>{el.classList.remove('on');document.body.classList.remove('bh-open');clearInterval(el._t);if(window.RNGC3D)RNGC3D.hide();el.innerHTML=''};
   $('#bhX').onclick=close;clearInterval(el._t);el._t=setInterval(draw,3000);draw()}
 const nice=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
 function holeNotes(n){const m=CO().maps&&CO().maps[n];if(!m)return null;const teeY=TEE().y[n-1]||m.yd;
