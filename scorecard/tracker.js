@@ -644,7 +644,7 @@ function trAddCourse(gid,pre){const d={name:'',city:'',par:[4,5,4,3,4,4,3,5,4, 4
       G.courses[id]=co;COURSES[id]=co;trRecent(id);gsave();NR.course=id;NR.tee='main';closeSheet();trNew(gid)}};
   draw()}
 
-/* ---------- course library: every course in California, Nevada and Arizona ----------
+/* ---------- course library: every course in California, Nevada and Arizona, plus St. George, Utah ----------
    courses/index.json lists them all; courses/c/<id>.json holds the card, tees and hole maps (built by tools/courses/build_courses.py).
    Data: OpenGolfAPI and OpenStreetMap contributors, ODbL 1.0. A picked course is kept on the phone so it works with no signal. */
 let LIB=null,LIBP=null;const FQ={q:'',st:'',near:null};
@@ -663,7 +663,7 @@ const trHomeLL=()=>G.homeInfo&&G.homeInfo.lat?[G.homeInfo.lat,G.homeInfo.lng]:nu
 function trFind(gid,cb){FQ.cb=cb||null;
   $('#sheet').innerHTML=`<div class="grab"></div><h2 style="font-size:26px">${cb?'Pick your home course':'Find a course'}</h2>
    <input class="field" id="fqQ" type="search" placeholder="Course or city" value="${esc(FQ.q)}" autocomplete="off" aria-label="Search courses">
-   <div class="seg" role="group" aria-label="State" style="margin-top:8px">${[['','All'],['CA','California'],['NV','Nevada'],['AZ','Arizona']].map(([k,n])=>`<button data-fst="${k}" aria-pressed="${FQ.st===k}">${n}</button>`).join('')}</div>
+   <div class="seg" role="group" aria-label="State" style="margin-top:8px">${[['','All'],['CA','California'],['NV','Nevada'],['AZ','Arizona'],['UT','Utah']].map(([k,n])=>`<button data-fst="${k}" aria-pressed="${FQ.st===k}">${n}</button>`).join('')}</div>
    <button class="linkbtn" id="fqNear"><i class="ph-bold ph-navigation-arrow"></i> ${FQ.near?'Sorted by closest to you':'Closest to me'}</button>
    <div class="findl" id="fqL"><p class="muted">Loading courses...</p></div>
    <p class="findsrc">Course data: OpenGolfAPI and OpenStreetMap contributors, ODbL. Cards can change, check the one at the course.</p>
