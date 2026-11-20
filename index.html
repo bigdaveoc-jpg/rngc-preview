@@ -1769,7 +1769,7 @@ function renderCourses(){
   v.innerHTML=subChips('courses')+pageHead('Courses','Where the club plays. Tap one for tees, yards and club events.')+
    `<div class="mapbox cmapsm" id="cmap" aria-label="Map of club courses"></div>`+
    groups.map(([n,cs])=>`<div class="clbl">${n}</div><div class="cgrid rise">${cSort(cs).map(card).join('')}</div>`).join('')+
-   `<div class="clbl">Any other course</div><button class="card course" data-sub="courses|find"><span class="n"><i class="ph-bold ph-magnifying-glass"></i></span><span><b>Find a course</b><small>1,500+ courses in California, Nevada, Arizona and St. George, UT</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`;
+   `<div class="clbl">Any other course</div><button class="card course" data-sub="courses|find"><span class="n"><i class="ph-bold ph-magnifying-glass"></i></span><span><b>Find a course</b><small>1,500+ courses in California, Nevada, Arizona and the St. George, UT area</small></span><i class="ph-bold ph-caret-right" style="color:var(--muted)"></i></button>`;
   withMaps(ok=>{const el=$('#cmap');if(!el)return;const m=makeMap(el,'courses',[34.5,-116],6,ok);
     if(m){list.filter(c=>c.lat).forEach(c=>{const mk=new google.maps.Marker({map:m,position:{lat:c.lat,lng:c.lng},title:c.short||c.name,icon:pinIcon('flag',c.venues?'#ffffff':'#d5dae1')});mk.addListener('click',()=>openCourse(c.id));cMarkers[c.id]=mk});
       const pts=list.filter(c=>c.lat);if(pts.length>1)fit(m,pts.map(c=>[c.lat,c.lng]))}});
@@ -1817,7 +1817,7 @@ function cEvHtml(ev,note,id){const up=ev.filter(e=>!isPast(e.date)).sort((a,b)=>
    ${up.length||ev.length?`<button class="linkbtn" data-go="events" style="min-height:40px">All club events</button>`:''}</div>`}
 function wireCourse(){}
 function coursesFind(){const v=$('#v-courses');
-  v.innerHTML=subChips('courses')+pageHead('Find a course','Any course in California, Nevada or Arizona, plus St. George, Utah. Tap one for its tees and yards.')+
+  v.innerHTML=subChips('courses')+pageHead('Find a course','Any course in California, Nevada or Arizona, plus the St. George, Utah area. Tap one for its tees and yards.')+
    `<input class="field" id="cfQ" type="search" placeholder="Course or city" value="${esc(S.cq||'')}" autocomplete="off" aria-label="Search courses">
     <div class="chips" role="group" aria-label="State" style="margin-top:10px">${[['','All'],['CA','California'],['NV','Nevada'],['AZ','Arizona'],['UT','Utah']].map(([k,n])=>`<button class="chip" data-cst="${k}" aria-pressed="${(S.cst||'')===k}">${n}</button>`).join('')}</div>
     <div class="cgrid" id="cfL" style="margin-top:12px"><p class="sub">Loading courses...</p></div><p class="findsrc">${CSRC}</p>`;
