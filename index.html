@@ -278,6 +278,8 @@ a.card.course{color:inherit;text-decoration:none}
 .mem b{font-family:var(--display);font-size:20px;text-transform:uppercase;letter-spacing:.02em;line-height:1.05;display:block}
 .mem small{color:var(--muted);font-size:13px}
 .av{width:44px;height:44px;border-radius:50%;background:var(--panel-2);border:1px solid var(--line);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:18px;color:var(--silver)}
+.av img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.pfphoto{display:flex;align-items:center;gap:14px;margin:0 0 6px}.pfphoto .av{width:72px;height:72px;font-size:26px}
 .av.s{width:30px;height:30px;font-size:14px}
 .privacy{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;color:var(--muted);font-size:14px;margin-top:12px}
 .privacy i{font-size:20px;color:var(--silver-2);margin-top:1px}
@@ -1367,7 +1369,8 @@ function pcardHTML(m){const a=m.alum||null,h=m.hof||null,no=a&&a.no?esc(a.no):''
     ${img&&a.cr?`<p class="cr">${esc(a.cr)}</p>`:''}
     <div class="ln">${a&&a.link&&/^https:\/\//.test(a.link)?`<a href="${esc(a.link)}" target="_blank" rel="noopener">Career stats</a>`:''}<button type="button" data-dm="${esc(m.id)}">Profile</button></div>
     <div class="hint">Tap to flip back</div></div></div></div>`}
-const avOf=m=>m&&m.hof?`<span class="av hofav" title="Hall of Fame">${HOFLOGO}</span>`:`<span class="av">${initials(m?m.name:'?')}</span>`;
+const avSrc=m=>m&&m.photo&&(m.pid||m.id)?AUTH+'/avatar?id='+encodeURIComponent(m.pid||m.id)+'&v='+m.photo:'';
+const avOf=m=>avSrc(m)?`<span class="av"><img src="${avSrc(m)}" alt="" loading="lazy"></span>`:m&&m.hof?`<span class="av hofav" title="Hall of Fame">${HOFLOGO}</span>`:`<span class="av">${initials(m?m.name:'?')}</span>`;
 const jit=id=>{let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))%997;return[((h%17)-8)*.004,(((h>>2)%17)-8)*.004]};
 const memPos=m=>{const c=CITIES[m.city],j=jit(m.id);return[c.lat+j[0],c.lng+j[1]]};
 
@@ -2287,7 +2290,7 @@ function openDirMember(id,keep){
    <details class="fold"><summary>Private note (leaders only) <i class="ph-bold ph-caret-down"></i></summary><div class="fb"><p>${m.note?esc(m.note):'<span class="meta">No note.</span>'}</p></div></details>
    <details class="fold" id="pfHist" data-hist="${esc(m.id)}"><summary>Change history <i class="ph-bold ph-caret-down"></i></summary><div class="fb" id="pfHistBody"><p class="meta">Opens when you tap it.</p></div></details>`);
 }
-const PF_LABEL={role:'role',leads:'chapter president of',chapters:'chapters',status:'status',dues_to:'dues paid through',hi:'handicap index',ghin:'GHIN number',name:'name',email:'email',phone:'phone',home:'home course',city:'city',show_city:'show city',show_index:'show index',note:'private note',alum:'alumni entry',hof:'Hall of Fame entry',setup_link:'setup link'};
+const PF_LABEL={role:'role',leads:'chapter president of',chapters:'chapters',status:'status',dues_to:'dues paid through',hi:'handicap index',ghin:'GHIN number',name:'name',email:'email',photo:'photo',phone:'phone',home:'home course',city:'city',show_city:'show city',show_index:'show index',note:'private note',alum:'alumni entry',hof:'Hall of Fame entry',setup_link:'setup link'};
 const pfVal=(f,v)=>f==='note'?'(updated)':Array.isArray(v)?(v.join(' + ')||'none'):(v===null||v===undefined||v==='')?'empty':typeof v==='object'?'updated':String(v).slice(0,40);
 document.addEventListener('toggle',async e=>{const d=e.target;if(!d||!d.matches||!d.matches('#pfHist')||!d.open||d.dataset.done)return;d.dataset.done='1';
   try{const r=await authCall('/admin/audit?id='+encodeURIComponent(d.dataset.hist),null,authTok());
@@ -2317,6 +2320,7 @@ function openAdminEdit(id){
     <label for="aeGhin">GHIN number</label><input class="field" id="aeGhin" inputmode="numeric" maxlength="12" value="${esc(m.ghin||'')}">
     <label for="aeHi">Handicap index (from GHIN, like 12.4)</label><input class="field" id="aeHi" inputmode="decimal" maxlength="6" value="${esc(m.hi||'')}">
     <label for="aeDues">Dues paid through</label><input class="field" id="aeDues" type="date" value="${esc(m.dues_to||'')}">
+    ${m.photo?'<label class="setrow"><span><b>Take down their photo</b><small>For a photo that should not be up.</small></span><input type="checkbox" class="sw" id="aePicOff"></label>':''}
     <label for="aeNote">Private note (leaders only)</label><textarea class="field" id="aeNote" maxlength="400" rows="2">${esc(m.note||'')}</textarea>
     <h4 style="margin:16px 0 4px">Chapters</h4>${cb('ch',ALL,m.chapters)}
     <h4 style="margin:16px 0 4px">Chapter president of</h4>${cb('ld',ALL.slice(0,3),m.leads,self)}
@@ -2333,6 +2337,7 @@ function openAdminEdit(id){
     const ch=[...document.querySelectorAll('[data-ch]:checked')].map(x=>x.dataset.ch),ld=[...document.querySelectorAll('[data-ld]:checked')].map(x=>x.dataset.ld);
     const want={name:$('#aeName').value,phone:$('#aePhone').value,home:$('#aeHome').value,city:$('#aeCity').value,show_city:$('#aeShowCity').checked,show_index:$('#aeShowIdx').checked,ghin:$('#aeGhin').value,hi:$('#aeHi').value,dues_to:$('#aeDues').value,note:$('#aeNote').value,chapters:ch};
     const patch={};for(const k in want){const cur=m[k]===undefined?(typeof want[k]==='boolean'?false:''):m[k];if(JSON.stringify(want[k])!==JSON.stringify(cur))patch[k]=want[k]}
+    if($('#aePicOff')&&$('#aePicOff').checked)patch.photo='';
     const em=$('#aeEmail').value.trim();if(em.toLowerCase()!==(m.email||'').toLowerCase()){
       if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){msg.textContent='Type an email like name@gmail.com.';return}
       if(!confirm('Change '+m.name+'\'s sign-in email to '+em+'?'))return;patch.email=em}
@@ -3033,8 +3038,12 @@ function realAccountHTML(){
   return pageHead('My account')+`<div class="setcols rise">
    ${group('Edit my profile',`<form id="pfForm" novalidate>
      <h4 style="margin:0 0 4px">About me</h4>
+     <div class="pfphoto">${avOf(Object.assign({},me,{hof:null}))}<div class="acts" style="margin:0"><label class="btn small" for="pfPic"><i class="ph-bold ph-camera-plus"></i> ${me.photo?'Change photo':'Add a photo'}</label>${me.photo?'<button class="btn small ghost" type="button" id="pfPicOff"><i class="ph-bold ph-trash"></i> Remove</button>':''}</div>
+      <input type="file" id="pfPic" accept="image/*" hidden></div>
      <label for="pfName">Name members see</label><input class="field" id="pfName" maxlength="60" autocomplete="name" value="${esc(me.name||'')}">
      <label for="pfGhin">GHIN number</label><input class="field" id="pfGhin" inputmode="numeric" maxlength="12" placeholder="Like 1234567" value="${esc(me.ghin||'')}">
+     <label for="pfHi">Handicap index</label><input class="field" id="pfHi" inputmode="decimal" maxlength="6" placeholder="Like 12.4" value="${esc(me.hi||'')}">
+     <p class="help">${me.hi&&me.hi_src&&me.hi_src!=='self-reported'?'Now on file: '+pfIdx(me)+'. ':''}If you change it, it shows as self-reported.</p>
      <label for="pfHome">Home course</label><input class="field" id="pfHome" maxlength="60" placeholder="Where you play most" value="${esc(me.home||'')}">
      <label for="pfCity">City</label><input class="field" id="pfCity" maxlength="40" placeholder="Like Henderson" value="${esc(me.city||'')}">
      <h4 style="margin:16px 0 4px">How we reach you</h4>
@@ -3054,7 +3063,7 @@ function realAccountHTML(){
      <label class="check" style="margin:12px 0 0"><input type="checkbox" id="pwShow"> Show passwords</label>
      <button class="btn full" type="submit" style="margin-top:12px"><i class="ph-bold ph-key"></i> Change password</button><p class="si-msg" id="pwMsg" role="status"></p></form>
      <p class="help">Forgot your current one? Sign out, then tap "First time or forgot it?" on the sign-in screen.</p>`)}
-   ${group('Set by the club',`${lk('Handicap index',me.hi?pfIdx(me):'None on file')}${lk('Chapters',esc((me.chapters||[]).join(' + ')||'National'))}
+   ${group('Set by the club',`${lk('Chapters',esc((me.chapters||[]).join(' + ')||'National'))}
      ${lk('Club role',me.role==='admin'?'Club admin':((me.leads||[]).length?'Chapter president of '+esc(me.leads.join(' + ')):'Member'))}
      ${lk('Dues',`<span class="${du.k}">${esc(du.t)}</span>`)}
      <p class="help"><i class="ph-bold ph-lock-simple"></i> Only club leaders can change these. If something is wrong, send your chapter leader a message.</p>
@@ -3064,14 +3073,28 @@ function realAccountHTML(){
      <div class="acts" style="margin-top:12px"><button class="btn ghost small" id="acOut"><i class="ph-bold ph-sign-out"></i> Sign out</button></div>`)}
   </div>`}
 /* edit my profile: name, GHIN, home course, city, email (needs the current password), phone, texts, what members see */
+const body_hi_bad=()=>{const v=$('#pfHi').value.trim();if(!v)return false;const f=parseFloat(v.replace(/^\+/,'-'));return !/^\+?\d{1,2}(\.\d)?$/.test(v)||f<-10||f>54};
+/* profile photo: the phone crops it square and shrinks it to a small JPEG before it leaves */
+function pfShrink(file){return new Promise((ok,no)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);
+  const n=Math.min(im.naturalWidth,im.naturalHeight),sz=Math.min(400,n),c=document.createElement('canvas');c.width=c.height=sz;
+  c.getContext('2d').drawImage(im,(im.naturalWidth-n)/2,(im.naturalHeight-n)/2,n,n,0,0,sz,sz);
+  let q=.85,d=c.toDataURL('image/jpeg',q);while(d.length>200000&&q>.4){q-=.1;d=c.toDataURL('image/jpeg',q)}ok(d)};
+  im.onerror=()=>{URL.revokeObjectURL(u);no(new Error("That photo didn't load. Try another one."))};im.src=u})}
+async function pfPhoto(img){const msg=$('#pfMsg');msg.textContent=img?'Adding your photo...':'Removing your photo...';
+  try{const r=await authCall('/me/photo',{img},authTok());applyMe(r.me);DIR.items=null;renderSettings();$('#pfMsg').textContent=img?'Photo saved':'Photo removed';toast(img?'Photo saved':'Photo removed')}
+  catch(err){msg.textContent=err.message}}
+document.addEventListener('change',async e=>{if(e.target.id!=='pfPic'||!e.target.files[0])return;
+  try{await pfPhoto(await pfShrink(e.target.files[0]))}catch(err){$('#pfMsg').textContent=err.message}});
+document.addEventListener('click',e=>{if(e.target.closest('#pfPicOff')&&confirm('Remove your photo?'))pfPhoto('')});
 const pfEmailChanged=()=>{const n=$('#pfEmail');return !!n&&n.value.trim().toLowerCase()!==((S.authMe&&S.authMe.email)||'').toLowerCase()};
 document.addEventListener('input',e=>{if(e.target.id==='pfEmail')$('#pfPwBox').hidden=!pfEmailChanged()});
 document.addEventListener('submit',async e=>{if(e.target.id!=='pfForm')return;e.preventDefault();
   const msg=$('#pfMsg'),b=$('#pfSave'),name=$('#pfName').value.trim(),email=$('#pfEmail').value.trim(),moved=pfEmailChanged();
   if(name.length<2){msg.textContent='Type your name.';$('#pfName').focus();return}
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){msg.textContent='Type an email like name@gmail.com.';$('#pfEmail').focus();return}
+  if(body_hi_bad()){msg.textContent='Index looks like 12.4. Leave it empty if you have none.';$('#pfHi').focus();return}
   if(moved&&!$('#pfPw').value){msg.textContent='Type your current password to change your email.';$('#pfPw').focus();return}
-  const body={name,ghin:$('#pfGhin').value,home:$('#pfHome').value,city:$('#pfCity').value,phone:$('#pfPhone').value,show_city:$('#pfShowCity').checked,show_index:$('#pfShowIdx').checked,text_ok:$('#pfText').checked};
+  const body={name,ghin:$('#pfGhin').value,hi:$('#pfHi').value.trim(),home:$('#pfHome').value,city:$('#pfCity').value,phone:$('#pfPhone').value,show_city:$('#pfShowCity').checked,show_index:$('#pfShowIdx').checked,text_ok:$('#pfText').checked};
   if(moved){body.email=email;body.pw=$('#pfPw').value}
   b.disabled=true;msg.textContent='Saving...';
   try{const r=await authCall('/me/update',body,authTok());
