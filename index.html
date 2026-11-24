@@ -748,8 +748,8 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .field.sm{min-height:40px;padding:8px 10px;width:auto;max-width:240px;font-size:14px}
 .inrow{display:flex;gap:8px;align-items:center}
 .inrow .field{flex:1}
-.sw{appearance:none;-webkit-appearance:none;flex:none;width:46px;height:28px;border-radius:99px;background:var(--panel-2);border:1px solid var(--line);position:relative;cursor:pointer;transition:background .2s}
-.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:transform .2s var(--ease),background .2s}
+.sw{appearance:none;-webkit-appearance:none;flex:none;width:46px;height:28px;border-radius:5px;background:var(--panel-2);border:1px solid var(--line);position:relative;cursor:pointer;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:3px;background:var(--muted);transition:transform .2s var(--ease),background .2s}
 .sw:checked{background:var(--silver);border-color:var(--silver)}
 .sw:checked::after{transform:translateX(18px);background:#0a0b0d}
 .sw:disabled{opacity:.5;cursor:default}
@@ -2287,7 +2287,7 @@ function openDirMember(id,keep){
    <details class="fold"><summary>Private note (leaders only) <i class="ph-bold ph-caret-down"></i></summary><div class="fb"><p>${m.note?esc(m.note):'<span class="meta">No note.</span>'}</p></div></details>
    <details class="fold" id="pfHist" data-hist="${esc(m.id)}"><summary>Change history <i class="ph-bold ph-caret-down"></i></summary><div class="fb" id="pfHistBody"><p class="meta">Opens when you tap it.</p></div></details>`);
 }
-const PF_LABEL={role:'role',leads:'chapter president of',chapters:'chapters',status:'status',dues_to:'dues paid through',hi:'handicap index',ghin:'GHIN number',name:'name',phone:'phone',home:'home course',city:'city',show_city:'show city',show_index:'show index',note:'private note',alum:'alumni entry',hof:'Hall of Fame entry',setup_link:'setup link'};
+const PF_LABEL={role:'role',leads:'chapter president of',chapters:'chapters',status:'status',dues_to:'dues paid through',hi:'handicap index',ghin:'GHIN number',name:'name',email:'email',phone:'phone',home:'home course',city:'city',show_city:'show city',show_index:'show index',note:'private note',alum:'alumni entry',hof:'Hall of Fame entry',setup_link:'setup link'};
 const pfVal=(f,v)=>f==='note'?'(updated)':Array.isArray(v)?(v.join(' + ')||'none'):(v===null||v===undefined||v==='')?'empty':typeof v==='object'?'updated':String(v).slice(0,40);
 document.addEventListener('toggle',async e=>{const d=e.target;if(!d||!d.matches||!d.matches('#pfHist')||!d.open||d.dataset.done)return;d.dataset.done='1';
   try{const r=await authCall('/admin/audit?id='+encodeURIComponent(d.dataset.hist),null,authTok());
@@ -2304,9 +2304,17 @@ function openAdminEdit(id){
   const cb=(nm,list,on,dis)=>list.map(c=>`<label class="check" style="margin:6px 0"><input type="checkbox" data-${nm}="${c}" ${(on||[]).includes(c)?'checked':''} ${dis?'disabled':''}> ${c}</label>`).join('');
   openSheet(`<h3 style="margin:0">Edit ${esc(m.name)}</h3>
    <form id="aeForm" novalidate>
+    <h4 style="margin:12px 0 4px">Profile</h4>
     <label for="aeName">Name</label><input class="field" id="aeName" maxlength="60" value="${esc(m.name)}">
+    <label for="aeEmail">Email, also their sign-in</label><input class="field" id="aeEmail" type="email" maxlength="120" value="${esc(m.email||'')}">
+    <p class="help" id="aeEmailNote" hidden>They sign in with the new email from now on. We tell the old address.</p>
     <label for="aePhone">Phone</label><input class="field" id="aePhone" type="tel" maxlength="20" value="${esc(m.phone||'')}">
-    <label for="aeGhin">GHIN number</label><input class="field" id="aeGhin" inputmode="numeric" maxlength="10" value="${esc(m.ghin||'')}">
+    <label for="aeHome">Home course</label><input class="field" id="aeHome" maxlength="60" value="${esc(m.home||'')}">
+    <label for="aeCity">City</label><input class="field" id="aeCity" maxlength="40" value="${esc(m.city||'')}">
+    <label class="setrow"><span><b>Show city to members</b></span><input type="checkbox" class="sw" id="aeShowCity" ${m.show_city?'checked':''}></label>
+    <label class="setrow"><span><b>Show handicap index to members</b></span><input type="checkbox" class="sw" id="aeShowIdx" ${m.show_index?'checked':''}></label>
+    <h4 style="margin:16px 0 4px">Golf and dues</h4>
+    <label for="aeGhin">GHIN number</label><input class="field" id="aeGhin" inputmode="numeric" maxlength="12" value="${esc(m.ghin||'')}">
     <label for="aeHi">Handicap index (from GHIN, like 12.4)</label><input class="field" id="aeHi" inputmode="decimal" maxlength="6" value="${esc(m.hi||'')}">
     <label for="aeDues">Dues paid through</label><input class="field" id="aeDues" type="date" value="${esc(m.dues_to||'')}">
     <label for="aeNote">Private note (leaders only)</label><textarea class="field" id="aeNote" maxlength="400" rows="2">${esc(m.note||'')}</textarea>
@@ -2320,10 +2328,14 @@ function openAdminEdit(id){
   const sens=()=>{const ld=[...document.querySelectorAll('[data-ld]:checked')].map(x=>x.dataset.ld);
     return $('#aeRole').value!==(m.role==='admin'?'admin':'member')||$('#aeStat').value!==(m.status==='suspended'?'suspended':'active')||ld.slice().sort().join()!==(m.leads||[]).slice().sort().join()};
   $('#aeForm').addEventListener('change',()=>{$('#aePw').hidden=!sens()});
+  $('#aeEmail').addEventListener('input',()=>{$('#aeEmailNote').hidden=$('#aeEmail').value.trim().toLowerCase()===(m.email||'').toLowerCase()});
   $('#aeForm').addEventListener('submit',async ev=>{ev.preventDefault();const msg=$('#aeMsg'),btn=ev.target.querySelector('button[type=submit]');
     const ch=[...document.querySelectorAll('[data-ch]:checked')].map(x=>x.dataset.ch),ld=[...document.querySelectorAll('[data-ld]:checked')].map(x=>x.dataset.ld);
-    const want={name:$('#aeName').value,phone:$('#aePhone').value,ghin:$('#aeGhin').value,hi:$('#aeHi').value,dues_to:$('#aeDues').value,note:$('#aeNote').value,chapters:ch};
-    const patch={};for(const k in want){const cur=m[k]===undefined?'':m[k];if(JSON.stringify(want[k])!==JSON.stringify(cur))patch[k]=want[k]}
+    const want={name:$('#aeName').value,phone:$('#aePhone').value,home:$('#aeHome').value,city:$('#aeCity').value,show_city:$('#aeShowCity').checked,show_index:$('#aeShowIdx').checked,ghin:$('#aeGhin').value,hi:$('#aeHi').value,dues_to:$('#aeDues').value,note:$('#aeNote').value,chapters:ch};
+    const patch={};for(const k in want){const cur=m[k]===undefined?(typeof want[k]==='boolean'?false:''):m[k];if(JSON.stringify(want[k])!==JSON.stringify(cur))patch[k]=want[k]}
+    const em=$('#aeEmail').value.trim();if(em.toLowerCase()!==(m.email||'').toLowerCase()){
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){msg.textContent='Type an email like name@gmail.com.';return}
+      if(!confirm('Change '+m.name+'\'s sign-in email to '+em+'?'))return;patch.email=em}
     if(!self){if(JSON.stringify(ld.slice().sort())!==JSON.stringify((m.leads||[]).slice().sort()))patch.leads=ld;
       if($('#aeRole').value!==(m.role==='admin'?'admin':'member'))patch.role=$('#aeRole').value;
       if($('#aeStat').value!==(m.status==='suspended'?'suspended':'active'))patch.status=$('#aeStat').value}
@@ -3019,14 +3031,22 @@ function realAccountHTML(){
   const me=S.authMe||{},plan=PLANS.find(p=>p.chapter===me.chapter)||PLANS[0],du=pfDues(me.dues_to);
   const lk=(t,v)=>`<div class="setrow"><span><b>${t}</b></span><span style="text-align:right">${v}</span></div>`;
   return pageHead('My account')+`<div class="setcols rise">
-   ${group('My profile',`<p class="meta" style="margin:0 0 8px">This is what other members can see about you. Skip anything you want.</p>
+   ${group('Edit my profile',`<form id="pfForm" novalidate>
+     <h4 style="margin:0 0 4px">About me</h4>
+     <label for="pfName">Name members see</label><input class="field" id="pfName" maxlength="60" autocomplete="name" value="${esc(me.name||'')}">
+     <label for="pfGhin">GHIN number</label><input class="field" id="pfGhin" inputmode="numeric" maxlength="12" placeholder="Like 1234567" value="${esc(me.ghin||'')}">
      <label for="pfHome">Home course</label><input class="field" id="pfHome" maxlength="60" placeholder="Where you play most" value="${esc(me.home||'')}">
      <label for="pfCity">City</label><input class="field" id="pfCity" maxlength="40" placeholder="Like Henderson" value="${esc(me.city||'')}">
-     <label class="setrow"><span><b>Show my city to members</b></span><input type="checkbox" class="sw" id="pfShowCity" ${me.show_city?'checked':''}></label>
-     <label class="setrow"><span><b>Show my handicap index to members</b><small>${me.hi?'Your index is '+esc(me.hi)+'.':'No index on file yet.'}</small></span><input type="checkbox" class="sw" id="pfShowIdx" ${me.show_index?'checked':''}></label>
-     <label for="pfPhone" style="margin-top:8px">Phone for event texts</label><input class="field" id="pfPhone" type="tel" maxlength="20" placeholder="Only your club leaders see this" value="${esc(me.phone||'')}">
+     <h4 style="margin:16px 0 4px">How we reach you</h4>
+     <label for="pfEmail">Email, also your sign-in</label><input class="field" id="pfEmail" type="email" maxlength="120" autocomplete="email" value="${esc(me.email||'')}">
+     <div id="pfPwBox" hidden><label for="pfPw">Current password, to change your email</label><input class="field" id="pfPw" type="password" autocomplete="current-password"></div>
+     <label for="pfPhone">Phone for event texts</label><input class="field" id="pfPhone" type="tel" maxlength="20" autocomplete="tel" placeholder="Only your club leaders see this" value="${esc(me.phone||'')}">
      <label class="setrow"><span><b>Text me club news</b><small>Short texts from club leaders to this phone. Reply STOP anytime. Msg and data rates may apply.</small></span><input type="checkbox" class="sw" id="pfText" ${me.text_ok?'checked':''}></label>
-     <button class="btn full" id="pfSave" style="margin-top:12px"><i class="ph-bold ph-check"></i> Save</button><p class="si-msg" id="pfMsg" role="status"></p>`)}
+     <h4 style="margin:16px 0 4px">What other members see</h4>
+     <label class="setrow"><span><b>Show my city</b></span><input type="checkbox" class="sw" id="pfShowCity" ${me.show_city?'checked':''}></label>
+     <label class="setrow"><span><b>Show my handicap index</b><small>${me.hi?'Your index is '+esc(me.hi)+'.':'No index on file yet.'}</small></span><input type="checkbox" class="sw" id="pfShowIdx" ${me.show_index?'checked':''}></label>
+     <p class="help">Your email and phone stay private. Only club leaders see them.</p>
+     <button class="btn full" type="submit" id="pfSave" style="margin-top:12px"><i class="ph-bold ph-check"></i> Save changes</button><p class="si-msg" id="pfMsg" role="status"></p></form>`)}
    ${group('Password',`<form id="pwForm" novalidate>
      <input type="text" autocomplete="username" value="${esc(me.email||'')}" hidden readonly tabindex="-1" aria-hidden="true">
      <label for="pwCur">Current password</label><input class="field" id="pwCur" type="password" autocomplete="current-password">
@@ -3034,8 +3054,7 @@ function realAccountHTML(){
      <label class="check" style="margin:12px 0 0"><input type="checkbox" id="pwShow"> Show passwords</label>
      <button class="btn full" type="submit" style="margin-top:12px"><i class="ph-bold ph-key"></i> Change password</button><p class="si-msg" id="pwMsg" role="status"></p></form>
      <p class="help">Forgot your current one? Sign out, then tap "First time or forgot it?" on the sign-in screen.</p>`)}
-   ${group('Set by the club',`${lk('Name',esc(me.name||''))}${lk('Email',esc(me.email||''))}${lk('GHIN number',esc(me.ghin||'None'))}
-     ${lk('Handicap index',me.hi?pfIdx(me):'None on file')}${lk('Chapters',esc((me.chapters||[]).join(' + ')||'National'))}
+   ${group('Set by the club',`${lk('Handicap index',me.hi?pfIdx(me):'None on file')}${lk('Chapters',esc((me.chapters||[]).join(' + ')||'National'))}
      ${lk('Club role',me.role==='admin'?'Club admin':((me.leads||[]).length?'Chapter president of '+esc(me.leads.join(' + ')):'Member'))}
      ${lk('Dues',`<span class="${du.k}">${esc(du.t)}</span>`)}
      <p class="help"><i class="ph-bold ph-lock-simple"></i> Only club leaders can change these. If something is wrong, send your chapter leader a message.</p>
@@ -3044,11 +3063,21 @@ function realAccountHTML(){
    ${group('Membership',`${setRow('Plan',esc(plan.name)+' - $'+plan.price+' a year','<a class="btn small ghost" href="'+plan.url+'" '+ext+'>Renew</a>')}
      <div class="acts" style="margin-top:12px"><button class="btn ghost small" id="acOut"><i class="ph-bold ph-sign-out"></i> Sign out</button></div>`)}
   </div>`}
-document.addEventListener('click',async e=>{const b=e.target.closest('#pfSave');if(!b)return;
-  const msg=$('#pfMsg');b.disabled=true;msg.textContent='Saving...';
-  try{const r=await authCall('/me/update',{home:$('#pfHome').value,city:$('#pfCity').value,phone:$('#pfPhone').value,show_city:$('#pfShowCity').checked,show_index:$('#pfShowIdx').checked,text_ok:$('#pfText').checked},authTok());
-    S.authMe=r.me;msg.textContent='Saved';toast('Profile saved');DIR.items=null}
-  catch(err){msg.textContent=err.message}b.disabled=false});
+/* edit my profile: name, GHIN, home course, city, email (needs the current password), phone, texts, what members see */
+const pfEmailChanged=()=>{const n=$('#pfEmail');return !!n&&n.value.trim().toLowerCase()!==((S.authMe&&S.authMe.email)||'').toLowerCase()};
+document.addEventListener('input',e=>{if(e.target.id==='pfEmail')$('#pfPwBox').hidden=!pfEmailChanged()});
+document.addEventListener('submit',async e=>{if(e.target.id!=='pfForm')return;e.preventDefault();
+  const msg=$('#pfMsg'),b=$('#pfSave'),name=$('#pfName').value.trim(),email=$('#pfEmail').value.trim(),moved=pfEmailChanged();
+  if(name.length<2){msg.textContent='Type your name.';$('#pfName').focus();return}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){msg.textContent='Type an email like name@gmail.com.';$('#pfEmail').focus();return}
+  if(moved&&!$('#pfPw').value){msg.textContent='Type your current password to change your email.';$('#pfPw').focus();return}
+  const body={name,ghin:$('#pfGhin').value,home:$('#pfHome').value,city:$('#pfCity').value,phone:$('#pfPhone').value,show_city:$('#pfShowCity').checked,show_index:$('#pfShowIdx').checked,text_ok:$('#pfText').checked};
+  if(moved){body.email=email;body.pw=$('#pfPw').value}
+  b.disabled=true;msg.textContent='Saving...';
+  try{const r=await authCall('/me/update',body,authTok());
+    applyMe(r.me);DIR.items=null;syncTop();renderSettings();
+    $('#pfMsg').textContent=moved?'Saved. Sign in with '+r.me.email+' from now on.':'Saved';toast(moved?'Email changed':'Profile saved')}
+  catch(err){msg.textContent=err.message;b.disabled=false}});
 /* change my own password: the server checks the current one; the page never keeps either */
 document.addEventListener('change',e=>{if(e.target.id!=='pwShow')return;const t=e.target.checked?'text':'password';$('#pwCur').type=t;$('#pwNew').type=t});
 document.addEventListener('submit',async e=>{if(e.target.id!=='pwForm')return;e.preventDefault();
