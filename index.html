@@ -1464,6 +1464,7 @@ function renderHome(){
   else if(pg==='invite')h=subChips('home')+inviteHTML();
   else if(pg==='about')h=subChips('home')+aboutHTML();
   else if(pg==='photos')h=subChips('home')+photosHTML();
+  else if(pg==='feed')h=subChips('home')+(window.RNGCFEED?RNGCFEED.html():'');
   else h=subChips('home')+(window.RNGCLIVE?RNGCLIVE.banner():'')+setupNudge()+appNudge()+overviewHTML();
   /* nothing changed: leave the page alone, so a data refresh never redraws (and flickers) what's already on screen */
   if(v._h!==h||!v._n||v._n.parentNode!==v){v.innerHTML=h;v._h=h;v._n=v.firstElementChild}
@@ -1491,6 +1492,7 @@ function overviewHTML(){
    <div class="ovgrid">${next?`<div class="card next nx nx-golf"><i class="ph-fill ph-golf nxbg" aria-hidden="true"></i><div class="nxhead"><i class="ph-fill ph-golf"></i> Golf event<span>&middot; ${esc(next.chapter)}</span></div><div class="cd">${cdNum(next.date)}</div><div><h3>${esc(next.name)}</h3><div class="meta">${f.dow}, ${f.m} ${f.d} - ${esc(next.where)}</div></div>${next.url?`<a class="btn small" href="${safeUrl(next.url)}" ${ext}>Register</a>`:`<button class="btn small" data-sub="events|${next.id==='rc27'?'cup':'up'}">Details</button>`}</div>`:''}
    ${ng?`<div class="card next nx nx-game"><i class="ph-fill ph-football nxbg" aria-hidden="true"></i><div class="nxhead"><i class="ph-fill ph-football"></i> Raiders game<span>&middot; Week ${ng.wk}</span></div><div class="cd">${cdNum(ng.date)}</div><div><h3>${esc(gTitle(ng))}</h3><div class="meta">${gWhen(ng)}</div></div><button class="btn small ghost" data-sub="games|sched">Schedule</button></div>`:''}</div>
    </div>
+   ${window.RNGCFEED?RNGCFEED.peek():''}
    <div class="tiles">${S.member?(canInvite()?tile('photos','images','Club photos','Golf days with the club'):tile('invite','paper-plane-tilt','Invite a friend','Your own link, your chapter')):tile('join','identification-badge','Join a chapter','Sign up, the chapter president gets it')}${authTok()?'<button class="card tile" data-gotix><i class="ph-bold ph-ticket"></i><b>Ticket exchange</b><small>Buy, sell and trade seats with members</small></button>':''}${tile('leaders','users','Club leaders','Bios and how to reach them')}${tile('shop','shopping-bag','Club shop','Polos, memberships, event entries')}${tile('news','newspaper','Club news','Events, membership, interviews')}${tile('sponsors','handshake','Sponsors','The brands behind the club')}</div>
    <div class="foot"><span>Follow the club</span>
     <a href="https://www.instagram.com/raidernationgolfclub" ${ext}><i class="ph-bold ph-instagram-logo"></i> Instagram</a>
@@ -2810,7 +2812,7 @@ window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.d
 window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||!e.data.golf)return;const k=e.data.golf;if(['me','log','groups','events'].includes(k)&&S.golfv!==k){S.golfv=k;renderSubnav()}});
 /* side menu: the open page shows its sub-links underneath it */
 const SUBNAV={
- home:[['About and media','about'],['Photos','photos'],['Join a chapter','join'],['Invite a friend','invite'],['Club leaders','leaders'],['Club news','news'],['Club shop','shop'],['Sponsors','sponsors']],
+ home:[['Club feed','feed'],['About and media','about'],['Photos','photos'],['Join a chapter','join'],['Invite a friend','invite'],['Club leaders','leaders'],['Club news','news'],['Club shop','shop'],['Sponsors','sponsors']],
  golf:[['My golf','me'],['Play log','log'],['Groups','groups'],['Club events','events'],['Courses','c-list']],
  events:[['Upcoming','up'],['Raider Cup','cup'],['Past events','past']],
  games:[['Raiders schedule','sched'],['Player news','news']],
@@ -3571,6 +3573,7 @@ syncTop();
 <script src="menus.js?v=5"></script>
 <script src="live.js?v=4"></script>
 <script src="chapter.js?v=8"></script>
+<script src="feed.js?v=3"></script>
 <script src="photos.js?v=1"></script>
 <script src="fantasy.js"></script>
 <script src="guestpass.js?v=club6"></script>
