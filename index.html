@@ -61,7 +61,7 @@ select option{background:#16191e;color:#eef0f3}
 .top{padding:max(14px,env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line);background:linear-gradient(#0f1114,var(--bg))}
 .brandrow{display:flex;align-items:center;gap:12px}
 .logo{width:40px;height:46px;flex:none}
-.top .logo{width:58px;height:67px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s var(--ease)}
+.top .logo{width:105px;height:67px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s var(--ease)}
 .top .logo:active{transform:scale(.94)}
 .brandtxt{flex:1;line-height:1}
 .brandtxt b{display:block;font-family:var(--display);font-size:21px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
@@ -560,7 +560,8 @@ body.thread-open .fab{display:none!important}
   .views{grid-column:2;grid-row:1/5}
   .logo{width:48px;height:56px}
   .top{position:relative}
-  .top .logo{width:150px;height:173px}
+  .top .logo{width:246px;height:157px}
+  .brandrow .brandtxt{display:none}   /* Ross's logo carries the club name on the wide sidebar */
   .brandrow{flex-direction:column;align-items:center;row-gap:12px}
   .brandrow .iconbtn{position:absolute;top:18px;right:16px;margin:0}
   .brandrow .brandtxt{flex:none;text-align:center}
@@ -627,9 +628,9 @@ body.thread-open .fab{display:none!important}
 
 /* logo intro: plays once per visit */
 .intro{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(circle at 50% 42%,#16181c,#050506 70%);transition:opacity .5s ease;cursor:pointer}
-.intro img{width:min(78vw,420px);height:auto}
+.intro img{width:min(92vw,640px);height:auto}
 .intro.out{opacity:0;pointer-events:none}
-.intro .skip{position:absolute;right:16px;top:calc(16px + env(safe-area-inset-top));min-height:44px;font:600 15px system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#aab2be;background:none;border:1px solid #2a2f37;border-radius:999px;padding:9px 16px;cursor:pointer}
+.intro .skip{position:absolute;right:16px;top:calc(16px + env(safe-area-inset-top));min-height:44px;font:600 15px system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#aab2be;background:none;border:1px solid #2a2f37;border-radius:4px;padding:9px 16px;cursor:pointer}
 
 /* ---------- sub-pages: each side-menu link is its own page ---------- */
 .subchips{padding-top:14px}
@@ -822,7 +823,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
   :root{--muted:#aab1bc}
   .top{display:flex;align-items:center;gap:10px;padding:max(10px,env(safe-area-inset-top)) 16px 10px}
   .brandrow{display:contents}
-  .top .logo{order:0;width:38px;height:44px}
+  .top .logo{order:0;width:69px;height:44px}
   .brandtxt{order:1;flex:1;min-width:0}
   .brandtxt b{font-size:18px;letter-spacing:.04em;white-space:nowrap}
   .brandtxt b em{font-size:10.5px;letter-spacing:.2em;margin-top:2px}
@@ -1081,7 +1082,7 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 <div class="intro" id="intro" role="img" aria-label="Raider Nation Golf Club"><img alt=""><button class="skip" type="button">Skip intro</button></div>
 <script>
 /* the animated logo, downloaded once and shared by the intro and the header logo */
-var rngcLogoP=null;function rngcLogo(){return rngcLogoP||(rngcLogoP=fetch('assets/logo/rngc-ball-animated.svg').then(function(r){return r.ok?r.text():null}).catch(function(){return null}))}
+var rngcLogoP=null;function rngcLogo(){return rngcLogoP||(rngcLogoP=fetch('assets/logo/ross-ball-animated.svg').then(function(r){return r.ok?r.text():null}).catch(function(){return null}))}
 (function(){
   var el=document.getElementById('intro'),img=el.querySelector('img'),seen=null;
   /* in the browser: once a day, not every time the app opens on the course.
@@ -1108,7 +1109,7 @@ var rngcLogoP=null;function rngcLogo(){return rngcLogoP||(rngcLogoP=fetch('asset
     var go=function(){if(document.visibilityState!=='visible')return;document.removeEventListener('visibilitychange',go);
       setTimeout(function(){
         img.onload=start;img.onerror=done;
-        img.src=svg?URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'})):'assets/logo/rngc-ball-animated.svg?r='+Date.now()},60)};
+        img.src=svg?URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'})):'assets/logo/ross-ball-animated.svg?r='+Date.now()},60)};
     document.addEventListener('visibilitychange',go);go()};
   rngcLogo().then(function(t){svg=t;got=true;put()});
   var onReady=function(){setTimeout(function(){ready=true;put();
@@ -1147,7 +1148,7 @@ var rngcLogoP=null;function rngcLogo(){return rngcLogoP||(rngcLogoP=fetch('asset
 
   <header class="top">
     <div class="brandrow">
-      <img class="logo" id="hdrLogo" src="assets/logo/rngc-ball-static.svg" alt="Raider Nation Golf Club logo. Tap to play the animation" role="button" tabindex="0">
+      <img class="logo" id="hdrLogo" src="assets/logo/ross-ball-static.svg" alt="Raider Nation Golf Club logo. Tap to play the animation" role="button" tabindex="0">
       <div class="brandtxt"><b>Raider Nation<em>Golf Club</em></b></div>
       <button class="iconbtn" id="btnProfile" aria-label="Your profile"><i class="ph-bold ph-user"></i></button>
     </div>
@@ -3399,7 +3400,7 @@ renderChips();renderAll();setTab('home');loadSchedule();
 /* header logo: tap it to replay the animation; signed out, it also replays on its own every few clicks (6+ clicks and 60+ seconds apart) */
 (function(){
   const lg=document.getElementById('hdrLogo');if(!lg)return;
-  const STATIC=lg.getAttribute('src'),ANIM='assets/logo/rngc-ball-animated.svg',LEN=7600;
+  const STATIC=lg.getAttribute('src'),ANIM='assets/logo/ross-ball-animated.svg',LEN=7600;
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   let busy=false,last=Date.now(),clicks=0,svg=null,url=null;
   const getSvg=()=>rngcLogo().then(t=>{svg=t});
