@@ -1006,6 +1006,19 @@ a.sponcard:hover{border-color:var(--silver-2)}a.sponcard:active{transform:scale(
 .chips+.csnudge{margin-top:18px}
 @media (min-width:760px){.newsgrid{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}#v-events .evgrid{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}}
 .zoomimg{display:block;width:100%;max-height:72vh;object-fit:contain;border-radius:12px}
+/* 2026-11-25 event flyer + Zelle QR (square corners, no pills) */
+.btn.sq{border-radius:6px}
+.evfly{display:block;width:100%;max-width:360px;margin-top:10px;padding:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--panel);cursor:zoom-in}
+.evfly img{display:block;width:100%;height:auto;max-height:440px;object-fit:contain}
+.evpics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.evpic{display:flex;flex-direction:column;gap:6px;min-width:0}
+.evpic .btn{width:100%}
+.evpicimg{aspect-ratio:4/5;border:1px dashed var(--line);border-radius:6px;display:grid;place-items:center;overflow:hidden;background:var(--panel);text-align:center;font-size:13px;color:var(--muted);padding:6px}
+.evpicimg.qr{aspect-ratio:1;background:#fff}
+.evpicimg img{width:100%;height:100%;object-fit:contain}
+.zelqr{display:block;width:100%;max-width:300px;margin:14px auto 10px;background:#fff;padding:12px;border-radius:6px}
+.zelnote{font-weight:700;text-align:center;margin:0 0 8px}
+.zelsteps{margin:6px 0 6px 20px;padding:0;line-height:1.5}
 .stack,.shopgrid{gap:12px}
 .iconbtn,.tab{border-radius:10px}
 .ev .date{border-radius:4px}
@@ -1489,7 +1502,7 @@ function overviewHTML(){
      <div class="acts"><button class="btn" data-sub="home|join"><i class="ph-bold ph-identification-badge"></i> Join the club</button><button class="btn ghost" data-sub="events|up">See events</button></div>`}
    </div></div>
    <div class="ovgrid">${S.member&&window.bucksCard?bucksCard():''}${S.member?inviteCard():guestCard()}</div>
-   <div class="ovgrid">${next?`<div class="card next nx nx-golf"><i class="ph-fill ph-golf nxbg" aria-hidden="true"></i><div class="nxhead"><i class="ph-fill ph-golf"></i> Golf event<span>&middot; ${esc(next.chapter)}</span></div><div class="cd">${cdNum(next.date)}</div><div><h3>${esc(next.name)}</h3><div class="meta">${f.dow}, ${f.m} ${f.d} - ${esc(next.where)}</div></div>${next.url?`<a class="btn small" href="${safeUrl(next.url)}" ${ext}>Register</a>`:`<button class="btn small" data-sub="events|${next.id==='rc27'?'cup':'up'}">Details</button>`}</div>`:''}
+   <div class="ovgrid">${next?`<div class="card next nx nx-golf"><i class="ph-fill ph-golf nxbg" aria-hidden="true"></i><div class="nxhead"><i class="ph-fill ph-golf"></i> Golf event<span>&middot; ${esc(next.chapter)}</span></div><div class="cd">${cdNum(next.date)}</div><div><h3>${esc(next.name)}</h3><div class="meta">${f.dow}, ${f.m} ${f.d} - ${esc(next.where)}</div></div>${next.url?`<a class="btn small" href="${safeUrl(next.url)}" ${ext}>Register</a>`:next.zelle?`<button class="btn small sq" data-zelle="${esc(next.id)}"><i class="ph-bold ph-qr-code"></i> Pay with Zelle</button>`:`<button class="btn small" data-sub="events|${next.id==='rc27'?'cup':'up'}">Details</button>`}</div>`:''}
    ${ng?`<div class="card next nx nx-game"><i class="ph-fill ph-football nxbg" aria-hidden="true"></i><div class="nxhead"><i class="ph-fill ph-football"></i> Raiders game<span>&middot; Week ${ng.wk}</span></div><div class="cd">${cdNum(ng.date)}</div><div><h3>${esc(gTitle(ng))}</h3><div class="meta">${gWhen(ng)}</div></div><button class="btn small ghost" data-sub="games|sched">Schedule</button></div>`:''}</div>
    </div>
    ${window.RNGCFEED?RNGCFEED.peek():''}
@@ -1616,10 +1629,10 @@ function evCard(e){
   const f=fmtDate(e.date),past=isPast(e.date),going=!!S.rsvp[e.id];
   const live=!past&&window.RNGCLIVE&&RNGCLIVE.isLive(e.id);
   return `<article class="card ev ${past?'past':''}" id="ev-${esc(e.id)}"><div class="date"><b>${f.d}</b><span>${f.m}</span></div>
-   <div><h3>${esc(e.name)}</h3><div class="where">${esc(e.where)}</div><div class="note">${esc(e.note)}</div>${e.rules?`<details class="evrules" style="margin-top:8px"><summary style="cursor:pointer;font-weight:700">Event rules</summary><p class="meta" style="white-space:pre-line;margin-top:6px">${esc(e.rules)}</p></details>`:''}
+   <div><h3>${esc(e.name)}</h3><div class="where">${esc(e.where)}</div><div class="note">${esc(e.note)}</div>${e.flyer?`<button class="evfly" data-zoom="${esc(e.flyer)}" aria-label="Open the flyer for ${esc(e.name)}"><img src="${esc(e.flyer)}" alt="Flyer for ${esc(e.name)}" loading="lazy"></button>`:''}${e.rules?`<details class="evrules" style="margin-top:8px"><summary style="cursor:pointer;font-weight:700">Event rules</summary><p class="meta" style="white-space:pre-line;margin-top:6px">${esc(e.rules)}</p></details>`:''}
    <div class="row">${live?'<span class="rl-pill"><i></i>LIVE NOW</span>':''}<span class="pill">${esc(e.chapter)}</span><span class="pill">${esc(e.price)}</span>${e.spots&&!past?`<span class="pill hot">${esc(e.spots)}</span>`:''}${past?'<span class="pill">Past event</span>':`<span class="grow"></span>
    <button class="btn small ghost ${going?'on':''}" data-rsvp="${esc(e.id)}" aria-pressed="${going}">${going?'<i class="ph-bold ph-check"></i> Interested':'<i class="ph-bold ph-star"></i> Interested'}</button>
-   ${e.url?`<a class="btn small" href="${safeUrl(e.url)}" ${ext}>Register and pay</a>`:''}${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canInfo(e)?`<button class="btn small ghost" data-evinfo="${esc(e.id)}"><i class="ph-bold ph-gear-six"></i> Event setup</button>`:''}`}</div>
+   ${e.url?`<a class="btn small" href="${safeUrl(e.url)}" ${ext}>Register and pay</a>`:''}${e.zelle?`<button class="btn small sq" data-zelle="${esc(e.id)}"><i class="ph-bold ph-qr-code"></i> Pay with Zelle</button>`:''}${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canInfo(e)?`<button class="btn small ghost" data-evinfo="${esc(e.id)}"><i class="ph-bold ph-gear-six"></i> Event setup</button>`:''}`}</div>
    ${!past&&SCORECARD_EVENTS.includes(e.id)?`<div class="row" style="margin-top:8px"><a class="btn small ghost" href="scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> Live scorecard</a><a class="btn small ghost" href="scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>${window.RNGCCHAPTER&&S.authMe&&RNGCCHAPTER.canEdit(e.chapter)?'<a class="btn small ghost" href="scorecard/#/setup"><i class="ph-bold ph-pencil-simple"></i> Edit event</a>':''}${typeof passBtn==='function'?passBtn(e):''}</div>`:''}
    ${window.RNGCPHOTOS?RNGCPHOTOS.evRow(e):''}
    </div></article>`;
@@ -3572,7 +3585,7 @@ syncTop();
 <script src="suggest.js?v=1"></script>
 <script src="menus.js?v=5"></script>
 <script src="live.js?v=4"></script>
-<script src="chapter.js?v=8"></script>
+<script src="chapter.js?v=9"></script>
 <script src="feed.js?v=3"></script>
 <script src="photos.js?v=1"></script>
 <script src="fantasy.js"></script>

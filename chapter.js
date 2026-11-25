@@ -41,7 +41,10 @@ function applyInfo(items){Object.entries(items||{}).forEach(([id,f])=>{let e=evs
   if(!e){if(!f.custom||typeof EVENTS==='undefined')return;   /* an event made in the app */
     e={id,name:f.name,date:f.date,where:f.where||'',chapter:f.chapter,price:f.price||'',note:f.note||'',url:'',custom:true,
        img:'assets/old-site/photos/'+(PHOTO[f.chapter]||PHOTO.Club)+'.jpg'};EVENTS.push(e)}
-  if(!BASE[id])BASE[id]={status:e.status||'',spots:e.spots||''};
+  if(!BASE[id])BASE[id]={status:e.status||'',spots:e.spots||'',img:e.img||''};
+  /* flyer + Zelle QR uploaded in Event setup (Nov 25 2026); the link carries when it was saved */
+  const pic=k=>f[k]?api()+'/event/img?ev='+encodeURIComponent(id)+'&k='+k+'&v='+f[k]:'';
+  e.flyer=pic('flyer');e.img=e.flyer||BASE[id].img;e.zelle=pic('zelle');e.zelNote=f.zelle_note||'';
   ['name','date','where','price'].forEach(k=>{if(f[k])e[k]=f[k]});
   if(f.note!=null)e.note=f.note;
   if(f.rules!=null)e.rules=f.rules;
@@ -70,31 +73,70 @@ function openInfo(id){const e=evs().find(x=>x.id===id);if(!e)return;
    <label for="eiW">Where</label><input class="field" id="eiW" maxlength="90" value="${esc(e.where)}">
    <label for="eiU">Sign-up and pay link</label><input class="field" id="eiU" type="url" maxlength="300" value="${esc(e.url&&/^(https:|\/)/.test(e.url)?e.url:'')}" placeholder="https://... from the club store">
    <label for="eiNo">Details</label><textarea class="field" id="eiNo" maxlength="600" rows="4">${esc(e.note||'')}</textarea>
-   ${h4('2. Players and teams')}
+   ${h4('2. Flyer and Zelle')}
+   <div class="evpics">${picBox('Fly','Flyer',e.flyer,'Members see it on the event.')}${picBox('Zel','Zelle QR code',e.zelle,'Members scan it to pay.')}</div>
+   <p class="meta" id="eiPicMsg" role="status" style="min-height:1.2em;margin:6px 0 0"></p>
+   <label for="eiZn">Zelle note, optional</label><input class="field" id="eiZn" maxlength="200" value="${esc(e.zelNote||'')}" placeholder="Send to Ross Ricks. Put your name and the event in the memo.">
+   ${h4('3. Players and teams')}
    <div class="two"><div><label for="eiCap">Players max</label><input class="field" id="eiCap" type="number" inputmode="numeric" min="0" max="500" value="${e.cap||''}" placeholder="No limit"></div>
     <div><label for="eiTeam">Team size</label><select class="field" id="eiTeam"><option value="0">Not set</option>${[1,2,3,4,5,6].map(n=>`<option value="${n}" ${+e.team===n?'selected':''}>${TEAM[n]}</option>`).join('')}</select></div></div>
-   ${h4('3. Rules')}
+   ${h4('4. Rules')}
    <textarea class="field" id="eiR" maxlength="1500" rows="4" aria-label="Event rules" placeholder="Mulligans, gimmes, dress code, carts, pace of play">${esc(e.rules||'')}</textarea>
    <label class="check" style="margin-top:10px"><input type="checkbox" id="eiX" ${e.status==='cancelled'?'checked':''}> Cancelled: hide it from members</label>
    <button class="btn full" type="submit" style="width:100%;margin-top:12px"><i class="ph-bold ph-check"></i> Save for everyone</button>
    <p class="meta" id="eiErr" role="alert" style="color:#ffb3b5;min-height:1.2em;margin-top:6px"></p></form>
-   ${h4('4. Groups and the game')}
+   ${h4('5. Groups and the game')}
    ${hasCard(id)?`<a class="btn ghost" style="width:100%" href="scorecard/#/field"><i class="ph-bold ph-users-three"></i> Teams: names, starting holes, players</a>
      <a class="btn ghost" style="width:100%;margin-top:8px" href="scorecard/#/setup"><i class="ph-bold ph-sliders-horizontal"></i> Game, contests, skins, start time</a>`
      :'<p class="meta">Groups and the game open once this event\'s course scorecard is set up. Ask David.</p>'}
-   ${h4('5. Guests')}
+   ${h4('6. Guests')}
    ${typeof isPast==='function'&&!isPast(e.date)?`<button class="btn ghost" style="width:100%" data-gpqr="${esc(id)}" type="button"><i class="ph-bold ph-qr-code"></i> Guest pass QR: share it or show it</button>
    <p class="meta" style="margin-top:6px">Players from other clubs scan it and get the scorecard and leaderboard for event day plus 72 hours.</p>`:'<p class="meta">Guest passes are for upcoming events.</p>'}
-   ${h4('6. Invite')}
+   ${h4('7. Invite')}
    <button class="btn ghost" style="width:100%" id="eiInv" type="button"><i class="ph-bold ph-paper-plane-tilt"></i> Write the invite</button>
    <p class="meta" style="margin-top:6px">Opens the club message box with the invite written. You pick who gets it and tap Send.</p>`);
   const f=document.getElementById('eiForm');
   f.onsubmit=ev=>{ev.preventDefault();const b=f.querySelector('button[type=submit]'),err=document.getElementById('eiErr');b.disabled=true;err.textContent='';
-    saveInfo(id,{name:f.eiN.value,date:f.eiD.value,price:f.eiP.value,where:f.eiW.value,url:f.eiU.value.trim(),note:f.eiNo.value,rules:f.eiR.value,
+    saveInfo(id,{name:f.eiN.value,date:f.eiD.value,price:f.eiP.value,where:f.eiW.value,url:f.eiU.value.trim(),note:f.eiNo.value,rules:f.eiR.value,zelle_note:f.eiZn.value,
       cap:Math.max(0,Math.min(500,parseInt(f.eiCap.value,10)||0)),team:+f.eiTeam.value||0,cancelled:f.eiX.checked})
      .then(()=>{err.textContent='';say('Saved for everyone')})
      .catch(x=>{err.textContent=x.status===401?'Your sign-in ran out. Sign in again.':x.message}).finally(()=>{b.disabled=false})};
-  document.getElementById('eiInv').onclick=()=>invite(id)}
+  document.getElementById('eiInv').onclick=()=>invite(id);
+  wirePic(id,'Fly','flyer');wirePic(id,'Zel','zelle')}
+
+/* Flyer and Zelle QR boxes in Event setup (David, Nov 25 2026: "ross needs to be able to upload flyer picture to the
+   event", "a zelle QR code for sign up and payment ... ross ... upload that QR code manually for each event").
+   Picking a picture saves it for everyone right away; Remove takes it off. */
+function picBox(k,label,src,help){return `<div class="evpic"><b>${label}</b>
+   <div class="evpicimg ${k==='Zel'?'qr':''}" id="ei${k}Box">${src?`<img src="${esc(src)}" alt="${label}">`:`<span>No ${label.toLowerCase()} yet</span>`}</div>
+   <label class="btn small ghost sq" for="ei${k}In" style="cursor:pointer"><i class="ph-bold ph-upload-simple"></i> <span id="ei${k}Add">${src?'Change':'Add'}</span></label>
+   <input type="file" id="ei${k}In" accept="image/*" hidden>
+   <button type="button" class="btn small ghost sq" id="ei${k}X" ${src?'':'hidden'}><i class="ph-bold ph-trash"></i> Remove</button>
+   <small class="meta">${help}</small></div>`}
+function wirePic(id,k,kind){const g=x=>document.getElementById('ei'+k+x),msg=document.getElementById('eiPicMsg'),inp=g('In');if(!inp)return;
+  const name=kind==='flyer'?'Flyer':'Zelle code';
+  const show=()=>{const e=evs().find(x=>x.id===id)||{},src=e[kind];
+    g('Box').innerHTML=src?`<img src="${esc(src)}" alt="${name}">`:`<span>No ${kind==='flyer'?'flyer':'Zelle QR code'} yet</span>`;g('Add').textContent=src?'Change':'Add';g('X').hidden=!src};
+  const send=img=>call('/admin/event-img',{ev:id,kind,img}).then(j=>{INFO.items[id]=j.info;keep(INFO);applyInfo({[id]:j.info});rerender();show();return j});
+  inp.onchange=()=>{const file=inp.files&&inp.files[0];inp.value='';if(!file)return;msg.textContent='Getting the picture ready...';
+    (kind==='zelle'?shrinkTo(file,1000,.9,'#fff'):shrink(file)).then(d=>{msg.textContent='Saving...';return send(d)})
+     .then(()=>{msg.textContent=name+' saved for everyone.';say(name+' saved')})
+     .catch(x=>{msg.textContent=x.status===401?'Your sign-in ran out. Sign in again.':x.status===413?'That picture is too big. Try another one.':x.message})};
+  g('X').onclick=()=>{if(!confirm('Take the '+name.toLowerCase()+' off this event?'))return;msg.textContent='Removing...';
+    send('').then(()=>{msg.textContent=name+' removed.'}).catch(x=>{msg.textContent=x.message})}}
+
+/* Pay with Zelle (Nov 25 2026): the event's QR code big on a white card, the note, and how to scan it from the same phone */
+function openZelle(id){const e=evs().find(x=>x.id===id);if(!e||!e.zelle)return;
+  const going=typeof S!=='undefined'&&S.rsvp&&!!S.rsvp[id];
+  openSheet(`<h3 style="margin:0">Pay with Zelle</h3><p class="meta" style="margin:2px 0 0">${esc(e.name)}${e.price?' · '+esc(e.price):''}</p>
+   <img class="zelqr" src="${esc(e.zelle)}" alt="Zelle QR code to pay for ${esc(e.name)}">
+   ${e.zelNote?`<p class="zelnote">${esc(e.zelNote)}</p>`:''}
+   <ol class="zelsteps"><li>Open Zelle in your bank's app.</li><li>Tap the QR code button and scan this code.</li><li>Put your name and the event in the memo.</li></ol>
+   <p class="meta">On this same phone? Press and hold the code, save it to your photos, then pick it from your photos in Zelle.</p>
+   <a class="btn ghost full sq" href="${esc(e.zelle)}" target="_blank" rel="noopener" style="width:100%;margin-top:10px"><i class="ph-bold ph-download-simple"></i> Open the code to save it</a>
+   <button class="btn full sq ${going?'ghost':''}" data-rsvp="${esc(id)}" data-zelrsvp style="width:100%;margin-top:8px">${going?'<i class="ph-bold ph-check"></i> Marked interested':'<i class="ph-bold ph-star"></i> Mark me interested'}</button>`)}
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-zelle]');if(b){ev.preventDefault();openZelle(b.dataset.zelle)}
+  if(ev.target.closest&&ev.target.closest('[data-zelrsvp]')&&typeof closeSheet==='function')setTimeout(closeSheet,0)});
 
 function invite(id){const e=evs().find(x=>x.id===id);if(!e)return;
   if(typeof openCompose!=='function'){say('Messages open once you sign in.');return}
@@ -133,11 +175,12 @@ function openNew(){if(!canLead()){say('Club admins and chapter presidents make e
      .catch(x=>{err.textContent=x.status===401?'Your sign-in ran out. Sign in again.':x.message;b.disabled=false})}}
 
 /* ---- a news photo: shrunk to a JPEG under about 550 KB before it leaves the phone ---- */
-function shrink(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();
-  im.onload=()=>{URL.revokeObjectURL(u);let side=1600,q=.82;
+function shrink(file){return shrinkTo(file,1600,.82,'#000')}
+function shrinkTo(file,side0,q0,bg){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{URL.revokeObjectURL(u);let side=side0,q=q0;
     for(let i=0;i<6;i++){const k=Math.min(1,side/Math.max(im.naturalWidth,im.naturalHeight)),c=document.createElement('canvas');
       c.width=Math.max(1,Math.round(im.naturalWidth*k));c.height=Math.max(1,Math.round(im.naturalHeight*k));
-      const x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
+      const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
       const out=c.toDataURL('image/jpeg',q);if(out.startsWith('data:image/jpeg')&&out.length<740000)return res(out);side=Math.round(side*.8);q=Math.max(.6,q-.06)}
     rej(new Error('That photo is too big. Try another one.'))};
   im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('That photo didn\'t open. Try a JPG or PNG.'))};im.src=u})}
@@ -206,5 +249,5 @@ function openFromLink(){let id='';try{id=new URLSearchParams(location.search).ge
     if(e&&canInfo(e)){clearInterval(t);openInfo(id)}
     else if(n>30){clearInterval(t);say(tok()?'Only club admins and the chapter president can edit this event.':'Sign in first, then try again.')}},500)}
 load();loadInfo().then(openFromLink);
-window.RNGCCHAPTER={html,wire,load,canLead,canEdit,canInfo,saveInfo,openInfo,invite,openNew,openPost,postTools,shrink,club:call,api};
+window.RNGCCHAPTER={html,wire,load,canLead,canEdit,canInfo,saveInfo,openInfo,invite,openNew,openPost,postTools,shrink,openZelle,club:call,api};
 })();
