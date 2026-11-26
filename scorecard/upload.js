@@ -103,7 +103,8 @@ function csvRows(text){const t=String(text).replace(/^﻿/,''),first=t.split(/\r
     cell+=ch}
   row.push(cell);rows.push(row);return rows}
 let xl=null;
-const loadXL=()=>xl||(xl=new Promise((ok,no)=>{const s=document.createElement('script');s.src='../assets/vendor/xlsx-0.18.5.min.js';s.onload=()=>ok(window.XLSX);s.onerror=()=>{xl=null;no(new Error('No signal. Try again in a minute.'))};document.head.appendChild(s)}));
+const XLSRC=(()=>{try{return new URL('../assets/vendor/xlsx-0.18.5.min.js',document.currentScript.src).href}catch(e){return '../assets/vendor/xlsx-0.18.5.min.js'}})();   /* works from the scorecard and the main app */
+const loadXL=()=>xl||(xl=new Promise((ok,no)=>{const s=document.createElement('script');s.src=XLSRC;s.onload=()=>ok(window.XLSX);s.onerror=()=>{xl=null;no(new Error('No signal. Try again in a minute.'))};document.head.appendChild(s)}));
 async function fileRows(file){const n=(file.name||'').toLowerCase();
   if(/\.(xlsx|xlsm|xls|ods)$/.test(n)){const X=await loadXL(),wb=X.read(await file.arrayBuffer(),{type:'array'});
     let best=[];wb.SheetNames.forEach(sn=>{const r=X.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:false,defval:''}).filter(x=>x.some(c=>String(c).trim()));if(r.length>best.length)best=r});return best}
@@ -161,5 +162,5 @@ async function save(teams){const b=$('#upSave'),m=$('#upSv');b.disabled=true;m.t
   closeSheet();if(location.hash.startsWith('#/field'))fieldPage();
   note(left?`Groups saved. ${left} team name${left===1?'':'s'} didn't save: add them in Team settings.`:`${teams.length} groups saved for every phone`)}
 
-window.RNGCUPLOAD={open,read,place,check,csvRows,person};
+window.RNGCUPLOAD={open,read,place,check,csvRows,person,fileRows,MAXG,MAXP};
 })();

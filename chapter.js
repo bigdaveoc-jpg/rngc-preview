@@ -86,10 +86,10 @@ function openInfo(id){const e=evs().find(x=>x.id===id);if(!e)return;
    <button class="btn full" type="submit" style="width:100%;margin-top:12px"><i class="ph-bold ph-check"></i> Save for everyone</button>
    <p class="meta" id="eiErr" role="alert" style="color:#ffb3b5;min-height:1.2em;margin-top:6px"></p></form>
    ${h4('5. Groups and the game')}
-   ${hasCard(id)?`<a class="btn sq" style="width:100%;margin-bottom:8px" href="scorecard/#/field/upload"><i class="ph-bold ph-upload-simple"></i> Upload teams and players: Excel, CSV or paste</a>
-     <a class="btn ghost" style="width:100%" href="scorecard/#/field"><i class="ph-bold ph-users-three"></i> Teams: names, starting holes, players</a>
+   <button class="btn sq" type="button" style="width:100%;margin-bottom:8px" data-evup="${esc(id)}"><i class="ph-bold ph-upload-simple"></i> Upload teams and players: Excel, CSV or paste</button>
+   ${hasCard(id)?`<a class="btn ghost" style="width:100%" href="scorecard/#/field"><i class="ph-bold ph-users-three"></i> Teams: names, starting holes, players</a>
      <a class="btn ghost" style="width:100%;margin-top:8px" href="scorecard/#/setup"><i class="ph-bold ph-sliders-horizontal"></i> Game, contests, skins, start time</a>`
-     :'<p class="meta">Groups and the game open once this event\'s course scorecard is set up. Ask David.</p>'}
+     :'<p class="meta">The live scorecard and leaderboard for this course are next. The groups you upload are saved for it.</p>'}
    ${h4('6. Guests')}
    ${typeof isPast==='function'&&!isPast(e.date)?`<button class="btn ghost" style="width:100%" data-gpqr="${esc(id)}" type="button"><i class="ph-bold ph-qr-code"></i> Guest pass QR: share it or show it</button>
    <p class="meta" style="margin-top:6px">Players from other clubs scan it and get the scorecard and leaderboard for event day plus 72 hours.</p>`:'<p class="meta">Guest passes are for upcoming events.</p>'}
@@ -149,13 +149,16 @@ function invite(id){const e=evs().find(x=>x.id===id);if(!e)return;
   if(typeof closeSheet==='function')closeSheet();
   setTimeout(()=>openCompose({to,subject:`You're invited: ${e.name}`.slice(0,90),body}),330)}
 document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-evinfo]');if(b){ev.preventDefault();openInfo(b.dataset.evinfo)}
-  if(ev.target.closest&&ev.target.closest('[data-evnew]')){ev.preventDefault();openNew()}});
+  if(ev.target.closest&&ev.target.closest('[data-evnew]')){ev.preventDefault();openNew()}
+  const u=ev.target.closest&&ev.target.closest('[data-evup]');if(u){ev.preventDefault();openUpload(u.dataset.evup)}});
 
 /* New event (David, Nov 13 2026): club admins for any chapter, presidents for theirs. Saved on the club server,
    then the Event setup opens for it (players, rules, invite). */
 function openNew(){if(!canLead()){say('Club admins and chapter presidents make events.');return}
   const chs=mine().filter(c=>c!=='Club');
-  openSheet(`<h3 style="margin:0">New event</h3><p class="meta" style="margin:2px 0 8px">Members see it as soon as you save.</p><form id="enForm">
+  openSheet(`<h3 style="margin:0">New event</h3><p class="meta" style="margin:2px 0 8px">Members see it as soon as you save.</p>
+   <div style="border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin-bottom:8px"><b>Teams and players</b>
+    <p class="meta" style="margin:2px 0 8px">Optional. Have the sheet already? Add it here and the groups save with the event.</p>${upBox('en')}</div><form id="enForm">
    <label for="enC">Chapter</label><select class="field" id="enC">${chs.map(c=>`<option>${c}</option>`).join('')}</select>
    <label for="enN">Event name</label><input class="field" id="enN" required minlength="3" maxlength="70" placeholder="RNGC vs ...">
    <div class="two"><div><label for="enD">Date</label><input class="field" id="enD" type="date" required></div>
@@ -167,13 +170,94 @@ function openNew(){if(!canLead()){say('Club admins and chapter presidents make e
    <label for="enNo">Details</label><textarea class="field" id="enNo" maxlength="600" rows="3" placeholder="Format, check-in time, what's included"></textarea>
    <button class="btn full" type="submit" style="width:100%;margin-top:12px"><i class="ph-bold ph-plus"></i> Make the event</button>
    <p class="meta" id="enErr" role="alert" style="color:#ffb3b5;min-height:1.2em;margin-top:6px"></p></form>`);
-  const f=document.getElementById('enForm');
-  f.onsubmit=ev=>{ev.preventDefault();const b=f.querySelector('button[type=submit]'),err=document.getElementById('enErr');b.disabled=true;err.textContent='';
+  const f=document.getElementById('enForm');wireUp('en');
+  f.onsubmit=ev=>{ev.preventDefault();const b=f.querySelector('button[type=submit]'),err=document.getElementById('enErr');
+    const teams=upTeams('en');if(teams.length&&UP().check(teams).length){err.textContent='Fix the teams sheet first, or tap Clear.';return}
+    b.disabled=true;err.textContent='';
     call('/admin/event-new',{chapter:f.enC.value,name:f.enN.value,date:f.enD.value,price:f.enP.value,where:f.enW.value,url:f.enU.value.trim(),note:f.enNo.value,
       cap:Math.max(0,Math.min(500,parseInt(f.enCap.value,10)||0)),team:+f.enT.value||0})
      .then(j=>{INFO.items[j.ev]=j.info;if(!INFO.events.includes(j.ev))INFO.events.push(j.ev);SRV_EVS=INFO.events;keep(INFO);applyInfo({[j.ev]:j.info});rerender();
-       say('Event made. Finish the setup here.');openInfo(j.ev)})
+       if(!teams.length){say('Event made. Finish the setup here.');openInfo(j.ev);return}
+       err.textContent='Event made. Saving the groups...';
+       return saveGroups(j.ev,teams,[]).then(r=>{say(r.left?`Event made with ${r.groups} groups. ${r.left} team name${r.left===1?'':'s'} didn't save.`:`Event made with ${r.groups} groups, ${r.players} players`);openInfo(j.ev)},
+         x=>{say('Event made. The groups didn\'t save: upload them in Event setup.');openInfo(j.ev)})})
      .catch(x=>{err.textContent=x.status===401?'Your sign-in ran out. Sign in again.':x.message;b.disabled=false})}}
+
+/* ---- Upload teams and players on any event (David, Nov 26 2026: "make it on every event also at the beginning of the
+   even creation page as well"). The reader is scorecard/upload.js, the same one the scorecard's Groups page uses.
+   Event setup and Chapter tools have Upload teams on every event; New event has it at the top, and the groups save
+   right after the event is made. Nothing saves until the leader has seen what was read. ---- */
+const UP=()=>window.RNGCUPLOAD;
+const UPS={},UPHOOK={};   /* per box: {groups, from, mode} and what to run when it changes */
+const lowN=s=>String(s==null?'':s).trim().replace(/\s+/g,' ').toLowerCase();
+function upBox(p){return `<div class="two"><div><label class="btn ghost sq" for="${p}UpF" style="cursor:pointer;width:100%"><i class="ph-bold ph-upload-simple"></i> Pick a file</label></div>
+    <div><button type="button" class="btn ghost sq" id="${p}UpPaste" style="width:100%"><i class="ph-bold ph-pencil-simple"></i> Paste names</button></div></div>
+   <input type="file" id="${p}UpF" accept=".xlsx,.xls,.xlsm,.ods,.csv,.txt,.tsv,text/csv,text/plain" hidden>
+   <div id="${p}UpPw" hidden style="margin-top:8px"><textarea class="field" id="${p}UpT" rows="5" aria-label="Paste teams and players" placeholder="16B: John Smith, Mike Jones, Al Ruiz, Bo Kim&#10;Or copy the rows from Excel and paste them"></textarea>
+    <button type="button" class="btn ghost sq" id="${p}UpGo" style="width:100%;margin-top:6px"><i class="ph-bold ph-magnifying-glass"></i> Read what I pasted</button></div>
+   <p class="meta" id="${p}UpMsg" role="status" style="min-height:1.2em;margin:6px 0 0"></p>
+   <div id="${p}UpPrev"></div>
+   <button type="button" class="linkbtn" id="${p}UpTpl" style="margin-top:4px"><i class="ph-bold ph-download-simple"></i> Download a blank sheet to fill in</button>`}
+const upTeams=p=>{const u=UPS[p];return u&&UP()?UP().place(u.groups,u.mode):[]};
+const many=(n,w)=>n+' '+w+(n===1?'':'s');
+function upList(teams){return `<div style="max-height:280px;overflow:auto;margin-top:8px;border-top:1px solid var(--line)">${teams.map(t=>`<div style="padding:7px 2px;border-bottom:1px solid var(--line)"><b>Hole ${t.start}${esc(String(t.id).slice(-1))}</b>${t.name?' · '+esc(t.name):''}
+    <div class="meta" style="font-size:14px">${t.players.map(x=>esc(x.name||x)).join(', ')}</div></div>`).join('')}</div>`}
+function upPrev(p){const u=UPS[p],box=document.getElementById(p+'UpPrev');if(!box)return;
+  if(!u){box.innerHTML='';if(UPHOOK[p])UPHOOK[p]();return}
+  const teams=upTeams(p),warn=UP().check(teams),np=teams.reduce((a,t)=>a+t.players.length,0),anyHole=u.groups.some(g=>g.hole>=1&&g.hole<=18);
+  box.innerHTML=`<div style="margin-top:8px"><b>${many(teams.length,'group')} · ${many(np,'player')}</b> <small class="meta">from ${esc(u.from)}. Check it before you save.</small>
+   ${anyHole?'':`<p class="meta" style="margin:8px 0 4px">No starting holes in it. Where do they start?</p>
+    <div class="two"><div><button type="button" class="btn small sq ${u.mode==='shotgun'?'':'ghost'}" style="width:100%" data-upm="shotgun">Shotgun: 1, 2, 3...</button></div><div><button type="button" class="btn small sq ${u.mode==='one'?'':'ghost'}" style="width:100%" data-upm="one">All on hole 1</button></div></div>`}
+   ${warn.length?`<p style="color:#ffb3b5;margin:8px 0 0">${warn.map(esc).join('<br>')}<br>Fix the sheet and upload it again.</p>`:''}
+   ${upList(teams)}
+   <button type="button" class="btn small ghost sq" data-upx style="margin-top:8px"><i class="ph-bold ph-x"></i> Clear</button></div>`;
+  box.querySelectorAll('[data-upm]').forEach(b=>b.onclick=()=>{u.mode=b.dataset.upm;upPrev(p)});
+  box.querySelector('[data-upx]').onclick=()=>{UPS[p]=null;document.getElementById(p+'UpMsg').textContent='';upPrev(p)};
+  if(UPHOOK[p])UPHOOK[p]()}
+function wireUp(p,hook){const g=x=>document.getElementById(p+x),msg=g('UpMsg');if(!g('UpF'))return;UPS[p]=null;UPHOOK[p]=hook||null;
+  const got=(rows,from)=>{const groups=UP().read(rows);
+    if(!groups.length){UPS[p]=null;upPrev(p);msg.textContent='No player names found in '+from+'. Check it has a column of names, or paste them.';return}
+    UPS[p]={groups,from,mode:groups.some(x=>x.hole>=1&&x.hole<=18)?'file':'shotgun'};msg.textContent='';upPrev(p)};
+  g('UpF').onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
+    if(!UP()){msg.textContent='The reader is still loading. Try again in a second.';return}msg.textContent='Reading '+f.name+'...';
+    try{got(await UP().fileRows(f),f.name)}catch(x){msg.textContent=x.message||'That file did not read. Try pasting instead.'}};
+  g('UpPaste').onclick=()=>{g('UpPw').hidden=false;g('UpT').focus()};
+  g('UpGo').onclick=()=>{const t=g('UpT').value;if(!t.trim()){msg.textContent='Paste the names first.';return}
+    if(!UP()){msg.textContent='The reader is still loading. Try again in a second.';return}got(UP().csvRows(t),'what you pasted')};
+  g('UpTpl').onclick=()=>{const head='Group,Starting hole,Team name,Player 1,Player 2,Player 3,Player 4';
+    const body=Array.from({length:18},(_,i)=>`${i+1},${i+1},,,,,`).join('\r\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+head+'\r\n'+body+'\r\n'],{type:'text/csv'}));a.download='RNGC teams and players.csv';
+    document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}}
+/* save: the same /admin/field call as the Groups page. A player with the same name keeps their id, so their check-in stays. */
+async function saveGroups(ev,teams,had){const byName={};(had||[]).forEach(t=>(t.players||[]).forEach(x=>{const k=lowN(x.name);if(!byName[k])byName[k]=x.id}));
+  const seen=new Set(),mk=()=>'p'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36);
+  const plain=teams.map(t=>({id:t.id,start:t.start,players:t.players.map(n=>{let id=byName[lowN(n)];if(!id||seen.has(id))id=mk();while(seen.has(id))id=mk();seen.add(id);return {id,name:n}})}));
+  const j=await call('/admin/field',{ev,teams:plain});
+  const named=teams.filter(t=>t.name);let ok=0;
+  for(const t of named){try{await call('/event/name',{ev,team:t.id,name:t.name});ok++}catch(e){break}}
+  return {field:j.field,groups:teams.length,players:plain.reduce((a,t)=>a+t.players.length,0),left:named.length-ok}}
+function openUpload(id){const e=evs().find(x=>x.id===id);if(!e)return;
+  if(!canInfo(e)){say('Club admins and this chapter\'s president upload the teams.');return}
+  if(!UP()){say('The upload is still loading. Try again in a second.');return}
+  openSheet(`<h3 style="margin:0">Upload teams and players</h3><p class="meta" style="margin:2px 0 8px">${esc(e.name)}. An Excel or CSV file, or paste from any sheet, email or text. You see everything before it saves.</p>
+   <div id="euNow" class="meta" style="margin-bottom:8px">Checking the groups saved now...</div>
+   ${upBox('eu')}
+   <button class="btn full sq" id="euSave" type="button" style="width:100%;margin-top:12px" disabled><i class="ph-bold ph-check"></i> <span id="euSaveT">Save the groups</span></button>
+   <p class="meta" id="euErr" role="alert" style="min-height:1.2em;margin-top:6px"></p>
+   <button class="btn ghost sq" id="euBack" type="button" style="width:100%"><i class="ph-bold ph-arrow-left"></i> Back to Event setup</button>`);
+  let had=[];const g=x=>document.getElementById('eu'+x);
+  const ready=()=>{const t=upTeams('eu'),b=g('Save');if(!b)return;b.disabled=!t.length||UP().check(t).length>0;g('SaveT').textContent=had.length?'Replace all groups':'Save the groups'};
+  const now=teams=>{had=teams||[];const np=had.reduce((a,t)=>a+(t.players||[]).length,0),el=g('Now');if(!el)return;
+    el.innerHTML=had.length?`<details><summary style="cursor:pointer">Saved now: ${many(had.length,'group')} · ${many(np,'player')}. A new upload replaces them.</summary>${upList(had)}</details>`:'No groups saved yet.';ready()};
+  wireUp('eu',ready);
+  call('/event/board',{ev:id}).then(j=>now(j.field&&j.field.teams),()=>{const el=g('Now');if(el)el.textContent='Couldn\'t check the groups saved now. You can still upload.'});
+  g('Back').onclick=()=>openInfo(id);
+  g('Save').onclick=()=>{const teams=upTeams('eu'),b=g('Save'),err=g('Err');if(!teams.length)return;
+    if(had.length&&!confirm(`Replace the ${many(had.length,'group')} saved now with these ${teams.length}?`))return;
+    b.disabled=true;err.style.color='';err.textContent='Saving for every phone...';
+    saveGroups(id,teams,had).then(r=>{UPS.eu=null;upPrev('eu');now(r.field&&r.field.teams);
+      err.textContent=r.left?`${many(r.groups,'group')} saved. ${r.left} team name${r.left===1?'':'s'} didn't save. Try again in a minute.`:`Saved: ${many(r.groups,'group')}, ${many(r.players,'player')}.`;say('Groups saved for every phone')},
+     x=>{err.style.color='#ffb3b5';err.textContent=x.status===401?'Your sign-in ran out. Sign in again.':x.status===403?'Only club admins and this chapter\'s president can do this.':x.status===400?'Something in the sheet did not fit. Check it and try again.':x.message;ready()})}}
 
 /* ---- a news photo: shrunk to a JPEG under about 550 KB before it leaves the phone ---- */
 function shrink(file){return shrinkTo(file,1600,.82,'#000')}
@@ -201,7 +285,7 @@ function html(){if(!canLead())return pageHead('Chapter tools')+'<p class="meta">
      ${canEdit(p.chapter)?`<button class="btn small ghost" data-cndel="${p.id}"><i class="ph-bold ph-trash"></i> Take down</button>`:''}</div>`).join('')}</div>`:'<p class="meta">Nothing posted yet.</p>')}
    ${group('Your events',`<button class="btn" data-evnew style="width:100%;margin-bottom:10px"><i class="ph-bold ph-plus"></i> New event</button>`+(mineEv.length?`<div class="stack">${mineEv.map(e=>`<div class="card"><b>${esc(e.name)}</b>${e.status==='cancelled'?' <span class="pill out">Cancelled</span>':''}
      <p class="meta">${day(e.date+'T12:00')} · ${esc(e.where)} · ${esc(e.price)}</p><div class="row" style="flex-wrap:wrap;gap:6px;margin-top:6px">
-     ${canInfo(e)?`<button class="btn small" data-evinfo="${e.id}"><i class="ph-bold ph-gear-six"></i> Event setup</button>`:''}
+     ${canInfo(e)?`<button class="btn small" data-evinfo="${e.id}"><i class="ph-bold ph-gear-six"></i> Event setup</button><button class="btn small ghost" data-evup="${e.id}"><i class="ph-bold ph-upload-simple"></i> Upload teams</button>`:''}
      
      ${!canInfo(e)?'<p class="meta">Not on the club server yet. Ask David.</p>':''}</div></div>`).join('')}</div>`:'<p class="meta">No upcoming events for your chapter.</p>'))}
    ${group('Your chapter',`<button class="btn full" data-sub="members|inbox"><i class="ph-bold ph-envelope-simple"></i> Message my chapter</button>`)}
@@ -250,5 +334,5 @@ function openFromLink(){let id='';try{id=new URLSearchParams(location.search).ge
     if(e&&canInfo(e)){clearInterval(t);openInfo(id)}
     else if(n>30){clearInterval(t);say(tok()?'Only club admins and the chapter president can edit this event.':'Sign in first, then try again.')}},500)}
 load();loadInfo().then(openFromLink);
-window.RNGCCHAPTER={html,wire,load,canLead,canEdit,canInfo,saveInfo,openInfo,invite,openNew,openPost,postTools,shrink,openZelle,club:call,api};
+window.RNGCCHAPTER={html,wire,load,canLead,canEdit,canInfo,saveInfo,openInfo,openUpload,invite,openNew,openPost,postTools,shrink,openZelle,club:call,api};
 })();
