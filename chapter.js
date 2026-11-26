@@ -86,6 +86,7 @@ function openInfo(id){const e=evs().find(x=>x.id===id);if(!e)return;
    <button class="btn full" type="submit" style="width:100%;margin-top:12px"><i class="ph-bold ph-check"></i> Save for everyone</button>
    <p class="meta" id="eiErr" role="alert" style="color:#ffb3b5;min-height:1.2em;margin-top:6px"></p></form>
    ${h4('5. Groups and the game')}
+   <div id="eiTeams" class="meta" style="margin-bottom:10px">Getting the teams...</div>
    <button class="btn sq" type="button" style="width:100%;margin-bottom:8px" data-evup="${esc(id)}"><i class="ph-bold ph-upload-simple"></i> Upload teams and players: Excel, CSV or paste</button>
    ${hasCard(id)?`<a class="btn ghost" style="width:100%" href="scorecard/#/field"><i class="ph-bold ph-users-three"></i> Teams: names, starting holes, players</a>
      <a class="btn ghost" style="width:100%;margin-top:8px" href="scorecard/#/setup"><i class="ph-bold ph-sliders-horizontal"></i> Game, contests, skins, start time</a>`
@@ -103,7 +104,14 @@ function openInfo(id){const e=evs().find(x=>x.id===id);if(!e)return;
      .then(()=>{err.textContent='';say('Saved for everyone')})
      .catch(x=>{err.textContent=x.status===401?'Your sign-in ran out. Sign in again.':x.message}).finally(()=>{b.disabled=false})};
   document.getElementById('eiInv').onclick=()=>invite(id);
-  wirePic(id,'Fly','flyer');wirePic(id,'Zel','zelle')}
+  wirePic(id,'Fly','flyer');wirePic(id,'Zel','zelle');showTeams(id)}
+/* the teams saved for this event, all of them, with team names (Nov 26 2026) */
+function showTeams(id){const el=()=>document.getElementById('eiTeams');
+  call('/event/board',{ev:id}).then(j=>{const box=el();if(!box)return;const t=(j.field&&j.field.teams)||[],names={};
+    Object.entries(j.cards||{}).forEach(([k,c])=>{if(c&&c.name)names[k]=c.name});
+    const np=t.reduce((a,x)=>a+(x.players||[]).length,0);
+    box.innerHTML=t.length?`<b style="color:var(--text)">Teams: ${many(t.length,'group')} · ${many(np,'player')}</b>${upList(t,names,true)}`:'No teams yet. Upload them below.'},
+   x=>{const box=el();if(box)box.textContent=x.status===401?'Sign in again to see the teams.':'Couldn\'t load the teams. Check your signal.'})}
 
 /* Flyer and Zelle QR boxes in Event setup (David, Nov 25 2026: "ross needs to be able to upload flyer picture to the
    event", "a zelle QR code for sign up and payment ... ross ... upload that QR code manually for each event").
@@ -200,8 +208,8 @@ function upBox(p){return `<div class="two"><div><label class="btn ghost sq" for=
    <button type="button" class="linkbtn" id="${p}UpTpl" style="margin-top:4px"><i class="ph-bold ph-download-simple"></i> Download a blank sheet to fill in</button>`}
 const upTeams=p=>{const u=UPS[p];return u&&UP()?UP().place(u.groups,u.mode):[]};
 const many=(n,w)=>n+' '+w+(n===1?'':'s');
-function upList(teams){return `<div style="max-height:280px;overflow:auto;margin-top:8px;border-top:1px solid var(--line)">${teams.map(t=>`<div style="padding:7px 2px;border-bottom:1px solid var(--line)"><b>Hole ${t.start}${esc(String(t.id).slice(-1))}</b>${t.name?' · '+esc(t.name):''}
-    <div class="meta" style="font-size:14px">${t.players.map(x=>esc(x.name||x)).join(', ')}</div></div>`).join('')}</div>`}
+function upList(teams,names,full){return `<div style="${full?'':'max-height:280px;overflow:auto;'}margin-top:8px;border-top:1px solid var(--line)">${teams.map(t=>{const n=t.name||(names&&names[t.id])||'';return `<div style="padding:7px 2px;border-bottom:1px solid var(--line)"><b>Hole ${t.start}${esc(String(t.id).slice(-1))}</b>${n?' · '+esc(n):''}
+    <div class="meta" style="font-size:14px">${t.players.map(x=>esc(x.name||x)).join(', ')}</div></div>`}).join('')}</div>`}
 function upPrev(p){const u=UPS[p],box=document.getElementById(p+'UpPrev');if(!box)return;
   if(!u){box.innerHTML='';if(UPHOOK[p])UPHOOK[p]();return}
   const teams=upTeams(p),warn=UP().check(teams),np=teams.reduce((a,t)=>a+t.players.length,0),anyHole=u.groups.some(g=>g.hole>=1&&g.hole<=18);
@@ -248,7 +256,7 @@ function openUpload(id){const e=evs().find(x=>x.id===id);if(!e)return;
   let had=[];const g=x=>document.getElementById('eu'+x);
   const ready=()=>{const t=upTeams('eu'),b=g('Save');if(!b)return;b.disabled=!t.length||UP().check(t).length>0;g('SaveT').textContent=had.length?'Replace all groups':'Save the groups'};
   const now=teams=>{had=teams||[];const np=had.reduce((a,t)=>a+(t.players||[]).length,0),el=g('Now');if(!el)return;
-    el.innerHTML=had.length?`<details><summary style="cursor:pointer">Saved now: ${many(had.length,'group')} · ${many(np,'player')}. A new upload replaces them.</summary>${upList(had)}</details>`:'No groups saved yet.';ready()};
+    el.innerHTML=had.length?`<details open><summary style="cursor:pointer">Saved now: ${many(had.length,'group')} · ${many(np,'player')}. A new upload replaces them.</summary>${upList(had)}</details>`:'No groups saved yet.';ready()};
   wireUp('eu',ready);
   call('/event/board',{ev:id}).then(j=>now(j.field&&j.field.teams),()=>{const el=g('Now');if(el)el.textContent='Couldn\'t check the groups saved now. You can still upload.'});
   g('Back').onclick=()=>openInfo(id);
