@@ -1775,7 +1775,7 @@ const cDay=d=>{const f=fmtDate(d);return f.dow+', '+f.m+' '+f.d+', '+d.slice(0,4
 const cCount=id=>cEvs(id).filter(e=>isPast(e.date)).length+PAST.filter(p=>p.c===id).length;
 const cSort=a=>a.slice().sort((x,y)=>{const nx=cNext(x.id),ny=cNext(y.id);return(!!ny-!!nx)||(nx&&ny?(nx.date<ny.date?-1:1):0)||(cCount(y.id)-cCount(x.id))});
 let CLIB=null,CLIBP=null;const FOUND={};
-const clib=()=>CLIB?Promise.resolve(CLIB):(CLIBP=CLIBP||fetch('scorecard/courses/index.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>CLIB=j).catch(e=>{CLIBP=null;throw e}));
+const clib=()=>CLIB?Promise.resolve(CLIB):(CLIBP=CLIBP||fetch('scorecard/courses/index.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>CLIB=window.RGCE?RGCE.rows(j):j).catch(e=>{CLIBP=null;throw e}));
 function renderCourses(){
   const v=$('#v-courses');cMarkers={};
   if(S.cview==='course')return v.innerHTML=coursePage(),wireCourse();
@@ -1819,11 +1819,12 @@ function coursePage(){const i=cInfo();
    `<div class="cacts">${c&&i.lib?`<button class="btn small" data-cplay="${esc(i.lib)}"><i class="ph-bold ph-golf"></i> Play here</button>`:''}
      <a class="btn small ghost" href="${dir}" ${ext}><i class="ph-bold ph-navigation-arrow"></i> Directions</a>
      ${tel?`<a class="btn small ghost" href="tel:${tel}"><i class="ph-bold ph-phone"></i> Call</a>`:''}
-     ${i.web?`<a class="btn small ghost" href="${esc(i.web)}" ${ext}><i class="ph-bold ph-globe"></i> Website</a>`:''}</div>`+
+     ${i.web?`<a class="btn small ghost" href="${esc(i.web)}" ${ext}><i class="ph-bold ph-globe"></i> Website</a>`:''}
+     ${window.RGCE?RGCE.btn(S.selLib||i.lib):''}</div>`+
    (i.addr||i.phone?`<p class="sub" style="margin-top:8px">${esc([i.addr,i.phone].filter(Boolean).join(' · '))}</p>`:'')+
    (i.found?'':cEvHtml(cEvs(i.trip?i.trip.id:i.id),i.note,i.trip?null:i.id))+
    (c?tbl("Men's tees",men)+tbl("Women's tees",wom):`<p class="note" style="margin-top:14px"><i class="ph-bold ph-info"></i><span>No scorecard on file yet. Start a round in Golf and add the card there.</span></p>`)+
-   (c?`<p class="findsrc">${CSRC}</p>`:'')}
+   (c?`<p class="findsrc">${CSRC}</p>`:'')+(window.RGCE?RGCE.stamp(S.selLib||i.lib):'')}
 function cEvHtml(ev,note,id){const up=ev.filter(e=>!isPast(e.date)).sort((a,b)=>a.date<b.date?-1:1);
   const past=[...ev.filter(e=>isPast(e.date)).map(e=>({n:e.name,d:e.date,img:e.img})),...PAST.filter(p=>id&&p.c===id).map(p=>({n:p.n,d:p.d,md:p.md,x:p.x,f:p.f}))]
     .sort((a,b)=>(b.d||'0')<(a.d||'0')?-1:(b.d||'0')>(a.d||'0')?1:0);
@@ -1839,7 +1840,7 @@ function coursesFind(){const v=$('#v-courses');
   v.innerHTML=subChips('courses')+pageHead('Find a course','Any course in California, Nevada or Arizona, plus the St. George, Utah area. Tap one for its tees and yards.')+
    `<input class="field" id="cfQ" type="search" placeholder="Course or city" value="${esc(S.cq||'')}" autocomplete="off" aria-label="Search courses">
     <div class="chips" role="group" aria-label="State" style="margin-top:10px">${[['','All'],['CA','California'],['NV','Nevada'],['AZ','Arizona'],['UT','Utah']].map(([k,n])=>`<button class="chip" data-cst="${k}" aria-pressed="${(S.cst||'')===k}">${n}</button>`).join('')}</div>
-    <div class="cgrid" id="cfL" style="margin-top:12px"><p class="sub">Loading courses...</p></div><p class="findsrc">${CSRC}</p>`;
+    <div class="cgrid" id="cfL" style="margin-top:12px"><p class="sub">Loading courses...</p></div>${window.RGCE?RGCE.addBtn():''}<p class="findsrc">${CSRC}</p>`;
   const q=$('#cfQ');q.oninput=()=>{S.cq=q.value;cfList()};
   v.querySelectorAll('[data-cst]').forEach(b=>b.onclick=()=>{S.cst=b.dataset.cst;v.querySelectorAll('[data-cst]').forEach(x=>x.setAttribute('aria-pressed',x===b));cfList()});
   clib().then(cfList).catch(()=>{const l=$('#cfL');if(l)l.innerHTML='<p class="sub">The course list needs a signal. Try again in a moment.</p>'})}
@@ -1852,7 +1853,7 @@ function openFound(id){const row=CLIB&&CLIB.courses.find(c=>c[0]===id);
   const base=row?{name:row[1],city:(row[2]?row[2]+', ':'')+row[3],lat:row[4],lng:row[5]}:{name:'Course',city:''};
   if(FOUND[id])return openCourse(null,id);
   openCourse(null,id);
-  fetch('scorecard/courses/c/'+encodeURIComponent(id)+'.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{const a=d.app;
+  (window.RGCE?RGCE.json(id):fetch('scorecard/courses/c/'+encodeURIComponent(id)+'.json').then(r=>{if(!r.ok)throw 0;return r.json()})).then(d=>{const a=d.app;
     FOUND[id]={...base,lib:a&&a.par&&a.tees&&a.tees.length?id:null,addr:d.address||'',web:d.website||'',
       card:a&&a.par&&a.tees&&a.tees.length?{par:a.par.reduce((x,y)=>x+y,0),holes:a.par.length,maps:a.maps?1:0,tees:a.tees.map(t=>[t.name,(t.y||[]).reduce((x,y)=>x+(+y||0),0),t.rating,t.slope])}:null}})
    .catch(()=>{FOUND[id]={...base,lib:null,card:null}}).then(()=>{if(S.tab==='courses'&&S.cview==='course'&&S.selLib===id)renderCourses()})}
@@ -3587,6 +3588,7 @@ syncTop();
 <script src="live.js?v=4"></script>
 <script src="scorecard/upload.js?v=2"></script>
 <script src="chapter.js?v=13"></script>
+<script src="courseedit.js?v=1"></script>
 <script src="feed.js?v=3"></script>
 <script src="photos.js?v=1"></script>
 <script src="fantasy.js"></script>

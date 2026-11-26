@@ -257,7 +257,7 @@ function hub(h){$('#app').className='wrap';
 function trPlayAt(id){const go=()=>{trRecent(id);gsave();NR=null;location.replace('#/new/solo')};
   if(COURSES[id])return go();
   $('#app').innerHTML='<p class="muted" style="padding:40px 20px;text-align:center">Loading the course...</p>';
-  fetch('courses/c/'+encodeURIComponent(id)+'.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>{
+  trCoJson(id).then(d=>{
     if(!d.app){location.replace('#/new/solo');return}
     const co=Object.assign(d.app,{lat:d.lat,lng:d.lng,phone:d.phone||'',web:d.website||''});(G.courses||(G.courses={}))[id]=co;COURSES[id]=co;go()})
    .catch(()=>location.replace('#/new/solo'))}
@@ -644,12 +644,35 @@ function trAddCourse(gid,pre){const d={name:'',city:'',par:[4,5,4,3,4,4,3,5,4, 4
       G.courses[id]=co;COURSES[id]=co;trRecent(id);gsave();NR.course=id;NR.tee='main';closeSheet();trNew(gid)}};
   draw()}
 
+/* ---------- course edits by club leaders (David, Nov 26 2026: "ability to edit the courses, holes, yardage and anything else") ----------
+   The club server keeps every leader's fix (GET /courses/edits); the phone lays it over the library file, keeps a copy for no signal,
+   and saved courses pick fixes up quietly (trLibRefresh). The Courses tab (courseedit.js) has the editor and the same merge. */
+const TR_CE={items:{},v:0};try{Object.assign(TR_CE,JSON.parse(localStorage.getItem('rngc-course-edits')||'{}'))}catch(e){}
+let TR_CEP=null;
+function trCEload(force){if(TR_CEP&&!force)return TR_CEP;
+  const get=fetch(TR_CLUB+'/courses/edits',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.items){TR_CE.items=j.items;TR_CE.v=j.v;try{localStorage.setItem('rngc-course-edits',JSON.stringify(j))}catch(e){}}}).catch(()=>{});
+  return TR_CEP=Promise.race([get,new Promise(r=>setTimeout(r,3500))]).then(()=>TR_CE)}
+function trCEapply(id,d){const e=TR_CE.items[id];if(!e||!e.par)return d;
+  d=d?JSON.parse(JSON.stringify(d)):{id};
+  ['name','city','state','address','phone','website'].forEach(k=>d[k]=e[k]||'');if(e.lat!=null){d.lat=e.lat;d.lng=e.lng}
+  const tot=e.par.reduce((a,b)=>a+b,0);
+  d.app=Object.assign(d.app||{},{name:e.name,city:[e.city,e.state].filter(Boolean).join(', '),par:e.par.slice(),si:e.si.slice(),siW:(e.siW||e.si).slice(),
+    tees:e.tees.map(t=>({id:t.id,name:t.name+(t.w?' · W':''),rating:t.rating||tot,slope:t.slope||113,y:t.y.slice()})),
+    lib:true,n9:!!e.n9,est:e.tees.some(t=>!t.rating||!t.slope),stdsi:false,edited:e.at});
+  d.holes=e.n9?9:18;return d}
+function trCErows(j){const E=TR_CE.items,rows=j.courses.filter(c=>!(E[c[0]]&&E[c[0]].hide)).map(c=>{const e=E[c[0]];if(!e||!e.par)return c;
+    return[c[0],e.name,e.city,e.state||c[3],c[4],c[5],e.n9?9:18,e.tees.some(t=>t.y.some(Boolean))?2:1,c[8],c[9]]});
+  for(const[id,e]of Object.entries(E))if(e.new&&!e.hide&&e.par)rows.push([id,e.name,e.city,e.state,e.lat||0,e.lng||0,e.n9?9:18,e.tees.some(t=>t.y.some(Boolean))?2:1,0,'Added']);
+  return Object.assign({},j,{courses:rows})}
+function trCoJson(id,opt){return Promise.all([fetch('courses/c/'+encodeURIComponent(id)+'.json',opt).then(r=>r.ok?r.json():null,()=>null),trCEload()])
+  .then(([d])=>{d=trCEapply(id,d);if(!d)throw new Error('no course');return d})}
+
 /* ---------- course library: every course in California, Nevada and Arizona, plus St. George, Utah ----------
    courses/index.json lists them all; courses/c/<id>.json holds the card, tees and hole maps (built by tools/courses/build_courses.py).
    Data: OpenGolfAPI and OpenStreetMap contributors, ODbL 1.0. A picked course is kept on the phone so it works with no signal. */
 let LIB=null,LIBP=null;const FQ={q:'',st:'',near:null};
 function trLib(){if(LIB)return Promise.resolve(LIB);
-  if(!LIBP)LIBP=fetch('courses/index.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(j=>{LIB=j;return j}).catch(e=>{LIBP=null;throw e});return LIBP}
+  if(!LIBP)LIBP=Promise.all([fetch('courses/index.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}),trCEload()]).then(([j])=>{LIB=trCErows(j);return LIB}).catch(e=>{LIBP=null;throw e});return LIBP}
 function trCoChips(){const rec=(G.recent||[]).filter(k=>COURSES[k]).slice(0,5),out=rec.map(k=>[k,COURSES[k]]);   /* your latest courses first */
   if(!out.length)out.push(G.home&&COURSES[G.home]?[G.home,COURSES[G.home]]:['chimera',COURSES.chimera]);
   const i=out.findIndex(([k])=>k===NR.course);if(i>0)out.unshift(out.splice(i,1)[0]);else if(i<0&&COURSES[NR.course])out.unshift([NR.course,COURSES[NR.course]]);return out}
@@ -688,7 +711,7 @@ function trFind(gid,cb){FQ.cb=cb||null;
 function trPick(id,gid,btn,cb){const row=LIB&&LIB.courses.find(c=>c[0]===id),info=row?{name:row[1],city:(row[2]?row[2]+', ':'')+row[3],lat:row[4],lng:row[5]}:(COURSES[id]?{name:COURSES[id].name,city:COURSES[id].city,lat:COURSES[id].lat,lng:COURSES[id].lng}:null);
   if(COURSES[id]){if(cb)return cb(id,info);NR.course=id;NR.tee=null;trRecent(id);closeSheet();trNew(gid);return}
   if(btn)btn.style.opacity=.5;
-  fetch('courses/c/'+encodeURIComponent(id)+'.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>{
+  trCoJson(id).then(d=>{
     if(d.app){const co=Object.assign(d.app,{lat:d.lat,lng:d.lng,phone:d.phone||'',web:d.website||''});G.courses[id]=co;COURSES[id]=co;gsave();if(cb)return cb(id,info);NR.course=id;NR.tee=null;trRecent(id);closeSheet();trNew(gid);return}
     if(cb)return cb(id,info);trAddCourse(gid,{lib:id,name:d.name,city:((d.city||'')+', '+d.state).replace(/^, /,''),pp:d.pp||null})})
    .catch(()=>{if(btn)btn.style.opacity=1;if(cb&&info)return cb(id,info);if(row)trAddCourse(gid,{lib:id,name:row[1],city:(row[2]?row[2]+', ':'')+row[3]})})}
@@ -1072,10 +1095,13 @@ function trJoin(code){code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'
  const _rd=trRound;trRound=function(id){const r=G.rounds.find(x=>x.id===id);window.__cur=(r&&r.cur)||'usd';return _rd(id)}}
 /* saved library courses pick up new hole maps quietly when there's signal (a course is kept on the phone when picked) */
 function trLibRefresh(){try{if(navigator.onLine===false)return}catch(e){}
+  trCEload(true);
   Object.keys(G.courses||{}).forEach(id=>{const co=G.courses[id];if(!co||!co.lib)return;
-    fetch('courses/c/'+encodeURIComponent(id)+'.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(d=>{if(!d||!d.app)return;
-      const nu=d.app.maps||null;if(JSON.stringify(co.maps||null)===JSON.stringify(nu))return;
-      if(nu)co.maps=nu;else delete co.maps;if(COURSES[id]&&COURSES[id]!==co)COURSES[id].maps=co.maps;gsave();
+    trCoJson(id,{cache:'no-cache'}).catch(()=>null).then(d=>{if(!d||!d.app)return;
+      const nu=d.app.maps||null,K=['name','city','par','si','siW','tees','n9','est','stdsi','edited'],card=K.some(k=>JSON.stringify(co[k]??null)!==JSON.stringify(d.app[k]??null));
+      if(JSON.stringify(co.maps||null)===JSON.stringify(nu)&&!card)return;
+      if(nu)co.maps=nu;else delete co.maps;if(card)K.forEach(k=>{if(d.app[k]===undefined)delete co[k];else co[k]=d.app[k]});   /* a leader's card fix (or its undo) reaches saved courses too */
+      if(COURSES[id]&&COURSES[id]!==co)Object.assign(COURSES[id],co);gsave();
       if(/^#\/hole\//.test(location.hash))route()   /* open hole screen redraws with the new map */
     }).catch(()=>{})})}
 setTimeout(trLibRefresh,1200);
