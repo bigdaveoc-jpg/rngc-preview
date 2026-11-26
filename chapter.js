@@ -49,6 +49,7 @@ function applyInfo(items){Object.entries(items||{}).forEach(([id,f])=>{let e=evs
   if(f.note!=null)e.note=f.note;
   if(f.rules!=null)e.rules=f.rules;
   if(f.url)e.url=f.url;
+  if('course' in f)e.course=f.course||'';   /* picked from the course list (Nov 26 2026, Event setup tiles) */
   if('cap' in f||'team' in f){e.cap=f.cap||0;e.team=f.team||0;
     e.spots=[TEAM[e.team],e.cap?e.cap+' players max':''].filter(Boolean).join(' · ')||BASE[id].spots}
   if('cancelled' in f)e.status=f.cancelled?'cancelled':(BASE[id].status==='cancelled'?'':BASE[id].status)})}
@@ -63,6 +64,7 @@ const hasCard=id=>typeof SCORECARD_EVENTS!=='undefined'&&SCORECARD_EVENTS.includ
    rules and setting up the games"). One sheet per event: details, players and team size, rules, cancel; links to the
    event-day groups and game pages; and the invite, written for you in the club's message box. */
 function openInfo(id){const e=evs().find(x=>x.id===id);if(!e)return;
+  if(window.RNGCEVSETUP&&canInfo(e))return window.RNGCEVSETUP.open(id);   /* the tile sheet (Nov 26 2026) */
   if(!canInfo(e)){say(SRV_EVS.includes(id)?'Club admins and this chapter\'s president change this event.':'This event isn\'t on the club server yet. Ask David.');return}
   const h4=t=>`<div style="margin:18px 0 4px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:13px;opacity:.85">${t}</div>`;
   openSheet(`<h3 style="margin:0">Event setup</h3><p class="meta" style="margin:2px 0 6px">${esc(e.name)}</p>
@@ -163,6 +165,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.clos
 /* New event (David, Nov 13 2026): club admins for any chapter, presidents for theirs. Saved on the club server,
    then the Event setup opens for it (players, rules, invite). */
 function openNew(){if(!canLead()){say('Club admins and chapter presidents make events.');return}
+  if(window.RNGCEVSETUP)return window.RNGCEVSETUP.openNew();
   const chs=mine().filter(c=>c!=='Club');
   openSheet(`<h3 style="margin:0">New event</h3><p class="meta" style="margin:2px 0 8px">Members see it as soon as you save.</p>
    <div style="border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin-bottom:8px"><b>Teams and players</b>
@@ -245,6 +248,7 @@ async function saveGroups(ev,teams,had){const byName={};(had||[]).forEach(t=>(t.
   for(const t of named){try{await call('/event/name',{ev,team:t.id,name:t.name});ok++}catch(e){break}}
   return {field:j.field,groups:teams.length,players:plain.reduce((a,t)=>a+t.players.length,0),left:named.length-ok}}
 function openUpload(id){const e=evs().find(x=>x.id===id);if(!e)return;
+  if(window.RNGCEVSETUP&&canInfo(e))return window.RNGCEVSETUP.open(id,'teams');
   if(!canInfo(e)){say('Club admins and this chapter\'s president upload the teams.');return}
   if(!UP()){say('The upload is still loading. Try again in a second.');return}
   openSheet(`<h3 style="margin:0">Upload teams and players</h3><p class="meta" style="margin:2px 0 8px">${esc(e.name)}. An Excel or CSV file, or paste from any sheet, email or text. You see everything before it saves.</p>
@@ -342,5 +346,7 @@ function openFromLink(){let id='';try{id=new URLSearchParams(location.search).ge
     if(e&&canInfo(e)){clearInterval(t);openInfo(id)}
     else if(n>30){clearInterval(t);say(tok()?'Only club admins and the chapter president can edit this event.':'Sign in first, then try again.')}},500)}
 load();loadInfo().then(openFromLink);
-window.RNGCCHAPTER={html,wire,load,canLead,canEdit,canInfo,saveInfo,openInfo,openUpload,invite,openNew,openPost,postTools,shrink,openZelle,club:call,api};
+/* the tile sheet hands back what the server saved: keep it, show it everywhere */
+function took(id,info,isNew){if(!info)return;INFO.items[id]=info;if(isNew&&!INFO.events.includes(id))INFO.events.push(id);SRV_EVS=INFO.events;keep(INFO);applyInfo({[id]:info});rerender()}
+window.RNGCCHAPTER={took,mine,shrinkTo,html,wire,load,canLead,canEdit,canInfo,saveInfo,openInfo,openUpload,invite,openNew,openPost,postTools,shrink,openZelle,club:call,api};
 })();
