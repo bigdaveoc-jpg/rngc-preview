@@ -362,6 +362,7 @@ document.write('<div style="min-height:100vh;display:flex;align-items:center;jus
 <script src="../bucks.js?v=club2"></script>
 <script src="holes-chimera.js?v=28"></script>
 <script src="hole3d.js?v=1"></script>
+<script src="upload.js?v=1"></script>
 <script>
 /* ===================== DATA ===================== */
 /* Chimera Golf Club, Henderson NV. Real card: pars, yardages, stroke index and rating/slope per tee
@@ -1108,6 +1109,7 @@ function fieldPage(){if(!ADMIN||CASUAL){if(!CASUAL){if(SYNC&&!REMOTE_AT&&!SC_ERR
   ${SYNC?`<div class="herebar"><div><b>${inN} of ${allP.length}</b><small>checked in on the app</small></div><div class="on"><b>${onN}</b><small>on now</small></div></div>`:''}
   ${ratesBox()}
   <p class="note"><i class="ph-bold ph-info"></i><span>Tap a player to move, rename or remove. Every change saves for every phone.${SYNC?' Checked in = that player picked their name on their own phone. On now = their phone was on the round in the last 15 minutes.':''}</span></p>
+  ${window.RNGCUPLOAD?'<button type="button" class="btn block" id="upOpen" style="margin:0 0 12px"><i class="ph-bold ph-upload-simple"></i> Upload teams and players</button>':''}
   ${TEAMS.map(t=>`<section class="card fg"><div class="fgh"><b>${esc(t.name)}</b><span class="muted">Hole ${t.start} · ${t.players.length} player${t.players.length===1?'':'s'}</span></div>
    <button type="button" class="btn ghost block" data-tset="${t.id}" style="margin:2px 0 8px"><i class="ph-bold ph-gear-six"></i> Team settings: name, starting hole</button>
    <div class="fgl">${t.players.map(p=>`<button type="button" class="fgp" data-p="${p.id}"><span>${esc(p.name)}${hereTag(t.id,p.id)}</span><i class="ph-bold ph-caret-right"></i></button>`).join('')}
@@ -1122,7 +1124,10 @@ function fieldPage(){if(!ADMIN||CASUAL){if(!CASUAL){if(SYNC&&!REMOTE_AT&&!SC_ERR
   document.querySelectorAll('[data-delg]').forEach(b=>b.onclick=()=>{const id=b.dataset.delg;
     if(hasScores(id)&&!confirm('This group has scores. Remove it anyway? Its scores leave the leaderboard.'))return;
     saveTeams(cloneTeams().filter(t=>t.id!==id),'Group removed')});
-  $('#addg').onclick=groupSheet}
+  $('#addg').onclick=groupSheet;
+  /* upload from a sheet (upload.js, David Nov 26 2026); Event setup links straight here with #/field/upload */
+  if($('#upOpen'))$('#upOpen').onclick=()=>RNGCUPLOAD.open();
+  if(location.hash==='#/field/upload'&&window.RNGCUPLOAD){history.replaceState(null,'','#/field');setTimeout(()=>RNGCUPLOAD.open(),0)}}
 function sheetOpen(html){$('#sheet').innerHTML=`<div class="grab"></div>${html}<button class="btn ghost block" style="margin-top:12px" id="closeSheet">Cancel</button>`;
   $('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#closeSheet').onclick=closeSheet}
 /* Team settings (David, Nov 14 2026: "from event setup you should be able to get to the team settings"): an admin names any group
