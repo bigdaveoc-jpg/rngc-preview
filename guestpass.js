@@ -79,27 +79,82 @@ function guestProfileHTML(){if(authTok())return '';const p=P.get();if(!p||!isOpe
    ${e?`<div class="card" style="padding:12px 14px"><b style="font-family:var(--display);font-size:20px;text-transform:uppercase">${esc(e.name)}</b><div class="meta">${esc(e.where||'')}</div></div>`:''}${grp}
    <button class="btn full" data-gpcard><i class="ph-bold ph-golf"></i> My scorecard</button>
    <button class="btn ghost full" data-gpboard><i class="ph-bold ph-ranking"></i> Leaderboard</button>
+   ${c&&c!==HOME_CLUB?clockCard(p)+moreCard(p):''}
    ${typeof isStandalone==='function'&&isStandalone()?'':'<button class="btn ghost full" data-getapp><i class="ph-bold ph-device-mobile"></i> Put the app on your phone</button>'}
    <button class="btn ghost full" id="gpSi">Raider Nation member? Sign in</button><button class="btn ghost full" id="gpCloseP">Close</button>`}
 /* a themed club's Home (David, Nov 26: the whole app in the other club's look): their logo, their guest's event,
    group, scorecard and leaderboard; none of Raider Nation's chapters, football, join or sponsor blocks */
+/* the 72 hours (David, Nov 26: "remember it's only a 72 hour access"): event day, then 72 hours, then it ends */
+const clockText=p=>{const st=status(p,Date.now());
+  return st==='event'?'Event day, then 72 hours. Ends '+fmt(p.exp):st==='after'?leftText(p.exp-Date.now())+' left. Ends '+fmt(p.exp):st==='expired'?'Ended '+fmt(p.exp):''};
+const clockCard=p=>{const st=status(p,Date.now());if(st==='none'||st==='early')return '';
+  return `<div class="card clubev gpclock${st==='expired'?' over':''}"><i class="ph-fill ph-timer"></i><div><b>${st==='expired'?'Your 72 hours are up':'Your access: 72 hours'}</b><span>${esc(clockText(p))}</span></div></div>`};
+const LEAD_KEY='rngc-lead-sent:';
+const leadSent=p=>{try{return !!(p&&localStorage.getItem(LEAD_KEY+p.id))}catch(e){return false}};
+const moreCard=p=>`<button type="button" class="card gpmorecard" data-gpmore><i class="ph-fill ph-sparkle"></i><span><b>${leadSent(p)?'Thanks, we got it':'Interested in more?'}</b><small>${leadSent(p)?'We\'ll be in touch. Tap to send more.':'Keep your golf, or get this app for your own club.'}</small></span><i class="ph-bold ph-caret-right"></i></button>`;
+/* a themed club's Home (David, Nov 26: the whole app in the other club's look): their logo, their guest's event,
+   group, scorecard and leaderboard, the 72-hour clock and Interested in more; none of Raider Nation's chapters,
+   football, join or sponsor blocks */
 window.rngcClubHome=()=>{const T=window.RNGCTHEME&&RNGCTHEME.cur();if(!T)return '';
-  const p=authTok()?null:P.get(),open=p&&isOpen(status(p,Date.now()));
+  const p=authTok()?null:P.get(),st=p?status(p,Date.now()):'none',open=isOpen(st),over=st==='expired';
   const today=new Date().toISOString().slice(0,10),evs=(typeof EVENTS!=='undefined'?EVENTS:[]);
-  const e=(open&&evById(p.ev))||evs.filter(x=>(x.date||'')>=today&&(partnerOf(x)||{}).key===T.key).sort((a,b)=>a.date<b.date?-1:1)[0]||null;
-  const f=e&&e.date&&typeof fmtDate==='function'?fmtDate(e.date):null,first=open&&p.name?String(p.name).split(' ')[0]:'';
+  const e=((open||over)&&evById(p.ev))||evs.filter(x=>(x.date||'')>=today&&(partnerOf(x)||{}).key===T.key).sort((a,b)=>a.date<b.date?-1:1)[0]||null;
+  const f=e&&e.date&&typeof fmtDate==='function'?fmtDate(e.date):null,first=(open||over)&&p.name?String(p.name).split(' ')[0]:'';
   let grp='';if(open)try{const fl=JSON.parse(localStorage.getItem('rngc-field:'+p.ev)||'null'),me=rosterOf(fl).find(x=>x.id===p.pid);
     if(me)grp=`<div class="card gpmine" style="grid-template-columns:auto 1fr"><i class="ph-fill ph-flag-pennant"></i><div><b>${esc(grpName(me.team))}, starts on hole ${me.start}</b><span>${me.mates.length?'With '+esc(me.mates.join(', ')):'Your group'}</span></div></div>`}catch(x){}
   return `<div class="rise clubhome">
    <div class="clubhero"><img src="${RNGCTHEME.logo()}" alt="${esc(T.name)}">
-    <h1>${first?'Welcome, '+esc(first):'Welcome to '+esc(T.short)}</h1>
+    <h1>${first?(over?'Thanks for playing, ':'Welcome, ')+esc(first):'Welcome to '+esc(T.short)}</h1>
     <p>${f?f.dow+', '+f.m+' '+f.d+' · ':''}${esc(T.name)}</p></div>
    ${e?`<div class="card clubev"><i class="ph-fill ph-golf"></i><div><b>${esc(e.name)}</b><span>${esc(e.where||'')}</span></div></div>`:''}${grp}
+   ${p&&(open||over)?clockCard(p):''}
    ${open?`<button class="btn full" data-gpcard><i class="ph-bold ph-golf"></i> My scorecard</button>
    <button class="btn ghost full" data-gpboard><i class="ph-bold ph-ranking"></i> Leaderboard</button>`
-   :`<div class="card clubev"><i class="ph-fill ph-qr-code"></i><div><b>Scan your event QR code</b><span>It puts you on your team and opens your scorecard.</span></div></div>`}
+   :over?'':`<div class="card clubev"><i class="ph-fill ph-qr-code"></i><div><b>Scan your event QR code</b><span>It puts you on your team and opens your scorecard.</span></div></div>`}
+   ${p&&(open||over)?moreCard(p):''}
    ${typeof isStandalone==='function'&&isStandalone()?'':'<button class="btn ghost full" data-getapp><i class="ph-bold ph-device-mobile"></i> Put the app on your phone</button>'}
    <p class="clubfoot">${esc(T.name)} · played with Raider Nation Golf Club</p></div>`};
+
+/* Interested in more? (David, Nov 26 2026: "an interested in more page on the invites to other clubs as they use this;
+   remember it's only a 72 hour access"). Guests from a partner club say what they want next; it goes to the club
+   server (/pass/lead) and the club admins get a phone alert. Works after the 72 hours too. */
+const MORE_OPTS=[['keep','Keep my golf','Scorecard, rounds and stats after the 72 hours'],
+  ['club','This app for my club','Your logo, colors, events and live scoring'],
+  ['events','More events with Raider Nation','Get invited to the next one'],
+  ['join','Join Raider Nation Golf Club','Chapters, club events and the Raider Cup']];
+function moreHTML(){const p=P.get()||{},T=window.RNGCTHEME&&RNGCTHEME.cur(),c=PARTNERS.find(x=>x.name===p.club);
+  const clubName=(c&&c.name)||(T&&T.name)||p.club||'';
+  return `<div class="gpmore"><h3>Interested in more?</h3>
+   <p class="sub">${p.exp?esc(status(p,Date.now())==='expired'?'Your 72 hours ended '+fmt(p.exp)+'. Your rounds are still saved on this phone.':'Your guest access lasts 72 hours after the event. It ends '+fmt(p.exp)+'.'):'Guest access lasts 72 hours after the event.'}</p>
+   <form id="gpMoreF" novalidate>
+    <div class="lbl">What would you like?</div>
+    <div class="gpopts">${MORE_OPTS.map(([k,t,d])=>`<label class="gpopt"><input type="checkbox" name="w" value="${k}"><span><b>${t}</b><small>${d}</small></span></label>`).join('')}</div>
+    <div class="lbl">How do we reach you?</div>
+    <input class="field" id="gmName" placeholder="Your name" autocomplete="name" value="${esc(p.name||'')}" maxlength="60">
+    <input class="field" id="gmClub" placeholder="Your club" autocomplete="organization" value="${esc(clubName)}" maxlength="80">
+    <select class="field" id="gmRole" aria-label="Your role"><option value="">Your role at the club</option><option>Member</option><option>Board or organizer</option><option>Owner or manager</option></select>
+    <input class="field" id="gmPhone" type="tel" placeholder="Phone" autocomplete="tel" maxlength="30">
+    <input class="field" id="gmEmail" type="email" placeholder="Email" autocomplete="email" maxlength="120">
+    <textarea class="field" id="gmNote" rows="3" placeholder="Anything else? Like how many members your club has." maxlength="600"></textarea>
+    <p class="gperr" id="gmErr" role="alert"></p>
+    <button class="btn full" type="submit"><i class="ph-bold ph-paper-plane-tilt"></i> Send</button>
+    <p class="meta gpfine">Phone or email is enough. We only use it to follow up with you.</p>
+   </form></div>`}
+window.rngcMore=()=>{openSheet(moreHTML());
+  const f=$('#gpMoreF'),err=$('#gmErr');
+  f.addEventListener('submit',async ev=>{ev.preventDefault();err.textContent='';
+    const p=P.get()||{},wants=[...f.querySelectorAll('input[name=w]:checked')].map(x=>x.value),v=id=>$('#'+id).value.trim();
+    const body={pass:p.token||'',wants,name:v('gmName'),club:v('gmClub'),role:v('gmRole'),phone:v('gmPhone'),email:v('gmEmail'),note:v('gmNote')};
+    if(!wants.length){err.textContent='Pick at least one.';return}
+    if(!body.phone&&!body.email){err.textContent='Add a phone number or an email so we can reach you.';return}
+    if(body.email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email)){err.textContent='That email doesn\'t look right.';return}
+    const btn=f.querySelector('button[type=submit]');btn.disabled=true;
+    try{if(!PREVIEW)await club('/pass/lead',body);
+      try{localStorage.setItem(LEAD_KEY+(p.id||'x'),String(Date.now()))}catch(x){}
+      $('#sheet').querySelector('.gpmore').innerHTML=`<div class="gpdone"><i class="ph-fill ph-check-circle"></i><h3>Thanks${body.name?', '+esc(body.name.split(' ')[0]):''}</h3><p class="sub">We got it and we'll be in touch soon.</p><button class="btn full" type="button" id="gmClose">Done</button></div>`;
+      $('#gmClose').addEventListener('click',closeSheet);if(typeof renderHome==='function')renderHome()}
+    catch(x){err.textContent=x.message||'Could not send. Try again in a minute.';btn.disabled=false}})};
+document.addEventListener('click',e=>{if(e.target.closest('[data-gpmore]')){e.preventDefault();window.rngcMore()}});
 window.rngcGuestProfile=()=>{const h=guestProfileHTML();if(!h)return false;openSheet(h);
   $('#gpCloseP').addEventListener('click',closeSheet);$('#gpSi').addEventListener('click',()=>{closeSheet();setTimeout(openSignIn,330)});return true};
 
@@ -142,6 +197,18 @@ body.gp-partner .tab[data-tab="games"],body.gp-partner .subnav[data-for="games"]
 .clubhero p{color:var(--muted);margin:6px 0 0}
 .clubev{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;padding:12px 14px}
 .clubev>i{font-size:26px;color:var(--silver)}.clubev b{display:block;font-size:16px}.clubev span{display:block;color:var(--muted);font-size:13px}
+.gpclock>i{color:var(--silver)}.gpclock.over>i{color:#c0262d}
+.gpmorecard{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:100%;padding:14px;text-align:left;border:1px solid var(--silver);color:var(--text);cursor:pointer}
+.gpmorecard>i:first-child{font-size:26px;color:var(--silver)}.gpmorecard b{display:block;font-size:17px}.gpmorecard small{display:block;color:var(--muted);font-size:13px}
+.gpmore h3{margin:0}.gpmore .sub{margin:4px 0 6px}.gpmore .lbl{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+.gpopts{display:grid;gap:8px}
+.gpopt{display:grid;grid-template-columns:22px 1fr;gap:12px;align-items:start;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--panel);cursor:pointer}
+.gpopt input{width:20px;height:20px;margin-top:2px;accent-color:var(--silver)}.gpopt b{display:block;font-size:15px}.gpopt small{display:block;color:var(--muted);font-size:13px}
+.gpopt:has(input:checked){border-color:var(--silver);box-shadow:inset 0 0 0 1px var(--silver)}
+.gpmore .field{display:block;width:100%;margin-top:8px;min-height:46px;padding:10px 12px;border-radius:6px;border:1px solid var(--line);background:var(--panel)}
+.gpmore textarea.field{min-height:76px;resize:vertical}.gpmore .btn{margin-top:12px}
+.gperr{color:#e5484d;font-size:14px;min-height:1.2em;margin:8px 0 0}.gpfine{text-align:center;margin:8px 0 4px}
+.gpdone{text-align:center;padding:12px 0}.gpdone>i{font-size:46px;color:var(--silver)}.gpdone h3{margin:6px 0 2px}
 .clubfoot{text-align:center;color:var(--muted);font-size:12px;margin:8px 0 18px}
 .gphome h3{font-family:var(--display);font-size:24px;text-transform:uppercase;margin:10px 0 2px}
 .gphome .meta{margin:0 0 14px}
