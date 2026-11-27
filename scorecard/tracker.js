@@ -267,7 +267,7 @@ const trThru=id=>Object.values(trMeHoles(id)).filter(v=>v!=null).length;
 function trNextHole(id){const m=trMeHoles(id);for(let h=1;h<=18;h++)if(m[h]==null)return h;return 18}
 
 /* next club event on golf home: shows the week before and on the day */
-function trNextEv(){const e=typeof EVENTS!=='undefined'&&EVENTS.nov14;if(!e||!e.date)return'';const d=new Date(String(e.date).replace(/^[A-Za-z]+ /,''));if(isNaN(d))return'';
+function trNextEv(){const e=typeof EVENTS!=='undefined'&&(EVENTS[S.event]||EVENTS.nov14);if(!e||!e.date)return'';const d=e.day?new Date(e.day+'T00:00:00'):new Date(String(e.date).replace(/^[A-Za-z]+ /,''));if(isNaN(d))return'';
   const now=new Date(),diff=Math.round((d-new Date(now.getFullYear(),now.getMonth(),now.getDate()))/864e5);if(diff<0||diff>7)return'';
   const tm=S.team&&TEAMS.find(x=>x.id===S.team),c=COURSES[e.course];
   return `<section class="card ev" style="padding:14px;margin-top:14px"><span class="tag">${diff===0?'Today':diff===1?'Tomorrow':'Next club event'}</span><h2 style="font-size:24px;margin:6px 0 2px">${esc(e.name)}</h2><div class="muted">${diff>1?esc(e.date)+' · ':''}${esc(e.start||'')}${c?' · '+esc(c.name):''}</div>
@@ -534,13 +534,13 @@ function trEvRows(){const up=trUpEvents(),d0=trToday();
   return up.map(f=>{const d=new Date(f.date+'T12:00:00'),day=d.toLocaleDateString([], {weekday:'short',month:'short',day:'numeric'}),
       x=Math.round((d-new Date(d0+'T12:00:00'))/864e5),when=x===0?'Today':x===1?'Tomorrow':x<8?'In '+x+' days':'';
     return `<button class="rrow" data-evopen="${esc(f.id)}"><div><b>${esc(f.name)}</b><span>${esc(day)}${f.where?' · '+esc(f.where):''}</span></div><div class="sc">${when?`<small>${when}</small>`:''}<i class="ph-bold ph-caret-right"></i></div></button>`}).join('')}
-function trEvents(){const e=EVENTS.nov14,c=COURSES[e.course],past=G.rounds.filter(r=>r.kind==='event').sort((a,b)=>b.date-a.date),t=S.team&&TEAMS.find(x=>x.id===S.team);
-  const ed=new Date(String(e.date).replace(/^[A-Za-z]+ /,'')),n0=new Date(),ex=isNaN(ed)?1e9:Math.round((ed-new Date(n0.getFullYear(),n0.getMonth(),n0.getDate()))/864e5);
+function trEvents(){const e=EVENTS[S.event]||EVENTS.nov14,c=COURSES[e.course],past=G.rounds.filter(r=>r.kind==='event').sort((a,b)=>b.date-a.date),t=S.team&&TEAMS.find(x=>x.id===S.team);
+  const ed=e.day?new Date(e.day+'T00:00:00'):new Date(String(e.date).replace(/^[A-Za-z]+ /,'')),n0=new Date(),ex=isNaN(ed)?1e9:Math.round((ed-new Date(n0.getFullYear(),n0.getMonth(),n0.getDate()))/864e5);
   trLoadEv();
   $('#app').innerHTML=trBar('Golf events',G.me.name)+trTabs('events')+`
    <div class="lbl">Upcoming club events</div>
    <section class="card tcard">${trEvRows()}</section>
-   ${ex<-3?'':`<section class="card ev" style="padding:16px;margin-top:14px"><span class="tag">${ex===0?'Today':ex===1?'Tomorrow':ex<0?'Last club event':'Next club event'}</span><h1>${esc(e.name)}</h1><div class="muted">${esc(e.date)} ·${esc(e.start)} · ${esc(c.name)}</div>
+   ${ex<-3?'':`<section class="card ev" style="padding:16px;margin-top:14px"><span class="tag">${ex===0?'Today':ex===1?'Tomorrow':ex<0?'Last club event':'Next club event'}</span><h1>${esc(e.name)}</h1><div class="muted">${[e.date,e.start,c&&c.name].filter(Boolean).map(esc).join(' · ')}</div>
     <div class="facts"><div><b>${esc(F().name)}</b><span>${esc(hcpLine())}</span></div><div><b>${TEAMS.length}</b><span>groups</span></div><div><b>${esc(TEE().name)}</b><span>tees</span></div></div>
     ${t?`<p class="note"><i class="ph-bold ph-users"></i><span>You're with ${esc(t.name)}, starting on hole ${t.start}.</span></p>`:''}
     <div class="row2"><a class="btn" href="#/event">${t?'Open my card':'Pick my group'}</a><a class="btn ghost" href="#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a></div>

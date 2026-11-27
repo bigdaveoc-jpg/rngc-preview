@@ -421,13 +421,58 @@ const LIVE=RID&&G.live[RID]&&COURSES[G.live[RID].course]?G.live[RID]:null,CASUAL
 if(CASUAL){EVENTS[RID]={id:RID,name:LIVE.name,date:LIVE.dateTxt,start:'',course:LIVE.course,clubs:[],cfg:LIVE.cfg,casual:true};
   TEAMS=[{id:'g',club:'',start:1,players:LIVE.players,name:LIVE.name,str:0,pace:1,off:0}];
   SPARE=(LIVE.bench||[]).slice()}
+
+/* ===================== CLUB EVENTS MADE IN THE APP (David, Nov 26 2026: "Start event") =====================
+   Any event made in Event setup with a course gets this event-day scorecard: ?ev=<id>, or today's event on its own.
+   The event (club server list) and its course card (library card + course editor fixes) are kept on the phone, so the
+   scorecard starts with no signal; a phone that has never seen them reads them once, right here, before starting. */
+const XEV=(function(){if(CASUAL)return null;
+  const LS=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}},put=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+  const day=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles'}).format(new Date());
+  const back=n=>{const x=new Date(day+'T12:00:00Z');x.setUTCDate(x.getUTCDate()-n);return x.toISOString().slice(0,10)};
+  const API=(()=>{try{const o=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&localStorage.getItem('rngc-club-api');if(o)return o.replace(/\/$/,'')}catch(e){}return 'https://rngc-club.137.184.188.41.sslip.io'})();
+  const get=u=>{try{const x=new XMLHttpRequest();x.open('GET',u,false);x.send();return x.status===200?JSON.parse(x.responseText):null}catch(e){return null}};
+  let q='';try{q=new URLSearchParams(location.search).get('ev')||''}catch(e){}
+  if(!/^[a-z0-9]{2,24}$/.test(q))q='';
+  if(q==='nov14'){try{localStorage.setItem('rngc-sc-ev','nov14')}catch(e){}return null}
+  let info=LS('rngc-evinfo');
+  const ok=k=>{const f=k&&info&&info.items&&info.items[k];return f&&f.custom&&f.course&&f.name&&/^\d{4}-\d\d-\d\d$/.test(f.date||'')&&!f.cancelled?f:null};
+  if(q&&!ok(q)){const j=get(API+'/events/info');if(j&&j.items){info={events:j.events||[],items:j.items};put('rngc-evinfo',info)}}
+  if(!q&&!(info&&info.items)){const j=get(API+'/events/info');if(j&&j.items){info={events:j.events||[],items:j.items};put('rngc-evinfo',info)}}
+  let id=ok(q)?q:'';
+  if(!id&&!q){const gp=LS('rngc-guest-pass'),f=gp&&ok(gp.ev);if(f&&f.date>=back(3)&&Date.now()<gp.exp)id=gp.ev}   /* a guest pass opens its own event */
+  let s='';try{s=localStorage.getItem('rngc-sc-ev')||''}catch(e){}
+  if(!id&&!q&&ok(s)&&ok(s).date===day)id=s;                                                     /* the event this phone opened, if it's today */
+  if(!id&&!q)id=Object.keys((info&&info.items)||{}).find(k=>ok(k)&&ok(k).date===day)||'';      /* else today's event */
+  if(!id&&!q&&ok(s)&&ok(s).date>=back(3)&&ok(s).date<=day)id=s;                                 /* else the last one, for 3 days after */
+  if(!id)return null;
+  const f=ok(id),cid=f.course;
+  let base=LS('rngc-evcourse:'+cid);
+  if(!base&&/^[0-9a-f-]{36}$/.test(cid)){const d=get('courses/c/'+cid+'.json');if(d&&d.app){base=Object.assign({},d.app,{lat:d.lat,lng:d.lng});put('rngc-evcourse:'+cid,base)}}
+  let E=LS('rngc-course-edits');if(!E||!E.items){const j=get(API+'/courses/edits');if(j&&j.items){E={items:j.items,v:j.v||0};put('rngc-course-edits',E)}}
+  const e=E&&E.items&&E.items[cid];let co=base?JSON.parse(JSON.stringify(base)):null;
+  if(e&&e.par)co=Object.assign(co||{},{name:e.name,city:[e.city,e.state].filter(Boolean).join(', '),par:e.par.slice(),si:e.si.slice(),siW:(e.siW||e.si).slice(),
+    tees:e.tees.map(t=>({id:t.id,name:t.name+(t.w?' · W':''),rating:t.rating||0,slope:t.slope||0,y:t.y.slice()}))});
+  if(!co||!Array.isArray(co.par)||co.par.length!==18||!co.tees||!co.tees.length)return null;   /* no card = no event scorecard */
+  if(!co.si||co.si.length!==18)co.si=Array.from({length:18},(_,i)=>i+1);if(!co.siW)co.siW=co.si;
+  COURSES[cid]=co;
+  const men=co.tees.filter(t=>!/ · W$/.test(t.name)),mid=men.length?men[Math.ceil((men.length-1)/2)]:co.tees[0];
+  const when=new Date(f.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  EVENTS[id]={id,name:f.name,date:when,day:f.date,where:f.where||'',start:f.start||'',course:cid,clubs:[],custom:true,
+    cfg:{format:'scramble',tee:mid.id,hcp:false,allow:100,ctp:co.par.map((p,i)=>p===3?i+1:0).filter(Boolean),ld:0,skins:'off',buyin:0}};
+  TEAMS=[];
+  try{localStorage.setItem('rngc-sc-ev',id)}catch(x){}
+  /* quietly freshen the event list and the course fixes for next time */
+  setTimeout(()=>{fetch(API+'/events/info',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.items)put('rngc-evinfo',{events:j.events||[],items:j.items})}).catch(()=>{})},4000);
+  return id})();
 const HOME=CASUAL?'#/':'#/event';
 
 /* ===================== STATE ===================== */
-const KEY=CASUAL?'rngc-scorecard-v2:'+RID:'rngc-scorecard-ev3';
-const DEF=()=>({event:CASUAL?RID:'nov14',team:CASUAL?'g':null,cfg:{},scores:{},submitted:{},simStart:0,sun:false,hole:null,
+const KEY=CASUAL?'rngc-scorecard-v2:'+RID:XEV?'rngc-scorecard-ev3:'+XEV:'rngc-scorecard-ev3';   /* each app-made event keeps its own card on the phone */
+const DEF=()=>({event:CASUAL?RID:(XEV||'nov14'),team:CASUAL?'g':null,cfg:{},scores:{},submitted:{},simStart:0,sun:false,hole:null,
   roster:{},keeper:CASUAL?{g:'me'}:{},me:CASUAL?'me':null,hcp:{},guests:[],ctp:{},ld:{},bets:{},st:{}});
 const S=Object.assign(DEF(),load());
+if(XEV)S.event=XEV;else if(!CASUAL&&!EVENTS[S.event])S.event='nov14';
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}}}
 let bc=null;try{bc=new BroadcastChannel('rngc-scorecard')}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(bc)try{bc.postMessage('u')}catch(e){};flashSaved();if(window.__scReady)scPush()}
@@ -523,7 +568,7 @@ const SC_API=(()=>{try{const o=/^(localhost|127\.0\.0\.1)$/.test(location.hostna
 const SYNC=REAL_FIELD&&!CASUAL;
 /* each group names itself (David, Nov 13 2026); the name rides on the group's card from the club server */
 function gNames(){if(CASUAL)return;TEAMS.forEach(t=>{if(t.dflt==null)t.dflt=t.name;const c=REMOTE&&REMOTE[t.id];t.name=(c&&c.name)||t.dflt})}
-let CLOSED=null;   /* the event was ended by a leader (time), or null: board says Final, scores lock for players */
+let CLOSED=null,STARTED=null,ISLIVE=false;   /* CLOSED: the event was ended; STARTED: a leader tapped Start event; ISLIVE: the club server says it's on. CLOSED: the event was ended by a leader (time), or null: board says Final, scores lock for players */
 let REMOTE={},REMOTE_AT=0,SC_ERR=0,SC_SENT={},SC_SIDE={},scT=null,SC_BUSY=false;
 function scAuth(){const h={'Content-Type':'application/json'},b={ev:S.event};
   try{const t=localStorage.getItem('rngc-auth-token');if(t)h.Authorization='Bearer '+t;const gp=JSON.parse(localStorage.getItem('rngc-guest-pass')||'null');if(gp&&gp.token)b.pass=gp.token}catch(e){}
@@ -551,7 +596,7 @@ function scFillMine(){if(!S.team||SC_BUSY||scT&&scDiff().n)return;const c=REMOTE
   for(const w in rs)for(const h in rs[w]){SC_SENT[w+':'+h]=rs[w][h];if(!(m[w]&&m[w][h]!=null)){(m[w]||(m[w]={}))[h]=rs[w][h];ch=true}}
   for(const[kind,unit]of[['ctp','ft'],['ld','yd']]){const seen=SC_SIDE[kind]||(SC_SIDE[kind]={});for(const h in c[kind]||{}){const v=c[kind][h];seen[h]=JSON.stringify({pid:v.pid,[unit]:v[unit]});if(!(S[kind]&&S[kind][h])){(S[kind]||(S[kind]={}))[h]=v;ch=true}}}
   if(ch){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}
-function scPull(){if(!SYNC)return;const mt=S.team&&TEAMS.find(x=>x.id===S.team);scCall('/event/board',mt&&S.me&&ids(mt).includes(S.me)?{team:S.team,me:S.me}:null).then(j=>{const na=j.admin&&!ADMIN;if(j.admin)ADMIN=true;const cs0=canScore();const fch=applyField(j.field||null);REMOTE=j.cards||{};gNames();const clch=(j.closed||null)!==CLOSED;CLOSED=j.closed||null;if(clch&&!$('#sheet.on'))setTimeout(route,0);let hch=false;try{hch=hereSet(j)}catch(e){}
+function scPull(){if(!SYNC)return;const mt=S.team&&TEAMS.find(x=>x.id===S.team);scCall('/event/board',mt&&S.me&&ids(mt).includes(S.me)?{team:S.team,me:S.me}:null).then(j=>{const na=j.admin&&!ADMIN;if(j.admin)ADMIN=true;const cs0=canScore();const fch=applyField(j.field||null);REMOTE=j.cards||{};gNames();const clch=(j.closed||null)!==CLOSED||(j.started||null)!==STARTED;CLOSED=j.closed||null;STARTED=j.started||null;ISLIVE=!!j.live;if(clch&&!$('#sheet.on'))setTimeout(route,0);let hch=false;try{hch=hereSet(j)}catch(e){}
   if(cs0!==canScore()&&/^#\/(hole|team)/.test(location.hash)&&!$('#sheet.on')){const mt=myTeam();note(canScore()?'This phone keeps score':first(PEOPLE()[keeperOf(mt)].name)+' keeps score now');route()}REMOTE_AT=Date.now();SC_ERR=0;scFillMine();scSend();setTimeout(rateMaybe,50);const h=location.hash;if(hch&&!fch&&h.startsWith('#/field')&&!$('#sheet.on'))fieldPage();if((fch&&!/^#\/(hole|setup|field|card|team|bets)/.test(h))||(na&&!/^#\/hole/.test(h))||(!ADMIN&&/^#\/(setup|field)/.test(h)))route()}).catch(()=>{SC_ERR++;if(!ADMIN&&/^#\/(setup|field)/.test(location.hash))route()})}
 const remoteOf=t=>REMOTE[t.id]||{};
 /* who is on the round (David, Nov 14 2026: "on the group set up i want to be able to see who has logged into the app, also on the
@@ -1026,6 +1071,7 @@ function setup(){if(!ADMIN&&!CASUAL){if(SYNC&&!REMOTE_AT&&!SC_ERR){$('#app').inn
   $('#app').innerHTML=bar(CASUAL?'Round setup':'Edit the event',EV().name)+`
   ${CASUAL?'':`<a class="btn block" href="../?evinfo=${encodeURIComponent(S.event)}" style="margin-top:4px"><i class="ph-bold ph-gear-six"></i> Event setup: details, players, rules, invite</a>
   <a class="btn block" href="#/field" style="margin-top:8px"><i class="ph-bold ph-users-three"></i> Groups: move players</a>
+  ${CLOSED?'':STARTED||ISLIVE?`<p class="note" style="margin-top:10px"><i class="ph-bold ph-broadcast"></i><span>The event is live${STARTED?' since '+hhmm(STARTED):''}. Every phone scores and the leaderboard is on.</span></p>`:`<button class="btn block" id="evGo" style="margin-top:8px"><i class="ph-bold ph-play"></i> Start the event · go live now</button>`}
   <button class="btn ${CLOSED?'':'ghost '}block" id="evClose" style="margin-top:8px"><i class="ph-bold ph-flag-checkered"></i> ${CLOSED?'Reopen the event':'End the event · scores final'}</button>
   <p class="muted" style="margin:6px 2px 0;font-size:13px">${CLOSED?'Ended at '+hhmm(CLOSED)+'. The leaderboard says Final and players cannot change scores. You can still fix one.':'When the last group is in: the leaderboard says Final, the live banner goes away and scores lock for players. You can reopen it.'}</p>
   <div class="lbl">Start</div><div style="display:flex;gap:8px"><input class="field" id="evStart" maxlength="40" value="${esc(EV().start||'')}" autocomplete="off"><button class="btn" id="evStartSave">Save</button></div>`}
@@ -1050,6 +1096,8 @@ function setup(){if(!ADMIN&&!CASUAL){if(SYNC&&!REMOTE_AT&&!SC_ERR){$('#app').inn
   <p class="note" style="margin-top:18px"><i class="ph-bold ph-floppy-disk"></i><span>Changes apply to every phone right away. Scores already entered stay put.</span></p>
   <div class="stick"><div class="navrow"><button class="btn ghost" id="reset" aria-label="Back to the event's defaults"><i class="ph-bold ph-arrow-counter-clockwise"></i></button><a class="btn" href="${HOME}">Done</a></div></div>`;
   const put=o=>{Object.assign(S.cfg,o);save();setup();if(!CASUAL)fieldSave({cfg:CFG()}).catch(()=>{}).finally(()=>{if(location.hash.startsWith('#/setup'))setup()})};
+  const eg=$('#evGo');if(eg)eg.onclick=()=>{if(!confirm('Start the event now? It goes live for everyone: scorecards, leaderboard and the live banner.'))return;eg.disabled=true;
+    scCall('/admin/event-start',null).then(j=>{STARTED=j.started||null;ISLIVE=!!j.live;CLOSED=j.closed||null;note('The event is live.');setup()}).catch(e=>{eg.disabled=false;note(e===400?'Add the course and the teams in Event setup first.':e===403?'Only the event leaders can start it.':'Could not reach the club server. Try again.')})};
   const ec=$('#evClose');if(ec)ec.onclick=()=>{const open=!!CLOSED;if(!confirm(open?'Reopen the event? Players can post scores again.':'End the event? The leaderboard shows Final and players cannot change scores. You can reopen it.'))return;ec.disabled=true;
     scCall('/event/close',open?{open:true}:null).then(j=>{CLOSED=j.closed||null;note(CLOSED?'Event ended. Scores are final.':'Event reopened.');setup()}).catch(()=>{ec.disabled=false;note('Could not reach the club server. Try again.')})};
   const es=$('#evStartSave');if(es)es.onclick=()=>{const v=$('#evStart').value.trim();fieldSave({start:v},'Start saved').catch(()=>{})};
@@ -1297,7 +1345,7 @@ function board(tv){const e=EV(),c=CO(),list=field(),f=ranked(list.slice()),fm=F(
     :bar('Leaderboard',e.name+' · '+fm.name,`${liveTag('margin-right:4px')}<a class="ib" href="#/tv" aria-label="Big screen view"><i class="ph-bold ph-television-simple"></i></a>${S.team?`<a class="ib" href="#/hole/${S.hole||order(myTeam().start)[0]}" aria-label="Back to my card"><i class="ph-bold ph-pencil-simple-line"></i></a>`:`<a class="ib" href="${HOME}" aria-label="Scorecard"><i class="ph-bold ph-pencil-simple-line"></i></a>`}`))+
    (!tv&&hasCt?`<div class="seg" role="group" aria-label="Board view" style="margin-bottom:10px"><button data-bt2="lb" aria-pressed="${BTAB==='lb'}">Leaderboard</button><button data-bt2="ct" aria-pressed="${BTAB==='ct'}">Contests</button></div>`:'')+
    (!tv&&BTAB==='ct'&&hasCt?contests():`<div class="${tv?'':'boardgrid'}">${tv?side:`<div class="side">${side}</div>`}<div>${lbHtml}</div></div>`)+
-   (CASUAL?'':`<p class="note" style="margin:14px 0 24px"><i class="ph-bold ph-info"></i><span>Real groups for Saturday.${scNote()} <i class="ph-bold ph-device-mobile"></i> = players on the app right now.</span></p>`);
+   (CASUAL?'':`<p class="note" style="margin:14px 0 24px"><i class="ph-bold ph-info"></i><span>Real groups.${scNote()} <i class="ph-bold ph-device-mobile"></i> = players on the app right now.</span></p>`);
   lastPos={};f.forEach(x=>lastPos[x.id]=x.pos);
   document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openCard(b.dataset.open));
   document.querySelectorAll('[data-net]').forEach(b=>b.onclick=()=>{VIEWNET=b.dataset.net==='1';board(tv)});
@@ -1346,10 +1394,10 @@ function tellClub(){try{if(window.parent!==window){window.parent.postMessage({go
 addEventListener('hashchange',tellClub);tellClub();fitSoon();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&location.hash.startsWith('#/hole'))wake()});
 </script>
-<script src="tracker.js?v=52"></script>
+<script src="tracker.js?v=53"></script>
 <script src="weather.js?v=1"></script>
 <script src="balls.js?v=2"></script>
-<script src="../live.js?v=3"></script>
+<script src="../live.js?v=5"></script>
 <script>
 /* quiet updates (../autoupdate.js): not while a sheet is open or a score is still on its way to the club server */
 window.rngcSafe=function(){if(document.querySelector('#sheet.on'))return false;if(SC_BUSY)return false;try{if(SYNC&&S.team&&scDiff().n)return false}catch(e){return false}return true};

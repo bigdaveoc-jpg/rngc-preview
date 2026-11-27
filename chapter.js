@@ -50,15 +50,19 @@ function applyInfo(items){Object.entries(items||{}).forEach(([id,f])=>{let e=evs
   if(f.rules!=null)e.rules=f.rules;
   if(f.url)e.url=f.url;
   if('course' in f)e.course=f.course||'';   /* picked from the course list (Nov 26 2026, Event setup tiles) */
+  /* an app-made event with a course gets the event-day scorecard (Nov 26 2026, Start event) */
+  if(e.custom&&typeof SCORECARD_EVENTS!=='undefined'){const i=SCORECARD_EVENTS.indexOf(id);if(e.course&&i<0)SCORECARD_EVENTS.push(id);else if(!e.course&&i>=0)SCORECARD_EVENTS.splice(i,1)}
   if('cap' in f||'team' in f){e.cap=f.cap||0;e.team=f.team||0;
     e.spots=[TEAM[e.team],e.cap?e.cap+' players max':''].filter(Boolean).join(' · ')||BASE[id].spots}
   if('cancelled' in f)e.status=f.cancelled?'cancelled':(BASE[id].status==='cancelled'?'':BASE[id].status)})}
 function keep(j){try{localStorage.setItem('rngc-evinfo',JSON.stringify(j))}catch(e){}}
 let INFO={events:[],items:{}};
 try{const c=JSON.parse(localStorage.getItem('rngc-evinfo')||'null');if(c&&c.items){INFO=c;SRV_EVS=c.events||[];applyInfo(c.items);setTimeout(rerender,0)}}catch(e){}
-function loadInfo(){return call('/events/info').then(j=>{INFO={events:j.events||[],items:j.items||{}};SRV_EVS=INFO.events;keep(INFO);applyInfo(INFO.items);rerender()}).catch(()=>{})}
+function loadInfo(){return call('/events/info').then(j=>{INFO={events:j.events||[],items:j.items||{}};SRV_EVS=INFO.events;keep(INFO);applyInfo(INFO.items);rerender();
+  try{if(window.RNGCLIVE)RNGCLIVE.poll()}catch(e){}}).catch(()=>{})}   /* today's app-made event may be live: check now, not on the next tick */
 function saveInfo(id,fields){return call('/admin/event-info',Object.assign({ev:id},fields)).then(j=>{INFO.items[id]=j.info;keep(INFO);applyInfo({[id]:j.info});rerender();return j})}
 const hasCard=id=>typeof SCORECARD_EVENTS!=='undefined'&&SCORECARD_EVENTS.includes(id);
+const scUrl=(id,h)=>'scorecard/'+(id&&id!=='nov14'?'?ev='+encodeURIComponent(id):'')+'#/'+h;
 
 /* Event setup (David, Nov 13 2026: "the teams and how many players and send the invites out and the setting up the
    rules and setting up the games"). One sheet per event: details, players and team size, rules, cancel; links to the
@@ -90,8 +94,8 @@ function openInfo(id){const e=evs().find(x=>x.id===id);if(!e)return;
    ${h4('5. Groups and the game')}
    <div id="eiTeams" class="meta" style="margin-bottom:10px">Getting the teams...</div>
    <button class="btn sq" type="button" style="width:100%;margin-bottom:8px" data-evup="${esc(id)}"><i class="ph-bold ph-upload-simple"></i> Upload teams and players: Excel, CSV or paste</button>
-   ${hasCard(id)?`<a class="btn ghost" style="width:100%" href="scorecard/#/field"><i class="ph-bold ph-users-three"></i> Teams: names, starting holes, players</a>
-     <a class="btn ghost" style="width:100%;margin-top:8px" href="scorecard/#/setup"><i class="ph-bold ph-sliders-horizontal"></i> Game, contests, skins, start time</a>`
+   ${hasCard(id)?`<a class="btn ghost" style="width:100%" href="${esc(scUrl(id,'field'))}"><i class="ph-bold ph-users-three"></i> Teams: names, starting holes, players</a>
+     <a class="btn ghost" style="width:100%;margin-top:8px" href="${esc(scUrl(id,'setup'))}"><i class="ph-bold ph-sliders-horizontal"></i> Game, contests, skins, start time</a>`
      :'<p class="meta">The live scorecard and leaderboard for this course are next. The groups you upload are saved for it.</p>'}
    ${h4('6. Guests')}
    ${typeof isPast==='function'&&!isPast(e.date)?`<button class="btn ghost" style="width:100%" data-gpqr="${esc(id)}" type="button"><i class="ph-bold ph-qr-code"></i> Guest pass QR: share it or show it</button>

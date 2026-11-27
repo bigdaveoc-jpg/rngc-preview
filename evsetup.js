@@ -50,9 +50,9 @@ const saveCfg=()=>run(call('/admin/field',{ev:ST.id,cfg:F().cfg||{}})).then(()=>
 /* ---- the sheet ---- */
 function open(id,tile){const e=evOf(id);if(!e)return;
   if(!C().canInfo(e)){say('Club admins and this chapter\'s president change this event.');return}
-  ST={id,tile:tile||'details',field:null,cards:{},here:{},closed:null,mv:null,upl:null,loaded:false};
+  ST={id,tile:tile||'details',field:null,cards:{},here:{},closed:null,started:null,live:false,mv:null,upl:null,loaded:false};
   openSheet('<div id="es" class="es"></div>');draw();
-  call('/event/board',{ev:id}).then(j=>{if(!ST||ST.id!==id)return;ST.field=j.field||{teams:[],bench:[],cfg:{}};ST.cards=j.cards||{};ST.here=j.here||{};ST.closed=j.closed||null;ST.loaded=true;
+  call('/event/board',{ev:id}).then(j=>{if(!ST||ST.id!==id)return;ST.field=j.field||{teams:[],bench:[],cfg:{}};ST.cards=j.cards||{};ST.here=j.here||{};ST.closed=j.closed||null;ST.started=j.started||null;ST.live=!!j.live;ST.loaded=true;
     if(!tile&&isDay(e))ST.tile='teams';draw()},()=>{if(ST&&ST.id===id){ST.loaded=true;ST.err=1;draw()}});
   if(e.course)lib().then(()=>tilesOnly()).catch(()=>{})}
 const isDay=e=>e&&e.date===today();
@@ -79,12 +79,16 @@ function leftLine(e){if(!ST.loaded)return '<div id="esLeft"></div>';const todo=[
     :'<div class="es-left ok" id="esLeft"><b>✓ Ready for event day</b></div>'}
 function dayBox(e){if(!ST.loaded||!isDay(e))return '';const cards=ST.cards||{},scoring=teamsOf().filter(t=>{const c=cards[t.id];return c&&c.scores&&Object.keys(c.scores).length}).length;
   const inn=Object.values(ST.here||{}).reduce((a,t)=>a+Object.keys(t).length,0),closed=!!ST.closed;
-  return `<div class="es-day"><div class="es-dayrow"><b class="${closed?'':'live'}">${closed?'Final':'● Event day'}</b><span class="meta">${esc(F().start||'')}</span></div>
+  const on=!closed&&(ST.started||ST.live),hm=ms=>new Date(ms).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+  return `<div class="es-day"><div class="es-dayrow"><b class="${closed?'':'live'}">${closed?'Final':on?'● Live'+(ST.started?' since '+hm(ST.started):''):'● Event day'}</b><span class="meta">${esc(F().start||'')}</span></div>
+   ${closed||on?'':`<button type="button" class="btn full sq" data-esgo style="width:100%;margin:10px 0 4px"><i class="ph-bold ph-play" aria-hidden="true"></i> Start the event</button>
+   <p class="meta" style="margin:0 0 6px">Goes live for everyone right away: scorecards, leaderboard, the live banner and every guest QR code.</p><div id="esGoQ"></div>`}
    <div class="es-stats"><div><strong>${scoring} of ${teamsOf().length}</strong>groups scoring</div><div><strong>${inn}</strong>players checked in</div></div>
-   <div class="two" style="margin-top:10px">${hasCard(ST.id)?'<a class="btn ghost sq" href="scorecard/#/board">Leaderboard</a>':'<span></span>'}
+   <div class="two" style="margin-top:10px">${hasCard(ST.id)?`<a class="btn ghost sq" href="${esc(scLink(ST.id,'board'))}">Leaderboard</a>`:'<span></span>'}
     <button type="button" class="btn sq" data-esend>${closed?'Reopen the event':'End the event'}</button></div>
    <div id="esEndQ"></div></div>`}
 const hasCard=id=>typeof SCORECARD_EVENTS!=='undefined'&&SCORECARD_EVENTS.includes(id);
+const scLink=(id,h)=>'scorecard/'+(id&&id!=='nov14'?'?ev='+encodeURIComponent(id):'')+'#/'+h;
 
 /* ---- panes ---- */
 const PANE={
@@ -244,7 +248,13 @@ document.addEventListener('click',ev=>{const box=document.getElementById('es');i
     z.innerHTML=closed?'':`<p><b>End the event?</b> Scores lock and the board says Final. You can still fix a score or reopen.</p><div class="two"><button type="button" class="btn sq" data-esend2>End it</button><button type="button" class="btn ghost sq" data-esendx>Not yet</button></div>`;
     if(closed)endEvent(true);return}
   if(q('[data-esendx]')){document.getElementById('esEndQ').innerHTML='';return}
+  /* Start event (David, Nov 26 2026: "for event organizers let's have a start event button") */
+  if(q('[data-esgo]')){const z=document.getElementById('esGoQ');if(z)z.innerHTML=`<p><b>Start the event now?</b> Every phone can score and the leaderboard goes live.</p><div class="two"><button type="button" class="btn sq" data-esgo2>Start it</button><button type="button" class="btn ghost sq" data-esgox>Not yet</button></div>`;return}
+  if(q('[data-esgox]')){document.getElementById('esGoQ').innerHTML='';return}
+  if(q('[data-esgo2]')){startEvent();return}
   if(q('[data-esend2]')){endEvent(false);return}});
+function startEvent(){run(call('/admin/event-start',{ev:ST.id})).then(j=>{ST.started=j.started||Date.now();ST.live=!!j.live;ST.closed=j.closed||null;draw();say('The event is live 🏴‍☠️');
+    try{if(window.RNGCLIVE&&RNGCLIVE.poll)RNGCLIVE.poll()}catch(x){}}).catch(x=>{const z=document.getElementById('esGoQ');if(z)z.innerHTML=`<p class="meta" style="color:#ff8a8a">${esc(x&&x.message||'Could not reach the club server. Try again.')}</p>`})}
 function endEvent(open){run(call('/event/close',open?{ev:ST.id,open:true}:{ev:ST.id})).then(j=>{ST.closed=open?null:(j.closed||Date.now());draw();say(open?'Event reopened':'Event ended. Scores are final.')}).catch(()=>{})}
 
 /* ---- typing: details save as you go; team names; new players; course search ---- */

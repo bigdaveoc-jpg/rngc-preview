@@ -216,7 +216,8 @@ function autoJoin(){if(autoTried||PREVIEW||authTok())return;const n=golfName(),e
   openPass(e.id,n,'').then(pp=>{savePass(pp);syncGolf()}).catch(()=>{})}
 /* put the guest on their group's card on this phone: the event scorecard reads its saved state when it opens */
 function seatOnCard(ev,pick,field){try{
-  const K='rngc-scorecard-ev3',st=JSON.parse(localStorage.getItem(K)||'{}');
+  const K=ev==='nov14'?'rngc-scorecard-ev3':'rngc-scorecard-ev3:'+ev,st=JSON.parse(localStorage.getItem(K)||'{}');   /* each app-made event has its own card (Nov 26 2026) */
+  if(ev!=='nov14')localStorage.setItem('rngc-sc-ev',ev);
   if(st.event&&st.event!==ev)return;
   st.event=ev;st.team=pick.team;st.me=pick.id;localStorage.setItem(K,JSON.stringify(st));
   if(field)localStorage.setItem('rngc-field:'+ev,JSON.stringify(field));

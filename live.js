@@ -23,7 +23,8 @@ const ROOT=location.pathname.startsWith('/scorecard')?'../':'';
 /* the events that have the event-day scorecard; the main app's list wins when it's there */
 const FALLBACK=[{id:'nov14',name:'RNGC vs The 12th Man',date:'2026-11-14',where:'Chimera Golf Club, Henderson NV',start:'8:00 am shotgun'}];
 const GROUPS={nov14:['g1A','g1B','g18A','g18B','g17A','g17B','g16A','g16B','g15A']};
-function events(){try{if(typeof EVENTS!=='undefined'&&Array.isArray(EVENTS)&&typeof SCORECARD_EVENTS!=='undefined')
+function events(){try{if(typeof XEV!=='undefined'&&XEV&&typeof EVENTS==='object'&&EVENTS[XEV]){const e=EVENTS[XEV];return [{id:XEV,name:e.name,date:e.day,where:e.where||'',start:e.start||''}]}}catch(e){}   /* inside the scorecard on an app-made event */
+  try{if(typeof EVENTS!=='undefined'&&Array.isArray(EVENTS)&&typeof SCORECARD_EVENTS!=='undefined')
   return EVENTS.filter(e=>SCORECARD_EVENTS.includes(e.id)).map(e=>Object.assign({start:(FALLBACK.find(f=>f.id===e.id)||{}).start||''},e))}catch(e){}return FALLBACK}
 const pacific=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles'}).format(new Date());   /* YYYY-MM-DD */
 let preview=false;try{if(/[?&#]livepreview/.test(location.search+location.hash))sessionStorage.setItem('rngc-live-preview','1');preview=sessionStorage.getItem('rngc-live-preview')==='1'}catch(e){}
@@ -90,8 +91,8 @@ const ago=t=>{const m=Math.round((Date.now()-t)/60000);return m<1?'now':m<60?m+'
 function bannerInner(){if(!isLive())return '';const e=L.ev,signed=!!tok(),pr=prefs();
   return `<div class="rl-b" role="region" aria-label="Live event"><div class="rl-top"><span class="rl-tag"><i></i>LIVE${preview&&!L.realLive?' PREVIEW':''}</span>
    <div class="rl-name"><b>${esc(e.name)}</b><span>${esc(e.where||'')}${e.start?' · '+esc(e.start):''}</span></div></div>
-   <div class="rl-acts"><a class="main" href="${ROOT}scorecard/#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>
-    <a href="${ROOT}scorecard/#/event"><i class="ph-bold ph-pencil-simple-line"></i> My scorecard</a>
+   <div class="rl-acts"><a class="main" href="${ROOT}scorecard/${L.ev&&L.ev.id!=='nov14'?'?ev='+encodeURIComponent(L.ev.id):''}#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a>
+    <a href="${ROOT}scorecard/${L.ev&&L.ev.id!=='nov14'?'?ev='+encodeURIComponent(L.ev.id):''}#/event"><i class="ph-bold ph-pencil-simple-line"></i> My scorecard</a>
     <button type="button" data-rl="details"><i class="ph-bold ph-info"></i> Event details</button>
     ${signed&&L.talkOn?'<button type="button" data-rl="talk"><i class="ph-bold ph-megaphone"></i> Trash Talk</button>':''}
     <button type="button" data-rl="alerts" class="${pr.on?'on':''}"><i class="ph-bold ph-bell${pr.on?'-ringing':''}"></i> ${pr.on?'Alerts on':'Get alerts'}</button></div>
