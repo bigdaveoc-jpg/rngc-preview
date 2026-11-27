@@ -14,7 +14,7 @@ var CLUBS={
     vars:{bg:'#0b0906','bg-2':'#120e08',panel:'#19140c','panel-2':'#221b10',line:'#3b2f1b',text:'#f7f0df',
       muted:'#b9ab8a',silver:'#f0c24f','silver-2':'#cfa64c','on-silver':'#170f02','silver-rgb':'240,194,79'},
     /* Bright mode on the course: cream paper, dark brown ink, gold buttons with dark letters */
-    sun:{bg:'#f6f1e4',panel:'#fffdf7','panel-2':'#efe6cf',line:'#d9cba6',text:'#1b1408',muted:'#5b4e33',
+    sun:{bg:'#f5efe1','bg-2':'#fbf8f0',panel:'#fffdf8','panel-2':'#f4ecd9','glass-2':'#f4ecd9',edge:'#e3d6b6',line:'#e3d6b6',text:'#1b1408',muted:'#5b4e33',
       silver:'#2a1e08','silver-2':'#6b5520','on-silver':'#fff8e6','silver-rgb':'176,128,26'},
     page:'#070503', bar:'#0b0906',
     hide:['games']   /* no Raiders football */
@@ -34,7 +34,7 @@ function css(t){
   var sel='html[data-club="'+t.key+'"]',logo=root+t.logo;
   return sel+'{'+v+'}'+
     sel+','+sel+' body:not(.sun){background:'+t.page+'}'+
-    (t.sun?sel+' body.sun{'+vs(t.sun)+'background:var(--bg)}'+sel+':has(body.sun){background:'+t.sun.bg+'}':'')+
+    (t.sun?sel+' body.sun{'+vs(t.sun)+'background:var(--bg)}'+'html[data-club="'+t.key+'"]:has(body.sun){background:'+t.sun.bg+'}':'')+
     sel+' .app{background:var(--bg)}'+
     /* gold metal on the main buttons */
     sel+' .btn:not(.ghost):not(.small.ghost){background:linear-gradient(180deg,#f7d97c,#e2ae3c 55%,#c8912a);color:#1b1408}'+
@@ -46,7 +46,7 @@ function css(t){
     sel+' .intro .skip{color:#cdbb8e;border-color:#3b2f1b}'+
     sel+' .intro img.clublogo{width:min(80vw,520px);animation:clubIn 1.6s cubic-bezier(.16,1,.3,1) both}'+
     '@keyframes clubIn{from{opacity:0;transform:scale(.86);filter:brightness(2.2) blur(6px)}60%{filter:brightness(1.3) blur(0)}to{opacity:1;transform:none;filter:none}}'+
-    sel+' .top .logo{object-fit:contain}'+'@media (max-width:999px){'+sel+' .top .logo{width:150px}}'+sel+' .brandtxt{visibility:hidden}'+   /* their logo carries the name */
+    sel+' .top .logo{object-fit:contain}'+'@media (max-width:999px){'+sel+' .top .logo{width:150px}}'+'@media (min-width:1000px){'+sel+' .top .logo{margin-top:46px}}'+sel+' .brandtxt{visibility:hidden}'+   /* their logo carries the name */
     sel+' .gpmine>i,'+sel+' .nx-golf{--nxc:var(--silver);color:var(--silver)}'+
     sel+' #chapterChips,'+sel+' .topjoin,'+sel+' .subnav[data-for="home"]{display:none!important}'+   /* no Raider Nation chapters or join */
     (t.hide||[]).map(function(x){return sel+' .tab[data-tab="'+x+'"],'+sel+' .subnav[data-for="'+x+'"]{display:none!important}'}).join('');
