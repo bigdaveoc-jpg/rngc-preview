@@ -14,7 +14,7 @@ var CLUBS={
     vars:{bg:'#0b0906','bg-2':'#120e08',panel:'#19140c','panel-2':'#221b10',line:'#3b2f1b',text:'#f7f0df',
       muted:'#b9ab8a',silver:'#f0c24f','silver-2':'#cfa64c','on-silver':'#170f02','silver-rgb':'240,194,79'},
     /* Bright mode on the course: cream paper, dark brown ink, gold buttons with dark letters */
-    sun:{bg:'#f5efe1','bg-2':'#fbf8f0',panel:'#fffdf8','panel-2':'#f4ecd9','glass-2':'#f4ecd9',edge:'#e3d6b6',line:'#e3d6b6',text:'#1b1408',muted:'#5b4e33',
+    sun:{bg:'#f5efe1','bg-2':'#fbf8f0',panel:'#fffdf8','panel-2':'#f4ecd9','glass-2':'#f4ecd9',glass:'rgba(27,20,8,.03)','glass-edge':'#e3d6b6','glass-hi':'transparent',edge:'#e3d6b6',line:'#e3d6b6',text:'#1b1408',muted:'#5b4e33',
       silver:'#2a1e08','silver-2':'#6b5520','on-silver':'#fff8e6','silver-rgb':'176,128,26'},
     page:'#070503', bar:'#0b0906',
     hide:['games']   /* no Raiders football */
@@ -34,7 +34,7 @@ function css(t){
   var sel='html[data-club="'+t.key+'"]',logo=root+t.logo;
   return sel+'{'+v+'}'+
     sel+','+sel+' body:not(.sun){background:'+t.page+'}'+
-    (t.sun?sel+' body.sun{'+vs(t.sun)+'background:var(--bg)}'+'html[data-club="'+t.key+'"]:has(body.sun){background:'+t.sun.bg+'}':'')+
+    (t.sun?sel+' body.sun{'+vs(t.sun)+'background:var(--bg)}'+sel+' body.sun .card{box-shadow:0 1px 2px rgba(16,24,40,.06),0 8px 20px -10px rgba(16,24,40,.14)}'+'html[data-club="'+t.key+'"]:has(body.sun){background:'+t.sun.bg+'}':'')+
     sel+' .app{background:var(--bg)}'+
     /* gold metal on the main buttons */
     sel+' .btn:not(.ghost):not(.small.ghost){background:linear-gradient(180deg,#f7d97c,#e2ae3c 55%,#c8912a);color:#1b1408}'+
@@ -77,7 +77,7 @@ window.RNGCTHEME={
   set:function(k){var t=k&&CLUBS[k]||null;if((t&&t.key)===(cur&&cur.key))return;
     try{t?localStorage.setItem(KEY,t.key):localStorage.removeItem(KEY)}catch(e){}
     if(!t&&cur){location.reload();return}
-    apply(t);var f=document.getElementById('golfFrame');if(f&&f.contentWindow&&f.contentWindow.RNGCTHEME)try{f.contentWindow.RNGCTHEME.set(k)}catch(e){}}
+    apply(t);if(window.RNGCBRIGHT)RNGCBRIGHT.init();var f=document.getElementById('golfFrame');if(f&&f.contentWindow&&f.contentWindow.RNGCTHEME)try{f.contentWindow.RNGCTHEME.set(k)}catch(e){}}
 };
 apply(pick());
 })();
