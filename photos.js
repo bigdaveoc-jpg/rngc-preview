@@ -48,7 +48,7 @@ function html(){if(Date.now()-LAST>60000)setTimeout(load,0);   /* fresh list whe
    ${ITEMS.length?`<div class="row" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">${chip(null,'All albums')}${albums.map(a=>chip(a.id,a.id?nameOf(a.id):'Club album',a.n)).join('')}</div>`:''}
    <div class="rise">${body}</div>
    <h3 class="shophead" style="margin-top:24px">From the club archive</h3><p class="sub" style="margin-top:0">Tap a photo to see it big.</p>
-   <div class="photogrid">${(typeof PHOTOS!=='undefined'?PHOTOS:[]).map(f=>`<button class="zoomtile" data-zoom="assets/old-site/photos/${f}.jpg" aria-label="Open photo"><img src="assets/old-site/photos/${f}-sm.jpg" alt="Club golf day" loading="lazy"></button>`).join('')}</div>
+   <div class="photogrid">${(typeof PHOTOS!=='undefined'?PHOTOS:[]).map(f=>`<button class="zoomtile" data-zoom="assets/old-site/photos/${f}.webp" aria-label="Open photo"><img src="assets/old-site/photos/${f}-sm.webp" alt="Club golf day" loading="lazy"></button>`).join('')}</div>
    <div class="acts" style="margin-top:16px"><button class="btn ghost" data-sub="events|past"><i class="ph-bold ph-images"></i> Flyers from past events</button></div>`}
 
 /* on an Events card, from event day on */
@@ -113,6 +113,7 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target;if(!t)r
   const d=t.closest('[data-phdel]');if(d){e.preventDefault();if(!confirm('Take this photo down? It leaves the album for everyone.'))return;
     call('/photos/delete',{id:+d.dataset.phdel}).then(()=>{if(typeof closeSheet==='function')closeSheet();say('Taken down');return load()}).catch(x=>say(x.message))}});
 
-load();
+/* after the first screen is up (speed pass, Nov 27) */
+(window.requestIdleCallback||function(f){setTimeout(f,1200)})(()=>load(),{timeout:2500});
 window.RNGCPHOTOS={html,evRow,load,openAdd,openAlbum};
 })();
