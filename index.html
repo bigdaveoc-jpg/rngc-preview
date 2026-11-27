@@ -2821,6 +2821,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-getapp]')){e.preventDefault();openGetApp();return}
   if(e.target.closest('[data-appnudge-off]')){try{localStorage.setItem('rngc-app-nudge-off','1')}catch(x){}const n=e.target.closest('.appnudge');if(n)n.remove();toast('Hidden. Get the app any time from Profile.')}});
 $('#btnProfile').addEventListener('click',()=>{
+  if(window.rngcGuestProfile&&window.rngcGuestProfile())return;   /* a guest's Profile is their club view (Nov 26 2026) */
   const going=EVENTS.filter(e=>S.rsvp[e.id]);
   openSheet(`<h3>${S.name?esc(S.name):'Your profile'}</h3>
    <p class="help" style="margin:0 0 10px">${S.name?'Your RSVPs and posts are saved on this device.':'Post once and your name saves here.'}</p>
@@ -2849,7 +2850,7 @@ const PUBLIC_TABS=['home','golf','courses'];   /* golf is open, name only (David
    pass is open (David, Nov 26 2026: "any qr code that is scanned tomorrow need to have full access"). The forum, members and
    settings stay members only: they hold members' names, messages and accounts. */
 const GUEST_TABS=['golf','events','games'];
-const locked=t=>!PUBLIC_TABS.includes(t)&&!authTok()&&!(GUEST_TABS.includes(t)&&window.RNGCPASS&&RNGCPASS.active());
+const locked=t=>!PUBLIC_TABS.includes(t)&&!authTok()&&!(GUEST_TABS.includes(t)&&window.RNGCPASS&&RNGCPASS.active()&&!(t==='games'&&RNGCPASS.guestClub&&RNGCPASS.guestClub()));   /* a partner club's guests (Legends, Fat Friday) get golf and events, no Raiders football */
 const GATE_N={events:'Club events',golf:'Golf',games:'Raiders games',courses:'Courses',forum:'The forum',members:'The member area',settings:'Settings'};
 let gateOn=false;
 function showGate(t){
@@ -3674,7 +3675,7 @@ syncTop();
 <script src="feed.js?v=3"></script>
 <script src="photos.js?v=1"></script>
 <script src="fantasy.js"></script>
-<script src="guestpass.js?v=club7"></script>
+<script src="guestpass.js?v=club8"></script>
 <script src="shop.js?v=club2"></script>
 <script>
 /* quiet updates (autoupdate.js): never while a sheet, the sign-in or the golf screen is busy; after the reload the person

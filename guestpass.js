@@ -55,6 +55,33 @@ const evById=id=>(typeof EVENTS!=='undefined'?EVENTS:[]).find(e=>e.id===id);
 const isLeader=()=>!!(S.authMe&&(S.authMe.role==='admin'||(S.authMe.leads||[]).length))||!!S.demo;
 const fmt=ms=>new Date(ms).toLocaleString('en-US',{timeZone:TZ,weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
 const savePass=p=>{try{localStorage.setItem(PASS_KEY,JSON.stringify(p))}catch(e){}};
+/* collab events (David, Nov 26 2026, Fat Friday with Legends Golf Club): a scan first asks "which club are you with?"
+   with both logos, then the name finder seats them on their group. A partner club's guests get their own club view:
+   their logo on Profile, golf and events, no Raiders football games tab. Logos are cut from the event flyer. */
+const HOME_CLUB={key:'rngc',name:'Raider Nation Golf Club',logo:'assets/clubs/rngc-fatfriday.jpg'};
+const PARTNERS=[{key:'legends',name:'Legends Golf Club',logo:'assets/clubs/legends-gc.jpg',re:/\blegends\b/i}];
+const partnerOf=e=>e?PARTNERS.find(x=>x.re.test(e.name||''))||null:null;
+function guestClub(){if(authTok())return null;const p=P.get();if(!p||!isOpen(status(p,Date.now())))return null;return PARTNERS.find(x=>x.name===p.club)||null}
+P.guestClub=guestClub;
+function clubView(){document.body.classList.toggle('gp-partner',!!guestClub())}
+function clubPick(evId,code){const e=evById(evId),partner=partnerOf(e);
+  openSheet(`<h3 style="margin:0">Which club are you with?</h3><p class="sub" style="margin:4px 0 12px">${esc(e.name)}</p>
+   <div class="gpclubs">${[partner,HOME_CLUB].map(c=>`<button type="button" class="gpclub" data-gpclub="${c.key}"><img src="${c.logo}" alt=""><span>${esc(c.name)}</span></button>`).join('')}</div>
+   <p class="meta" style="text-align:center;margin:12px 0 0">Raider Nation member? <button class="linkbtn" data-signin style="margin:0">Sign in</button></p>`);
+  document.querySelectorAll('[data-gpclub]').forEach(b=>b.addEventListener('click',()=>{const c=b.dataset.gpclub===HOME_CLUB.key?HOME_CLUB:partner;nameSheet(evId,code,c)}))}
+/* a guest's Profile: their club, their group, their event */
+function guestProfileHTML(){if(authTok())return '';const p=P.get();if(!p||!isOpen(status(p,Date.now())))return '';
+  const c=PARTNERS.find(x=>x.name===p.club)||(p.club===HOME_CLUB.name?HOME_CLUB:null),e=evById(p.ev);
+  let grp='';try{const f=JSON.parse(localStorage.getItem('rngc-field:'+p.ev)||'null'),me=rosterOf(f).find(x=>x.id===p.pid);
+    if(me)grp=`<div class="card gpmine" style="grid-template-columns:auto 1fr"><i class="ph-fill ph-flag-pennant"></i><div><b>${esc(grpName(me.team))}, starts on hole ${me.start}</b><span>${me.mates.length?'With '+esc(me.mates.join(', ')):'Your group'}</span></div></div>`}catch(x){}
+  return `<div class="gpprof">${c?`<img src="${c.logo}" alt="${esc(c.name)}">`:''}<h3>${esc(p.name||'Guest')}</h3><p class="meta">${esc(c?c.name:(p.club||'Guest'))} · guest of Raider Nation Golf Club</p></div>
+   ${e?`<div class="card" style="padding:12px 14px"><b style="font-family:var(--display);font-size:20px;text-transform:uppercase">${esc(e.name)}</b><div class="meta">${esc(e.where||'')}</div></div>`:''}${grp}
+   <button class="btn full" data-gpcard><i class="ph-bold ph-golf"></i> My scorecard</button>
+   <button class="btn ghost full" data-gpboard><i class="ph-bold ph-ranking"></i> Leaderboard</button>
+   ${typeof isStandalone==='function'&&isStandalone()?'':'<button class="btn ghost full" data-getapp><i class="ph-bold ph-device-mobile"></i> Put the app on your phone</button>'}
+   <button class="btn ghost full" id="gpSi">Raider Nation member? Sign in</button><button class="btn ghost full" id="gpCloseP">Close</button>`}
+window.rngcGuestProfile=()=>{const h=guestProfileHTML();if(!h)return false;openSheet(h);
+  $('#gpCloseP').addEventListener('click',closeSheet);$('#gpSi').addEventListener('click',()=>{closeSheet();setTimeout(openSignIn,330)});return true};
 
 (function(){const s=document.createElement('style');s.textContent=`
 #v-golf.gp{display:flex;flex-direction:column}
@@ -79,7 +106,16 @@ const savePass=p=>{try{localStorage.setItem(PASS_KEY,JSON.stringify(p))}catch(e)
 .gpqr .gplogo img{width:100%;height:100%;display:block}
 .gpqr.gpload{aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px}
 .gphome{padding:16px;margin:0 0 16px;border:1px solid var(--silver);text-align:center;background:radial-gradient(120% 80% at 50% 0,rgba(213,218,225,.14),transparent 60%),var(--panel)}
-.gphome .tag{display:inline-flex;align-items:center;gap:6px;font:700 13px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--bg);background:var(--silver);padding:6px 10px;border-radius:999px}
+.gphome .tag{display:inline-flex;align-items:center;gap:6px;font:700 13px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--bg);background:var(--silver);padding:6px 10px;border-radius:4px}
+.gpclubs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gpclub{display:flex;flex-direction:column;gap:8px;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text);font:inherit;cursor:pointer;text-align:center}
+.gpclub:hover,.gpclub:focus-visible{border-color:var(--silver)}
+.gpclub img{width:100%;aspect-ratio:2/1;object-fit:cover;border-radius:4px;display:block}
+.gpclub span{font:700 15px/1.2 var(--display);text-transform:uppercase;letter-spacing:.03em;padding:0 2px 4px}
+.gplogohd{display:block;width:100%;max-width:280px;margin:0 auto 12px;aspect-ratio:2/1;object-fit:cover;border-radius:6px}
+.gpprof{text-align:center;margin:0 0 12px}.gpprof img{display:block;width:100%;max-width:300px;margin:0 auto 10px;aspect-ratio:2/1;object-fit:cover;border-radius:6px}
+.gpprof h3{margin:0}.gpprof .meta{margin:4px 0 0}
+body.gp-partner .tab[data-tab="games"],body.gp-partner .subnav[data-for="games"],body.gp-partner .tab[data-tab="members"],body.gp-partner .subnav[data-for="members"]{display:none}
 .gphome h3{font-family:var(--display);font-size:24px;text-transform:uppercase;margin:10px 0 2px}
 .gphome .meta{margin:0 0 14px}
 .gphome .gpqr{max-width:260px}
@@ -149,21 +185,22 @@ function findName(list,q){const qt=normName(q).split(' ').filter(Boolean);if(!qt
   return list.filter(p=>{const nt=normName(p.name).split(' ');return qt.every(w=>nt.some(n=>n.startsWith(w)))}).slice(0,6)}
 const grpName=id=>'Group '+String(id||'').slice(1);
 function openRedeem(pp){nameSheet(pp.ev,pp.code)}
-function nameSheet(evId,code){
+function nameSheet(evId,code,picked){
   if(!evId){openPlainName();return}
   const pp={ev:evId,code:code||''},e=evById(pp.ev);
   if(!e){toast('That pass is for an event we can\'t find.');return}
   const w=windowFor(e.date),st=status(w,Date.now());
   if(st==='expired'){showUpgrade({ename:e.name,exp:w.exp});return}
-  const opp=(/vs (?:the )?(.+)$/i.exec(e.name)||[])[1]||'';
+  if(!picked&&partnerOf(e)){clubPick(evId,code);return}
+  const opp=picked?picked.name:(/vs (?:the )?(.+)$/i.exec(e.name)||[])[1]||'';
   let field=null,roster=[],pick=null;
-  openSheet(`<h3 style="margin:0">Welcome to the course</h3><p class="sub" style="margin:4px 0 10px">${esc(e.name)} - ${esc(e.where)}</p>
+  openSheet(`${picked?`<img class="gplogohd" src="${picked.logo}" alt="${esc(picked.name)}">`:''}<h3 style="margin:0">Welcome to the course</h3><p class="sub" style="margin:4px 0 10px">${esc(e.name)} - ${esc(e.where)}</p>
    <label class="meta" for="gpName" style="display:block;margin:0 0 6px">Find your name</label>
    <input class="field" id="gpName" maxlength="24" autocomplete="name" placeholder="Start typing your name">
    <div id="gpHits" class="gphits"></div>
    <div id="gpMine"></div>
    <div id="gpNew" class="meta" style="margin:10px 0 0;display:none">Not on the list? No problem. Tap Start golfing and we'll make your guest profile with that name.</div>
-   <label class="meta" for="gpClub" style="display:block;margin:12px 0 6px">Your club</label><input class="field" id="gpClub" maxlength="40" value="${esc(opp)}">
+   ${picked?`<input type="hidden" id="gpClub" value="${esc(opp)}"><button type="button" class="linkbtn" id="gpReclub" style="margin:10px 0 0">Not with ${esc(picked.name)}? Change club</button>`:`<label class="meta" for="gpClub" style="display:block;margin:12px 0 6px">Your club</label><input class="field" id="gpClub" maxlength="40" value="${esc(opp)}">`}
    <div class="acts" style="margin-top:14px"><button class="btn full" id="gpGo" style="width:100%"><i class="ph-bold ph-golf"></i> ${st==='early'?'Save my pass':'Start golfing'}</button></div>
    <p class="meta" style="text-align:center;margin:10px 0 0">Free: live scorecard, leaderboard, skins, side games and your stats. Club member? <button class="linkbtn" data-signin style="margin:0">Sign in</button></p>`);
   const inp=$('#gpName'),hits=$('#gpHits'),mine=$('#gpMine'),nw=$('#gpNew');
@@ -175,6 +212,7 @@ function nameSheet(evId,code){
     hits.innerHTML=m.map(p=>`<button type="button" class="gphit" data-pid="${esc(p.id)}"><b>${esc(p.name)}</b><span>${esc(grpName(p.team))} &middot; hole ${p.start}</span></button>`).join('');
     nw.style.display=roster.length&&normName(q).length>=3&&!m.length?'block':'none'};
   inp.addEventListener('input',draw);
+  const rc=$('#gpReclub');if(rc)rc.addEventListener('click',()=>clubPick(evId,code));
   hits.addEventListener('click',ev2=>{const b=ev2.target.closest('[data-pid]');if(!b)return;pick=roster.find(p=>p.id===b.dataset.pid)||null;if(pick)inp.value=pick.name.slice(0,24);showPick();draw()});
   if(!PREVIEW)club('/pass/roster',pp.code?{ev:pp.ev,code:pp.code}:{ev:pp.ev}).then(r=>{field=r.field;roster=rosterOf(field);draw()}).catch(()=>{});
   $('#gpGo').addEventListener('click',async()=>{
@@ -183,7 +221,7 @@ function nameSheet(evId,code){
     const name=pick?pick.name.slice(0,24):typed;
     if(!name){toast('Add your name for the scorecard');inp.focus();return}
     const b=$('#gpGo');b.disabled=true;
-    try{const p=pp.code?await redeem(pp.ev,pp.code,name,clubName):await openPass(pp.ev,name,clubName);saveGolfName(name);if(pick){p.pid=pick.id;p.team=pick.team}savePass(p);
+    try{const p=pp.code?await redeem(pp.ev,pp.code,name,clubName):await openPass(pp.ev,name,clubName);saveGolfName(name);if(pick){p.pid=pick.id;p.team=pick.team}if(clubName)p.club=clubName;savePass(p);
       if(pick)seatOnCard(pp.ev,pick,field);
       closeSheet();syncGolf();
       if(status(p,Date.now())==='early')toast('Pass saved. It opens on '+fmt(p.start));
@@ -244,6 +282,7 @@ window.showGate=function(t){
 
 /* golf tab: time-left bar for guests */
 function syncGolf(){
+  clubView();
   const v=$('#v-golf');if(!v)return;
   const p=P.get(),st=status(p,Date.now()),guest=false;   /* golf is open to all now (Nov 14 2026): no pass bar */
   v.classList.toggle('gp',guest);
@@ -258,6 +297,7 @@ document.addEventListener('submit',e=>{if(!e.target.classList.contains('gpform')
   if(!window.rngcTryPassCode($('#gpCode').value))toast('That code is not a guest pass for a club event.')});
 document.addEventListener('click',e=>{
   const q=e.target.closest('[data-gpqr]');if(q){showPassQR(q.dataset.gpqr);return}
+  if(e.target.closest('[data-gpcard]')||e.target.closest('[data-gpboard]')){closeSheet();S.golfv=e.target.closest('[data-gpboard]')?'board':'event';setTab('golf');S.golfv='me';return}
   const sh=e.target.closest('[data-gpshare]');if(sh){const text='Guest golf pass for '+(evById((parsePass(sh.dataset.gpshare.split('pass=')[1])||{}).ev)||{name:'the event'}).name+': '+sh.dataset.gpshare;
     if(navigator.share)navigator.share({text}).catch(()=>{});else if(navigator.clipboard)navigator.clipboard.writeText(sh.dataset.gpshare).then(()=>toast('Link copied'));return}
   if(e.target.closest('[data-gpup]')){showUpgrade(Object.assign({},P.get(),{exp:null,ename:null}));const h=$('#sheet h3');if(h)h.textContent='Keep golf after your pass';return}
