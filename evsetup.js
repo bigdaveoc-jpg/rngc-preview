@@ -19,10 +19,16 @@ const FMT=[['scramble','Scramble'],['bestball','Best ball'],['best2','Best 2'],[
 const IC={details:'calendar-blank',teams:'users-three',game:'flag-pennant',share:'qr-code'};
 
 /* ---- the course list (same file the Courses tab uses) and a course's pars ---- */
-let LIB=null,LIBP=null;const PARS={};
-const lib=()=>LIB?Promise.resolve(LIB):(LIBP=LIBP||fetch('scorecard/courses/index.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>{
-  const F=j.fields||[],k=n=>F.indexOf(n);LIB=(j.courses||[]).map(c=>({id:c[k('id')],name:c[k('name')],city:c[k('city')],st:c[k('state')]}));return LIB}).catch(e=>{LIBP=null;throw e}));
-const pars=id=>PARS[id]?Promise.resolve(PARS[id]):fetch('scorecard/courses/c/'+encodeURIComponent(id)+'.json').then(r=>r.ok?r.json():null).then(j=>PARS[id]=(j&&j.app&&j.app.par)||[]).catch(()=>[]);
+/* Course editor fixes (renames, added courses, hidden doubles, par) come from the same phone copy courseedit.js keeps,
+   read fresh on every search so a fix made a minute ago shows up here too (Nov 26: Los Serranos renamed). */
+let LIB=null,LIBP=null,RAWLIB=null;const PARS={};
+const edits=()=>{try{return JSON.parse(localStorage.getItem('rngc-course-edits')||'{}').items||{}}catch(e){return {}}};
+const merge=()=>{const E=edits(),out=RAWLIB.filter(c=>!(E[c.id]&&E[c.id].hide)).map(c=>{const e=E[c.id];return e&&e.par?{id:c.id,name:e.name,city:e.city,st:e.state||c.st}:c});
+  for(const[id,e]of Object.entries(E))if(e.new&&!e.hide&&e.par)out.push({id,name:e.name,city:e.city,st:e.state});return LIB=out};
+const lib=()=>(LIBP=LIBP||fetch('scorecard/courses/index.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>{
+  const F=j.fields||[],k=n=>F.indexOf(n);RAWLIB=(j.courses||[]).map(c=>({id:c[k('id')],name:c[k('name')],city:c[k('city')],st:c[k('state')]}))}).catch(e=>{LIBP=null;throw e})).then(merge);
+const pars=id=>{const e=edits()[id];if(e&&e.par)return Promise.resolve(PARS[id]=e.par.slice());
+  return PARS[id]?Promise.resolve(PARS[id]):fetch('scorecard/courses/c/'+encodeURIComponent(id)+'.json').then(r=>r.ok?r.json():null).then(j=>PARS[id]=(j&&j.app&&j.app.par)||[]).catch(()=>[])};
 const courseName=id=>{const c=LIB&&LIB.find(x=>x.id===id);return c?c.name:''};
 
 /* ---- state for the open sheet ---- */
