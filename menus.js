@@ -20,10 +20,10 @@ const css=`.pm-hide{display:none!important}
 .pm-switch span{flex:1;min-width:0}
 .pm-switch i{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.06);font-size:16px;color:var(--silver,#d5dae1);
   transition:transform .25s var(--ease,ease)}
-.pm-dd.open .pm-switch{border-color:rgba(213,218,225,.35)}
+.pm-dd.open .pm-switch{border-color:rgba(var(--silver-rgb,213,218,225),.35)}
 .pm-dd.open .pm-switch i{transform:rotate(180deg)}
 .pm-switch:active{opacity:.8}
-.pm-panel{position:absolute;left:0;right:0;top:calc(100% + 6px);padding:6px;border:1px solid rgba(213,218,225,.18);border-radius:14px;
+.pm-panel{position:absolute;left:0;right:0;top:calc(100% + 6px);padding:6px;border:1px solid rgba(var(--silver-rgb,213,218,225),.18);border-radius:14px;
   background:var(--bg-2,#111317);box-shadow:0 18px 40px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.4);
   transform-origin:top center;opacity:0;visibility:hidden;transform:translateY(-8px) scaleY(.94);
   transition:opacity .18s ease,transform .24s var(--ease,ease),visibility 0s .24s;max-height:min(72vh,560px);overflow-y:auto;overscroll-behavior:contain}

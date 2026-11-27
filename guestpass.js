@@ -63,7 +63,8 @@ const PARTNERS=[{key:'legends',name:'Legends Golf Club',logo:'assets/clubs/legen
 const partnerOf=e=>e?PARTNERS.find(x=>x.re.test(e.name||''))||null:null;
 function guestClub(){if(authTok())return null;const p=P.get();if(!p||!isOpen(status(p,Date.now())))return null;return PARTNERS.find(x=>x.name===p.club)||null}
 P.guestClub=guestClub;
-function clubView(){document.body.classList.toggle('gp-partner',!!guestClub())}
+function clubView(){const g=guestClub();document.body.classList.toggle('gp-partner',!!g);
+  if(g&&window.RNGCTHEME&&!RNGCTHEME.cur()&&RNGCTHEME.clubs[g.key])RNGCTHEME.set(g.key)}   /* a partner guest gets their club's whole look */
 function clubPick(evId,code){const e=evById(evId),partner=partnerOf(e);
   openSheet(`<h3 style="margin:0">Which club are you with?</h3><p class="sub" style="margin:4px 0 12px">${esc(e.name)}</p>
    <div class="gpclubs">${[partner,HOME_CLUB].map(c=>`<button type="button" class="gpclub" data-gpclub="${c.key}" aria-label="${esc(c.name)}"><img src="${c.logo}" alt="${esc(c.name)}"></button>`).join('')}</div>
@@ -80,6 +81,25 @@ function guestProfileHTML(){if(authTok())return '';const p=P.get();if(!p||!isOpe
    <button class="btn ghost full" data-gpboard><i class="ph-bold ph-ranking"></i> Leaderboard</button>
    ${typeof isStandalone==='function'&&isStandalone()?'':'<button class="btn ghost full" data-getapp><i class="ph-bold ph-device-mobile"></i> Put the app on your phone</button>'}
    <button class="btn ghost full" id="gpSi">Raider Nation member? Sign in</button><button class="btn ghost full" id="gpCloseP">Close</button>`}
+/* a themed club's Home (David, Nov 26: the whole app in the other club's look): their logo, their guest's event,
+   group, scorecard and leaderboard; none of Raider Nation's chapters, football, join or sponsor blocks */
+window.rngcClubHome=()=>{const T=window.RNGCTHEME&&RNGCTHEME.cur();if(!T)return '';
+  const p=authTok()?null:P.get(),open=p&&isOpen(status(p,Date.now()));
+  const today=new Date().toISOString().slice(0,10),evs=(typeof EVENTS!=='undefined'?EVENTS:[]);
+  const e=(open&&evById(p.ev))||evs.filter(x=>(x.date||'')>=today&&(partnerOf(x)||{}).key===T.key).sort((a,b)=>a.date<b.date?-1:1)[0]||null;
+  const f=e&&e.date&&typeof fmtDate==='function'?fmtDate(e.date):null,first=open&&p.name?String(p.name).split(' ')[0]:'';
+  let grp='';if(open)try{const fl=JSON.parse(localStorage.getItem('rngc-field:'+p.ev)||'null'),me=rosterOf(fl).find(x=>x.id===p.pid);
+    if(me)grp=`<div class="card gpmine" style="grid-template-columns:auto 1fr"><i class="ph-fill ph-flag-pennant"></i><div><b>${esc(grpName(me.team))}, starts on hole ${me.start}</b><span>${me.mates.length?'With '+esc(me.mates.join(', ')):'Your group'}</span></div></div>`}catch(x){}
+  return `<div class="rise clubhome">
+   <div class="clubhero"><img src="${RNGCTHEME.logo()}" alt="${esc(T.name)}">
+    <h1>${first?'Welcome, '+esc(first):'Welcome to '+esc(T.short)}</h1>
+    <p>${f?f.dow+', '+f.m+' '+f.d+' · ':''}${esc(T.name)}</p></div>
+   ${e?`<div class="card clubev"><i class="ph-fill ph-golf"></i><div><b>${esc(e.name)}</b><span>${esc(e.where||'')}</span></div></div>`:''}${grp}
+   ${open?`<button class="btn full" data-gpcard><i class="ph-bold ph-golf"></i> My scorecard</button>
+   <button class="btn ghost full" data-gpboard><i class="ph-bold ph-ranking"></i> Leaderboard</button>`
+   :`<div class="card clubev"><i class="ph-fill ph-qr-code"></i><div><b>Scan your event QR code</b><span>It puts you on your team and opens your scorecard.</span></div></div>`}
+   ${typeof isStandalone==='function'&&isStandalone()?'':'<button class="btn ghost full" data-getapp><i class="ph-bold ph-device-mobile"></i> Put the app on your phone</button>'}
+   <p class="clubfoot">${esc(T.name)} · played with Raider Nation Golf Club</p></div>`};
 window.rngcGuestProfile=()=>{const h=guestProfileHTML();if(!h)return false;openSheet(h);
   $('#gpCloseP').addEventListener('click',closeSheet);$('#gpSi').addEventListener('click',()=>{closeSheet();setTimeout(openSignIn,330)});return true};
 
@@ -105,7 +125,7 @@ window.rngcGuestProfile=()=>{const h=guestProfileHTML();if(!h)return false;openS
 .gpqr .gplogo{position:absolute;left:50%;top:50%;width:22%;aspect-ratio:120/140;transform:translate(-50%,-50%);background:#fff;border-radius:10px;padding:4px;box-sizing:content-box;display:flex}
 .gpqr .gplogo img{width:100%;height:100%;display:block}
 .gpqr.gpload{aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px}
-.gphome{padding:16px;margin:0 0 16px;border:1px solid var(--silver);text-align:center;background:radial-gradient(120% 80% at 50% 0,rgba(213,218,225,.14),transparent 60%),var(--panel)}
+.gphome{padding:16px;margin:0 0 16px;border:1px solid var(--silver);text-align:center;background:radial-gradient(120% 80% at 50% 0,rgba(var(--silver-rgb,213,218,225),.14),transparent 60%),var(--panel)}
 .gphome .tag{display:inline-flex;align-items:center;gap:6px;font:700 13px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--bg);background:var(--silver);padding:6px 10px;border-radius:4px}
 .gpclubs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .gpclub{display:flex;align-items:center;justify-content:center;padding:10px 6px;min-height:120px;border:0;border-radius:6px;background:none;cursor:pointer;transition:transform .15s ease}
@@ -115,6 +135,14 @@ window.rngcGuestProfile=()=>{const h=guestProfileHTML();if(!h)return false;openS
 .gpprof{text-align:center;margin:0 0 12px}.gpprof img{display:block;width:75%;max-width:260px;max-height:130px;margin:0 auto 10px;object-fit:contain}
 .gpprof h3{margin:0}.gpprof .meta{margin:4px 0 0}
 body.gp-partner .tab[data-tab="games"],body.gp-partner .subnav[data-for="games"],body.gp-partner .tab[data-tab="members"],body.gp-partner .subnav[data-for="members"]{display:none}
+.clubhome{display:flex;flex-direction:column;gap:10px;padding-top:14px}
+.clubhero{text-align:center;padding:22px 16px 18px;border:1px solid var(--line);border-radius:6px;background:radial-gradient(110% 90% at 50% 0,rgba(var(--silver-rgb,213,218,225),.16),transparent 65%),var(--panel)}
+.clubhero img{display:block;width:82%;max-width:320px;margin:0 auto 14px}
+.clubhero h1{font-family:var(--display);font-size:30px;text-transform:uppercase;letter-spacing:.03em;margin:0;line-height:1.05}
+.clubhero p{color:var(--muted);margin:6px 0 0}
+.clubev{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;padding:12px 14px}
+.clubev>i{font-size:26px;color:var(--silver)}.clubev b{display:block;font-size:16px}.clubev span{display:block;color:var(--muted);font-size:13px}
+.clubfoot{text-align:center;color:var(--muted);font-size:12px;margin:8px 0 18px}
 .gphome h3{font-family:var(--display);font-size:24px;text-transform:uppercase;margin:10px 0 2px}
 .gphome .meta{margin:0 0 14px}
 .gphome .gpqr{max-width:260px}
@@ -220,7 +248,7 @@ function nameSheet(evId,code,picked){
     const name=pick?pick.name.slice(0,24):typed;
     if(!name){toast('Add your name for the scorecard');inp.focus();return}
     const b=$('#gpGo');b.disabled=true;
-    try{const p=pp.code?await redeem(pp.ev,pp.code,name,clubName):await openPass(pp.ev,name,clubName);saveGolfName(name);if(pick){p.pid=pick.id;p.team=pick.team}if(clubName)p.club=clubName;savePass(p);
+    try{const p=pp.code?await redeem(pp.ev,pp.code,name,clubName):await openPass(pp.ev,name,clubName);saveGolfName(name);if(pick){p.pid=pick.id;p.team=pick.team}if(clubName)p.club=clubName;savePass(p);if(clubName&&window.RNGCTHEME){const pc=PARTNERS.find(x=>x.name===clubName);RNGCTHEME.set(pc&&RNGCTHEME.clubs[pc.key]?pc.key:null);if(typeof renderHome==='function')renderHome()}
       if(pick)seatOnCard(pp.ev,pick,field);
       closeSheet();syncGolf();
       if(status(p,Date.now())==='early')toast('Pass saved. It opens on '+fmt(p.start));

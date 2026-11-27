@@ -94,7 +94,7 @@ if(typeof document==='undefined'||!document.getElementById('v-home'))return;   /
 /* ---------- club app: wallet card on Home and the wallet sheet ---------- */
 const B=window.RNGCBUCKS;
 (function(){const s=document.createElement('style');s.textContent=`
-.rbcard{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin-top:12px;padding:14px;background:linear-gradient(135deg,rgba(213,218,225,.16),rgba(213,218,225,.03) 60%),var(--panel)}
+.rbcard{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin-top:12px;padding:14px;background:linear-gradient(135deg,rgba(var(--silver-rgb,213,218,225),.16),rgba(var(--silver-rgb,213,218,225),.03) 60%),var(--panel)}
 .rbcard i.big{font-size:34px;color:var(--silver)}
 .rbcard b{display:block;font-family:var(--display);font-size:26px;font-weight:800;line-height:1}
 .rbcard span{color:var(--muted);font-size:13px}

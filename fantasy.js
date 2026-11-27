@@ -191,7 +191,7 @@ const note=m=>{if(typeof toast==='function')toast(m)};
 (function(){const s=document.createElement('style');s.textContent=`
 .ffx .sponsor{display:flex;align-items:center;gap:10px;padding:10px 14px;margin-top:12px;font-size:13px;color:var(--muted);border-style:dashed}
 .ffx .sponsor b{color:var(--text);font-weight:600}
-.ffx .hero{margin-top:16px;padding:18px;background:linear-gradient(135deg,rgba(213,218,225,.14),rgba(213,218,225,.02) 60%),var(--panel)}
+.ffx .hero{margin-top:16px;padding:18px;background:linear-gradient(135deg,rgba(var(--silver-rgb,213,218,225),.14),rgba(var(--silver-rgb,213,218,225),.02) 60%),var(--panel)}
 .ffx .hero h2{font-family:var(--display);font-size:30px;font-weight:800;text-transform:uppercase;line-height:1}
 .ffx .hero p{color:var(--muted);margin-top:6px;font-size:15px}
 .ffx .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
@@ -223,7 +223,7 @@ const note=m=>{if(typeof toast==='function')toast(m)};
 .ffx .picks .pk{flex:none;min-width:120px;padding:8px 10px;font-size:12px}
 .ffx .picks .pk b{display:block;font-size:14px}
 .ffx .picks .pk.mine{border-color:var(--silver-2)}
-.ffx .champ{text-align:center;padding:22px 14px;margin-top:12px;background:linear-gradient(135deg,rgba(213,218,225,.22),rgba(213,218,225,.04) 70%),var(--panel)}
+.ffx .champ{text-align:center;padding:22px 14px;margin-top:12px;background:linear-gradient(135deg,rgba(var(--silver-rgb,213,218,225),.22),rgba(var(--silver-rgb,213,218,225),.04) 70%),var(--panel)}
 .ffx .champ i{font-size:44px}
 .ffx .champ b{display:block;font-family:var(--display);font-size:28px;text-transform:uppercase;margin-top:6px}
 .ffx .wkbar{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:8px 0}

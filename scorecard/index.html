@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="../errlog.js?v=1"></script>
+<script src="../clubtheme.js?v=1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0a0b0d">
@@ -25,7 +26,7 @@ body.sun{--bg:#f4f5f7;--panel:#fff;--panel-2:#e9ecf0;--line:#c9ced6;--text:#0a0b
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.4}
 body:not(.sun){background:
-  radial-gradient(60% 45% at 8% 0%,rgba(213,218,225,.2),transparent 70%),
+  radial-gradient(60% 45% at 8% 0%,rgba(var(--silver-rgb,213,218,225),.2),transparent 70%),
   radial-gradient(55% 50% at 100% 35%,rgba(84,112,160,.3),transparent 72%),
   radial-gradient(45% 35% at 85% 100%,rgba(70,100,150,.25),transparent 70%),#0a0b0d;background-attachment:fixed}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
@@ -177,10 +178,10 @@ body.sun .mk.e,body.sun .mk.d{box-shadow:0 0 0 2px #fff,0 0 0 3.5px currentColor
 .lrow .tp{font-family:var(--display);font-size:28px;font-weight:800;text-align:right}
 .lrow .th{text-align:right;font-size:12px;color:var(--muted);line-height:1.1}
 .lrow .th b{display:block;font-size:15px;color:var(--text)}
-.lrow.me{background:rgba(213,218,225,.08)}
+.lrow.me{background:rgba(var(--silver-rgb,213,218,225),.08)}
 body.sun .lrow.me{background:#eef0f4}
 .lrow.flash{animation:flash 1.4s var(--ease)}
-@keyframes flash{0%{background:rgba(213,218,225,.28)}100%{background:transparent}}
+@keyframes flash{0%{background:rgba(var(--silver-rgb,213,218,225),.28)}100%{background:transparent}}
 .lhead{display:grid;grid-template-columns:42px 1fr auto 52px;gap:10px;padding:8px 14px 4px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .lhead span:nth-child(3),.lhead span:nth-child(4){text-align:right}
 .ticker{font-size:13px;color:var(--muted);margin-top:10px;min-height:20px;display:flex;gap:8px;align-items:center}
@@ -359,7 +360,7 @@ document.write('<div style="min-height:100vh;display:flex;align-items:center;jus
 <div class="wrap" id="app"></div>
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Team card"></div>
-<script src="../bucks.js?v=club2"></script>
+<script src="../bucks.js?v=club3"></script>
 <script src="holes-chimera.js?v=28"></script>
 <script src="hole3d.js?v=1"></script>
 <script src="upload.js?v=2"></script>
