@@ -58,15 +58,15 @@ const savePass=p=>{try{localStorage.setItem(PASS_KEY,JSON.stringify(p))}catch(e)
 /* collab events (David, Nov 26 2026, Fat Friday with Legends Golf Club): a scan first asks "which club are you with?"
    with both logos, then the name finder seats them on their group. A partner club's guests get their own club view:
    their logo on Profile, golf and events, no Raiders football games tab. Logos are cut from the event flyer. */
-const HOME_CLUB={key:'rngc',name:'Raider Nation Golf Club',logo:'assets/clubs/rngc-fatfriday.jpg'};
-const PARTNERS=[{key:'legends',name:'Legends Golf Club',logo:'assets/clubs/legends-gc.jpg',re:/\blegends\b/i}];
+const HOME_CLUB={key:'rngc',name:'Raider Nation Golf Club',logo:'assets/clubs/rngc-fatfriday.png'};
+const PARTNERS=[{key:'legends',name:'Legends Golf Club',logo:'assets/clubs/legends-gc.png',re:/\blegends\b/i}];
 const partnerOf=e=>e?PARTNERS.find(x=>x.re.test(e.name||''))||null:null;
 function guestClub(){if(authTok())return null;const p=P.get();if(!p||!isOpen(status(p,Date.now())))return null;return PARTNERS.find(x=>x.name===p.club)||null}
 P.guestClub=guestClub;
 function clubView(){document.body.classList.toggle('gp-partner',!!guestClub())}
 function clubPick(evId,code){const e=evById(evId),partner=partnerOf(e);
   openSheet(`<h3 style="margin:0">Which club are you with?</h3><p class="sub" style="margin:4px 0 12px">${esc(e.name)}</p>
-   <div class="gpclubs">${[partner,HOME_CLUB].map(c=>`<button type="button" class="gpclub" data-gpclub="${c.key}"><img src="${c.logo}" alt=""><span>${esc(c.name)}</span></button>`).join('')}</div>
+   <div class="gpclubs">${[partner,HOME_CLUB].map(c=>`<button type="button" class="gpclub" data-gpclub="${c.key}" aria-label="${esc(c.name)}"><img src="${c.logo}" alt="${esc(c.name)}"></button>`).join('')}</div>
    <p class="meta" style="text-align:center;margin:12px 0 0">Raider Nation member? <button class="linkbtn" data-signin style="margin:0">Sign in</button></p>`);
   document.querySelectorAll('[data-gpclub]').forEach(b=>b.addEventListener('click',()=>{const c=b.dataset.gpclub===HOME_CLUB.key?HOME_CLUB:partner;nameSheet(evId,code,c)}))}
 /* a guest's Profile: their club, their group, their event */
@@ -108,12 +108,11 @@ window.rngcGuestProfile=()=>{const h=guestProfileHTML();if(!h)return false;openS
 .gphome{padding:16px;margin:0 0 16px;border:1px solid var(--silver);text-align:center;background:radial-gradient(120% 80% at 50% 0,rgba(213,218,225,.14),transparent 60%),var(--panel)}
 .gphome .tag{display:inline-flex;align-items:center;gap:6px;font:700 13px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--bg);background:var(--silver);padding:6px 10px;border-radius:4px}
 .gpclubs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.gpclub{display:flex;flex-direction:column;gap:8px;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text);font:inherit;cursor:pointer;text-align:center}
-.gpclub:hover,.gpclub:focus-visible{border-color:var(--silver)}
-.gpclub img{width:100%;aspect-ratio:2/1;object-fit:cover;border-radius:4px;display:block}
-.gpclub span{font:700 15px/1.2 var(--display);text-transform:uppercase;letter-spacing:.03em;padding:0 2px 4px}
-.gplogohd{display:block;width:100%;max-width:280px;margin:0 auto 12px;aspect-ratio:2/1;object-fit:cover;border-radius:6px}
-.gpprof{text-align:center;margin:0 0 12px}.gpprof img{display:block;width:100%;max-width:300px;margin:0 auto 10px;aspect-ratio:2/1;object-fit:cover;border-radius:6px}
+.gpclub{display:flex;align-items:center;justify-content:center;padding:10px 6px;min-height:120px;border:0;border-radius:6px;background:none;cursor:pointer;transition:transform .15s ease}
+.gpclub:hover{transform:scale(1.04)}.gpclub:active{transform:scale(.97)}.gpclub:focus-visible{outline:2px solid var(--silver);outline-offset:2px}
+.gpclub img{width:100%;max-height:140px;object-fit:contain;display:block}
+.gplogohd{display:block;width:70%;max-width:240px;max-height:110px;margin:0 auto 12px;object-fit:contain}
+.gpprof{text-align:center;margin:0 0 12px}.gpprof img{display:block;width:75%;max-width:260px;max-height:130px;margin:0 auto 10px;object-fit:contain}
 .gpprof h3{margin:0}.gpprof .meta{margin:4px 0 0}
 body.gp-partner .tab[data-tab="games"],body.gp-partner .subnav[data-for="games"],body.gp-partner .tab[data-tab="members"],body.gp-partner .subnav[data-for="members"]{display:none}
 .gphome h3{font-family:var(--display);font-size:24px;text-transform:uppercase;margin:10px 0 2px}
