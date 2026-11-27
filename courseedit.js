@@ -48,7 +48,7 @@ function refresh(){cards();
   try{if(S.tab==='courses'){if(S.cview==='course'&&S.selLib&&!S.selCourse)openFound(S.selLib);else renderCourses()}}catch(e){}
   try{const w=document.getElementById('golfFrame').contentWindow;if(w&&w.trLibRefresh)w.trLibRefresh()}catch(e){}}
 const load=()=>call('/courses/edits').then(j=>{const was=JSON.stringify(CE.items);keep(j);if(JSON.stringify(CE.items)!==was)refresh()}).catch(()=>{});
-cards();load();
+cards();(window.requestIdleCallback||function(f){setTimeout(f,1200)})(()=>load(),{timeout:2500});   /* after the first screen is up (speed pass, Nov 27) */
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')load()});
 
 /* ---- buttons on the course pages ---- */
