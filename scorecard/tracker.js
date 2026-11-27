@@ -519,18 +519,39 @@ function trGroup(id){const g=G.groups.find(x=>x.id===id);if(!g){location.hash='#
     $('#amSave').onclick=()=>{const n=$('#amN').value.trim();if(!n){$('#amN').focus();return}g.members.push({id:'m'+Date.now().toString(36),name:n,hcp:trIdx($('#amI').value)});gsave();closeSheet();trGroup(id)}}}
 
 /* ---------- club events ---------- */
+/* Upcoming club events (David, Nov 26 2026: "upcoming events are not showing" under Golf > Club events). The list is the
+   club server's event list, the same one the Events tab shows; the phone copy chapter.js keeps shows first, then the fresh one. */
+let TR_EV=null,TR_EVT=0;
+const trToday=()=>{const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')};
+function trUpEvents(){let j=TR_EV;if(!j)try{j=JSON.parse(localStorage.getItem('rngc-evinfo')||'null')}catch(x){}
+  const it=(j&&j.items)||{},d0=trToday();
+  return Object.entries(it).filter(([id,f])=>f&&f.name&&/^\d{4}-\d\d-\d\d$/.test(f.date||'')&&!f.cancelled&&f.date>=d0).map(([id,f])=>Object.assign({id},f)).sort((a,b)=>a.date<b.date?-1:1)}
+function trLoadEv(){if(Date.now()-TR_EVT<60000)return;TR_EVT=Date.now();
+  fetch(TR_CLUB+'/events/info',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.items)return;const was=JSON.stringify(trUpEvents());TR_EV=j;
+    if(/^events/.test(location.hash.replace(/^#\/?/,''))&&JSON.stringify(trUpEvents())!==was)trEvents()}).catch(()=>{})}
+function trEvRows(){const up=trUpEvents(),d0=trToday();
+  if(!up.length)return '<div class="trow"><span class="muted">No club dates posted yet. New events show up here as soon as they are set.</span></div>';
+  return up.map(f=>{const d=new Date(f.date+'T12:00:00'),day=d.toLocaleDateString([], {weekday:'short',month:'short',day:'numeric'}),
+      x=Math.round((d-new Date(d0+'T12:00:00'))/864e5),when=x===0?'Today':x===1?'Tomorrow':x<8?'In '+x+' days':'';
+    return `<button class="rrow" data-evopen="${esc(f.id)}"><div><b>${esc(f.name)}</b><span>${esc(day)}${f.where?' · '+esc(f.where):''}</span></div><div class="sc">${when?`<small>${when}</small>`:''}<i class="ph-bold ph-caret-right"></i></div></button>`}).join('')}
 function trEvents(){const e=EVENTS.nov14,c=COURSES[e.course],past=G.rounds.filter(r=>r.kind==='event').sort((a,b)=>b.date-a.date),t=S.team&&TEAMS.find(x=>x.id===S.team);
+  const ed=new Date(String(e.date).replace(/^[A-Za-z]+ /,'')),n0=new Date(),ex=isNaN(ed)?1e9:Math.round((ed-new Date(n0.getFullYear(),n0.getMonth(),n0.getDate()))/864e5);
+  trLoadEv();
   $('#app').innerHTML=trBar('Golf events',G.me.name)+trTabs('events')+`
-   <section class="card ev" style="padding:16px;margin-top:14px"><span class="tag">${(()=>{const d=new Date(String(e.date).replace(/^[A-Za-z]+ /,'')),n=new Date(),x=isNaN(d)?1e9:Math.round((d-new Date(n.getFullYear(),n.getMonth(),n.getDate()))/864e5);return x===0?'Today':x===1?'Tomorrow':x<0?'Last club event':'Next club event'})()}</span><h1>${esc(e.name)}</h1><div class="muted">${esc(e.date)} · ${esc(e.start)} · ${esc(c.name)}</div>
+   <div class="lbl">Upcoming club events</div>
+   <section class="card tcard">${trEvRows()}</section>
+   ${ex<-3?'':`<section class="card ev" style="padding:16px;margin-top:14px"><span class="tag">${ex===0?'Today':ex===1?'Tomorrow':ex<0?'Last club event':'Next club event'}</span><h1>${esc(e.name)}</h1><div class="muted">${esc(e.date)} ·${esc(e.start)} · ${esc(c.name)}</div>
     <div class="facts"><div><b>${esc(F().name)}</b><span>${esc(hcpLine())}</span></div><div><b>${TEAMS.length}</b><span>groups</span></div><div><b>${esc(TEE().name)}</b><span>tees</span></div></div>
     ${t?`<p class="note"><i class="ph-bold ph-users"></i><span>You're with ${esc(t.name)}, starting on hole ${t.start}.</span></p>`:''}
     <div class="row2"><a class="btn" href="#/event">${t?'Open my card':'Pick my group'}</a><a class="btn ghost" href="#/board"><i class="ph-bold ph-ranking"></i> Leaderboard</a></div>
-    ${ADMIN?'<a class="btn ghost block" style="margin-top:12px" href="#/setup"><i class="ph-bold ph-sliders-horizontal"></i> Edit the event · groups, game, start</a>'+(window.parent!==window?'<button class="btn ghost block" style="margin-top:8px" id="gpQR"><i class="ph-bold ph-qr-code"></i> Guest pass QR</button>':''):''}</section>
+    ${ADMIN?'<a class="btn ghost block" style="margin-top:12px" href="#/setup"><i class="ph-bold ph-sliders-horizontal"></i> Edit the event · groups, game, start</a>'+(window.parent!==window?'<button class="btn ghost block" style="margin-top:8px" id="gpQR"><i class="ph-bold ph-qr-code"></i> Guest pass QR</button>':''):''}</section>`}
    <div class="lbl">Your past events</div>
    <section class="card tcard">${past.length?past.map(r=>`<button class="rrow" data-round="${r.id}"><div><b>${esc(r.name)}</b><span>${trDay(r.date)} · ${esc(r.cname)} · ${esc(r.team||'')}</span></div><div class="sc">${esc(r.result||'-')}<small>${r.pos?'place '+r.pos:''}</small></div></button>`).join('')
      :'<div class="trow"><span class="muted">Turn in an event card and it shows up here.</span></div>'}</section>
    <p class="note"><i class="ph-bold ph-info"></i><span>Club events come off the club calendar. The admin picks the game, tees, handicaps and contests, and every group plays the same setup.</span></p><div style="height:28px"></div>`;
   trWire()
+  document.querySelectorAll('[data-evopen]').forEach(b=>b.onclick=()=>{try{if(window.parent!==window){window.parent.postMessage({openEvent:b.dataset.evopen},location.origin);return}}catch(x){}
+    location.href='../#ev-'+encodeURIComponent(b.dataset.evopen)});
   {const gq=document.getElementById('gpQR');if(gq)gq.onclick=()=>{try{window.parent.postMessage({gpqr:e.id||'nov14'},location.origin)}catch(x){}}}}
 
 /* ---------- start a round ---------- */

@@ -2891,6 +2891,8 @@ function renderGolf(){const fr=$('#golfFrame'),want=new URL('scorecard/#/'+(S.go
   if(window.visualViewport)visualViewport.addEventListener('resize',()=>setTimeout(home,250))})();
 window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&'golfFull' in e.data)document.body.classList.toggle('golffull',!!e.data.golfFull&&S.tab==='golf')});
 window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.golfCourses)goSub('golf','c-list')});   /* the golf screen's Courses button */
+window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||!e.data.openEvent)return;   /* Golf > Club events: tap an upcoming event */
+  goSub('events','up');setTimeout(()=>{const el=document.getElementById('ev-'+e.data.openEvent);if(el)el.scrollIntoView({block:'start',behavior:'smooth'})},200)});
 window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||!e.data.golf)return;const k=e.data.golf;if(['me','log','groups','events'].includes(k)&&S.golfv!==k){S.golfv=k;renderSubnav()}});
 /* side menu: the open page shows its sub-links underneath it */
 const SUBNAV={
