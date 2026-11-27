@@ -14,7 +14,7 @@ const css=`#rgTerms{position:fixed;inset:0;z-index:9500;display:grid;place-items
   padding:24px 16px calc(24px + env(safe-area-inset-bottom));font-family:var(--body,Barlow,system-ui,sans-serif);color:var(--text,#eef0f3)}
 #rgTerms[hidden]{display:none}
 #rgTerms .box{width:100%;max-width:440px;background:var(--panel,#16191e);border:1px solid var(--line,#2a2f37);border-radius:16px;padding:22px 20px}
-#rgTerms img{width:52px;height:52px;display:block;margin:0 auto 10px}
+#rgTerms img{width:96px;height:58px;display:block;margin:0 auto 10px}
 #rgTerms h2{font:800 26px/1.05 var(--display,'Barlow Condensed',sans-serif);text-transform:uppercase;letter-spacing:.03em;text-align:center;margin:0 0 6px}
 #rgTerms .lede{color:var(--muted,#9aa2ae);text-align:center;margin:0 0 14px}
 #rgTerms ul{list-style:none;margin:0 0 14px;padding:0}
@@ -34,7 +34,7 @@ let box=null,ver='',busy=false;
 function build(){if(box)return box;
   const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
   box=document.createElement('div');box.id='rgTerms';box.hidden=true;box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-labelledby','rgTermsH');
-  box.innerHTML=`<div class="box"><img src="/assets/logo/rngc-ball-static.svg" alt="">
+  box.innerHTML=`<div class="box"><img src="/assets/logo/ross-ball-static.svg" alt="">
    <h2 id="rgTermsH">Club rules</h2><p class="lede">One quick thing before you jump in. You only do this once.</p>
    <ul>
     <li><i class="ph-bold ph-coins"></i><span>Raider Bucks are club points with no cash value. They can't be bought, sold or cashed out.</span></li>

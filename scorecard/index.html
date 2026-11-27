@@ -49,7 +49,7 @@ h1,h2,.disp{font-family:var(--display);text-transform:uppercase;letter-spacing:.
 
 /* top bar */
 .bar{display:flex;align-items:center;gap:10px;padding:max(12px,env(safe-area-inset-top)) 0 10px}
-.bar .logo{width:34px;height:39px}
+.bar .logo{width:62px;height:39px}
 .bar .t{flex:1;min-width:0;line-height:1.1}
 .bar .t b{display:block;font-family:var(--display);font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bar .t span{font-size:13px;color:var(--muted)}
@@ -692,7 +692,7 @@ function skinsResults(list){const cfg=CFG();if(cfg.skins==='off')return null;con
   const pot=cfg.buyin*units.length;return{won,open,pot,each:won.length?pot/won.length:0,units:units.length}}
 
 /* ===================== SCREENS ===================== */
-const LOGO='../assets/logo/rngc-ball-static.svg';
+const LOGO='../assets/logo/ross-ball-static.svg';
 /* inside the club app the club header already shows the logo, so the golf header gets a back arrow instead (David, Nov 13 2026: double logo on mobile) */
 const IN_CLUB=(()=>{try{return window.top!==window}catch(e){return true}})();
 const liveTag=(st='')=>CLOSED?`<span class="live final"${st?` style="${st}"`:''}>FINAL</span>`:`<span class="live"${st?` style="${st}"`:''}><i></i>LIVE</span>`;

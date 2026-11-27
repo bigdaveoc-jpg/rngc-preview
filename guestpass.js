@@ -177,7 +177,7 @@ window.rngcGuestProfile=()=>{const h=guestProfileHTML();if(!h)return false;openS
 .gpmine>i{font-size:26px;color:#62c184}.gpmine b{display:block;font-size:16px}.gpmine span{display:block;color:var(--muted);font-size:13px}
 .gpqr{position:relative;background:#fff;padding:14px;border-radius:12px;max-width:300px;margin:0 auto;box-shadow:0 0 0 3px var(--silver),0 10px 30px rgba(0,0,0,.45)}
 .gpqr svg{display:block;width:100%;height:auto}
-.gpqr .gplogo{position:absolute;left:50%;top:50%;width:22%;aspect-ratio:120/140;transform:translate(-50%,-50%);background:#fff;border-radius:10px;padding:4px;box-sizing:content-box;display:flex}
+.gpqr .gplogo{position:absolute;left:50%;top:50%;width:22%;aspect-ratio:1;transform:translate(-50%,-50%);background:#fff;border-radius:10px;padding:4px;box-sizing:content-box;display:flex}
 .gpqr .gplogo img{width:100%;height:100%;display:block}
 .gpqr.gpload{aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px}
 .gphome{padding:16px;margin:0 0 16px;border:1px solid var(--silver);text-align:center;background:radial-gradient(120% 80% at 50% 0,rgba(var(--silver-rgb,213,218,225),.14),transparent 60%),var(--panel)}
@@ -232,7 +232,7 @@ async function passData(ev){
   const q=qr(0,'H');q.addData(link);q.make();   /* H: the club mark in the middle still scans */
   return qrCache[ev]={code,link,svg:q.createSvgTag({cellSize:6,margin:0,scalable:true})};
 }
-const qrBox=d=>`<div class="gpqr">${d.svg}<span class="gplogo"><img src="assets/logo/rngc-mark.svg" alt=""></span></div>`;
+const qrBox=d=>`<div class="gpqr">${d.svg}<span class="gplogo"><img src="assets/app/icon-192.png?v=ross1" alt=""></span></div>`;
 async function showPassQR(ev){
   const e=evById(ev);if(!e)return;
   try{const d=await passData(ev),w=windowFor(e.date);
