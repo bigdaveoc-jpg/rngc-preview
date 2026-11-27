@@ -13,6 +13,9 @@ var CLUBS={
     /* black and gold from their logo: warm blacks, gold accent, cream text */
     vars:{bg:'#0b0906','bg-2':'#120e08',panel:'#19140c','panel-2':'#221b10',line:'#3b2f1b',text:'#f7f0df',
       muted:'#b9ab8a',silver:'#f0c24f','silver-2':'#cfa64c','on-silver':'#170f02','silver-rgb':'240,194,79'},
+    /* Bright mode on the course: cream paper, dark brown ink, gold buttons with dark letters */
+    sun:{bg:'#f6f1e4',panel:'#fffdf7','panel-2':'#efe6cf',line:'#d9cba6',text:'#1b1408',muted:'#5b4e33',
+      silver:'#2a1e08','silver-2':'#6b5520','on-silver':'#fff8e6','silver-rgb':'176,128,26'},
     page:'#070503', bar:'#0b0906',
     hide:['games']   /* no Raiders football */
   }
@@ -25,14 +28,18 @@ function pick(){
   var k=null;try{k=localStorage.getItem(KEY)}catch(e){}
   return k&&CLUBS[k]||null;
 }
+function vs(o){var v='',k;for(k in o)v+='--'+k+':'+o[k]+';';return v}
 function css(t){
-  var v='',k;for(k in t.vars)v+='--'+k+':'+t.vars[k]+';';
+  var v=vs(t.vars);
   var sel='html[data-club="'+t.key+'"]',logo=root+t.logo;
   return sel+'{'+v+'}'+
-    sel+','+sel+' body{background:'+t.page+'}'+
+    sel+','+sel+' body:not(.sun){background:'+t.page+'}'+
+    (t.sun?sel+' body.sun{'+vs(t.sun)+'background:var(--bg)}'+sel+':has(body.sun){background:'+t.sun.bg+'}':'')+
     sel+' .app{background:var(--bg)}'+
     /* gold metal on the main buttons */
-    sel+' .btn:not(.ghost):not(.small.ghost){background:linear-gradient(180deg,#f7d97c,#e2ae3c 55%,#c8912a);color:var(--on-silver)}'+
+    sel+' .btn:not(.ghost):not(.small.ghost){background:linear-gradient(180deg,#f7d97c,#e2ae3c 55%,#c8912a);color:#1b1408}'+
+    /* the scorecard's small header mark */
+    sel+' .bar img.logo{content:url("'+logo+'");width:64px;height:39px;object-fit:contain}'+
     /* the faint mark behind the pages: their logo, in color */
     sel+' .views::before{background-image:url("'+logo+'");filter:none;background-size:min(70%,480px) auto}'+
     sel+' .intro{background:radial-gradient(circle at 50% 42%,#1d160a,#050302 70%)}'+
